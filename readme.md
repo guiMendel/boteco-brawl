@@ -34,7 +34,7 @@ Exemplo do conteudo do arquivo:
 {
   "configurations": [
     {
-      "includePath": ["${workspaceFolder}/**", "/opt/homebrew/include/SDL2"]
+      "includePath": ["${workspaceFolder}/include/engine", "${workspaceFolder}/include/game", "C:/TDM-GCC-32/sdl2/include/SDL2"]
     }
   ],
   "version": 4

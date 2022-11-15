@@ -9,7 +9,7 @@
 #include "Helper.h"
 #include "Resources.h"
 #include "InputManager.h"
-#include "TitleState.h"
+#include "MainState.h"
 
 using namespace std;
 using namespace Helper;
@@ -293,5 +293,5 @@ void Game::PopState()
 
 unique_ptr<GameState> Game::GetInitialState() const
 {
-  return make_unique<TitleState>();
+  return make_unique<MainState>();
 }

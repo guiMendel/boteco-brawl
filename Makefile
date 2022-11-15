@@ -61,13 +61,13 @@ ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
 # FOR GAME
 
 # Header files
-_GAME_DEPS = Movement.h Health.h Alien.h Minion.h Projectile.h MainState.h PenguinBody.h PenguinCannon.h TitleState.h EndState.h Hazard.h
+_GAME_DEPS = MainState.h 
 
 # Generate header filepaths
 GAME_DEPS = $(patsubst %,$(GAME_INCLUDE_DIRECTORY)\\%,$(_GAME_DEPS))
 
 # Object files
-_GAME_OBJS = Movement.o Alien.o Health.o Minion.o Projectile.o MainState.o PenguinBody.o PenguinCannon.o EndState.o Hazard.o TitleState.o
+_GAME_OBJS = MainState.o
 
 # Generate object filepaths
 GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))
