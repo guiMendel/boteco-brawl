@@ -22,7 +22,7 @@ public:
   {
     Load(fileName);
   }
-  
+
   virtual ~Sprite() {}
 
   // Loads the file image to the sprite
@@ -31,13 +31,15 @@ public:
   // Sets which rectangle of the image to be displayed
   void SetClip(int x, int y, int width, int height);
 
-  int GetUnscaledWidth() const { return width; }
+  int GetUnscaledWidth() const { return clipRect.w; }
 
-  int GetUnscaledHeight() const { return height; }
+  int GetUnscaledHeight() const { return clipRect.h; }
 
-  int GetWidth() const { return clipRect.w * gameObject.localScale.x; }
+  int GetWidth() const;
 
-  int GetHeight() const { return clipRect.h * gameObject.localScale.y; }
+  int GetHeight() const;
+
+  void SetTargetDimension(int width, int height = -1);
 
   bool IsLoaded() const { return texture != nullptr; }
 
@@ -63,14 +65,15 @@ private:
   // The loaded texture
   std::shared_ptr<SDL_Texture> texture;
 
-  // Real dimensions of the loaded image
-  int width{0}, height{0};
-
-  // Scaled dimensions
-  int scaledWidth{0}, scaledHeight{0};
-
   // The clipped rectangle of the image to be rendered
   SDL_Rect clipRect;
+
+  // When both target dimensions are -1, uses the clip's dimensions. If only one is -1, the correspondent aspect ratio dimensions is used
+  // Target width of image
+  int targetWidth{-1};
+
+  // Target height of image
+  int targetHeight{-1};
 
   // The sprite's layer
   RenderLayer renderLayer{RenderLayer::Default};

@@ -12,6 +12,8 @@ void Sprite::Load(const string fileName)
   // Get texture from resource manager
   texture = Resources::GetTexture(fileName);
 
+  int width, height;
+
   // Get it's dimensions
   SDL_QueryTexture(texture.get(), nullptr, nullptr, &width, &height);
 
@@ -48,4 +50,36 @@ void Sprite::Render(Vector2 position)
       Helper::RadiansToDegrees(gameObject.GetRotation()),
       nullptr,
       SDL_FLIP_NONE);
+}
+
+void Sprite::SetTargetDimension(int width, int height)
+{
+  targetWidth = width;
+  targetHeight = height;
+}
+
+int Sprite::GetWidth() const
+{
+  if (targetWidth >= 0)
+    return targetWidth * gameObject.localScale.x;
+
+  // If target height is also -1, use clip width
+  if (targetHeight < 0)
+    return clipRect.w * gameObject.localScale.x;
+
+  // Otherwise, use aspect ratio
+  return targetHeight * clipRect.w / clipRect.h * gameObject.localScale.x;
+}
+
+int Sprite::GetHeight() const
+{
+  if (targetHeight >= 0)
+    return targetHeight * gameObject.localScale.y;
+
+  // If target width is also -1, use clip Height
+  if (targetWidth < 0)
+    return clipRect.h * gameObject.localScale.y;
+
+  // Otherwise, use aspect ratio
+  return targetWidth * clipRect.h / clipRect.w * gameObject.localScale.y;
 }
