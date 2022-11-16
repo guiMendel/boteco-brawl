@@ -5,10 +5,8 @@
 enum class RenderLayer
 {
   Background,
-  Tilemap,
   Default,
-  Enemies,
-  Player,
+  Characters,
   VFX,
   Projectiles,
   Foreground,

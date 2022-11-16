@@ -3,8 +3,6 @@
 #include "GameState.h"
 #include "Vector2.h"
 #include "Sound.h"
-#include "TileMap.h"
-#include "TileSet.h"
 #include "Camera.h"
 #include "Resources.h"
 #include "SatCollision.h"

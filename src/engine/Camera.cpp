@@ -28,14 +28,34 @@ Vector2 GetInputSpeedChange();
 
 Vector2 GetGravitySpeedChange(Vector2 speed, float gravity);
 
+Camera::Camera()
+{
+  SetSize(5);
+  rawPosition = Vector2(-Game::screenWidth / 2.0f, -Game::screenHeight / 2.0f) / pixelsPerUnit;
+}
+
 Vector2 Camera::GetPosition() const
 {
-  return rawPosition + Vector2(Game::screenWidth / 2, Game::screenHeight / 2);
+  return rawPosition + Vector2(Game::screenWidth / 2, Game::screenHeight / 2) / pixelsPerUnit;
 }
 
 void Camera::SetPosition(Vector2 newPosition)
 {
-  rawPosition = newPosition - Vector2(Game::screenWidth / 2, Game::screenHeight / 2);
+  rawPosition = newPosition - Vector2(Game::screenWidth / 2, Game::screenHeight / 2) / pixelsPerUnit;
+}
+
+// Get how many units occupy half the camera's height
+float Camera::GetSize() const { return Game::screenHeight / pixelsPerUnit / 2; }
+
+void Camera::SetSize(float newSize)
+{
+  // Remember old screen position
+  Vector2 oldPosition = WorldToScreen(rawPosition);
+
+  pixelsPerUnit = Game::screenHeight / 2 / newSize;
+
+  // Restore it
+  rawPosition = ScreenToWorld(oldPosition);
 }
 
 void Camera::Update(float deltaTime)
@@ -87,6 +107,28 @@ void Camera::Move(Vector2 speedModification, float deltaTime)
 
   // Displace it
   rawPosition += speed * deltaTime;
+}
+
+// Convert coordinates
+Vector2 Camera::ScreenToWorld(const Vector2 &screenCoordinates) const
+{
+  return screenCoordinates / pixelsPerUnit + rawPosition;
+}
+
+// Convert coordinates
+Vector2 Camera::WorldToScreen(const Vector2 &worldCoordinates) const
+{
+  return (worldCoordinates - rawPosition) * pixelsPerUnit;
+}
+
+Rectangle Camera::ScreenToWorld(const Rectangle &screenCoordinates) const
+{
+  return screenCoordinates / pixelsPerUnit + rawPosition;
+}
+
+Rectangle Camera::WorldToScreen(const Rectangle &worldCoordinates) const
+{
+  return (worldCoordinates - rawPosition) * pixelsPerUnit;
 }
 
 // Gets the displacement directions from input

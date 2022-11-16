@@ -29,9 +29,6 @@ public:
 
   Rectangle() : x(0), y(0), width(0), height(0) {}
 
-  Rectangle(std::initializer_list<float> list)
-      : x(*list.begin()), y(*(list.begin() + 1)), width(*(list.begin() + 2)), height(*(list.begin() + 3)) {}
-
   Rectangle(const Rectangle &other) : x(other.x), y(other.y), width(other.width), height(other.height) {}
 
   Rectangle(const Rectangle &&other) : x(other.x), y(other.y), width(other.width), height(other.height) {}
@@ -67,6 +64,19 @@ public:
   Rectangle operator+=(const Vector2 &vector) { return *this = *this + vector; }
 
   Rectangle operator-=(const Vector2 &vector) { return *this = *this - vector; }
+
+  Rectangle operator*(float value) const
+  {
+    return Rectangle(x * value, y * value, width * value, height * value);
+  }
+
+  Rectangle operator/(float value) const
+  {
+    return Rectangle(x / value, y / value, width / value, height / value);
+  }
+
+  Rectangle operator*=(float value) { return *this = *this * value; }
+  Rectangle operator/=(float value) { return *this = *this / value; }
 
   Vector2 Coordinates() const { return Vector2(x, y); }
 
@@ -106,7 +116,7 @@ public:
   }
 
   // Convert to sdl rect
-  operator SDL_Rect() const { return SDL_Rect{(int)x, (int)y, (int)width, (int)height}; }
+  explicit operator SDL_Rect() const { return SDL_Rect{(int)x, (int)y, (int)width, (int)height}; }
 
   explicit operator Vector2() const { return Vector2{x, y}; }
 

@@ -20,13 +20,11 @@ void Text::Render()
   Vector2 position = gameObject.GetPosition() - Vector2((float)width, (float)height) / 2;
 
   // Get the real position
-  Vector2 offsetPosition = Camera::GetInstance().WorldToScreen(position);
+  SDL_Rect destinationRect = (SDL_Rect)Camera::GetInstance().WorldToScreen(
+      Rectangle(position, width, height));
 
   // Get clip rectangle
   SDL_Rect clipRect{0, 0, width, height};
-
-  // Get destination rectangle
-  SDL_Rect destinationRect{(int)offsetPosition.x, (int)offsetPosition.y, width, height};
 
   // Put the texture in the renderer
   SDL_RenderCopyEx(

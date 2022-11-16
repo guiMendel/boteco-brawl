@@ -47,13 +47,13 @@ COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(ENGINE_INCLUDE_DIRECTORY) $
 # FOR ENGINE
 
 # Header files
-_ENGINE_DEPS = Game.h GameState.h Sprite.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h TileSet.h TileMap.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h RenderLayer.h SpriteAnimator.h SatCollision.h Collider.h Recipes.h Text.h Color.h GameData.h Timer.h Tag.h
+_ENGINE_DEPS = Game.h GameState.h Sprite.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h RenderLayer.h SpriteAnimator.h SatCollision.h Collider.h Recipes.h Text.h Color.h GameData.h Timer.h Tag.h Rigidbody.h PhysicsSystem.h
 
 # Generate header filepaths
 ENGINE_DEPS = $(patsubst %,$(ENGINE_INCLUDE_DIRECTORY)\\%,$(_ENGINE_DEPS))
 
 # Object files
-_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o TileSet.o TileMap.o Resources.o InputManager.o Camera.o Debug.o SpriteAnimator.o Collider.o Recipes.o Text.o
+_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o SpriteAnimator.o Collider.o Recipes.o Text.o Rigidbody.o PhysicsSystem.o
 
 # Generate object filepaths
 ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))

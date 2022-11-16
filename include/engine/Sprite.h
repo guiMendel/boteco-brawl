@@ -14,31 +14,28 @@ public:
   // Since we are using unique ptrs, no need to define destructor
 
   // Default constructor
-  Sprite(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0, bool centerObject = true)
-      : Component(associatedObject), centered(centerObject), renderLayer(renderLayer), renderOrder(renderOrder) {}
+  Sprite(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float pixelsPerUnit = 32, int renderOrder = 0, bool centerObject = true);
 
   // Constructor with image file name
-  Sprite(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0, bool centerObject = true) : Sprite(associatedObject, renderLayer, renderOrder, centerObject)
-  {
-    Load(fileName);
-  }
+  Sprite(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, float pixelsPerUnit = 32, int renderOrder = 0, bool centerObject = true);
 
   virtual ~Sprite() {}
 
   // Loads the file image to the sprite
   void Load(const std::string fileName);
 
-  // Sets which rectangle of the image to be displayed
+  // Sets which rectangle of the image is to be displayed
   void SetClip(int x, int y, int width, int height);
 
   int GetUnscaledWidth() const { return clipRect.w; }
 
   int GetUnscaledHeight() const { return clipRect.h; }
 
-  int GetWidth() const;
+  float GetWidth() const;
 
-  int GetHeight() const;
+  float GetHeight() const;
 
+  // Set the dimensions of the image to be displayed (in game units, NOT pixels)
   void SetTargetDimension(int width, int height = -1);
 
   bool IsLoaded() const { return texture != nullptr; }
@@ -51,15 +48,18 @@ public:
 
   void Update([[maybe_unused]] float deltaTime) override {}
 
+  RenderLayer GetRenderLayer() override { return renderLayer; }
+
+  int GetRenderOrder() override { return renderOrder; }
+
   // Offset when rendering based on game object's position
   Vector2 offset{0, 0};
 
   // Whether to center the sprite on the render coordinates
   bool centered;
 
-  RenderLayer GetRenderLayer() override { return renderLayer; }
-
-  int GetRenderOrder() override { return renderOrder; }
+  // The size of a pixel from this image relative to a game unit
+  float pixelsPerUnit;
 
 private:
   // The loaded texture

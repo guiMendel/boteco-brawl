@@ -7,6 +7,17 @@
 using namespace std;
 using namespace Helper;
 
+Sprite::Sprite(GameObject &associatedObject, RenderLayer renderLayer, float pixelsPerUnit, int renderOrder, bool centerObject)
+    : Component(associatedObject), centered(centerObject), pixelsPerUnit(pixelsPerUnit), renderLayer(renderLayer), renderOrder(renderOrder)
+{
+}
+
+// Constructor with image file name
+Sprite::Sprite(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer, float pixelsPerUnit, int renderOrder, bool centerObject) : Sprite(associatedObject, renderLayer, pixelsPerUnit, renderOrder, centerObject)
+{
+  Load(fileName);
+}
+
 void Sprite::Load(const string fileName)
 {
   // Get texture from resource manager
@@ -34,12 +45,12 @@ void Sprite::Render(Vector2 position)
     position -= Vector2(GetWidth() / 2, GetHeight() / 2);
   }
 
-  // Get the real position
-  Vector2 offsetPosition = Camera::GetInstance().WorldToScreen(position);
+  // Get the real position box
+  SDL_Rect destinationRect = (SDL_Rect)Camera::GetInstance().WorldToScreen(
+      Rectangle(position, GetWidth(), GetHeight()));
 
-  // Get destination rectangle
-  SDL_Rect destinationRect{
-      (int)offsetPosition.x, (int)offsetPosition.y, GetWidth(), GetHeight()};
+  cout << gameObject.GetName() << ": " << (string)Camera::GetInstance().WorldToScreen(
+      Rectangle(position, GetWidth(), GetHeight())) << endl;
 
   // Put the texture in the renderer
   SDL_RenderCopyEx(
@@ -58,27 +69,31 @@ void Sprite::SetTargetDimension(int width, int height)
   targetHeight = height;
 }
 
-int Sprite::GetWidth() const
+float Sprite::GetWidth() const
 {
   if (targetWidth >= 0)
     return targetWidth * gameObject.localScale.x;
 
-  // If target height is also -1, use clip width
+  // If target height is also -1, use clip width (convert pixels to game units using own proportion)
   if (targetHeight < 0)
-    return clipRect.w * gameObject.localScale.x;
+    return clipRect.w * gameObject.localScale.x / pixelsPerUnit;
 
   // Otherwise, use aspect ratio
   return targetHeight * clipRect.w / clipRect.h * gameObject.localScale.x;
 }
 
-int Sprite::GetHeight() const
+float Sprite::GetHeight() const
 {
   if (targetHeight >= 0)
     return targetHeight * gameObject.localScale.y;
 
-  // If target width is also -1, use clip Height
+  // If target width is also -1, use clip Height (convert pixels to game units using own proportion)
   if (targetWidth < 0)
-    return clipRect.h * gameObject.localScale.y;
+  {
+    // cout << gameObject.GetName() << ": " << clipRect.h << " * " << gameObject.localScale.y << " / " << pixelsPerUnit << " = " << clipRect.h * gameObject.localScale.y / pixelsPerUnit << endl;
+
+    return clipRect.h * gameObject.localScale.y / pixelsPerUnit;
+  }
 
   // Otherwise, use aspect ratio
   return targetWidth * clipRect.h / clipRect.w * gameObject.localScale.y;

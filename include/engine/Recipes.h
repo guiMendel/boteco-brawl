@@ -9,6 +9,8 @@ class Recipes
 {
 public:
   static auto Background(std::string imagePath) -> std::function<void(std::shared_ptr<GameObject>)>;
+
+  static auto Character() -> std::function<void(std::shared_ptr<GameObject>)>;
 };
 
 #endif

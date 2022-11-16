@@ -25,12 +25,14 @@ public:
   // How far from the target camera can be before starting to follow
   static const float maxFocusDistance;
 
-  // Current speed of camera
-  Vector2 speed;
-
   Vector2 GetPosition() const;
 
   void SetPosition(Vector2 newPosition);
+
+  // Get how many units occupy half the camera's height
+  float GetSize() const;
+
+  void SetSize(float newSize);
 
   Vector2 GetRawPosition() const { return rawPosition; }
 
@@ -52,26 +54,19 @@ public:
   // Update frame
   void Update(float deltaTime);
 
-  // Convert coordinates
-  Vector2 ScreenToWorld(const Vector2 &screenCoordinates) const
-  {
-    return screenCoordinates + rawPosition;
-  }
+  // Convert coordinates (screen pixels to game units)
+  Vector2 ScreenToWorld(const Vector2 &screenCoordinates) const;
 
-  // Convert coordinates
-  Vector2 WorldToScreen(const Vector2 &worldCoordinates) const
-  {
-    return worldCoordinates - rawPosition;
-  }
+  // Convert coordinates (game units to screen pixels)
+  Vector2 WorldToScreen(const Vector2 &worldCoordinates) const;
 
-  Rectangle ScreenToWorld(const Rectangle &screenCoordinates) const
-  {
-    return screenCoordinates + rawPosition;
-  }
-  Rectangle WorldToScreen(const Rectangle &worldCoordinates) const
-  {
-    return worldCoordinates - rawPosition;
-  }
+  // Convert coordinates & dimensions (screen pixels to game units)
+  Rectangle ScreenToWorld(const Rectangle &screenCoordinates) const;
+
+  // Convert coordinates & dimensions (game units to screen pixels)
+  Rectangle WorldToScreen(const Rectangle &worldCoordinates) const;
+
+  float GetPixelsPerUnit() const { return pixelsPerUnit; }
 
   static Camera &GetInstance()
   {
@@ -80,21 +75,27 @@ public:
     return instance;
   }
 
+  // Current speed of camera
+  Vector2 speed;
+
 private:
   // Singleton
-  Camera(){};
+  Camera();
+
+  // Move the camera the current speed
+  void Move(Vector2 speedModification, float deltaTime);
+
+  // Current unit resolution of camera
+  float pixelsPerUnit;
 
   // World coordinates of camera's top left corner
-  Vector2 rawPosition{-Game::screenWidth / 2.0f, -Game::screenHeight / 2.0f};
+  Vector2 rawPosition;
 
   // Which game object to follow
   std::weak_ptr<GameObject> weakFocus;
 
   // How much time to wait before starting to follow target
   float timeLeftToFollow{0.0f};
-
-  // Move the camera the current speed
-  void Move(Vector2 speedModification, float deltaTime);
 };
 
 #endif
