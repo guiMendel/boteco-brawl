@@ -5,13 +5,14 @@
 #include "Camera.h"
 #include <iostream>
 
-using namespace std;
-
 class CameraFollower : public Component
 {
 public:
-  CameraFollower(GameObject &associatedObject, bool useRawPosition = false)
+  CameraFollower(GameObject &associatedObject, bool useRawPosition = false, int ok = 2)
       : Component(associatedObject), useRawPosition(useRawPosition) {}
+
+  CameraFollower(GameObject &associatedObject, ComponentParameters &parameters)
+      : CameraFollower(associatedObject, parameters["useRawPosition"].asBool) {}
 
   virtual ~CameraFollower() {}
 

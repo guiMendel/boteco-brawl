@@ -4,8 +4,10 @@
 #include "InputManager.h"
 #include "Vector2.h"
 #include "RenderLayer.h"
+#include "ComponentParameter.h"
 #include <string>
 #include <memory>
+#include <map>
 
 #define LOCK(weak, shared)   \
   auto shared = weak.lock(); \

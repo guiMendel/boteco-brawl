@@ -3,6 +3,17 @@ CC = g++
 
 # === DIRECTORY LOCATIONS =======================
 
+# FOR EDITOR
+
+# Where to find the include folder
+EDITOR_INCLUDE_DIRECTORY = .\include\editor
+
+# Where to find the objects folder
+EDITOR_OBJECT_DIRECTORY = .\src\editor\obj
+
+# Where to find source code
+EDITOR_SOURCE_DIRECTORY = .\src\editor
+
 # FOR ENGINE
 
 # Where to find the include folder
@@ -40,7 +51,7 @@ LIBS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 COMPILER_FLAGS = -std=c++17 -Wall -Wextra -pedantic
 
 # Compilation arguments
-COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(ENGINE_INCLUDE_DIRECTORY) $(SDL_INCLUDE) $(COMPILER_FLAGS)
+COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(ENGINE_INCLUDE_DIRECTORY) -I $(EDITOR_INCLUDE_DIRECTORY) $(SDL_INCLUDE) $(COMPILER_FLAGS)
 
 # === FILES ===================================
 
@@ -90,4 +101,5 @@ $(GAME_OBJECT_DIRECTORY)\\%.o: $(GAME_SOURCE_DIRECTORY)\%.cpp $(GAME_DEPS) $(ENG
 	
 # Makes the game
 game: $(GAME_OBJS) $(ENGINE_OBJS)
+	./src/editor/componentTable/tableScrapper.sh
 	$(CC) $^ $(COMPILATION_ARGS) $(LIBS) $(SDL_LIBRARY) -o $@

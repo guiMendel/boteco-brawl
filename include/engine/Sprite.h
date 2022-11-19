@@ -13,11 +13,11 @@ class Sprite : public Component
 public:
   // Since we are using unique ptrs, no need to define destructor
 
-  // Default constructor
-  Sprite(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float pixelsPerUnit = 32, int renderOrder = 0, bool centerObject = true);
-
   // Constructor with image file name
   Sprite(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, float pixelsPerUnit = 32, int renderOrder = 0, bool centerObject = true);
+
+  // Default constructor
+  Sprite(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float pixelsPerUnit = 32, int renderOrder = 0, bool centerObject = true);
 
   virtual ~Sprite() {}
 
