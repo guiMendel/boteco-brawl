@@ -12,12 +12,15 @@
 #include "Helper.h"
 #include "Tag.h"
 #include "Timer.h"
+#include "SatCollision.h"
 
 class GameState;
+class PhysicsSystem;
 
 class GameObject
 {
-  friend GameState;
+  friend class GameState;
+  friend class PhysicsSystem;
 
 public:
   // With dimensions
@@ -161,7 +164,10 @@ private:
   void UnlinkParent();
 
   // Announces collision to all components
-  void OnCollision(GameObject &other);
+  void OnCollision(SatCollision::CollisionData collisionData);
+
+  // Announces trigger collision to all components
+  void OnTriggerCollision(GameObject &other);
 
   // Vector with all components of this object
   std::vector<std::shared_ptr<Component>> components;
@@ -183,5 +189,6 @@ private:
 };
 
 #include "GameState.h"
+#include "PhysicsSystem.h"
 
 #endif

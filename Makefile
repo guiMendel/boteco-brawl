@@ -25,6 +25,17 @@ ENGINE_OBJECT_DIRECTORY = .\src\engine\obj
 # Where to find source code
 ENGINE_SOURCE_DIRECTORY = .\src\engine
 
+# FOR INTEGRATION
+
+# Where to find the include folder
+INTEGRATION_INCLUDE_DIRECTORY = .\include\integration
+
+# Where to find the objects folder
+INTEGRATION_OBJECT_DIRECTORY = .\src\integration\obj
+
+# Where to find source code
+INTEGRATION_SOURCE_DIRECTORY = .\src\integration
+
 # FOR GAME
 
 # Where to find the include folder
@@ -51,23 +62,37 @@ LIBS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 COMPILER_FLAGS = -std=c++17 -Wall -Wextra -pedantic
 
 # Compilation arguments
-COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(ENGINE_INCLUDE_DIRECTORY) -I $(EDITOR_INCLUDE_DIRECTORY) $(SDL_INCLUDE) $(COMPILER_FLAGS)
+COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(ENGINE_INCLUDE_DIRECTORY) -I $(EDITOR_INCLUDE_DIRECTORY) -I $(INTEGRATION_INCLUDE_DIRECTORY) $(SDL_INCLUDE) $(COMPILER_FLAGS)
 
 # === FILES ===================================
 
 # FOR ENGINE
 
 # Header files
-_ENGINE_DEPS = Game.h GameState.h Sprite.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h RenderLayer.h SpriteAnimator.h SatCollision.h Collider.h Recipes.h Text.h Color.h GameData.h Timer.h Tag.h Rigidbody.h PhysicsSystem.h
+_ENGINE_DEPS = Game.h GameState.h Sprite.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h SpriteAnimator.h SatCollision.h Collider.h Text.h Color.h Timer.h Rigidbody.h PhysicsSystem.h
 
 # Generate header filepaths
 ENGINE_DEPS = $(patsubst %,$(ENGINE_INCLUDE_DIRECTORY)\\%,$(_ENGINE_DEPS))
 
 # Object files
-_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o SpriteAnimator.o Collider.o Recipes.o Text.o Rigidbody.o PhysicsSystem.o
+_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o SpriteAnimator.o Collider.o Text.o Rigidbody.o PhysicsSystem.o
 
 # Generate object filepaths
 ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
+
+# FOR INTEGRATION
+
+# Header files
+_INTEGRATION_DEPS = ColliderDensity.h GameData.h Recipes.h RenderLayer.h Tag.h
+
+# Generate header filepaths
+INTEGRATION_DEPS = $(patsubst %,$(INTEGRATION_INCLUDE_DIRECTORY)\\%,$(_INTEGRATION_DEPS))
+
+# Object files
+_INTEGRATION_OBJS = Recipes.o InitialState.o
+
+# Generate object filepaths
+INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATION_OBJS))
 
 # FOR GAME
 
@@ -89,17 +114,24 @@ GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))
 
 # Define how to make .o files, and make them dependent on their .c counterparts and the h files
 # The void cast is simply there to hide output of mkdir
-$(ENGINE_OBJECT_DIRECTORY)\\%.o: $(ENGINE_SOURCE_DIRECTORY)\%.cpp $(ENGINE_DEPS)
+$(ENGINE_OBJECT_DIRECTORY)\\%.o: $(ENGINE_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(ENGINE_DEPS)
+	$(CC) -c -o $@ $< $(COMPILATION_ARGS)
+
+# FOR INTEGRATION
+
+# Define how to make .o files, and make them dependent on their .c counterparts and the h files
+# The void cast is simply there to hide output of mkdir
+$(INTEGRATION_OBJECT_DIRECTORY)\\%.o: $(INTEGRATION_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(ENGINE_DEPS)
 	$(CC) -c -o $@ $< $(COMPILATION_ARGS)
 
 # FOR GAME
 
 # Define how to make .o files, and make them dependent on their .c counterparts and the h files
 # The void cast is simply there to hide output of mkdir
-$(GAME_OBJECT_DIRECTORY)\\%.o: $(GAME_SOURCE_DIRECTORY)\%.cpp $(GAME_DEPS) $(ENGINE_DEPS)
+$(GAME_OBJECT_DIRECTORY)\\%.o: $(GAME_SOURCE_DIRECTORY)\%.cpp $(GAME_DEPS) $(ENGINE_DEPS) $(INTEGRATION_DEPS)
 	$(CC) -c -o $@ $< $(COMPILATION_ARGS)
 	
 # Makes the game
-game: $(GAME_OBJS) $(ENGINE_OBJS)
+game: $(GAME_OBJS) $(ENGINE_OBJS) $(INTEGRATION_OBJS)
 	./src/editor/componentTable/tableScrapper.sh
 	$(CC) $^ $(COMPILATION_ARGS) $(LIBS) $(SDL_LIBRARY) -o $@

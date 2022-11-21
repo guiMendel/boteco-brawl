@@ -34,4 +34,6 @@ auto getComponentsTable() -> component_table
   component_param_types paramTypes;
 
   /* ADD COMPONENTS TO TABLE */
+
+  return table;
 }

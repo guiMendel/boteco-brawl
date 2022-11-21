@@ -48,4 +48,6 @@ auto getComponentsTable() -> component_table
 
     paramTypes.clear();
   }
+
+  return table;
 }

@@ -6,20 +6,20 @@
 using namespace std;
 
 // Explicitly initialize box
-Collider::Collider(GameObject &associatedObject, Rectangle box) : Component(associatedObject)
+Collider::Collider(GameObject &associatedObject, Rectangle box, bool isTrigger, ColliderDensity density) : Component(associatedObject), isTrigger(isTrigger), density(density)
 {
   SetBox(box);
 }
 
 // Use sprite's box
-Collider::Collider(GameObject &associatedObject, shared_ptr<Sprite> sprite, Vector2 scale)
+Collider::Collider(GameObject &associatedObject, shared_ptr<Sprite> sprite, bool isTrigger, ColliderDensity density, Vector2 scale)
     : Collider(associatedObject,
-               Rectangle(0, 0, sprite->GetWidth() * scale.x, sprite->GetHeight() * scale.y)) {}
+               Rectangle(0, 0, sprite->GetWidth() * scale.x, sprite->GetHeight() * scale.y), isTrigger, density) {}
 
 // Use sprite's box
-Collider::Collider(GameObject &associatedObject, shared_ptr<SpriteAnimator> animator, Vector2 scale)
+Collider::Collider(GameObject &associatedObject, shared_ptr<SpriteAnimator> animator, bool isTrigger, ColliderDensity density, Vector2 scale)
     : Collider(associatedObject,
-               Rectangle(0, 0, animator->GetFrameWidth() * scale.x, animator->GetFrameHeight() * scale.y)) {}
+               Rectangle(0, 0, animator->GetFrameWidth() * scale.x, animator->GetFrameHeight() * scale.y), isTrigger, density) {}
 
 void Collider::SetBox(const Rectangle &newBox)
 {
@@ -32,8 +32,39 @@ Rectangle Collider::GetBox() const { return box + gameObject.GetPosition(); }
 
 void Collider::Start()
 {
-  // Announce to game state
-  gameState.RegisterCollider(dynamic_pointer_cast<Collider>(GetShared()));
+  // Id of gameObject on which to subscribe this collider
+  int ownerId = isTrigger ? gameObject.id : -1;
+
+  // If not trigger, find the rigidbody
+  if (isTrigger == false)
+  {
+    // Object to inspect for a rigidbody
+    shared_ptr<GameObject> inspectingObject = gameObject.GetShared();
+
+    // While it isn't null, check if it has a rigidbody
+    while (inspectingObject != nullptr)
+    {
+      // Check it
+      auto rigidbody = inspectingObject->GetComponent<Rigidbody>();
+
+      // If it's not null, then it's the one
+      if (rigidbody != nullptr)
+      {
+        ownerId = rigidbody->gameObject.id;
+        rigidbodyWeak = rigidbody;
+        break;
+      }
+
+      // Check next in line
+      inspectingObject = inspectingObject->GetParent();
+    }
+  }
+
+  // Subscribe, if managed to find a valid id
+  if (ownerId >= 0)
+  {
+    gameState.physicsSystem.RegisterCollider(dynamic_pointer_cast<Collider>(GetShared()), ownerId);
+  }
 }
 
 void Collider::Render()
@@ -59,4 +90,14 @@ void Collider::Render()
 
   // Paint collider edges
   SDL_RenderDrawLines(renderer, vertices, 5);
+}
+
+float Collider::GetArea() const
+{
+  return box.width * box.height;
+}
+
+float Collider::GetDensity() const
+{
+  return static_cast<int>(density);
 }

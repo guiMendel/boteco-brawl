@@ -216,7 +216,7 @@ void Game::Start()
 
     // Update the state's timer
     state.timer.Update(deltaTime);
-    
+
     // Update the state
     state.Update(deltaTime);
 
@@ -289,9 +289,4 @@ void Game::PopState()
 
   // Resume next state
   GetState().Resume();
-}
-
-unique_ptr<GameState> Game::GetInitialState() const
-{
-  return make_unique<MainState>();
 }

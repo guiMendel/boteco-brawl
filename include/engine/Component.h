@@ -5,6 +5,7 @@
 #include "Vector2.h"
 #include "RenderLayer.h"
 #include "ComponentParameter.h"
+#include "SatCollision.h"
 #include <string>
 #include <memory>
 #include <map>
@@ -74,7 +75,10 @@ protected:
 
 private:
   // Allows for reacting to collision
-  virtual void OnCollision([[maybe_unused]] GameObject &other) {}
+  virtual void OnCollision([[maybe_unused]] SatCollision::CollisionData collisionData) {}
+
+  // Allows for reacting to trigger collision
+  virtual void OnTriggerCollision([[maybe_unused]] GameObject &other) {}
 
   // Whether StartAndRegisterLayer has been called already
   bool started{false};

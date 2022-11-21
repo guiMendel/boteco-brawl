@@ -12,6 +12,7 @@
 #include "Music.h"
 #include "InputManager.h"
 #include "Vector2.h"
+#include "PhysicsSystem.h"
 
 class Component;
 class Collider;
@@ -103,6 +104,9 @@ public:
 
   std::shared_ptr<GameObject> GetRootObject() { return rootObject; }
 
+  // The state's own physics system instance
+  PhysicsSystem physicsSystem;
+
   // A timer helper
   Timer timer;
 
@@ -126,13 +130,6 @@ private:
   // Executes this function for each object, cascading down the hierarchy
   void CascadeDown(std::shared_ptr<GameObject> object, std::function<void(GameObject &)> callback, bool topDown = true);
   void DeleteObjects();
-  void DetectCollisions();
-
-  // Adds a new collider to it's corresponding object entry
-  void RegisterCollider(std::shared_ptr<Collider> collider);
-
-  // Removes any expired colliders from structure & returns the remaining ones as shared
-  std::unordered_map<int, std::vector<std::shared_ptr<Collider>>> ValidateColliders();
 
   // Whether the state has executed the start method
   bool started{false};
@@ -143,9 +140,6 @@ private:
   // Structure that maps each render layer to the components set to render in it
   std::unordered_map<RenderLayer, std::vector<std::weak_ptr<Component>>>
       layerStructure;
-
-  // Structure that maps each object id to the list of it's colliders
-  std::unordered_map<int, std::vector<std::weak_ptr<Collider>>> colliderStructure;
 };
 
 #include "Component.h"

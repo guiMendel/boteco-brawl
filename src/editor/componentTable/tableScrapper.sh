@@ -75,13 +75,8 @@ function table_entry_for() {
     Name=$( echo "$match" | grep -oP "$CLabel$")
 
     # Get type as enum value
-    TypeEnum=""
-    case "$Type" in
-      int) TypeEnum="Int";;
-      float) TypeEnum="Float";;
-      std::string | string) TypeEnum="String";;
-      bool) TypeEnum="Bool";;
-    esac
+    Type=$( echo "$Type" | grep -oP "$CLabel$")
+    TypeEnum="${Type^}"
 
     # Add param line to entry
     NewEntry="$NewEntry

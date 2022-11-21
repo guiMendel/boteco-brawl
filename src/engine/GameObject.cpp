@@ -251,9 +251,16 @@ void GameObject::InternalDestroy()
   Assert(shared.use_count() == 2, "Found leaked references to game object " + GetName() + " when trying to destroy it");
 }
 
-void GameObject::OnCollision(GameObject &other)
+void GameObject::OnCollision(SatCollision::CollisionData collisionData)
 {
   // Alert all components
   for (auto component : components)
-    component->OnCollision(other);
+    component->OnCollision(collisionData);
+}
+
+void GameObject::OnTriggerCollision(GameObject &other)
+{
+  // Alert all components
+  for (auto component : components)
+    component->OnTriggerCollision(other);
 }

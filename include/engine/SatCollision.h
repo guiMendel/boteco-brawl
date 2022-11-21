@@ -3,18 +3,37 @@
 
 #include "Rectangle.h"
 #include <iostream>
+#include <utility>
+#include <memory>
+
+class Rigidbody;
 
 // Implementation of SAT collision, limited to rectangle polygons
 // Based on this guide: https://youtu.be/-EsWKT7Doww
 namespace SatCollision
 {
+  struct CollisionData
+  {
+    // Direction through which contact was initiated
+    Vector2 normal;
+
+    // Body of object that received contact
+    std::shared_ptr<Rigidbody> source;
+
+    // Body of object that made contact
+    std::shared_ptr<Rigidbody> other;
+  };
+
   // Finds the minimum distance between both rectangle's edges
   // Negative values indicate penetration
   // Rotations are in radians
-  static float FindMinDistance(Rectangle rect1, Rectangle rect2, float rotation1 = 0.0f, float rotation2 = 0.0f)
+  static std::pair<float, Vector2> FindMinDistance(Rectangle rect1, Rectangle rect2, float rotation1 = 0.0f, float rotation2 = 0.0f)
   {
     // Will keep track of the best distance found
     float bestDistance = std::numeric_limits<float>::lowest();
+
+    // Will store the normal corresponding to the best distance
+    Vector2 bestNormal;
 
     // Normal to be used in each iteration
     Vector2 normal = Vector2::Angled(rotation1);
@@ -34,19 +53,22 @@ namespace SatCollision
 
       // Check if we got a better distance
       if (minDistance > bestDistance)
+      {
         bestDistance = minDistance;
+        bestNormal = normal;
+      }
 
       // Advance normal for next iteration (clockwise)
       normal = normal.Rotated(M_PI / 2.0);
     }
 
-    return bestDistance;
+    return std::make_pair(bestDistance, bestNormal);
   }
 
   // Checks if both rect's have any overlapping area
   static bool IsColliding(const Rectangle &rect1, const Rectangle &rect2, float rotation1, float rotation2)
   {
-    return FindMinDistance(rect1, rect2, rotation1, rotation2) <= 0.0f && FindMinDistance(rect2, rect1, rotation2, rotation1) <= 0.0f;
+    return FindMinDistance(rect1, rect2, rotation1, rotation2).first <= 0.0f && FindMinDistance(rect2, rect1, rotation2, rotation1).first <= 0.0f;
   }
 
   // Additionally first does a quick check to ensure the rectangles are close enough so that collision is possible

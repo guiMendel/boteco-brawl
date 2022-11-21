@@ -5,32 +5,11 @@
 #include "Sound.h"
 #include "Camera.h"
 #include "Resources.h"
-#include "SatCollision.h"
 #include <iostream>
 
 #define CASCADE_OBJECTS(method, param) CascadeDown(rootObject, [param](GameObject &object) { object.method(param); });
 
 using namespace std;
-
-// Whether the two collider lists have some pair of colliders which are colliding
-bool CheckForCollision(vector<shared_ptr<Collider>> colliders1, vector<shared_ptr<Collider>> colliders2)
-{
-  for (auto collider1 : colliders1)
-  {
-    for (auto collider2 : colliders2)
-    {
-      if (SatCollision::IsColliding(
-              collider1->GetBox(), collider2->GetBox(),
-              collider1->gameObject.GetRotation(), collider2->gameObject.GetRotation(),
-              pow(collider1->GetMaxVertexDistance() + collider2->GetMaxVertexDistance(), 2)))
-      {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
 
 // Initialize root object
 GameState::GameState() : inputManager(InputManager::GetInstance()), rootObject(new GameObject("Root", *this))
@@ -83,36 +62,6 @@ void GameState::DeleteObjects()
     deadObject->InternalDestroy();
 }
 
-void GameState::DetectCollisions()
-{
-  // Get validated colliders
-  auto validatedColliderStructure = ValidateColliders();
-
-  // For each object
-  auto objectEntryIterator = validatedColliderStructure.begin();
-  while (objectEntryIterator != validatedColliderStructure.end())
-  {
-    // Test, for each OTHER object in the list (excluding the ones before this one)
-    decltype(objectEntryIterator) otherObjectEntryIterator{objectEntryIterator};
-    otherObjectEntryIterator++;
-    while (otherObjectEntryIterator != validatedColliderStructure.end())
-    {
-      // Check if they are colliding
-      if (CheckForCollision(objectEntryIterator->second, otherObjectEntryIterator->second))
-      {
-        auto &object1 = *gameObjects[objectEntryIterator->first];
-        auto &object2 = *gameObjects[otherObjectEntryIterator->first];
-        object1.OnCollision(object2);
-        object2.OnCollision(object1);
-      }
-
-      otherObjectEntryIterator++;
-    }
-
-    objectEntryIterator++;
-  }
-}
-
 void GameState::Update(float deltaTime)
 {
   // Quit if necessary
@@ -130,8 +79,8 @@ void GameState::Update(float deltaTime)
   // Delete dead ones
   DeleteObjects();
 
-  // Inform them of any collisions
-  DetectCollisions();
+  // Resolve collisions
+  physicsSystem.ResolveCollisions();
 }
 
 void GameState::Render()
@@ -246,56 +195,6 @@ void GameState::RegisterLayerRenderer(shared_ptr<Component> component)
         if (comp1 == nullptr || comp2 == nullptr) return true;
         
         return comp1->GetRenderOrder() < comp2->GetRenderOrder(); });
-}
-
-void GameState::RegisterCollider(shared_ptr<Collider> collider)
-{
-  if (!collider)
-    return;
-
-  colliderStructure[collider->gameObject.id].emplace_back(collider);
-}
-
-unordered_map<int, vector<shared_ptr<Collider>>> GameState::ValidateColliders()
-{
-  unordered_map<int, vector<shared_ptr<Collider>>> verifiedCollidersStructure;
-
-  // For each object entry
-  auto objectEntryIterator = colliderStructure.begin();
-  while (objectEntryIterator != colliderStructure.end())
-  {
-    auto &objectColliders = objectEntryIterator->second;
-
-    // For each of it's colliders
-    auto colliderIterator = objectColliders.begin();
-    while (colliderIterator != objectColliders.end())
-    {
-      // Remove it if it's expired
-      if (colliderIterator->expired())
-      {
-        colliderIterator = objectColliders.erase(colliderIterator);
-        continue;
-      }
-
-      // Otherwise lock it and add it
-      verifiedCollidersStructure[objectEntryIterator->first]
-          .push_back(colliderIterator->lock());
-
-      // Advance
-      colliderIterator++;
-    }
-
-    // If it's empty, remove it from the map
-    if (objectColliders.empty())
-    {
-      objectEntryIterator = colliderStructure.erase(objectEntryIterator);
-      continue;
-    }
-
-    objectEntryIterator++;
-  }
-
-  return verifiedCollidersStructure;
 }
 
 shared_ptr<GameObject> GameState::GetObject(int id)
