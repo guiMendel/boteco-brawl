@@ -18,7 +18,7 @@ using namespace Helper;
 const int Game::frameRate{30};
 
 // Defines the resolution width
-const int Game::screenWidth{1024};
+const int Game::screenWidth{1200};
 
 // Defines the resolution height
 const int Game::screenHeight{600};

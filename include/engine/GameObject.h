@@ -12,10 +12,9 @@
 #include "Helper.h"
 #include "Tag.h"
 #include "Timer.h"
-#include "SatCollision.h"
+#include "PhysicsSystem.h"
 
 class GameState;
-class PhysicsSystem;
 
 class GameObject
 {
@@ -189,6 +188,5 @@ private:
 };
 
 #include "GameState.h"
-#include "PhysicsSystem.h"
 
 #endif

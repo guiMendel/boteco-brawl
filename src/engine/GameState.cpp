@@ -12,7 +12,8 @@
 using namespace std;
 
 // Initialize root object
-GameState::GameState() : inputManager(InputManager::GetInstance()), rootObject(new GameObject("Root", *this))
+GameState::GameState()
+    : physicsSystem(*this), inputManager(InputManager::GetInstance()), rootObject(new GameObject("Root", *this))
 {
 }
 
@@ -80,7 +81,7 @@ void GameState::Update(float deltaTime)
   DeleteObjects();
 
   // Resolve collisions
-  physicsSystem.ResolveCollisions();
+  physicsSystem.Update(deltaTime);
 }
 
 void GameState::Render()
@@ -130,6 +131,9 @@ void GameState::Start()
 
   // Start objects
   CASCADE_OBJECTS(Start, );
+
+  // Start physics system
+  physicsSystem.Start();
 }
 
 void GameState::Pause()

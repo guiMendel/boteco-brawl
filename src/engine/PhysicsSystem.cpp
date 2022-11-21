@@ -1,14 +1,19 @@
-#include "PhysicsSystem.h"
 #include "Collider.h"
-#include <unordered_map>
+#include "PhysicsSystem.h"
+#include "GameState.h"
 
 using namespace std;
 using namespace SatCollision;
 
 // Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 2};
+const Vector2 PhysicsSystem::initialGravity{0, 1};
 
 PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
+
+void PhysicsSystem::Update([[maybe_unused]] float deltaTime)
+{
+  ResolveCollisions();
+}
 
 // Returns whether the two collider lists have some pair of colliders which are intersecting
 // If there is, also populates the collision data struct
@@ -20,7 +25,7 @@ bool PhysicsSystem::CheckForCollision(
     for (auto collider2 : colliders2)
     {
       auto [distance, normal] = FindMinDistance(collider1->GetBox(), collider2->GetBox(),
-                                                collider1->gameObject.GetRotation(), collider2->gameObject.GetRotation());
+                                             collider1->gameObject.GetRotation(), collider2->gameObject.GetRotation());
 
       // If distance is negative, it implies collision
       if (distance < 0)
@@ -170,7 +175,7 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 }
 
 // Source https://youtu.be/1L2g4ZqmFLQ and https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/previousinformation/physics6collisionresponse/
-void PhysicsSystem::ResolveCollision(SatCollision::CollisionData collisionData)
+void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 {
   // Ease of access
   auto bodyA = collisionData.source;

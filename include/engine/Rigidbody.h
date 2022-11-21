@@ -4,6 +4,7 @@
 #include "Vector2.h"
 #include "GameObject.h"
 #include "Component.h"
+#include "PhysicsSystem.h"
 
 enum class RigidbodyType
 {
@@ -11,7 +12,6 @@ enum class RigidbodyType
   Dynamic
 };
 
-class PhysicsSystem;
 class Collider;
 
 class Rigidbody : public Component
@@ -66,8 +66,5 @@ private:
   // Stores the inverse of mass
   float inverseMass{0};
 };
-
-#include "PhysicsSystem.h"
-#include "Collider.h"
 
 #endif

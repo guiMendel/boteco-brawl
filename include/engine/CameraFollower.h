@@ -8,7 +8,7 @@
 class CameraFollower : public Component
 {
 public:
-  CameraFollower(GameObject &associatedObject, bool useRawPosition = false, int ok = 2)
+  CameraFollower(GameObject &associatedObject, bool useRawPosition = false)
       : Component(associatedObject), useRawPosition(useRawPosition) {}
 
   CameraFollower(GameObject &associatedObject, ComponentParameters &parameters)

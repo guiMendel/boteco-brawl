@@ -1,3 +1,4 @@
+#include "Collider.h"
 #include "Rigidbody.h"
 
 using namespace std;

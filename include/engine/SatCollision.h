@@ -64,23 +64,6 @@ namespace SatCollision
 
     return std::make_pair(bestDistance, bestNormal);
   }
-
-  // Checks if both rect's have any overlapping area
-  static bool IsColliding(const Rectangle &rect1, const Rectangle &rect2, float rotation1, float rotation2)
-  {
-    return FindMinDistance(rect1, rect2, rotation1, rotation2).first <= 0.0f && FindMinDistance(rect2, rect1, rotation2, rotation1).first <= 0.0f;
-  }
-
-  // Additionally first does a quick check to ensure the rectangles are close enough so that collision is possible
-  static bool IsColliding(const Rectangle &rect1, const Rectangle &rect2, float rotation1, float rotation2, float minDistanceSquared)
-  {
-    // std::cout << minDistanceSquared << " < " << Vector2::SqrDistance(rect1.Center(), rect2.Center()) << " == " << (Vector2::SqrDistance(rect1.Center(), rect2.Center()) > minDistanceSquared) << std::endl;
-
-    // if (Vector2::SqrDistance(rect1.Center(), rect2.Center()) > minDistanceSquared)
-    //   return false;
-
-    return IsColliding(rect1, rect2, rotation1, rotation2);
-  }
 }
 
 #endif

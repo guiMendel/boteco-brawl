@@ -2,13 +2,14 @@
 #define __PHYSICS_SYSTEM__
 
 #include "Vector2.h"
-#include "Collider.h"
 #include <vector>
 #include <memory>
+#include <unordered_map>
 #include "SatCollision.h"
 
 class GameState;
 class Rigidbody;
+class Collider;
 
 class PhysicsSystem
 {
@@ -21,18 +22,9 @@ public:
 
   PhysicsSystem(GameState &gameState);
 
-  virtual void Update(float deltaTime);
+  void Update([[maybe_unused]] float deltaTime);
 
-  virtual void Render();
-
-  virtual void Start();
-
-  virtual void Pause();
-
-  virtual void Resume();
-
-  // Detects all collisions (triggers included) and resolves them
-  void ResolveCollisions();
+  void Start() {}
 
   // Adds a new collider to it's corresponding object entry
   void RegisterCollider(std::shared_ptr<Collider> collider, int objectId);
@@ -45,6 +37,9 @@ private:
   // Automatically raises trigger collisions
   bool CheckForCollision(
       std::vector<std::shared_ptr<Collider>> colliders1, std::vector<std::shared_ptr<Collider>> colliders2, SatCollision::CollisionData &collisionData);
+
+  // Detects all collisions (triggers included) and resolves them
+  void ResolveCollisions();
 
   // Applies impulse to both bodies involved in the collision
   void ResolveCollision(SatCollision::CollisionData collisionData);
@@ -60,7 +55,5 @@ private:
 
   GameState &gameState;
 };
-
-#include "Rigidbody.h"
 
 #endif
