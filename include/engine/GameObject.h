@@ -54,8 +54,6 @@ public:
     if (started)
       component->StartAndRegisterLayer();
 
-    std::cout << "Added component to " << component->gameObject.GetName() << std::endl;
-
     return component;
   }
 

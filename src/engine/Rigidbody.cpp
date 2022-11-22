@@ -3,8 +3,8 @@
 
 using namespace std;
 
-Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity)
-    : Component(associatedObject), type(type), elasticity(elasticity) {}
+Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity, float friction)
+    : Component(associatedObject), type(type), elasticity(elasticity), friction(friction) {}
 
 float Rigidbody::GetMass() const
 {
@@ -91,7 +91,7 @@ void Rigidbody::ApplyImpulse(Vector2 impulse)
   if (type == RigidbodyType::Static)
     return;
 
-  cout << "Impulse: " << (string)impulse << ", final velocity: " << (string)(velocity + impulse * inverseMass) << endl;
+  // cout << "Impulse: " << (string)impulse << ", final velocity: " << (string)(velocity + impulse * inverseMass) << endl;
 
   velocity += impulse * inverseMass;
 }

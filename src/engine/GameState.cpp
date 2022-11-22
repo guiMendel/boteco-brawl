@@ -78,8 +78,6 @@ void GameState::Update(float deltaTime)
 
 void GameState::PhysicsUpdate(float deltaTime)
 {
-  cout << "New Frame: " << deltaTime << endl;
-
   // Physics update
   CASCADE_OBJECTS(PhysicsUpdate, deltaTime);
 
@@ -133,9 +131,6 @@ void GameState::Start()
 
   // Register it before going on
   RegisterCamera(mainCamera);
-
-  cout << "Camera up" << endl;
-  cout << Camera::GetMain()->gameObject.name << endl;
 
   // Create the initial objects
   InitializeObjects();
@@ -233,8 +228,6 @@ void GameState::RegisterCamera(shared_ptr<Camera> camera)
   if (find_if(cameras.begin(), cameras.end(), [camera](shared_ptr<Camera> &otherCamera)
               { return camera->id == otherCamera->id; }) == cameras.end())
     camerasWeak.emplace_back(camera);
-  else
-    cout << "Camera was already registered;";
 }
 
 list<shared_ptr<Camera>> GameState::GetCameras()

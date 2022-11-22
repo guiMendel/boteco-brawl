@@ -20,7 +20,7 @@ class Rigidbody : public Component
   friend class PhysicsSystem;
 
 public:
-  Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity = 0);
+  Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity = 0, float friction = 0.05f);
 
   virtual ~Rigidbody() {}
 
@@ -56,6 +56,9 @@ public:
 
   // Collision elasticity modifier (i.e. coefficient of restitution ε)
   float elasticity;
+
+  // Friction applied on each collision
+  float friction;
 
 private:
   // Calculates mass based on colliders volumes & densities

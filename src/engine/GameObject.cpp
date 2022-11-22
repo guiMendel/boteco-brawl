@@ -115,8 +115,6 @@ shared_ptr<GameObject> GameObject::GetShared() const
 
 auto GameObject::GetComponent(const Component *componentPointer) const -> shared_ptr<Component>
 {
-  cout << "Has " << components.size() << " components" << endl;
-  
   auto componentIterator = find_if(
       components.begin(), components.end(),
       [componentPointer](shared_ptr<Component> component)

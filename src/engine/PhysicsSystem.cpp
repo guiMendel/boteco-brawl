@@ -203,14 +203,19 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 
 void ApplyImpulse(CollisionData collisionData)
 {
-  cout << "ApplyImpulse" << endl;
-
   // Ease of access
   auto bodyA = collisionData.source;
   auto bodyB = collisionData.other;
 
+  // Friction to apply
+  float frictionModifier = 1 - min(bodyA->friction, bodyB->friction);
+
+  // Apply it
+  bodyA->velocity = bodyA->velocity * frictionModifier;
+  bodyB->velocity = bodyB->velocity * frictionModifier;
+
   // Elasticity of collision
-  float elasticity = min(bodyA->elasticity, bodyB->elasticity);
+  float elasticity = (bodyA->elasticity + bodyB->elasticity) / 2.0f;
 
   // Relative velocity
   Vector2 relativeVelocity = bodyA->velocity - bodyB->velocity;
