@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <iostream>
+#include <memory>
 #include "Camera.h"
 #include "InputManager.h"
 #include "Game.h"
@@ -9,39 +10,30 @@ using namespace std;
 #define LENGTH(array) sizeof(array) / sizeof(array[0])
 #define CLAMP(value, minValue, maxValue) min(max(value, minValue), maxValue)
 
-// Acceleration applied each frame to the camera towards 0 speed
-const int Camera::gravity{70};
+Vector2 screenQuarter = Vector2(-Game::screenWidth / 2.0f, -Game::screenHeight / 2.0f);
 
-// Max speed for the camera, in pixels per second
-const int Camera::maxSpeed{700};
-
-// Acceleration applied to the camera on user input
-const int Camera::acceleration{4000};
-
-// How many seconds the camera waits before starting to follow the target
-const float Camera::followDelay{2.0f};
-
-// How far from the target camera can be before starting to follow
-const float Camera::maxFocusDistance{1.0f};
-
-Vector2 GetInputSpeedChange();
-
-Vector2 GetGravitySpeedChange(Vector2 speed, float gravity);
-
-Camera::Camera()
+shared_ptr<Camera> Camera::GetMain()
 {
-  SetSize(5);
-  rawPosition = Vector2(-Game::screenWidth / 2.0f, -Game::screenHeight / 2.0f) / pixelsPerUnit;
+  auto cameras = Game::GetInstance().GetState().GetCameras();
+
+  if (cameras.empty())
+  {
+    cout << "WARNING: Trying to get Main camera when no cameras are registered" << endl;
+    return nullptr;
+  }
+
+  return cameras.front();
 }
 
-Vector2 Camera::GetPosition() const
+Camera::Camera(GameObject &associatedObject, float size)
+    : Component(associatedObject)
 {
-  return rawPosition + Vector2(Game::screenWidth / 2, Game::screenHeight / 2) / pixelsPerUnit;
+  SetSize(size);
 }
 
-void Camera::SetPosition(Vector2 newPosition)
+void Camera::Start()
 {
-  rawPosition = newPosition - Vector2(Game::screenWidth / 2, Game::screenHeight / 2) / pixelsPerUnit;
+  gameState.RegisterCamera(dynamic_pointer_cast<Camera>(GetShared()));
 }
 
 // Get how many units occupy half the camera's height
@@ -49,125 +41,57 @@ float Camera::GetSize() const { return Game::screenHeight / pixelsPerUnit / 2; }
 
 void Camera::SetSize(float newSize)
 {
-  // Remember old screen position
-  Vector2 oldPosition = WorldToScreen(rawPosition);
-
   pixelsPerUnit = Game::screenHeight / 2 / newSize;
-
-  // Restore it
-  rawPosition = ScreenToWorld(oldPosition);
 }
 
-void Camera::Update(float deltaTime)
+Vector2 Camera::GetTopLeft() const
 {
-  // Get displacement from input, taking delta time in consideration
-  auto frameSpeedChange = GetInputSpeedChange() * acceleration * deltaTime;
+  static auto currentPixelsPerUnit = pixelsPerUnit;
 
-  // If there was input, reset follow delay (convert seconds to milliseconds)
-  if (frameSpeedChange)
-    timeLeftToFollow = followDelay;
+  static Vector2 topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
 
-  // If no input
-  else
+  if (currentPixelsPerUnit != pixelsPerUnit)
   {
-
-    // If follow delay is over OR there is no target
-    if (weakFocus.expired() == false && timeLeftToFollow <= 0.0f)
-    {
-      LOCK(weakFocus, focus);
-
-      frameSpeedChange = Vector2::Zero();
-      SetPosition(focus->GetPosition());
-    }
-
-    // If timer is not up yet
-    else
-    {
-      // By default, apply gravity
-      if (speed)
-        frameSpeedChange = GetGravitySpeedChange(speed, gravity);
-
-      // Discount it
-      if (timeLeftToFollow > 0.0f)
-        timeLeftToFollow -= deltaTime;
-    }
+    currentPixelsPerUnit = pixelsPerUnit;
+    topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
   }
 
-  // Move
-  Move(frameSpeedChange, deltaTime);
+  return gameObject.GetPosition() + topLeftDisplacement;
 }
 
-void Camera::Move(Vector2 speedModification, float deltaTime)
+void Camera::SetTopLeft(Vector2 newPosition)
 {
-  // Add to the camera speed
-  speed += speedModification;
+  static auto currentPixelsPerUnit = pixelsPerUnit;
 
-  // Check that it does not exceed the limits
-  speed.CapMagnitude(maxSpeed);
+  static Vector2 topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
 
-  // Displace it
-  rawPosition += speed * deltaTime;
+  if (currentPixelsPerUnit != pixelsPerUnit)
+  {
+    currentPixelsPerUnit = pixelsPerUnit;
+    topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
+  }
+
+  gameObject.SetPosition(newPosition - topLeftDisplacement);
 }
 
 // Convert coordinates
 Vector2 Camera::ScreenToWorld(const Vector2 &screenCoordinates) const
 {
-  return screenCoordinates / pixelsPerUnit + rawPosition;
+  return screenCoordinates / pixelsPerUnit + GetTopLeft();
 }
 
 // Convert coordinates
 Vector2 Camera::WorldToScreen(const Vector2 &worldCoordinates) const
 {
-  return (worldCoordinates - rawPosition) * pixelsPerUnit;
+  return (worldCoordinates - GetTopLeft()) * pixelsPerUnit;
 }
 
 Rectangle Camera::ScreenToWorld(const Rectangle &screenCoordinates) const
 {
-  return screenCoordinates / pixelsPerUnit + rawPosition;
+  return screenCoordinates / pixelsPerUnit + GetTopLeft();
 }
 
 Rectangle Camera::WorldToScreen(const Rectangle &worldCoordinates) const
 {
-  return (worldCoordinates - rawPosition) * pixelsPerUnit;
-}
-
-// Gets the displacement directions from input
-Vector2 GetInputSpeedChange()
-{
-  // Get input reference
-  auto inputManager = InputManager::GetInstance();
-
-  // Will hold camera displacement values
-  Vector2 frameSpeedChange{Vector2::Zero()};
-
-  // Map each key direction to an index
-  typedef decltype(UP_ARROW_KEY) KeyType;
-
-  KeyType keyDirectionMap[] =
-      {UP_ARROW_KEY, LEFT_ARROW_KEY, DOWN_ARROW_KEY, RIGHT_ARROW_KEY};
-
-  // Map each displacement direction to an index, corresponding to the key direction map
-  Vector2 displacementMap[LENGTH(keyDirectionMap)] =
-      {Vector2::Down(), Vector2::Left(), Vector2::Up(), Vector2::Right()};
-
-  // Catch button presses
-  for (size_t i = 0; i < LENGTH(keyDirectionMap); ++i)
-  {
-    // Check if this direction is pressed
-    if (inputManager.IsKeyDown(keyDirectionMap[i]))
-      // If so, add this displacement to the sum
-      frameSpeedChange += displacementMap[i];
-  }
-
-  return frameSpeedChange;
-}
-Vector2 GetGravitySpeedChange(Vector2 speed, float gravity)
-{
-  // Set the displacement to the opposite direction of current speed
-  Vector2 frameSpeedChange = Vector2(speed).Normalized() * -gravity;
-
-  // Cap to the current speed value
-  frameSpeedChange.CapMagnitude(speed.Magnitude());
-
-  return frameSpeedChange;
+  return (worldCoordinates - GetTopLeft()) * pixelsPerUnit;
 }

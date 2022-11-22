@@ -55,6 +55,9 @@ public:
   // Whether the component is active
   bool enabled{true};
 
+  // Component's unique identifier
+  const int id;
+
 protected:
   virtual void Start() {}
 

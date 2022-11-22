@@ -10,6 +10,14 @@
 
 using namespace std;
 
+auto Recipes::Camera(float size) -> function<void(shared_ptr<GameObject>)>
+{
+  return [size](shared_ptr<GameObject> cameraObject)
+  {
+    cameraObject->AddComponent<::Camera>(size);
+  };
+}
+
 auto Recipes::Background(string imagePath) -> function<void(shared_ptr<GameObject>)>
 {
   return [imagePath](shared_ptr<GameObject> background)
@@ -23,11 +31,11 @@ auto Recipes::Background(string imagePath) -> function<void(shared_ptr<GameObjec
     // Make it cover the screen
     if (sprite->GetWidth() < sprite->GetHeight())
     {
-      sprite->SetTargetDimension(Game::screenWidth / Camera::GetInstance().GetPixelsPerUnit());
+      sprite->SetTargetDimension(Game::screenWidth / Camera::GetMain()->GetPixelsPerUnit());
     }
     else
     {
-      sprite->SetTargetDimension(-1, Game::screenHeight / Camera::GetInstance().GetPixelsPerUnit());
+      sprite->SetTargetDimension(-1, Game::screenHeight / Camera::GetMain()->GetPixelsPerUnit());
     }
   };
 }
@@ -39,16 +47,16 @@ auto Recipes::Character() -> std::function<void(std::shared_ptr<GameObject>)>
     // Get sprite
     auto sprite = character->AddComponent<Sprite>("./assets/image/character.png", RenderLayer::Characters);
 
-    character->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
+    character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0.5f);
     character->AddComponent<Collider>(sprite, false, ColliderDensity::Character);
   };
 }
 
-auto Recipes::Platform(Vector2 size) -> std::function<void(std::shared_ptr<GameObject>)>
+auto Recipes::Platform(Vector2 size, bool isStatic) -> std::function<void(std::shared_ptr<GameObject>)>
 {
-  return [size](shared_ptr<GameObject> platform)
+  return [size, isStatic](shared_ptr<GameObject> platform)
   {
-    platform->AddComponent<Rigidbody>(RigidbodyType::Static);
+    platform->AddComponent<Rigidbody>(isStatic ? RigidbodyType::Static : RigidbodyType::Dynamic);
     platform->AddComponent<Collider>(Rectangle(0, 0, size.x, size.y), false, ColliderDensity::Ground);
   };
 }

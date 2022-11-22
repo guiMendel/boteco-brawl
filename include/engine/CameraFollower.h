@@ -18,7 +18,7 @@ public:
 
   void Update([[maybe_unused]] float deltaTime) override
   {
-    gameObject.SetPosition(useRawPosition ? Camera::GetInstance().GetRawPosition() : Camera::GetInstance().GetPosition());
+    gameObject.SetPosition(useRawPosition ? Camera::GetMain()->GetTopLeft() : Camera::GetMain()->GetPosition());
   }
 
   bool useRawPosition;

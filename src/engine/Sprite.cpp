@@ -46,11 +46,8 @@ void Sprite::Render(Vector2 position)
   }
 
   // Get the real position box
-  SDL_Rect destinationRect = (SDL_Rect)Camera::GetInstance().WorldToScreen(
+  SDL_Rect destinationRect = (SDL_Rect)Camera::GetMain()->WorldToScreen(
       Rectangle(position, GetWidth(), GetHeight()));
-
-  // cout << gameObject.GetName() << ": " << (string)Camera::GetInstance().WorldToScreen(
-      // Rectangle(position, GetWidth(), GetHeight())) << endl;
 
   // Put the texture in the renderer
   SDL_RenderCopyEx(

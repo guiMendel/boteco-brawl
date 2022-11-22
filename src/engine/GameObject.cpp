@@ -7,7 +7,7 @@
 using namespace std;
 
 // Private constructor
-GameObject::GameObject(string name, GameState &gameState) : gameState(gameState), id(gameState.SupplyObjectId()), name(name)
+GameObject::GameObject(string name, GameState &gameState) : gameState(gameState), id(gameState.SupplyId()), name(name)
 {
 }
 
@@ -115,6 +115,8 @@ shared_ptr<GameObject> GameObject::GetShared() const
 
 auto GameObject::GetComponent(const Component *componentPointer) const -> shared_ptr<Component>
 {
+  cout << "Has " << components.size() << " components" << endl;
+  
   auto componentIterator = find_if(
       components.begin(), components.end(),
       [componentPointer](shared_ptr<Component> component)
@@ -124,6 +126,18 @@ auto GameObject::GetComponent(const Component *componentPointer) const -> shared
     return shared_ptr<Component>();
 
   return *componentIterator;
+}
+
+auto GameObject::RequireComponent(const Component *componentPointer) const -> shared_ptr<Component>
+{
+  auto component = GetComponent(componentPointer);
+
+  if (!component)
+  {
+    throw runtime_error(string("Required component was not found"));
+  }
+
+  return component;
 }
 
 shared_ptr<GameObject> GameObject::InternalGetParent() const

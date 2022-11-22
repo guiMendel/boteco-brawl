@@ -18,14 +18,6 @@
 class InputManager
 {
 public:
-  // Singleton access using Meyer's implementation
-  static InputManager &GetInstance()
-  {
-    static InputManager instance;
-
-    return instance;
-  }
-
   void Update();
 
   bool KeyPress(int key) { return keyState[key] == true && keyUpdate[key] == updateCounter; }
@@ -49,10 +41,6 @@ public:
   bool QuitRequested() const { return quitRequested; }
 
 private:
-  // Default constructor
-  // No need for constructor since all values were initialized in class definition
-  InputManager() {}
-
   // Mouse state flags
   bool mouseState[6]{};
 

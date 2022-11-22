@@ -20,7 +20,7 @@ class Rigidbody : public Component
   friend class PhysicsSystem;
 
 public:
-  Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity = 0.5f);
+  Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity = 0);
 
   virtual ~Rigidbody() {}
 
@@ -62,6 +62,9 @@ private:
   void DeriveMassFromColliders();
 
   void InternalSetMass(float newMass);
+
+  // Whether collision with the given body happened THIS frame
+  bool IsCollidingWith(Rigidbody &otherBody);
 
   // Whether collision with the given body happened last frame
   bool WasCollidingWith(Rigidbody &otherBody);

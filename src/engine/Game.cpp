@@ -8,14 +8,17 @@
 #include "Game.h"
 #include "Helper.h"
 #include "Resources.h"
-#include "InputManager.h"
+#include "GameState.h"
 #include "MainState.h"
 
 using namespace std;
 using namespace Helper;
 
 // Defines the maximum frames per second
-const int Game::frameRate{30};
+const int Game::frameRate{40};
+
+// Defines the maximum physics frames per second
+const int Game::physicsFrameRate{120};
 
 // Defines the resolution width
 const int Game::screenWidth{1200};
@@ -137,16 +140,16 @@ Game::~Game()
   ExitSDL(window.release(), renderer.release());
 }
 
-void Game::CalculateDeltaTime()
+void Game::CalculateDeltaTime(int &start, float &deltaTime)
 {
   // Get this frame's start time
-  float newFrameStart = SDL_GetTicks();
+  int newStart = SDL_GetTicks();
 
   // Calculate & convert delta time from ms to s
-  deltaTime = (newFrameStart - frameStart) / 1000;
+  deltaTime = (float)(newStart - start) / 1000.0f;
 
   // Update frame start variable
-  frameStart = newFrameStart;
+  start = newStart;
 }
 
 // === PUBLIC METHODS =================================
@@ -169,12 +172,6 @@ Game &Game::GetInstance()
 
 void Game::Start()
 {
-  // Find out how many ms to wait to achieve the configured framerate
-  const int frameDelay = 1000 / Game::frameRate;
-
-  // Get the input manager
-  InputManager &inputManager = InputManager::GetInstance();
-
   // Push next state in if necessary
   if (nextState != nullptr)
     PushNextState();
@@ -184,52 +181,67 @@ void Game::Start()
   // Start the initial state
   GetState().Start();
 
+  GameLoop();
+}
+
+void Game::GameLoop()
+{
+  // Amount of milliseconds between each frame
+  const int frameDelay = 1000 / Game::frameRate;
+
+  // Amount of milliseconds between each physics frame
+  const int physicsDelay = 1000 / Game::physicsFrameRate;
+
+  // Milliseconds until next frame
+  int nextFrameIn{0};
+
+  // Milliseconds until next physics frame
+  int nextPhysicsFrameIn{0};
+
   // Loop while exit not requested
   while (GetState().QuitRequested() == false)
   {
-    // Check if state needs to be popped
-    // Throws when it's the last state (and no nextState is set)
+    // Calculate how long this loop will take to execute
+    int executionStart = SDL_GetTicks();
+
     try
     {
-      if (GetState().PopRequested())
-        PopState();
-    }
+      if (nextPhysicsFrameIn <= 0)
+      {
+        PhysicsFrame();
+        nextPhysicsFrameIn = physicsDelay;
+      }
 
-    // If last state was popped, stop game
+      if (nextFrameIn <= 0)
+      {
+        // Throws when trying to pop it's last state (and no nextState is set)
+        Frame();
+        nextFrameIn = frameDelay;
+      }
+    }
     catch (const runtime_error &)
     {
       break;
     }
 
-    // Load next state if necessary
-    if (nextState != nullptr)
-      PushNextState();
+    // Check how long this loop was
+    int loopDuration = (int)SDL_GetTicks() - executionStart;
 
-    // Get reference to current state
-    GameState &state{GetState()};
+    // Discount from each counter
+    nextFrameIn -= loopDuration;
+    nextPhysicsFrameIn -= loopDuration;
 
-    // Calculate frame's delta time
-    CalculateDeltaTime();
+    // Check how long to wait until next loop
+    int sleepTime = min(nextFrameIn, nextPhysicsFrameIn);
 
-    // Get input
-    inputManager.Update();
+    if (sleepTime > 0)
+    {
+      // Discount sleep time
+      nextFrameIn -= sleepTime;
+      nextPhysicsFrameIn -= sleepTime;
 
-    // Update the state's timer
-    state.timer.Update(deltaTime);
-
-    // Update the state
-    state.Update(deltaTime);
-
-    // Render the state
-    state.Render();
-
-    // WARNING: DO NOT USE state FROM HERE UNTIL END OF LOOP
-
-    // Render the window
-    SDL_RenderPresent(GetRenderer());
-
-    // Delay the frame to obey the framerate
-    SDL_Delay(frameDelay);
+      SDL_Delay(sleepTime);
+    }
   }
 
   // Make sure state pile is empty
@@ -238,6 +250,53 @@ void Game::Start()
 
   // Clear resources
   Resources::ClearAll();
+}
+
+void Game::Frame()
+{
+  // Check if state needs to be popped
+  // Throws when it's the last state (and no nextState is set)
+  if (GetState().PopRequested())
+    PopState();
+
+  // Load next state if necessary
+  if (nextState != nullptr)
+    PushNextState();
+
+  // Get reference to current state
+  GameState &state{GetState()};
+
+  // Calculate frame's delta time
+  CalculateDeltaTime(frameStart, deltaTime);
+
+  // Get input
+  inputManager.Update();
+
+  // Update the state's timer
+  state.timer.Update(deltaTime);
+
+  // Update the state
+  state.Update(deltaTime);
+
+  // Render the state
+  state.Render();
+
+  // WARNING: DO NOT USE state FROM HERE UNTIL END OF LOOP
+
+  // Render the window
+  SDL_RenderPresent(GetRenderer());
+}
+
+void Game::PhysicsFrame()
+{
+  // Get reference to current state
+  GameState &state{GetState()};
+
+  // Calculate physics frame's delta time
+  CalculateDeltaTime(physicsFrameStart, physicsDeltaTime);
+
+  // Update the state
+  state.PhysicsUpdate(physicsDeltaTime);
 }
 
 GameState &Game::GetState() const

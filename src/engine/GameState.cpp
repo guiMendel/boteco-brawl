@@ -5,6 +5,7 @@
 #include "Sound.h"
 #include "Camera.h"
 #include "Resources.h"
+#include "Recipes.h"
 #include <iostream>
 
 #define CASCADE_OBJECTS(method, param) CascadeDown(rootObject, [param](GameObject &object) { object.method(param); });
@@ -13,7 +14,7 @@ using namespace std;
 
 // Initialize root object
 GameState::GameState()
-    : physicsSystem(*this), inputManager(InputManager::GetInstance()), rootObject(new GameObject("Root", *this))
+    : physicsSystem(*this), inputManager(Game::GetInstance().GetInputManager()), rootObject(new GameObject("Root", *this))
 {
 }
 
@@ -21,9 +22,6 @@ GameState::~GameState()
 {
   // Clear unused resources
   Resources::ClearAll();
-
-  // Reset camera
-  Camera::GetInstance().Reset();
 }
 
 void GameState::CascadeDown(shared_ptr<GameObject> object, function<void(GameObject &)> callback, bool topDown)
@@ -71,20 +69,22 @@ void GameState::Update(float deltaTime)
     quitRequested = true;
   }
 
-  // Update camera
-  Camera::GetInstance().Update(deltaTime);
-
   // Update game objects
   CASCADE_OBJECTS(Update, deltaTime);
 
   // Delete dead ones
   DeleteObjects();
+}
+
+void GameState::PhysicsUpdate(float deltaTime)
+{
+  cout << "New Frame: " << deltaTime << endl;
 
   // Physics update
   CASCADE_OBJECTS(PhysicsUpdate, deltaTime);
 
   // Resolve collisions
-  physicsSystem.Update(deltaTime);
+  physicsSystem.PhysicsUpdate(deltaTime);
 }
 
 void GameState::Render()
@@ -121,11 +121,21 @@ void GameState::Render()
 
 void GameState::Start()
 {
+
   if (started)
     return;
 
   // Load any assets
   LoadAssets();
+
+  // Create the main camera
+  auto mainCamera = CreateObject("MainCamera", Recipes::Camera())->GetComponent<Camera>();
+
+  // Register it before going on
+  RegisterCamera(mainCamera);
+
+  cout << "Camera up" << endl;
+  cout << Camera::GetMain()->gameObject.name << endl;
 
   // Create the initial objects
   InitializeObjects();
@@ -214,4 +224,20 @@ shared_ptr<GameObject> GameState::GetObject(int id)
   {
     return nullptr;
   }
+}
+
+void GameState::RegisterCamera(shared_ptr<Camera> camera)
+{
+  auto cameras = GetCameras();
+
+  if (find_if(cameras.begin(), cameras.end(), [camera](shared_ptr<Camera> &otherCamera)
+              { return camera->id == otherCamera->id; }) == cameras.end())
+    camerasWeak.emplace_back(camera);
+  else
+    cout << "Camera was already registered;";
+}
+
+list<shared_ptr<Camera>> GameState::GetCameras()
+{
+  return ParseWeakIntoShared(camerasWeak);
 }

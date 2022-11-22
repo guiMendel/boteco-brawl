@@ -70,17 +70,17 @@ void Collider::Start()
 void Collider::Render()
 {
   auto box = GetBox();
-  auto camera = Camera::GetInstance();
+  auto camera = Camera::GetMain();
 
   // Create an SDL point for each vertex
   SDL_Point vertices[5];
 
   // Starting and final points are top left
-  vertices[0] = (SDL_Point)camera.WorldToScreen(box.TopLeft(gameObject.GetRotation()));
-  vertices[1] = (SDL_Point)camera.WorldToScreen(box.BottomLeft(gameObject.GetRotation()));
-  vertices[2] = (SDL_Point)camera.WorldToScreen(box.BottomRight(gameObject.GetRotation()));
-  vertices[3] = (SDL_Point)camera.WorldToScreen(box.TopRight(gameObject.GetRotation()));
-  vertices[4] = (SDL_Point)camera.WorldToScreen(box.TopLeft(gameObject.GetRotation()));
+  vertices[0] = (SDL_Point)camera->WorldToScreen(box.TopLeft(gameObject.GetRotation()));
+  vertices[1] = (SDL_Point)camera->WorldToScreen(box.BottomLeft(gameObject.GetRotation()));
+  vertices[2] = (SDL_Point)camera->WorldToScreen(box.BottomRight(gameObject.GetRotation()));
+  vertices[3] = (SDL_Point)camera->WorldToScreen(box.TopRight(gameObject.GetRotation()));
+  vertices[4] = (SDL_Point)camera->WorldToScreen(box.TopLeft(gameObject.GetRotation()));
 
   // Get renderer
   auto renderer = Game::GetInstance().GetRenderer();

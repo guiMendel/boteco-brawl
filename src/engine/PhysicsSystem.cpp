@@ -7,12 +7,15 @@ using namespace SatCollision;
 
 void ApplyImpulse(CollisionData collisionData);
 
+// The min value of penetration that can be considered a non collision entry contact
+const float minStayPenetration{0.0001};
+
 // Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 2};
+const Vector2 PhysicsSystem::initialGravity{0, 0};
 
 PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 
-void PhysicsSystem::Update([[maybe_unused]] float deltaTime)
+void PhysicsSystem::PhysicsUpdate([[maybe_unused]] float deltaTime)
 {
   ResolveCollisions();
 }
@@ -168,12 +171,21 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 // Source https://youtu.be/1L2g4ZqmFLQ and https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/previousinformation/physics6collisionresponse/
 void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 {
-  // Apply impulse necessary
-  ApplyImpulse(collisionData);
+  // If this collision was already dealt with this frame, ignore it
+  if (collisionData.source->IsCollidingWith(*collisionData.other))
+    return;
+
+  // ApplyImpulse(collisionData);
 
   // Check if is entering collision
-  if (collisionData.source->WasCollidingWith(*collisionData.other) == false)
+  if (collisionData.source->WasCollidingWith(*collisionData.other) == false ||
+      collisionData.penetration < minStayPenetration)
   {
+    cout << "Penetration was " << collisionData.penetration << endl;
+
+    // Apply impulse
+    ApplyImpulse(collisionData);
+
     // Announce collision enter to components
     collisionData.source->gameObject.OnCollisionEnter(collisionData);
 
@@ -196,6 +208,8 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 
 void ApplyImpulse(CollisionData collisionData)
 {
+  cout << "ApplyImpulse" << endl;
+
   // Ease of access
   auto bodyA = collisionData.source;
   auto bodyB = collisionData.other;
@@ -216,12 +230,15 @@ void ApplyImpulse(CollisionData collisionData)
   bodyA->ApplyImpulse(impulse);
   bodyB->ApplyImpulse(-impulse);
 
+  // Increase penetration a little bit to ensure objects are no longer colliding afterwards
+  float penetration = collisionData.penetration;
+
   bool bodyBStatic = bodyB->type == RigidbodyType::Static;
 
   // Correct position
-  float bodyADisplacement = bodyBStatic ? collisionData.penetration
-                                        : collisionData.penetration * bodyB->GetMass() / (bodyA->GetMass() + bodyB->GetMass());
-  float bodyBDisplacement = collisionData.penetration - bodyADisplacement;
+  float bodyADisplacement = bodyBStatic ? penetration
+                                        : penetration * bodyB->GetMass() / (bodyA->GetMass() + bodyB->GetMass());
+  float bodyBDisplacement = penetration - bodyADisplacement;
 
   if (bodyA->type != RigidbodyType::Static)
     bodyA->gameObject.Translate(collisionData.normal * bodyADisplacement);

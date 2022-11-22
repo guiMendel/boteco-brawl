@@ -22,7 +22,8 @@ public:
 
   PhysicsSystem(GameState &gameState);
 
-  void Update([[maybe_unused]] float deltaTime);
+  void Update([[maybe_unused]] float deltaTime) {}
+  void PhysicsUpdate([[maybe_unused]] float deltaTime);
 
   void Start() {}
 

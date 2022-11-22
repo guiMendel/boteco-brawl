@@ -7,7 +7,7 @@ void Debug::DrawPoint(Vector2 point, bool convertToScreen)
 {
   if (convertToScreen)
   {
-    point = Camera::GetInstance().WorldToScreen(point);
+    point = Camera::GetMain()->WorldToScreen(point);
   }
 
   auto renderer = Game::GetInstance().GetRenderer();

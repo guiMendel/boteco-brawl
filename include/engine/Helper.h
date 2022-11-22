@@ -4,6 +4,7 @@
 #include <cmath>
 #include <stdexcept>
 #include <vector>
+#include <list>
 #include <memory>
 #include <string>
 #include <SDL.h>
@@ -88,6 +89,29 @@ namespace Helper
   // Gets a random member from the vector
   template <typename T>
   [[maybe_unused]] static int Sample(std::vector<T> array) { return array[SampleIndex(array)]; }
+
+  // Iterates through each weak pointer, removing those that are expired, and collecting the rest in a shared ptr collection
+  template <typename T>
+  [[maybe_unused]] static std::list<std::shared_ptr<T>> ParseWeakIntoShared(std::list<std::weak_ptr<T>> &weakList)
+  {
+    std::list<std::shared_ptr<T>> finalList;
+
+    // Start iterating
+    auto weakIterator = weakList.begin();
+
+    while (weakIterator != weakList.end())
+    {
+      // If it's expired remove it
+      if (weakIterator->expired())
+        weakIterator = weakList.erase(weakIterator);
+
+      // Otherwise, add it to the list
+      else
+        finalList.push_back((weakIterator++)->lock());
+    }
+
+    return finalList;
+  }
 
 }
 

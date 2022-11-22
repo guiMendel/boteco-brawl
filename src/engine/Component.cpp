@@ -5,7 +5,7 @@
 using namespace std;
 
 Component::Component(GameObject &associatedObject)
-    : gameObject(associatedObject), gameState(gameObject.gameState), inputManager(InputManager::GetInstance()) {}
+    : gameObject(associatedObject), gameState(gameObject.gameState), id(gameState.SupplyId()), inputManager(Game::GetInstance().GetInputManager()) {}
 
 void Component::StartAndRegisterLayer()
 {
@@ -24,7 +24,14 @@ void Component::StartAndRegisterLayer()
 
 shared_ptr<Component> Component::GetShared() const
 {
-  return gameObject.GetComponent(this);
+  try
+  {
+    return gameObject.RequireComponent(this);
+  }
+  catch (runtime_error &)
+  {
+    throw runtime_error("Component failed to get own shared pointer: it was not found in it's gameObject list");
+  }
 }
 
 bool Component::IsEnabled() const { return enabled && gameObject.IsEnabled(); }

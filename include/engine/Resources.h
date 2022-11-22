@@ -6,6 +6,7 @@
 #include <memory>
 #include <SDL.h>
 #include <SDL_mixer.h>
+#include <SDL_image.h>
 #include <SDL_ttf.h>
 #include "Helper.h"
 
@@ -59,7 +60,7 @@ private:
     Resource *resourcePointer = resourceLoader(resourceKey);
 
     // Catch any errors
-    Assert(resourcePointer != nullptr, "Failed to load " + resourceType + " at " + resourceKey);
+    Helper::Assert(resourcePointer != nullptr, "Failed to load " + resourceType + " at " + resourceKey);
 
     // Store the texture (create the pointer with the destructor)
     table.emplace(

@@ -6,6 +6,7 @@
 #include <vector>
 #include <unordered_map>
 #include <iostream>
+#include <list>
 #include <SDL.h>
 #include "GameObject.h"
 #include "Sprite.h"
@@ -16,11 +17,13 @@
 
 class Component;
 class Collider;
+class Camera;
 
 // Abstract class that defines a state of the game
 class GameState
 {
   friend Collider;
+  friend Camera;
 
 public:
   GameState();
@@ -34,6 +37,7 @@ public:
   bool PopRequested() { return popRequested; }
 
   virtual void Update(float deltaTime);
+  virtual void PhysicsUpdate(float deltaTime);
 
   virtual void Render();
 
@@ -97,12 +101,14 @@ public:
   // Preloads all the assets so that they are ready when required
   virtual void LoadAssets() {}
 
-  // Supplies a valid unique identifier for a game object
-  int SupplyObjectId() { return nextObjectId++; }
+  // Supplies a valid unique identifier for a game object or a component
+  int SupplyId() { return nextId++; }
 
   void RegisterLayerRenderer(std::shared_ptr<Component> component);
 
   std::shared_ptr<GameObject> GetRootObject() { return rootObject; }
+
+  std::list<std::shared_ptr<Camera>> GetCameras();
 
   // The state's own physics system instance
   PhysicsSystem physicsSystem;
@@ -127,6 +133,8 @@ protected:
   bool quitRequested{false};
 
 private:
+  void RegisterCamera(std::shared_ptr<Camera> camera);
+
   // Executes this function for each object, cascading down the hierarchy
   void CascadeDown(std::shared_ptr<GameObject> object, std::function<void(GameObject &)> callback, bool topDown = true);
   void DeleteObjects();
@@ -135,7 +143,10 @@ private:
   bool started{false};
 
   // ID counter for game objects
-  int nextObjectId{1};
+  int nextId{1};
+
+  // Stores it's cameras
+  std::list<std::weak_ptr<Camera>> camerasWeak;
 
   // Structure that maps each render layer to the components set to render in it
   std::unordered_map<RenderLayer, std::vector<std::weak_ptr<Component>>>

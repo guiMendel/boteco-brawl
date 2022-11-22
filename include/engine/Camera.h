@@ -5,54 +5,35 @@
 #include "GameObject.h"
 #include "Vector2.h"
 #include "Rectangle.h"
+#include "Component.h"
 #include <memory>
 
-class Camera
+class Camera : public Component
 {
 public:
-  // Acceleration applied each frame to the camera towards 0 speed
-  static const int gravity;
+  static std::shared_ptr<Camera> GetMain();
 
-  // Max speed for the camera, in pixels per second
-  static const int maxSpeed;
+  Camera(GameObject &associatedObject, float size = 5);
 
-  // Acceleration applied to the camera on user input
-  static const int acceleration;
+  Vector2 GetPosition() const { return gameObject.GetPosition(); }
 
-  // How many seconds the camera waits before starting to follow the target
-  static const float followDelay;
-
-  // How far from the target camera can be before starting to follow
-  static const float maxFocusDistance;
-
-  Vector2 GetPosition() const;
-
-  void SetPosition(Vector2 newPosition);
+  void SetPosition(Vector2 newPosition) { gameObject.SetPosition(newPosition); }
 
   // Get how many units occupy half the camera's height
   float GetSize() const;
 
   void SetSize(float newSize);
 
-  Vector2 GetRawPosition() const { return rawPosition; }
+  Vector2 GetTopLeft() const;
 
-  void SetRawPosition(Vector2 newPosition) { rawPosition = newPosition; }
+  void SetTopLeft(Vector2 newPosition);
 
   void Reset()
   {
     SetPosition(Vector2::Zero());
-    speed = Vector2::Zero();
-    weakFocus.reset();
   }
 
-  // Start following new object
-  void Follow(std::shared_ptr<GameObject> newFocus) { weakFocus = newFocus; }
-
-  // Follow no object
-  void Unfollow() { weakFocus.reset(); }
-
-  // Update frame
-  void Update(float deltaTime);
+  void Start() override;
 
   // Convert coordinates (screen pixels to game units)
   Vector2 ScreenToWorld(const Vector2 &screenCoordinates) const;
@@ -68,34 +49,9 @@ public:
 
   float GetPixelsPerUnit() const { return pixelsPerUnit; }
 
-  static Camera &GetInstance()
-  {
-    static Camera instance;
-
-    return instance;
-  }
-
-  // Current speed of camera
-  Vector2 speed;
-
 private:
-  // Singleton
-  Camera();
-
-  // Move the camera the current speed
-  void Move(Vector2 speedModification, float deltaTime);
-
   // Current unit resolution of camera
   float pixelsPerUnit;
-
-  // World coordinates of camera's top left corner
-  Vector2 rawPosition;
-
-  // Which game object to follow
-  std::weak_ptr<GameObject> weakFocus;
-
-  // How much time to wait before starting to follow target
-  float timeLeftToFollow{0.0f};
 };
 
 #endif
