@@ -7,11 +7,8 @@ using namespace SatCollision;
 
 void ApplyImpulse(CollisionData collisionData);
 
-// The min value of penetration that can be considered a non collision entry contact
-const float minStayPenetration{0.0001};
-
 // Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 0};
+const Vector2 PhysicsSystem::initialGravity{0, 1.5};
 
 PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 
@@ -175,17 +172,15 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
   if (collisionData.source->IsCollidingWith(*collisionData.other))
     return;
 
-  // ApplyImpulse(collisionData);
+  ApplyImpulse(collisionData);
+
+  // cout << "Penetration was " << collisionData.penetration << endl;
 
   // Check if is entering collision
-  if (collisionData.source->WasCollidingWith(*collisionData.other) == false ||
-      collisionData.penetration < minStayPenetration)
+  if (collisionData.source->WasCollidingWith(*collisionData.other) == false)
+  // if (collisionData.source->WasCollidingWith(*collisionData.other) == false ||
+  //     collisionData.penetration < minStayPenetration)
   {
-    cout << "Penetration was " << collisionData.penetration << endl;
-
-    // Apply impulse
-    ApplyImpulse(collisionData);
-
     // Announce collision enter to components
     collisionData.source->gameObject.OnCollisionEnter(collisionData);
 
@@ -240,9 +235,18 @@ void ApplyImpulse(CollisionData collisionData)
                                         : penetration * bodyB->GetMass() / (bodyA->GetMass() + bodyB->GetMass());
   float bodyBDisplacement = penetration - bodyADisplacement;
 
+  // cout << "Body a was at " << (string)bodyA->GetColliders()[0]->GetBox() << endl;
+
   if (bodyA->type != RigidbodyType::Static)
-    bodyA->gameObject.Translate(collisionData.normal * bodyADisplacement);
+    bodyA->gameObject.Translate(-collisionData.normal * bodyADisplacement);
 
   if (bodyBStatic == false)
     bodyB->gameObject.Translate(collisionData.normal * bodyBDisplacement);
+
+  // cout << "Body a is now at " << (string)bodyA->GetColliders()[0]->GetBox() << endl;
+
+  // auto [distance, normal] = FindMinDistance(bodyA->GetColliders()[0]->GetBox(), bodyB->GetColliders()[0]->GetBox(),
+  //                                           bodyA->gameObject.GetRotation(), bodyB->gameObject.GetRotation());
+
+  // cout << "New distance is " << distance << endl;
 }

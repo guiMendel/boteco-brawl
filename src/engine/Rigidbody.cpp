@@ -37,7 +37,7 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
   // Apply gravity
   velocity += gameState.physicsSystem.gravity * gravityScale * deltaTime;
 
-  cout << gameObject.GetName() << " velocity x: " << velocity.x << endl;
+  // cout << gameObject.GetName() << " velocity x: " << velocity.x << endl;
 
   // Move according to velocity
   gameObject.Translate(velocity * deltaTime);
@@ -88,7 +88,12 @@ vector<shared_ptr<Collider>> Rigidbody::GetColliders() const
 
 void Rigidbody::ApplyImpulse(Vector2 impulse)
 {
-  velocity = velocity + impulse * inverseMass;
+  if (type == RigidbodyType::Static)
+    return;
+
+  cout << "Impulse: " << (string)impulse << ", final velocity: " << (string)(velocity + impulse * inverseMass) << endl;
+
+  velocity += impulse * inverseMass;
 }
 
 bool Rigidbody::IsCollidingWith(Rigidbody &otherBody)
