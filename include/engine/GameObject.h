@@ -111,6 +111,7 @@ public:
   // Where this object exists in game space, in absolute coordinates
   Vector2 GetPosition() const;
   void SetPosition(const Vector2 newPosition);
+  void Translate(const Vector2 translation);
 
   // Absolute scale of the object
   Vector2 GetScale() const;

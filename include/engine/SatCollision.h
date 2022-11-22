@@ -17,6 +17,9 @@ namespace SatCollision
     // Direction through which contact was initiated
     Vector2 normal;
 
+    // How far along the normal penetration goes
+    float penetration;
+
     // Body of object that received contact
     std::shared_ptr<Rigidbody> source;
 

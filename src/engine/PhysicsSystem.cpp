@@ -5,8 +5,10 @@
 using namespace std;
 using namespace SatCollision;
 
+void ApplyImpulse(CollisionData collisionData);
+
 // Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 1};
+const Vector2 PhysicsSystem::initialGravity{0, 2};
 
 PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 
@@ -43,6 +45,7 @@ bool PhysicsSystem::CheckForCollision(
         collisionData.source = collider1->rigidbodyWeak.lock();
         collisionData.other = collider2->rigidbodyWeak.lock();
         collisionData.normal = normal;
+        collisionData.penetration = abs(distance);
 
         return true;
       }
@@ -165,9 +168,21 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 // Source https://youtu.be/1L2g4ZqmFLQ and https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/previousinformation/physics6collisionresponse/
 void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 {
+  // Apply impulse necessary
+  ApplyImpulse(collisionData);
+
   // Check if is entering collision
   if (collisionData.source->WasCollidingWith(*collisionData.other) == false)
-    EnterCollision(collisionData);
+  {
+    // Announce collision enter to components
+    collisionData.source->gameObject.OnCollisionEnter(collisionData);
+
+    // Switch reference
+    std::swap(collisionData.source, collisionData.other);
+
+    // Announce to other object
+    collisionData.source->gameObject.OnCollisionEnter(collisionData);
+  }
 
   // Announce collision to components
   collisionData.source->gameObject.OnCollision(collisionData);
@@ -179,7 +194,7 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
   collisionData.source->gameObject.OnCollision(collisionData);
 }
 
-void PhysicsSystem::EnterCollision(CollisionData collisionData)
+void ApplyImpulse(CollisionData collisionData)
 {
   // Ease of access
   auto bodyA = collisionData.source;
@@ -200,14 +215,17 @@ void PhysicsSystem::EnterCollision(CollisionData collisionData)
   // Apply impulse
   bodyA->ApplyImpulse(impulse);
   bodyB->ApplyImpulse(-impulse);
-  
-  // Announce collision enter to components
-  collisionData.source->gameObject.OnCollisionEnter(collisionData);
 
-  // Switch reference
-  std::swap(collisionData.source, collisionData.other);
+  bool bodyBStatic = bodyB->type == RigidbodyType::Static;
 
-  // Announce to other object
-  collisionData.source->gameObject.OnCollisionEnter(collisionData);
+  // Correct position
+  float bodyADisplacement = bodyBStatic ? collisionData.penetration
+                                        : collisionData.penetration * bodyB->GetMass() / (bodyA->GetMass() + bodyB->GetMass());
+  float bodyBDisplacement = collisionData.penetration - bodyADisplacement;
 
+  if (bodyA->type != RigidbodyType::Static)
+    bodyA->gameObject.Translate(collisionData.normal * bodyADisplacement);
+
+  if (bodyBStatic == false)
+    bodyB->gameObject.Translate(collisionData.normal * bodyBDisplacement);
 }

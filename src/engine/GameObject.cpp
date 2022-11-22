@@ -181,6 +181,11 @@ void GameObject::SetPosition(const Vector2 newPosition)
   localPosition = newPosition - InternalGetParent()->GetPosition();
 }
 
+void GameObject::Translate(const Vector2 translation)
+{
+  SetPosition(GetPosition() + translation);
+}
+
 // Absolute scale of the object
 Vector2 GameObject::GetScale() const
 {

@@ -41,7 +41,7 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
     cout << "velocity y: " << (velocity - gameState.physicsSystem.gravity * gravityScale * deltaTime).y << " > " << velocity.y << endl;
 
   // Move according to velocity
-  gameObject.SetPosition(gameObject.GetPosition() + velocity * deltaTime);
+  gameObject.Translate(velocity * deltaTime);
 }
 
 void Rigidbody::UseAutoMass(bool value)

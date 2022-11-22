@@ -80,11 +80,11 @@ void GameState::Update(float deltaTime)
   // Delete dead ones
   DeleteObjects();
 
-  // Resolve collisions
-  physicsSystem.Update(deltaTime);
-
   // Physics update
   CASCADE_OBJECTS(PhysicsUpdate, deltaTime);
+
+  // Resolve collisions
+  physicsSystem.Update(deltaTime);
 }
 
 void GameState::Render()
