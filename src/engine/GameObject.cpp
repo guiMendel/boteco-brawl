@@ -66,6 +66,18 @@ void GameObject::Update(float deltaTime)
   }
 }
 
+void GameObject::PhysicsUpdate(float deltaTime)
+{
+  if (enabled == false)
+    return;
+
+  for (const auto &component : components)
+  {
+    if (component->IsEnabled())
+      component->PhysicsUpdate(deltaTime);
+  }
+}
+
 void GameObject::OnStatePause()
 {
   for (auto component : components)
@@ -256,6 +268,13 @@ void GameObject::OnCollision(SatCollision::CollisionData collisionData)
   // Alert all components
   for (auto component : components)
     component->OnCollision(collisionData);
+}
+
+void GameObject::OnCollisionEnter(SatCollision::CollisionData collisionData)
+{
+  // Alert all components
+  for (auto component : components)
+    component->OnCollisionEnter(collisionData);
 }
 
 void GameObject::OnTriggerCollision(GameObject &other)

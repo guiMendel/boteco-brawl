@@ -41,8 +41,11 @@ private:
   // Detects all collisions (triggers included) and resolves them
   void ResolveCollisions();
 
-  // Applies impulse to both bodies involved in the collision
+  // Checks if collision is entering & announces regular collision
   void ResolveCollision(SatCollision::CollisionData collisionData);
+
+  // Applies impulse to both bodies involved in the collision & announces collision enter
+  void EnterCollision(SatCollision::CollisionData collisionData);
 
   // Pass each object through ValidateColliders and collect the results in a map
   std::unordered_map<int, std::vector<std::shared_ptr<Collider>>> ValidateAllColliders();

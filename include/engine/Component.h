@@ -60,6 +60,7 @@ protected:
 
   // Called once per frame
   virtual void Update([[maybe_unused]] float deltaTime) {}
+  virtual void PhysicsUpdate([[maybe_unused]] float deltaTime) {}
 
   // Called once per frame to render to the screen
   virtual void Render() {}
@@ -76,6 +77,7 @@ protected:
 private:
   // Allows for reacting to collision
   virtual void OnCollision([[maybe_unused]] SatCollision::CollisionData collisionData) {}
+  virtual void OnCollisionEnter([[maybe_unused]] SatCollision::CollisionData collisionData) {}
 
   // Allows for reacting to trigger collision
   virtual void OnTriggerCollision([[maybe_unused]] GameObject &other) {}

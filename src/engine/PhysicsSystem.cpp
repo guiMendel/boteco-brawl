@@ -25,7 +25,7 @@ bool PhysicsSystem::CheckForCollision(
     for (auto collider2 : colliders2)
     {
       auto [distance, normal] = FindMinDistance(collider1->GetBox(), collider2->GetBox(),
-                                             collider1->gameObject.GetRotation(), collider2->gameObject.GetRotation());
+                                                collider1->gameObject.GetRotation(), collider2->gameObject.GetRotation());
 
       // If distance is negative, it implies collision
       if (distance < 0)
@@ -71,21 +71,8 @@ void PhysicsSystem::ResolveCollisions()
     {
       // Check if they are colliding
       if (CheckForCollision(objectEntryIterator->second, otherObjectEntryIterator->second, collisionData))
-      {
         // Resolve collision (apply impulses)
         ResolveCollision(collisionData);
-
-        // Announce collision to components
-        collisionData.source->gameObject.OnCollision(collisionData);
-
-        // Switch reference
-        auto switchBody = collisionData.source;
-        collisionData.source = collisionData.other;
-        collisionData.other = switchBody;
-
-        // Announce to other object
-        collisionData.source->gameObject.OnCollision(collisionData);
-      }
 
       otherObjectEntryIterator++;
     }
@@ -162,6 +149,7 @@ unordered_map<int, vector<shared_ptr<Collider>>> PhysicsSystem::ValidateAllColli
 
 void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId)
 {
+
   if (!collider)
     return;
 
@@ -177,6 +165,22 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 // Source https://youtu.be/1L2g4ZqmFLQ and https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/previousinformation/physics6collisionresponse/
 void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 {
+  // Check if is entering collision
+  if (collisionData.source->WasCollidingWith(*collisionData.other) == false)
+    EnterCollision(collisionData);
+
+  // Announce collision to components
+  collisionData.source->gameObject.OnCollision(collisionData);
+
+  // Switch reference
+  std::swap(collisionData.source, collisionData.other);
+
+  // Announce to other object
+  collisionData.source->gameObject.OnCollision(collisionData);
+}
+
+void PhysicsSystem::EnterCollision(CollisionData collisionData)
+{
   // Ease of access
   auto bodyA = collisionData.source;
   auto bodyB = collisionData.other;
@@ -189,11 +193,21 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 
   // Calculate impulse vector along the normal
   float impulseMagnitude = -(1 + elasticity) * Vector2::Dot(relativeVelocity, collisionData.normal) /
-                           (bodyA->inverseMass + bodyB->inverseMass);
+                           (bodyA->GetInverseMass() + bodyB->GetInverseMass());
 
   Vector2 impulse = collisionData.normal * impulseMagnitude;
 
   // Apply impulse
   bodyA->ApplyImpulse(impulse);
   bodyB->ApplyImpulse(-impulse);
+  
+  // Announce collision enter to components
+  collisionData.source->gameObject.OnCollisionEnter(collisionData);
+
+  // Switch reference
+  std::swap(collisionData.source, collisionData.other);
+
+  // Announce to other object
+  collisionData.source->gameObject.OnCollisionEnter(collisionData);
+
 }

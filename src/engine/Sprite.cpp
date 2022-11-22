@@ -49,8 +49,8 @@ void Sprite::Render(Vector2 position)
   SDL_Rect destinationRect = (SDL_Rect)Camera::GetInstance().WorldToScreen(
       Rectangle(position, GetWidth(), GetHeight()));
 
-  cout << gameObject.GetName() << ": " << (string)Camera::GetInstance().WorldToScreen(
-      Rectangle(position, GetWidth(), GetHeight())) << endl;
+  // cout << gameObject.GetName() << ": " << (string)Camera::GetInstance().WorldToScreen(
+      // Rectangle(position, GetWidth(), GetHeight())) << endl;
 
   // Put the texture in the renderer
   SDL_RenderCopyEx(
@@ -90,8 +90,6 @@ float Sprite::GetHeight() const
   // If target width is also -1, use clip Height (convert pixels to game units using own proportion)
   if (targetWidth < 0)
   {
-    // cout << gameObject.GetName() << ": " << clipRect.h << " * " << gameObject.localScale.y << " / " << pixelsPerUnit << " = " << clipRect.h * gameObject.localScale.y / pixelsPerUnit << endl;
-
     return clipRect.h * gameObject.localScale.y / pixelsPerUnit;
   }
 

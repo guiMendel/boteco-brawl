@@ -82,6 +82,9 @@ void GameState::Update(float deltaTime)
 
   // Resolve collisions
   physicsSystem.Update(deltaTime);
+
+  // Physics update
+  CASCADE_OBJECTS(PhysicsUpdate, deltaTime);
 }
 
 void GameState::Render()

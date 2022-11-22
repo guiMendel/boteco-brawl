@@ -27,7 +27,7 @@ namespace SatCollision
   // Finds the minimum distance between both rectangle's edges
   // Negative values indicate penetration
   // Rotations are in radians
-  static std::pair<float, Vector2> FindMinDistance(Rectangle rect1, Rectangle rect2, float rotation1 = 0.0f, float rotation2 = 0.0f)
+  [[maybe_unused]] static std::pair<float, Vector2> FindMinDistance(Rectangle rect1, Rectangle rect2, float rotation1 = 0.0f, float rotation2 = 0.0f)
   {
     // Will keep track of the best distance found
     float bestDistance = std::numeric_limits<float>::lowest();

@@ -133,5 +133,5 @@ $(GAME_OBJECT_DIRECTORY)\\%.o: $(GAME_SOURCE_DIRECTORY)\%.cpp $(GAME_DEPS) $(ENG
 	
 # Makes the game
 game: $(GAME_OBJS) $(ENGINE_OBJS) $(INTEGRATION_OBJS)
-	./src/editor/componentTable/tableScrapper.sh
+#	./src/editor/componentTable/tableScrapper.sh
 	$(CC) $^ $(COMPILATION_ARGS) $(LIBS) $(SDL_LIBRARY) -o $@

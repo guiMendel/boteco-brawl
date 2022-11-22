@@ -5,6 +5,7 @@
 #include "GameObject.h"
 #include "Component.h"
 #include "PhysicsSystem.h"
+#include <unordered_set>
 
 enum class RigidbodyType
 {
@@ -16,16 +17,21 @@ class Collider;
 
 class Rigidbody : public Component
 {
-    friend class PhysicsSystem;
+  friend class PhysicsSystem;
+
 public:
   Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity = 0.5f);
 
   virtual ~Rigidbody() {}
 
-  void Update(float deltaTime) override;
+  void PhysicsUpdate(float deltaTime) override;
 
-  float GetMass() const { return mass; }
-  float GetInverseMass() const { return inverseMass; }
+  void OnCollision(SatCollision::CollisionData collisionData) override;
+
+  float GetMass() const;
+  float GetInverseMass() const;
+
+  void DynamicBodyUpdate(float deltaTime);
 
   void SetMass(float newMass);
 
@@ -57,6 +63,9 @@ private:
 
   void InternalSetMass(float newMass);
 
+  // Whether collision with the given body happened last frame
+  bool WasCollidingWith(Rigidbody &otherBody);
+
   // Whether to automatically calculate mass for this body
   bool useAutoMass{true};
 
@@ -65,6 +74,12 @@ private:
 
   // Stores the inverse of mass
   float inverseMass{0};
+
+  // Keeps track of all other bodies with which collision was detected on the current frame
+  std::unordered_set<int> collidingBodies;
+
+  // Holds the content of collidingBodies from the last frame
+  std::unordered_set<int> oldCollidingBodies;
 };
 
 #endif

@@ -39,7 +39,7 @@ public:
 
   float GetArea() const;
   float GetDensity() const;
-  float GetMass() const { return GetArea() * GetMass(); }
+  float GetMass() const { return GetArea() * GetDensity(); }
 
   // Whether this collider actually participates in physical collisions
   const bool isTrigger;

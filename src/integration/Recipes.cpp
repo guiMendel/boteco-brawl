@@ -5,6 +5,7 @@
 #include "Camera.h"
 #include "Game.h"
 #include "Rigidbody.h"
+#include "Rectangle.h"
 #include <iostream>
 
 using namespace std;
@@ -36,8 +37,18 @@ auto Recipes::Character() -> std::function<void(std::shared_ptr<GameObject>)>
   return [](shared_ptr<GameObject> character)
   {
     // Get sprite
-    character->AddComponent<Sprite>("./assets/image/character.png", RenderLayer::Characters);
+    auto sprite = character->AddComponent<Sprite>("./assets/image/character.png", RenderLayer::Characters);
 
     character->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
+    character->AddComponent<Collider>(sprite, false, ColliderDensity::Character);
+  };
+}
+
+auto Recipes::Platform(Vector2 size) -> std::function<void(std::shared_ptr<GameObject>)>
+{
+  return [size](shared_ptr<GameObject> platform)
+  {
+    platform->AddComponent<Rigidbody>(RigidbodyType::Static);
+    platform->AddComponent<Collider>(Rectangle(0, 0, size.x, size.y), false, ColliderDensity::Ground);
   };
 }

@@ -8,7 +8,8 @@ enum class ColliderDensity
   Default = 10,
   Wood = 10,
   Metal = 50,
-  Character = 5
+  Character = 5,
+  Ground = 25
 };
 
 #endif

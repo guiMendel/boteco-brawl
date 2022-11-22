@@ -31,6 +31,7 @@ public:
 
   // Called once per frame
   void Update(float deltaTime);
+  void PhysicsUpdate(float deltaTime);
 
   void OnStatePause();
   void OnStateResume();
@@ -164,6 +165,7 @@ private:
 
   // Announces collision to all components
   void OnCollision(SatCollision::CollisionData collisionData);
+  void OnCollisionEnter(SatCollision::CollisionData collisionData);
 
   // Announces trigger collision to all components
   void OnTriggerCollision(GameObject &other);
