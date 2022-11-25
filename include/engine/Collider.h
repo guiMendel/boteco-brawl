@@ -41,6 +41,9 @@ public:
   float GetDensity() const;
   float GetMass() const { return GetArea() * GetDensity(); }
 
+  // Tries to lock it's rigidbody component, and throws if it's expired
+  std::shared_ptr<Rigidbody> RequireRigidbody() const;
+
   // Whether this collider actually participates in physical collisions
   const bool isTrigger;
 

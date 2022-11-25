@@ -101,3 +101,11 @@ float Collider::GetDensity() const
 {
   return static_cast<int>(density);
 }
+
+shared_ptr<Rigidbody> Collider::RequireRigidbody() const
+{
+  if (rigidbodyWeak.expired())
+    throw runtime_error("Collider required a rigidbody but didn't have one");
+
+  return rigidbodyWeak.lock();
+}

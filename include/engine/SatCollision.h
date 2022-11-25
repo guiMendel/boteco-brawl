@@ -21,10 +21,10 @@ namespace SatCollision
     float penetration;
 
     // Body of object that received contact
-    std::shared_ptr<Rigidbody> source;
+    std::shared_ptr<Collider> source;
 
     // Body of object that made contact
-    std::shared_ptr<Rigidbody> other;
+    std::shared_ptr<Collider> other;
   };
 
   // Finds the minimum distance between both rectangle's edges

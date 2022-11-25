@@ -119,7 +119,6 @@ void GameState::Render()
 
 void GameState::Start()
 {
-
   if (started)
     return;
 

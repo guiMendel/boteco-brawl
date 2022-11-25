@@ -8,7 +8,7 @@ using namespace SatCollision;
 void ApplyImpulse(CollisionData collisionData);
 
 // Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 1.5};
+const Vector2 PhysicsSystem::initialGravity{0, 0.5};
 
 PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 
@@ -42,8 +42,8 @@ bool PhysicsSystem::CheckForCollision(
         }
 
         // Populate collision data
-        collisionData.source = collider1->rigidbodyWeak.lock();
-        collisionData.other = collider2->rigidbodyWeak.lock();
+        collisionData.source = collider1;
+        collisionData.other = collider2;
         collisionData.normal = normal;
         collisionData.penetration = abs(distance);
 
@@ -169,7 +169,7 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 {
   // If this collision was already dealt with this frame, ignore it
-  if (collisionData.source->IsCollidingWith(*collisionData.other))
+  if (collisionData.source->RequireRigidbody()->IsCollidingWith(*collisionData.other->RequireRigidbody()))
     return;
 
   ApplyImpulse(collisionData);
@@ -177,7 +177,7 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
   // cout << "Penetration was " << collisionData.penetration << endl;
 
   // Check if is entering collision
-  if (collisionData.source->WasCollidingWith(*collisionData.other) == false)
+  if (collisionData.source->RequireRigidbody()->WasCollidingWith(*collisionData.other->RequireRigidbody()) == false)
   // if (collisionData.source->WasCollidingWith(*collisionData.other) == false ||
   //     collisionData.penetration < minStayPenetration)
   {
@@ -204,8 +204,8 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 void ApplyImpulse(CollisionData collisionData)
 {
   // Ease of access
-  auto bodyA = collisionData.source;
-  auto bodyB = collisionData.other;
+  auto bodyA = collisionData.source->RequireRigidbody();
+  auto bodyB = collisionData.other->RequireRigidbody();
 
   // Friction to apply
   float frictionModifier = 1 - min(bodyA->friction, bodyB->friction);
