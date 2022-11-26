@@ -6,7 +6,7 @@
 #include <utility>
 #include <memory>
 
-class Rigidbody;
+class Collider;
 
 // Implementation of SAT collision, limited to rectangle polygons
 // Based on this guide: https://youtu.be/-EsWKT7Doww

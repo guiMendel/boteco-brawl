@@ -47,8 +47,11 @@ auto Recipes::Character() -> std::function<void(std::shared_ptr<GameObject>)>
     // Get sprite
     auto sprite = character->AddComponent<Sprite>("./assets/image/character.png", RenderLayer::Characters);
 
-    character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0.5f);
+    auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0.5f);
     character->AddComponent<Collider>(sprite, false, ColliderDensity::Character);
+
+    // Turn on continuous collision
+    body->continuousCollisions = true;
   };
 }
 

@@ -45,6 +45,12 @@ public:
   // Applies impulse to the body, altering it's velocity
   void ApplyImpulse(Vector2 impulse);
 
+  // Tells whether should use continuous detection in this frame
+  bool ShouldUseContinuousDetection() const;
+
+  // For bodies with continuous collision check, gets info for a rectangle that spans along it's trajectory since the last frame; as well as the trajectory angle
+  std::pair<Rectangle, float> GetFrameTrajectory();
+
   // Velocity for each axis
   Vector2 velocity{0, 0};
 
@@ -53,6 +59,9 @@ public:
 
   // Gravity modifier
   Vector2 gravityScale{1, 1};
+
+  // Whether this body will check each frame if a collision should have happened in between frames
+  bool continuousCollisions{false};
 
   // Collision elasticity modifier (i.e. coefficient of restitution ε)
   float elasticity;
@@ -72,6 +81,9 @@ private:
   // Whether collision with the given body happened last frame
   bool WasCollidingWith(Rigidbody &otherBody);
 
+  // Calculates the value of the smallest dimension of it's colliders
+  void CalculateSmallestColliderDimension();
+
   // Whether to automatically calculate mass for this body
   bool useAutoMass{true};
 
@@ -80,6 +92,18 @@ private:
 
   // Stores the inverse of mass
   float inverseMass{0};
+
+  // Stores the last position of the body
+  Vector2 lastPosition;
+
+  // Smallest dimension of this body's colliders, squared
+  float sqrSmallestDimension{0};
+
+  // Store this frame's result of the call to GetFrameTrajectory()
+  std::pair<Rectangle, float> frameTrajectory;
+
+  // Whether frameTrajectory is now outdated
+  bool frameTrajectoryOutdated{true};
 
   // Keeps track of all other bodies with which collision was detected on the current frame
   std::unordered_set<int> collidingBodies;

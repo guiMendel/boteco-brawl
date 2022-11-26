@@ -34,28 +34,44 @@ public:
   Vector2 gravity{initialGravity};
 
 private:
+  using ValidatedColliders = std::vector<std::shared_ptr<Collider>>;
+  using ValidatedCollidersMap = std::unordered_map<int, ValidatedColliders>;
+  using WeakColliders = std::vector<std::weak_ptr<Collider>>;
+
   // Checks if there is collision between the two collider lists. If there is, populates the collisionData struct
   // Automatically raises trigger collisions
   bool CheckForCollision(
       std::vector<std::shared_ptr<Collider>> colliders1, std::vector<std::shared_ptr<Collider>> colliders2, SatCollision::CollisionData &collisionData);
 
   // Detects all collisions (triggers included) and resolves them
-  void ResolveCollisions();
+  void HandleCollisions();
 
-  // Checks if collision is entering & announces regular collision
+  // Normal collision detection for an object
+  void DetectCollisions(ValidatedCollidersMap::iterator objectIterator, ValidatedCollidersMap::iterator endIterator);
+
+  // Continuous collision detection for an object
+  void DetectBetweenFramesCollision(ValidatedCollidersMap::iterator objectIterator, ValidatedCollidersMap::iterator endIterator);
+
+  // Applies impulse, checks if collision is entering & announces regular collision
   void ResolveCollision(SatCollision::CollisionData collisionData);
 
-  // Applies impulse to both bodies involved in the collision & announces collision enter
+  // Announces collision enter
   void EnterCollision(SatCollision::CollisionData collisionData);
 
   // Pass each object through ValidateColliders and collect the results in a map
-  std::unordered_map<int, std::vector<std::shared_ptr<Collider>>> ValidateAllColliders();
+  ValidatedCollidersMap ValidateAllColliders();
 
   // For a specific object, removes any expired colliders from structure & returns the remaining ones as shared
-  std::vector<std::shared_ptr<Collider>> ValidateColliders(int id);
+  ValidatedColliders ValidateColliders(int id);
+
+  // Finds the collider (if any) whose intersection with the trajectory rect is closest to the trajectory start
+  // Returns a vector of the found colliders, the distance where this collision happened, and a callback to be executed if this collision is selected to be resolved
+  // Automatically triggers any intersected Triggers
+  auto FindTrajectoryIntersection(ValidatedColliders colliders, Rectangle trajectoryRectangle, float trajectoryAngle, GameObject &sourceObject)
+      -> std::tuple<ValidatedColliders, float, std::function<void()>>;
 
   // Structure that maps each object id to the list of it's colliders
-  std::unordered_map<int, std::vector<std::weak_ptr<Collider>>> colliderStructure;
+  std::unordered_map<int, WeakColliders> colliderStructure;
 
   GameState &gameState;
 };

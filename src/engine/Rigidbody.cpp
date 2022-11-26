@@ -3,13 +3,15 @@
 
 using namespace std;
 
+float CollidersProjectionSize(Rigidbody &body, Vector2 normal);
+
 Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity, float friction)
-    : Component(associatedObject), type(type), elasticity(elasticity), friction(friction) {}
+    : Component(associatedObject), type(type), elasticity(elasticity), friction(friction), lastPosition(gameObject.GetPosition()) {}
 
 float Rigidbody::GetMass() const
 {
   if (type == RigidbodyType::Static)
-    return std::numeric_limits<float>::max();
+    return numeric_limits<float>::max();
 
   return mass;
 }
@@ -30,6 +32,12 @@ void Rigidbody::PhysicsUpdate(float deltaTime)
   // Update collision sets
   oldCollidingBodies = collidingBodies;
   collidingBodies.clear();
+
+  // Update the last position variable
+  lastPosition = gameObject.GetPosition();
+
+  // Set this frame's possibly calculated trajectory as outdated
+  frameTrajectoryOutdated = true;
 }
 
 void Rigidbody::DynamicBodyUpdate(float deltaTime)
@@ -110,4 +118,94 @@ void Rigidbody::OnCollision(SatCollision::CollisionData collisionData)
 {
   // Add to collision set
   collidingBodies.insert(collisionData.other->gameObject.id);
+}
+
+void Rigidbody::CalculateSmallestColliderDimension()
+{
+  sqrSmallestDimension = numeric_limits<float>::max();
+
+  // For each collider
+  for (auto collider : GetColliders())
+  {
+    auto colliderBox = collider->GetBox();
+
+    // Compare
+    sqrSmallestDimension = min(colliderBox.width, sqrSmallestDimension);
+    sqrSmallestDimension = min(colliderBox.height, sqrSmallestDimension);
+  }
+
+  // Square it
+  sqrSmallestDimension *= sqrSmallestDimension;
+}
+
+bool Rigidbody::ShouldUseContinuousDetection() const
+{
+  // Cut short if disabled
+  if (continuousCollisions == false)
+    return false;
+
+  // Check that it's moved at least as much as it's smallest dimension
+  auto sqrDistance = (gameObject.GetPosition() - lastPosition).SqrMagnitude();
+
+  // Only use continuous if it's moved more than this
+  return sqrDistance > sqrSmallestDimension;
+}
+
+pair<Rectangle, float> Rigidbody::GetFrameTrajectory()
+{
+  if (frameTrajectoryOutdated == false)
+    return frameTrajectory;
+
+  // Get displacement
+  Vector2 displacement = gameObject.GetPosition() - lastPosition;
+
+  // Get displacement normal
+  Vector2 normal = displacement.Normalized().Rotated(M_PI / 2.0f);
+
+  // Get colliders projection size on normal
+  float projectionSize = CollidersProjectionSize(*this, normal);
+
+  // Store result
+  // Place rectangle so that it's left face sits where the gameObject is
+  frameTrajectory = make_pair(
+      Rectangle(gameObject.GetPosition() + displacement / 2,
+                displacement.Magnitude(), projectionSize),
+      displacement.Angle());
+
+  frameTrajectoryOutdated = false;
+
+  return frameTrajectory;
+}
+
+float CollidersProjectionSize(Rigidbody &body, Vector2 normal)
+{
+  // The biggest projection found
+  float biggestProjection{numeric_limits<float>::lowest()};
+
+  // The smallest projection found
+  float smallestProjection{numeric_limits<float>::max()};
+
+  // The bodies rotation
+  float rotation = body.gameObject.GetRotation();
+
+  // For each of it's colliders
+  for (auto collider : body.GetColliders())
+  {
+    // Get collider's center
+    Vector2 center = collider->GetBox().Center();
+
+    // For each of the collider's vertices
+    for (auto vertex : collider->GetBox().Vertices(rotation))
+    {
+      // Get projection of vector from center to vertex
+      float projectionSize = Vector2::Dot(vertex - center, normal);
+
+      // Compare it
+      biggestProjection = max(biggestProjection, projectionSize);
+      smallestProjection = min(smallestProjection, projectionSize);
+    }
+  }
+
+  // Return the the distance between each projection
+  return biggestProjection - smallestProjection;
 }
