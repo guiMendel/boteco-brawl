@@ -5,7 +5,7 @@
 
 using namespace std;
 
-const float Rigidbody::defaultAirFriction{0.1f};
+const float Rigidbody::defaultAirFriction{0.0f};
 
 // Modifier applied to trajectory rectangle thickness
 const float trajectoryThicknessModifier{0.8f};
@@ -114,14 +114,14 @@ void Rigidbody::ApplyImpulse(Vector2 impulse)
   velocity += impulse * inverseMass;
 }
 
-bool Rigidbody::IsCollidingWith(Collider &other)
+bool Rigidbody::IsCollidingWith(int id)
 {
-  return collidingBodies.count(other.gameObject.id) > 0;
+  return collidingBodies.count(id) > 0;
 }
 
-bool Rigidbody::WasCollidingWith(Collider &other)
+bool Rigidbody::WasCollidingWith(int id)
 {
-  return oldCollidingBodies.count(other.gameObject.id) > 0;
+  return oldCollidingBodies.count(id) > 0;
 }
 
 void Rigidbody::OnCollision(SatCollision::CollisionData collisionData)
@@ -132,7 +132,7 @@ void Rigidbody::OnCollision(SatCollision::CollisionData collisionData)
 
 void Rigidbody::CalculateSmallestColliderDimension()
 {
-  sqrSmallestDimension = numeric_limits<float>::max();
+  smallestDimension = numeric_limits<float>::max();
 
   // For each collider
   for (auto collider : GetColliders())
@@ -140,12 +140,12 @@ void Rigidbody::CalculateSmallestColliderDimension()
     auto colliderBox = collider->GetBox();
 
     // Compare
-    sqrSmallestDimension = min(colliderBox.width, sqrSmallestDimension);
-    sqrSmallestDimension = min(colliderBox.height, sqrSmallestDimension);
+    smallestDimension = min(colliderBox.width, smallestDimension);
+    smallestDimension = min(colliderBox.height, smallestDimension);
   }
 
   // Square it
-  sqrSmallestDimension *= sqrSmallestDimension;
+  sqrSmallestDimension = smallestDimension * smallestDimension;
 }
 
 bool Rigidbody::ShouldUseContinuousDetection() const
@@ -224,46 +224,43 @@ float CollidersProjectionSize(Rigidbody &body, Vector2 normal)
 
 void Rigidbody::Render()
 {
-  // if (printDebug == false)
-  //   return;
+  auto [box, rotation] = frameTrajectory;
+  auto camera = Camera::GetMain();
 
-  // auto [box, rotation] = frameTrajectory;
-  // auto camera = Camera::GetMain();
+  // Create an SDL point for each vertex
+  SDL_Point vertices[5];
 
-  // // Create an SDL point for each vertex
-  // SDL_Point vertices[5];
+  // Starting and final points are top left
+  vertices[0] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
+  vertices[1] = (SDL_Point)camera->WorldToScreen(box.BottomLeft(rotation));
+  vertices[2] = (SDL_Point)camera->WorldToScreen(box.BottomRight(rotation));
+  vertices[3] = (SDL_Point)camera->WorldToScreen(box.TopRight(rotation));
+  vertices[4] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
 
-  // // Starting and final points are top left
-  // vertices[0] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
-  // vertices[1] = (SDL_Point)camera->WorldToScreen(box.BottomLeft(rotation));
-  // vertices[2] = (SDL_Point)camera->WorldToScreen(box.BottomRight(rotation));
-  // vertices[3] = (SDL_Point)camera->WorldToScreen(box.TopRight(rotation));
-  // vertices[4] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
+  // Get renderer
+  auto renderer = Game::GetInstance().GetRenderer();
 
-  // // Get renderer
-  // auto renderer = Game::GetInstance().GetRenderer();
+  // Set paint color to blu
+  SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
 
-  // // Set paint color to blu
-  // SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+  // Paint collider edges
+  SDL_RenderDrawLines(renderer, vertices, 5);
 
-  // // Paint collider edges
-  // SDL_RenderDrawLines(renderer, vertices, 5);
+  for (auto line : printLines)
+  {
+    SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
+    SDL_Point v[2]{(SDL_Point)camera->WorldToScreen(line.first), (SDL_Point)camera->WorldToScreen(line.second)};
+    SDL_RenderDrawLines(renderer, v, 2);
+  }
 
-  // for (auto line : printLines)
-  // {
-  //   SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
-  //   SDL_Point v[2]{(SDL_Point)camera->WorldToScreen(line.first), (SDL_Point)camera->WorldToScreen(line.second)};
-  //   SDL_RenderDrawLines(renderer, v, 2);
-  // }
-
-  // if (printIntersectionPoint)
-  // {
-  //   for (auto inter : intersectionPoints)
-  //   {
-  //     Vector2 point = camera->WorldToScreen(inter);
-  //     DrawCircle(renderer, point.x, point.y, 7);
-  //   }
-  // }
+  if (printIntersectionPoint)
+  {
+    for (auto inter : intersectionPoints)
+    {
+      Vector2 point = camera->WorldToScreen(inter);
+      DrawCircle(renderer, point.x, point.y, 7);
+    }
+  }
 }
 
 RigidbodyType Rigidbody::GetType() const { return type; }

@@ -89,10 +89,12 @@ private:
   void InternalSetMass(float newMass);
 
   // Whether collision with the given collider happened THIS frame
-  bool IsCollidingWith(Collider &other);
+  bool IsCollidingWith(int id);
+  bool IsCollidingWith(GameObject &other) { return IsCollidingWith(other.id); }
 
   // Whether collision with the given body happened last frame
-  bool WasCollidingWith(Collider &other);
+  bool WasCollidingWith(int id);
+  bool WasCollidingWith(GameObject &other) { return WasCollidingWith(other.id); }
 
   // Calculates the value of the smallest dimension of it's colliders
   void CalculateSmallestColliderDimension();
@@ -112,7 +114,8 @@ private:
   // Stores the last position of the body
   Vector2 lastPosition;
 
-  // Smallest dimension of this body's colliders, squared
+  // Smallest dimension of this body's colliders
+  float smallestDimension{0};
   float sqrSmallestDimension{0};
 
   bool printDebug{false};
