@@ -88,11 +88,11 @@ private:
 
   void InternalSetMass(float newMass);
 
-  // Whether collision with the given body happened THIS frame
-  bool IsCollidingWith(Rigidbody &otherBody);
+  // Whether collision with the given collider happened THIS frame
+  bool IsCollidingWith(Collider &other);
 
   // Whether collision with the given body happened last frame
-  bool WasCollidingWith(Rigidbody &otherBody);
+  bool WasCollidingWith(Collider &other);
 
   // Calculates the value of the smallest dimension of it's colliders
   void CalculateSmallestColliderDimension();

@@ -300,3 +300,10 @@ void GameObject::OnTriggerCollision(GameObject &other)
   for (auto component : components)
     component->OnTriggerCollision(other);
 }
+
+void GameObject::OnTriggerCollisionEnter(GameObject &other)
+{
+  // Alert all components
+  for (auto component : components)
+    component->OnTriggerCollisionEnter(other);
+}

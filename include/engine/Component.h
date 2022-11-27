@@ -84,6 +84,7 @@ private:
 
   // Allows for reacting to trigger collision
   virtual void OnTriggerCollision([[maybe_unused]] GameObject &other) {}
+  virtual void OnTriggerCollisionEnter([[maybe_unused]] GameObject &other) {}
 
   // Whether StartAndRegisterLayer has been called already
   bool started{false};

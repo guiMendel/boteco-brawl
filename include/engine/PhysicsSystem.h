@@ -61,6 +61,9 @@ private:
   // Applies impulse, checks if collision is entering & announces regular collision
   void ResolveCollision(SatCollision::CollisionData collisionData);
 
+  // Checks if collision is entering & announces regular collision
+  void ResolveTriggerCollision(Rigidbody &body, Collider &collider);
+
   // Announces collision enter
   void EnterCollision(SatCollision::CollisionData collisionData);
 
@@ -73,7 +76,7 @@ private:
   // Finds the collider (if any) whose intersection with the trajectory rect is closest to the trajectory start
   // Returns a vector of the found colliders, the distance where this collision happened, and a callback to be executed if this collision is selected to be resolved
   // Automatically triggers any intersected Triggers
-  auto FindTrajectoryIntersection(ValidatedColliders colliders, Rectangle trajectoryRectangle, float trajectoryAngle, GameObject &sourceObject)
+  auto FindTrajectoryIntersection(ValidatedColliders colliders, Rectangle trajectoryRectangle, float trajectoryAngle, Rigidbody &sourceBody)
       -> std::tuple<ValidatedColliders, float, std::function<void()>>;
 
   // Structure that maps each dynamic body object id to the list of it's colliders

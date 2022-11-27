@@ -171,6 +171,7 @@ private:
 
   // Announces trigger collision to all components
   void OnTriggerCollision(GameObject &other);
+  void OnTriggerCollisionEnter(GameObject &other);
 
   // Vector with all components of this object
   std::vector<std::shared_ptr<Component>> components;

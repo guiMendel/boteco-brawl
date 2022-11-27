@@ -114,14 +114,14 @@ void Rigidbody::ApplyImpulse(Vector2 impulse)
   velocity += impulse * inverseMass;
 }
 
-bool Rigidbody::IsCollidingWith(Rigidbody &otherBody)
+bool Rigidbody::IsCollidingWith(Collider &other)
 {
-  return collidingBodies.count(otherBody.gameObject.id) > 0;
+  return collidingBodies.count(other.gameObject.id) > 0;
 }
 
-bool Rigidbody::WasCollidingWith(Rigidbody &otherBody)
+bool Rigidbody::WasCollidingWith(Collider &other)
 {
-  return oldCollidingBodies.count(otherBody.gameObject.id) > 0;
+  return oldCollidingBodies.count(other.gameObject.id) > 0;
 }
 
 void Rigidbody::OnCollision(SatCollision::CollisionData collisionData)
