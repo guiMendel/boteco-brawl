@@ -25,6 +25,8 @@ public:
   virtual ~Rigidbody() {}
 
   void PhysicsUpdate(float deltaTime) override;
+  void Render() override;
+  RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
   void OnCollision(SatCollision::CollisionData collisionData) override;
 
@@ -51,11 +53,11 @@ public:
   // For bodies with continuous collision check, gets info for a rectangle that spans along it's trajectory since the last frame; as well as the trajectory angle
   std::pair<Rectangle, float> GetFrameTrajectory();
 
+  RigidbodyType GetType() const;
+  void SetType(RigidbodyType newType);
+
   // Velocity for each axis
   Vector2 velocity{0, 0};
-
-  // What the type of this body is
-  RigidbodyType type{RigidbodyType::Static};
 
   // Gravity modifier
   Vector2 gravityScale{1, 1};
@@ -68,6 +70,12 @@ public:
 
   // Friction applied on each collision
   float friction;
+
+  bool printIntersectionPoint{false};
+
+  std::vector<Vector2> intersectionPoints;
+
+  std::vector<std::pair<Vector2, Vector2>> printLines;
 
 private:
   // Calculates mass based on colliders volumes & densities
@@ -84,6 +92,9 @@ private:
   // Calculates the value of the smallest dimension of it's colliders
   void CalculateSmallestColliderDimension();
 
+  // What the type of this body is
+  RigidbodyType type{RigidbodyType::Static};
+
   // Whether to automatically calculate mass for this body
   bool useAutoMass{true};
 
@@ -98,6 +109,8 @@ private:
 
   // Smallest dimension of this body's colliders, squared
   float sqrSmallestDimension{0};
+
+  bool printDebug{false};
 
   // Store this frame's result of the call to GetFrameTrajectory()
   std::pair<Rectangle, float> frameTrajectory;

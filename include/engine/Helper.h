@@ -7,7 +7,10 @@
 #include <list>
 #include <memory>
 #include <string>
+#include <iostream>
 #include <SDL.h>
+
+#define RAD2DEG (180 / M_PI)
 
 namespace Helper
 {
@@ -19,9 +22,7 @@ namespace Helper
   [[maybe_unused]] static void Assert(bool condition, std::string message, std::string explanation)
   {
     if (condition == false)
-    {
       throw std::runtime_error(message + ". Reported error: " + explanation);
-    }
   }
 
   // Throws exception if condition is false

@@ -1,12 +1,21 @@
 #include "Collider.h"
 #include "Rigidbody.h"
+#include "Game.h"
+#include "Camera.h"
 
 using namespace std;
 
+void DrawCircle(SDL_Renderer *renderer, int32_t centreX, int32_t centreY, int32_t radius);
 float CollidersProjectionSize(Rigidbody &body, Vector2 normal);
 
+// Modifier applied to trajectory rectangle thickness
+const float trajectoryThicknessModifier{0.8f};
+
+// Slack to give beginning of trajectory
+const float trajectorySlack{0.8f};
+
 Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity, float friction)
-    : Component(associatedObject), type(type), elasticity(elasticity), friction(friction), lastPosition(gameObject.GetPosition()) {}
+    : Component(associatedObject), elasticity(elasticity), friction(friction), type(type), lastPosition(gameObject.GetPosition()) {}
 
 float Rigidbody::GetMass() const
 {
@@ -32,12 +41,6 @@ void Rigidbody::PhysicsUpdate(float deltaTime)
   // Update collision sets
   oldCollidingBodies = collidingBodies;
   collidingBodies.clear();
-
-  // Update the last position variable
-  lastPosition = gameObject.GetPosition();
-
-  // Set this frame's possibly calculated trajectory as outdated
-  frameTrajectoryOutdated = true;
 }
 
 void Rigidbody::DynamicBodyUpdate(float deltaTime)
@@ -45,10 +48,14 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
   // Apply gravity
   velocity += gameState.physicsSystem.gravity * gravityScale * deltaTime;
 
-  // cout << gameObject.GetName() << " velocity x: " << velocity.x << endl;
+  // Update the last position variable
+  lastPosition = gameObject.GetPosition();
 
   // Move according to velocity
   gameObject.Translate(velocity * deltaTime);
+
+  // Set this frame's possibly calculated trajectory as outdated
+  frameTrajectoryOutdated = true;
 }
 
 void Rigidbody::UseAutoMass(bool value)
@@ -98,8 +105,6 @@ void Rigidbody::ApplyImpulse(Vector2 impulse)
 {
   if (type == RigidbodyType::Static)
     return;
-
-  // cout << "Impulse: " << (string)impulse << ", final velocity: " << (string)(velocity + impulse * inverseMass) << endl;
 
   velocity += impulse * inverseMass;
 }
@@ -163,12 +168,14 @@ pair<Rectangle, float> Rigidbody::GetFrameTrajectory()
   Vector2 normal = displacement.Normalized().Rotated(M_PI / 2.0f);
 
   // Get colliders projection size on normal
-  float projectionSize = CollidersProjectionSize(*this, normal);
+  float projectionSize = CollidersProjectionSize(*this, normal) * trajectoryThicknessModifier;
+
+  displacement.SetMagnitude(displacement.Magnitude() - trajectorySlack);
 
   // Store result
-  // Place rectangle so that it's left face sits where the gameObject is
+  // Place rectangle so that it's left face sits where the gameObject was
   frameTrajectory = make_pair(
-      Rectangle(gameObject.GetPosition() + displacement / 2,
+      Rectangle(lastPosition + Vector2::Angled(displacement.Angle(), trajectorySlack) + displacement / 2,
                 displacement.Magnitude(), projectionSize),
       displacement.Angle());
 
@@ -208,4 +215,108 @@ float CollidersProjectionSize(Rigidbody &body, Vector2 normal)
 
   // Return the the distance between each projection
   return biggestProjection - smallestProjection;
+}
+
+void Rigidbody::Render()
+{
+  // if (printDebug == false)
+  //   return;
+
+  // auto [box, rotation] = frameTrajectory;
+  // auto camera = Camera::GetMain();
+
+  // // Create an SDL point for each vertex
+  // SDL_Point vertices[5];
+
+  // // Starting and final points are top left
+  // vertices[0] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
+  // vertices[1] = (SDL_Point)camera->WorldToScreen(box.BottomLeft(rotation));
+  // vertices[2] = (SDL_Point)camera->WorldToScreen(box.BottomRight(rotation));
+  // vertices[3] = (SDL_Point)camera->WorldToScreen(box.TopRight(rotation));
+  // vertices[4] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
+
+  // // Get renderer
+  // auto renderer = Game::GetInstance().GetRenderer();
+
+  // // Set paint color to blu
+  // SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
+
+  // // Paint collider edges
+  // SDL_RenderDrawLines(renderer, vertices, 5);
+
+  // for (auto line : printLines)
+  // {
+  //   SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
+  //   SDL_Point v[2]{(SDL_Point)camera->WorldToScreen(line.first), (SDL_Point)camera->WorldToScreen(line.second)};
+  //   SDL_RenderDrawLines(renderer, v, 2);
+  // }
+
+  // if (printIntersectionPoint)
+  // {
+  //   for (auto inter : intersectionPoints)
+  //   {
+  //     Vector2 point = camera->WorldToScreen(inter);
+  //     DrawCircle(renderer, point.x, point.y, 7);
+  //   }
+  // }
+}
+
+RigidbodyType Rigidbody::GetType() const { return type; }
+
+void Rigidbody::SetType(RigidbodyType newType)
+{
+  if (type == newType)
+    return;
+
+  type = newType;
+  gameState.physicsSystem.UnregisterColliders(gameObject.id);
+
+  // Re-register colliders
+  for (auto collider : GetColliders())
+    gameState.physicsSystem.RegisterCollider(collider, gameObject.id);
+}
+
+//
+//
+//
+//
+//
+//
+//
+void DrawCircle(SDL_Renderer *renderer, int32_t centreX, int32_t centreY, int32_t radius)
+{
+  const int32_t diameter = (radius * 2);
+
+  int32_t x = (radius - 1);
+  int32_t y = 0;
+  int32_t tx = 1;
+  int32_t ty = 1;
+  int32_t error = (tx - diameter);
+
+  while (x >= y)
+  {
+    //  Each of the following renders an octant of the circle
+    SDL_RenderDrawPoint(renderer, centreX + x, centreY - y);
+    SDL_RenderDrawPoint(renderer, centreX + x, centreY + y);
+    SDL_RenderDrawPoint(renderer, centreX - x, centreY - y);
+    SDL_RenderDrawPoint(renderer, centreX - x, centreY + y);
+    SDL_RenderDrawPoint(renderer, centreX + y, centreY - x);
+    SDL_RenderDrawPoint(renderer, centreX + y, centreY + x);
+    SDL_RenderDrawPoint(renderer, centreX - y, centreY - x);
+    SDL_RenderDrawPoint(renderer, centreX - y, centreY + x);
+
+    if (error <= 0)
+    {
+      ++y;
+      error += ty;
+      ty += 2;
+    }
+
+    if (error > 0)
+    {
+      --x;
+      tx += 2;
+      error += (tx - diameter);
+    }
+  }
 }

@@ -14,6 +14,12 @@
 using namespace std;
 using namespace Helper;
 
+class no_state_error : runtime_error
+{
+public:
+  no_state_error(string message) : runtime_error(message) {}
+};
+
 // Defines the maximum frames per second
 const int Game::frameRate{40};
 
@@ -219,7 +225,7 @@ void Game::GameLoop()
         nextFrameIn = frameDelay;
       }
     }
-    catch (const runtime_error &)
+    catch (const no_state_error &)
     {
       break;
     }
@@ -341,7 +347,8 @@ void Game::PopState()
   if (loadedStates.size() == 0)
   {
     // Throws if there is no nextState
-    Assert(nextState != nullptr, "Game was left without any loaded states");
+    if (nextState == nullptr)
+      throw no_state_error("Game was left without any loaded states");
 
     return;
   }

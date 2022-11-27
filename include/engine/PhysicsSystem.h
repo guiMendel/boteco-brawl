@@ -30,6 +30,9 @@ public:
   // Adds a new collider to it's corresponding object entry
   void RegisterCollider(std::shared_ptr<Collider> collider, int objectId);
 
+  // Deletes the colliders associated to this object ID
+  void UnregisterColliders(int objectId);
+
   // Current gravity of the system
   Vector2 gravity{initialGravity};
 
@@ -47,10 +50,10 @@ private:
   void HandleCollisions();
 
   // Normal collision detection for an object
-  void DetectCollisions(ValidatedCollidersMap::iterator objectIterator, ValidatedCollidersMap::iterator endIterator);
+  void DetectCollisions(ValidatedCollidersMap::iterator objectIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &staticColliders);
 
   // Continuous collision detection for an object
-  void DetectBetweenFramesCollision(ValidatedCollidersMap::iterator objectIterator, ValidatedCollidersMap::iterator endIterator);
+  void DetectBetweenFramesCollision(ValidatedCollidersMap::iterator objectIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &staticColliders);
 
   // Applies impulse, checks if collision is entering & announces regular collision
   void ResolveCollision(SatCollision::CollisionData collisionData);
@@ -59,7 +62,7 @@ private:
   void EnterCollision(SatCollision::CollisionData collisionData);
 
   // Pass each object through ValidateColliders and collect the results in a map
-  ValidatedCollidersMap ValidateAllColliders();
+  ValidatedCollidersMap ValidateAllColliders(std::unordered_map<int, WeakColliders> &);
 
   // For a specific object, removes any expired colliders from structure & returns the remaining ones as shared
   ValidatedColliders ValidateColliders(int id);
@@ -70,8 +73,11 @@ private:
   auto FindTrajectoryIntersection(ValidatedColliders colliders, Rectangle trajectoryRectangle, float trajectoryAngle, GameObject &sourceObject)
       -> std::tuple<ValidatedColliders, float, std::function<void()>>;
 
-  // Structure that maps each object id to the list of it's colliders
-  std::unordered_map<int, WeakColliders> colliderStructure;
+  // Structure that maps each dynamic body object id to the list of it's colliders
+  std::unordered_map<int, WeakColliders> dynamicColliderStructure;
+
+  // Structure that maps each static body object id to the list of it's colliders
+  std::unordered_map<int, WeakColliders> staticColliderStructure;
 
   GameState &gameState;
 };

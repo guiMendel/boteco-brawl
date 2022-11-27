@@ -7,16 +7,52 @@
 using namespace std;
 using namespace SatCollision;
 
+// Defines a point's position relative to 2 lines
+enum class PointPosition
+{
+  Smaller,
+  Inside,
+  Bigger
+};
+
+// Plugs X through a line equation
+float GetY(float x, pair<float, float> line)
+{
+  return line.first * x + line.second;
+}
+
+// Discovers if a point lies between two lines
+PointPosition PointPositionForLines(Vector2 point, pair<float, float> lineA, pair<float, float> lineB)
+{
+  // Find y counterparts of the points in the lines
+  auto bounds = make_pair(GetY(point.x, lineA), GetY(point.x, lineB));
+
+  // Compare point position
+  if (point.y < bounds.first && point.y < bounds.second)
+    return PointPosition::Smaller;
+
+  if (point.y > bounds.first && point.y > bounds.second)
+    return PointPosition::Bigger;
+
+  return PointPosition::Inside;
+}
+
+Vector2 GetIntersection(pair<float, float> lineA, pair<float, float> lineB)
+{
+  float x = (lineA.second - lineB.second) / (lineB.first - lineA.first);
+  return Vector2(x, GetY(x, lineA));
+}
+
 // Gets a line equation for 2 points
 pair<float, float> GetLineEquation(Vector2 point1, Vector2 point2);
 
 // Finds out how far along the trajectory the intersection of this collider happened
-float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectangle, float trajectoryAngle);
+float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectangle, float trajectoryAngle, GameObject &sourceObject);
 
 void ApplyImpulse(CollisionData collisionData);
 
 // Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 0.5};
+const Vector2 PhysicsSystem::initialGravity{0, 3};
 
 PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 
@@ -66,56 +102,70 @@ bool PhysicsSystem::CheckForCollision(
 void PhysicsSystem::HandleCollisions()
 {
   // Get validated colliders
-  auto validatedColliderStructure = ValidateAllColliders();
+  auto dynamicColliders = ValidateAllColliders(dynamicColliderStructure);
+  auto staticColliders = ValidateAllColliders(staticColliderStructure);
 
-  // For each object
-  auto objectEntryIterator = validatedColliderStructure.begin();
-  while (objectEntryIterator != validatedColliderStructure.end())
+  // For each dynamic object
+  for (
+      auto collidersEntryIterator = dynamicColliders.begin();
+      collidersEntryIterator != dynamicColliders.end();
+      collidersEntryIterator++)
   {
-    // Check for continuous detection
-    auto objectBody = objectEntryIterator->second.at(0)->rigidbodyWeak.lock();
+    Assert(collidersEntryIterator->second.empty() == false, "Collider entry was unexpectedly empty");
 
-    if (objectBody != nullptr && objectBody->ShouldUseContinuousDetection())
-      DetectBetweenFramesCollision(objectEntryIterator, validatedColliderStructure.end());
+    // Check for continuous detection
+    auto objectBody = collidersEntryIterator->second.at(0)->RequireRigidbody();
+
+    if (objectBody->ShouldUseContinuousDetection())
+    {
+      objectBody->printDebug = true;
+      DetectBetweenFramesCollision(collidersEntryIterator, dynamicColliders.end(), staticColliders);
+    }
 
     else
-      DetectCollisions(objectEntryIterator, validatedColliderStructure.end());
+    {
+      objectBody->printDebug = false;
 
-    objectEntryIterator++;
+      DetectCollisions(collidersEntryIterator, dynamicColliders.end(), staticColliders);
+    }
   }
 }
 
-void PhysicsSystem::DetectCollisions(ValidatedCollidersMap::iterator objectEntryIterator, ValidatedCollidersMap::iterator endIterator)
+void PhysicsSystem::DetectCollisions(ValidatedCollidersMap::iterator collidersEntryIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &staticColliders)
 {
   // Will hold any collision data
   static CollisionData collisionData;
 
-  // Test, for each OTHER object in the list (excluding the ones before this one)
-  decltype(objectEntryIterator) otherObjectEntryIterator{objectEntryIterator};
-  otherObjectEntryIterator++;
+  // Test, for each OTHER dynamic object in the list (excluding the ones before this one)
+  decltype(collidersEntryIterator) otherCollidersEntryIterator{collidersEntryIterator};
 
-  while (otherObjectEntryIterator != endIterator)
+  for (otherCollidersEntryIterator++; otherCollidersEntryIterator != endIterator; otherCollidersEntryIterator++)
   {
     // Check if they are colliding
-    if (CheckForCollision(objectEntryIterator->second, otherObjectEntryIterator->second, collisionData))
+    if (CheckForCollision(collidersEntryIterator->second, otherCollidersEntryIterator->second, collisionData))
       // Resolve collision (apply impulses)
       ResolveCollision(collisionData);
+  }
 
-    otherObjectEntryIterator++;
+  // Test for all static objects
+  for (auto staticEntry : staticColliders)
+  {
+    // Check if they are colliding
+    if (CheckForCollision(collidersEntryIterator->second, staticEntry.second, collisionData))
+      // Resolve collision (apply impulses)
+      ResolveCollision(collisionData);
   }
 }
 
-void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator objectEntryIterator, ValidatedCollidersMap::iterator endIterator)
+void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator collidersEntryIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &staticColliders)
 {
-  cout << "Using continuous collision detection for " << objectEntryIterator->second.at(0)->gameObject.name << endl;
-
   // Get object body
-  auto objectBody = objectEntryIterator->second.at(0)->RequireRigidbody();
+  auto objectBody = collidersEntryIterator->second.at(0)->RequireRigidbody();
 
   // Get trajectory info
   auto [trajectoryRectangle, trajectoryAngle] = objectBody->GetFrameTrajectory();
 
-  // Holds the collider with which collision happened
+  // Holds the colliders with which collision happened
   vector<shared_ptr<Collider>> collisionTargets;
 
   // Holds how far along the displacement axis the collision happened
@@ -124,16 +174,15 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
   // Dependency callback of the detected collision (callback that must be executed for it to become valid)
   function<void()> collisionDependency;
 
-  // Test, for each OTHER object in the list (excluding the ones before this one)
-  decltype(objectEntryIterator) otherObjectEntryIterator{objectEntryIterator};
-  otherObjectEntryIterator++;
+  // Test, for each OTHER  dynamic object in the list (excluding the ones before this one)
+  auto otherCollidersEntryIterator{collidersEntryIterator};
 
-  while (otherObjectEntryIterator != endIterator)
+  for (otherCollidersEntryIterator++; otherCollidersEntryIterator != endIterator; otherCollidersEntryIterator++)
   {
     // Find out if there is intersection between this other object and our trajectory
     auto [intersectedColliders, intersectionDistance, intersectionDependencyCallback] =
         FindTrajectoryIntersection(
-            otherObjectEntryIterator->second, trajectoryRectangle, trajectoryAngle, objectBody->gameObject);
+            otherCollidersEntryIterator->second, trajectoryRectangle, trajectoryAngle, objectBody->gameObject);
 
     // If no intersection was found, continue
     if (intersectedColliders.empty())
@@ -147,20 +196,45 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
       collisionTargets = intersectedColliders;
       collisionDependency = intersectionDependencyCallback;
     }
+  }
 
-    otherObjectEntryIterator++;
+  // Now test for static bodies
+  for (auto staticEntry : staticColliders)
+  {
+    // Find out if there is intersection between this other object and our trajectory
+    auto [intersectedColliders, intersectionDistance, intersectionDependencyCallback] =
+        FindTrajectoryIntersection(
+            staticEntry.second, trajectoryRectangle, trajectoryAngle, objectBody->gameObject);
+
+    // If no intersection was found, continue
+    if (intersectedColliders.empty())
+      continue;
+
+    // We want the collision which must have happened before all others, so:
+    // Keep this collider if it's closer to the start of trajectory
+    if (intersectionDistance < collisionDistance)
+    {
+      collisionDistance = intersectionDistance;
+      collisionTargets = intersectedColliders;
+      collisionDependency = intersectionDependencyCallback;
+    }
   }
 
   // If no between frames collision was detected, carry on to regular collision detection
   if (collisionTargets.empty())
   {
-    DetectCollisions(objectEntryIterator, endIterator);
+    DetectCollisions(collidersEntryIterator, endIterator, staticColliders);
     return;
   }
+
+  // Make it relative to the object's position
+  collisionDistance -= Vector2::Dot(objectBody->lastPosition, Vector2::Angled(trajectoryAngle));
 
   // Otherwise, move the body to where collision happened
   objectBody->gameObject.SetPosition(
       objectBody->lastPosition + Vector2::Angled(trajectoryAngle, collisionDistance));
+
+  objectBody->intersectionPoints.push_back(objectBody->lastPosition + Vector2::Angled(trajectoryAngle, collisionDistance));
 
   // Execute this intersection's dependency callback
   collisionDependency();
@@ -168,7 +242,7 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
   // And, finally, resolve the actual collision between this body and the collider
   CollisionData collisionData;
 
-  if (CheckForCollision(objectEntryIterator->second, collisionTargets, collisionData))
+  if (CheckForCollision(collidersEntryIterator->second, collisionTargets, collisionData))
     ResolveCollision(collisionData);
   else
     cout << "WARNING: Unable to resolve continuous collision" << endl;
@@ -176,8 +250,14 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
 
 vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id)
 {
+  auto objectBody = gameState.GetObject(id)->GetComponent<Rigidbody>();
+
+  bool isDynamic = objectBody != nullptr && objectBody->GetType() == RigidbodyType::Dynamic;
+
+  auto &weakColliders = isDynamic ? dynamicColliderStructure : staticColliderStructure;
+
   // Get colliders
-  auto &objectColliders = colliderStructure[id];
+  auto &objectColliders = weakColliders[id];
 
   // Will hold verified colliders
   vector<shared_ptr<Collider>> verifiedColliders;
@@ -209,32 +289,38 @@ vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id)
     // If it has a rigidbody with auto mass on, derive its new mass
     auto rigidbody = gameState.GetObject(id)->GetComponent<Rigidbody>();
 
-    if (rigidbody != nullptr && rigidbody->UsingAutoMass())
-      rigidbody->DeriveMassFromColliders();
+    if (rigidbody != nullptr)
+    {
+      if (rigidbody->UsingAutoMass())
+        rigidbody->DeriveMassFromColliders();
+
+      rigidbody->CalculateSmallestColliderDimension();
+    }
   }
 
   return verifiedColliders;
 }
 
-unordered_map<int, vector<shared_ptr<Collider>>> PhysicsSystem::ValidateAllColliders()
+unordered_map<int, vector<shared_ptr<Collider>>> PhysicsSystem::ValidateAllColliders(unordered_map<int, WeakColliders> &weakColliders)
 {
   unordered_map<int, vector<shared_ptr<Collider>>> verifiedCollidersStructure;
 
   // For each object entry
-  auto objectEntryIterator = colliderStructure.begin();
-  while (objectEntryIterator != colliderStructure.end())
+  auto collidersEntryIterator = weakColliders.begin();
+  while (collidersEntryIterator != weakColliders.end())
   {
-    int objectId = objectEntryIterator->first;
+    int objectId = collidersEntryIterator->first;
     verifiedCollidersStructure[objectId] = ValidateColliders(objectId);
 
     // If it's empty, remove it from the map
     if (verifiedCollidersStructure[objectId].empty())
     {
-      objectEntryIterator = colliderStructure.erase(objectEntryIterator);
+      collidersEntryIterator = weakColliders.erase(collidersEntryIterator);
+      verifiedCollidersStructure.erase(objectId);
       continue;
     }
 
-    objectEntryIterator++;
+    collidersEntryIterator++;
   }
 
   return verifiedCollidersStructure;
@@ -245,10 +331,21 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
   if (!collider)
     return;
 
-  colliderStructure[objectId].emplace_back(collider);
-
-  // If it has a rigidbody
+  // Get rigidbody if it exists
   auto rigidbody = gameState.GetObject(objectId)->GetComponent<Rigidbody>();
+
+  bool isDynamic{false};
+
+  // Check if it's dynamic
+  if (rigidbody != nullptr)
+    isDynamic = rigidbody->GetType() == RigidbodyType::Dynamic;
+
+  if (isDynamic)
+    dynamicColliderStructure[objectId].emplace_back(collider);
+  else
+    staticColliderStructure[objectId].emplace_back(collider);
+
+  // (isDynamic ? dynamicColliderStructure : staticColliderStructure)[objectId].emplace_back(collider);
 
   if (rigidbody != nullptr)
   {
@@ -270,8 +367,6 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 
   ApplyImpulse(collisionData);
 
-  // cout << "Penetration was " << collisionData.penetration << endl;
-
   // Check if is entering collision
   if (collisionData.source->RequireRigidbody()->WasCollidingWith(*collisionData.other->RequireRigidbody()) == false)
   // if (collisionData.source->WasCollidingWith(*collisionData.other) == false ||
@@ -281,7 +376,7 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
     collisionData.source->gameObject.OnCollisionEnter(collisionData);
 
     // Switch reference
-    std::swap(collisionData.source, collisionData.other);
+    swap(collisionData.source, collisionData.other);
 
     // Announce to other object
     collisionData.source->gameObject.OnCollisionEnter(collisionData);
@@ -291,7 +386,7 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
   collisionData.source->gameObject.OnCollision(collisionData);
 
   // Switch reference
-  std::swap(collisionData.source, collisionData.other);
+  swap(collisionData.source, collisionData.other);
 
   // Announce to other object
   collisionData.source->gameObject.OnCollision(collisionData);
@@ -329,27 +424,18 @@ void ApplyImpulse(CollisionData collisionData)
   // Increase penetration a little bit to ensure objects are no longer colliding afterwards
   float penetration = collisionData.penetration;
 
-  bool bodyBStatic = bodyB->type == RigidbodyType::Static;
+  bool bodyBStatic = bodyB->GetType() == RigidbodyType::Static;
 
   // Correct position
   float bodyADisplacement = bodyBStatic ? penetration
                                         : penetration * bodyB->GetMass() / (bodyA->GetMass() + bodyB->GetMass());
   float bodyBDisplacement = penetration - bodyADisplacement;
 
-  // cout << "Body a was at " << (string)bodyA->GetColliders()[0]->GetBox() << endl;
-
-  if (bodyA->type != RigidbodyType::Static)
+  if (bodyA->GetType() != RigidbodyType::Static)
     bodyA->gameObject.Translate(-collisionData.normal * bodyADisplacement);
 
   if (bodyBStatic == false)
     bodyB->gameObject.Translate(collisionData.normal * bodyBDisplacement);
-
-  // cout << "Body a is now at " << (string)bodyA->GetColliders()[0]->GetBox() << endl;
-
-  // auto [distance, normal] = FindMinDistance(bodyA->GetColliders()[0]->GetBox(), bodyB->GetColliders()[0]->GetBox(),
-  //                                           bodyA->gameObject.GetRotation(), bodyB->gameObject.GetRotation());
-
-  // cout << "New distance is " << distance << endl;
 }
 
 auto PhysicsSystem::FindTrajectoryIntersection(ValidatedColliders colliders, Rectangle trajectoryRectangle, float trajectoryAngle, GameObject &sourceObject)
@@ -385,7 +471,7 @@ auto PhysicsSystem::FindTrajectoryIntersection(ValidatedColliders colliders, Rec
 
     // Get the distance of this collider along the trajectory
     float colliderDistance = GetDistanceAlongTrajectory(
-        *collider, trajectoryRectangle, trajectoryAngle);
+        *collider, trajectoryRectangle, trajectoryAngle, sourceObject);
 
     // Check if it's got better distance
     if (colliderDistance < minDistance)
@@ -398,7 +484,7 @@ auto PhysicsSystem::FindTrajectoryIntersection(ValidatedColliders colliders, Rec
   return make_tuple(selectedColliders, minDistance, []() {});
 }
 
-float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectangle, float trajectoryAngle)
+float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectangle, float trajectoryAngle, GameObject &sourceObject)
 {
   // Get line equations for trajectory bounds
   auto boundA = GetLineEquation(
@@ -406,41 +492,10 @@ float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectang
   auto boundB = GetLineEquation(
       trajectoryRectangle.BottomLeft(trajectoryAngle), trajectoryRectangle.BottomRight(trajectoryAngle));
 
-  // Plugs X through a line equation
-  auto GetY = [](float x, pair<float, float> line)
-  {
-    return line.first * x + line.second;
-  };
-
-  // Defines a point's position relative to 2 lines
-  enum PointPosition
-  {
-    Smaller,
-    Inside,
-    Bigger
-  };
-
-  // Discovers if a point lies between two lines
-  auto PointPositionForLines = [GetY](Vector2 point, pair<float, float> lineA, pair<float, float> lineB)
-  {
-    // Find y counterparts of the points in the lines
-    auto bounds = make_pair(GetY(point.x, lineA), GetY(point.x, lineB));
-
-    // Compare point position
-    if (point.y < bounds.first && point.y < bounds.second)
-      return Smaller;
-
-    if (point.y > bounds.first && point.y > bounds.second)
-      return Bigger;
-
-    return Inside;
-  };
-
-  auto GetIntersection = [GetY](pair<float, float> lineA, pair<float, float> lineB)
-  {
-    float x = (lineA.second - lineB.second) / (lineA.first - lineB.first);
-    return Vector2(x, GetY(x, lineA));
-  };
+  auto body = sourceObject.GetComponent<Rigidbody>();
+  body->printLines.clear();
+  body->printLines.push_back(make_pair(Vector2(-10, GetY(-10, boundA)), Vector2(10, GetY(10, boundA))));
+  body->printLines.push_back(make_pair(Vector2(-10, GetY(-10, boundB)), Vector2(10, GetY(10, boundB))));
 
   // For each adjacent vertex pair
   auto vertices = collider.GetBox().Vertices();
@@ -455,11 +510,11 @@ float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectang
       vertexA = vertexB++)
   {
     // Check which vertices are inside the trajectory
-    bool vertexAPosition = PointPositionForLines(*vertexA, boundA, boundB);
-    bool vertexBPosition = PointPositionForLines(*vertexB, boundA, boundB);
+    auto vertexAPosition = PointPositionForLines(*vertexA, boundA, boundB);
+    auto vertexBPosition = PointPositionForLines(*vertexB, boundA, boundB);
 
     // If both vertices are inside, the face is already good
-    if (vertexAPosition == Inside && vertexBPosition == Inside)
+    if (vertexAPosition == PointPosition::Inside && vertexBPosition == PointPosition::Inside)
     {
       trimmedFacesVertices.push_back(*vertexA);
       trimmedFacesVertices.push_back(*vertexB);
@@ -470,12 +525,13 @@ float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectang
     auto faceEquation = GetLineEquation(*vertexA, *vertexB);
 
     // If both are outside
-    if (vertexAPosition != Inside && vertexBPosition != Inside)
+    if (vertexAPosition != PointPosition::Inside && vertexBPosition != PointPosition::Inside)
     {
       // Ensure they are on opposite sides
       if (vertexAPosition == vertexBPosition)
         continue;
 
+      // Impossible for them to be parallel, so no problem to search for intersection
       trimmedFacesVertices.push_back(GetIntersection(boundA, faceEquation));
       trimmedFacesVertices.push_back(GetIntersection(boundB, faceEquation));
       continue;
@@ -485,16 +541,20 @@ float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectang
     bool boundASmaller = GetY(0, boundA) < GetY(0, boundB);
 
     // And which vertex is outside
-    auto insideVertex = vertexAPosition == Inside ? *vertexA : *vertexB;
+    auto insideVertex = vertexAPosition == PointPosition::Inside ? *vertexA : *vertexB;
 
     // If the face crosses the smaller bound
-    if (vertexAPosition == Smaller || vertexBPosition == Smaller)
+    if (vertexAPosition == PointPosition::Smaller || vertexBPosition == PointPosition::Smaller)
     {
+      // Impossible for them to be parallel, so no problem to search for intersection
       trimmedFacesVertices.push_back(GetIntersection(boundASmaller ? boundA : boundB, faceEquation));
       trimmedFacesVertices.push_back(insideVertex);
+
+      continue;
     }
 
     // Otherwise the face crosses the bigger bound
+    // Impossible for them to be parallel, so no problem to search for intersection
     trimmedFacesVertices.push_back(GetIntersection(boundASmaller ? boundB : boundA, faceEquation));
     trimmedFacesVertices.push_back(insideVertex);
   }
@@ -508,15 +568,36 @@ float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectang
   float minDistance = numeric_limits<float>::max();
 
   // For each inside vertex
+  body->intersectionPoints.clear();
+
   for (auto vertex : trimmedFacesVertices)
+  {
+    // if (Vector2::Dot(vertex, displacementDirection) < minDistance) {
+    body->printIntersectionPoint = true;
+    if (find(body->intersectionPoints.begin(), body->intersectionPoints.end(), vertex) == body->intersectionPoints.end())
+      body->intersectionPoints.push_back(vertex);
+    // }
     minDistance = min(minDistance, Vector2::Dot(vertex, displacementDirection));
+  }
 
   return minDistance;
 }
 
 pair<float, float> GetLineEquation(Vector2 point1, Vector2 point2)
 {
+  // Prevent awkward stuff
+  if (point2.x - point1.x == 0)
+  {
+    point1.x += 0.01;
+  }
+
   float m = (point2.y - point1.y) / (point2.x - point1.x);
 
   return make_pair(m, point1.y - point1.x * m);
+}
+
+void PhysicsSystem::UnregisterColliders(int objectId)
+{
+  dynamicColliderStructure.erase(objectId);
+  staticColliderStructure.erase(objectId);
 }
