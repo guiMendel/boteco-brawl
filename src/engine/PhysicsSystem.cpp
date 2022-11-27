@@ -1,3 +1,4 @@
+#include "Game.h"
 #include "Collider.h"
 #include "PhysicsSystem.h"
 #include "GameState.h"
@@ -6,6 +7,12 @@
 
 using namespace std;
 using namespace SatCollision;
+
+// Initial gravity
+const Vector2 PhysicsSystem::initialGravity{0, 1};
+
+// Min velocity before friction simply cuts it to 0
+const float maxFrictionCutSpeed{0.01f};
 
 // Defines a point's position relative to 2 lines
 enum class PointPosition
@@ -50,9 +57,6 @@ pair<float, float> GetLineEquation(Vector2 point1, Vector2 point2);
 float GetDistanceAlongTrajectory(Collider &collider, Rectangle trajectoryRectangle, float trajectoryAngle, GameObject &sourceObject);
 
 void ApplyImpulse(CollisionData collisionData);
-
-// Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 3};
 
 PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 
@@ -399,11 +403,11 @@ void ApplyImpulse(CollisionData collisionData)
   auto bodyB = collisionData.other->RequireRigidbody();
 
   // Friction to apply
-  float frictionModifier = 1 - min(bodyA->friction, bodyB->friction);
+  float frictionModifier = min(bodyA->friction, bodyB->friction);
 
   // Apply it
-  bodyA->velocity = bodyA->velocity * frictionModifier;
-  bodyB->velocity = bodyB->velocity * frictionModifier;
+  bodyA->velocity = PhysicsSystem::ApplyFriction(bodyA->velocity, frictionModifier);
+  bodyB->velocity = PhysicsSystem::ApplyFriction(bodyB->velocity, frictionModifier);
 
   // Elasticity of collision
   float elasticity = (bodyA->elasticity + bodyB->elasticity) / 2.0f;
@@ -600,4 +604,36 @@ void PhysicsSystem::UnregisterColliders(int objectId)
 {
   dynamicColliderStructure.erase(objectId);
   staticColliderStructure.erase(objectId);
+}
+
+Vector2 PhysicsSystem::ApplyFriction(Vector2 velocity, float friction)
+{
+  if (!velocity)
+    return velocity;
+
+  float frictionModifier = 1 - friction;
+
+  // Find square of speed
+  float sqrSpeed = velocity.SqrMagnitude();
+
+  // Get this constant
+  static const float sqrMaxCutSpeed{maxFrictionCutSpeed * maxFrictionCutSpeed};
+
+  // Check if speed is relevant enough for us to still bother with it
+  if (sqrSpeed <= sqrMaxCutSpeed)
+    return Vector2::Zero();
+
+  // Get the speed proportion factor
+  float speedProportion = sqrSpeed > 1 ? pow(sqrSpeed, 0.25f) : 1;
+
+  // Get delta time
+  float deltaTime = Game::GetInstance().GetPhysicsDeltaTime();
+
+  // Make friction proportional to delta time and speed
+  float proportionalFriction = min(
+      pow(pow(frictionModifier, speedProportion), deltaTime), 1.0f);
+
+  cout << "Friction: " << proportionalFriction << ". Old: " << velocity.Magnitude() << ", New: " << (velocity * proportionalFriction).Magnitude() << endl;
+
+  return velocity * proportionalFriction;
 }

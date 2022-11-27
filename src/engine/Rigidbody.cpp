@@ -5,14 +5,16 @@
 
 using namespace std;
 
-void DrawCircle(SDL_Renderer *renderer, int32_t centreX, int32_t centreY, int32_t radius);
-float CollidersProjectionSize(Rigidbody &body, Vector2 normal);
+const float Rigidbody::defaultAirFriction{0.1f};
 
 // Modifier applied to trajectory rectangle thickness
 const float trajectoryThicknessModifier{0.8f};
 
 // Slack to give beginning of trajectory
 const float trajectorySlack{0.8f};
+
+void DrawCircle(SDL_Renderer *renderer, int32_t centreX, int32_t centreY, int32_t radius);
+float CollidersProjectionSize(Rigidbody &body, Vector2 normal);
 
 Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity, float friction)
     : Component(associatedObject), elasticity(elasticity), friction(friction), type(type), lastPosition(gameObject.GetPosition()) {}
@@ -47,6 +49,9 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
 {
   // Apply gravity
   velocity += gameState.physicsSystem.gravity * gravityScale * deltaTime;
+
+  // Apply air friction
+  velocity = PhysicsSystem::ApplyFriction(velocity, airFriction);
 
   // Update the last position variable
   lastPosition = gameObject.GetPosition();

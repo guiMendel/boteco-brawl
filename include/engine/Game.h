@@ -43,6 +43,7 @@ public:
   void Start();
 
   float GetDeltaTime() const { return deltaTime; }
+  float GetPhysicsDeltaTime() const { return physicsDeltaTime; }
 
   // Requests the push of a new state to the queue
   void PushState(std::unique_ptr<GameState> &&state);

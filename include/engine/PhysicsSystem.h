@@ -33,6 +33,9 @@ public:
   // Deletes the colliders associated to this object ID
   void UnregisterColliders(int objectId);
 
+  // Applies a given friction to the velocity
+  static Vector2 ApplyFriction(Vector2 velocity, float friction);
+
   // Current gravity of the system
   Vector2 gravity{initialGravity};
 

@@ -20,7 +20,9 @@ class Rigidbody : public Component
   friend class PhysicsSystem;
 
 public:
-  Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity = 0, float friction = 0.05f);
+  static const float defaultAirFriction;
+
+  Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity = 0, float friction = 0.8f);
 
   virtual ~Rigidbody() {}
 
@@ -68,8 +70,11 @@ public:
   // Collision elasticity modifier (i.e. coefficient of restitution ε)
   float elasticity;
 
-  // Friction applied on each collision
+  // Friction applied on each collision. Is a modifier applied to speed per second
   float friction;
+
+  // Friction applied on each frame. Is a modifier applied to speed per second
+  float airFriction{defaultAirFriction};
 
   bool printIntersectionPoint{false};
 
