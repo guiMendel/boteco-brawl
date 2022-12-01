@@ -4,7 +4,7 @@
 using namespace std;
 
 // Interval between each valid jump input, in seconds
-const float jumpCooldown{0.2f};
+const float jumpCooldown{0.1f};
 
 // How far from the ground character can jump
 const float jumpRange{0.2f};
@@ -14,7 +14,8 @@ Movement::Movement(GameObject &associatedObject, float acceleration, float defau
       acceleration(acceleration),
       defaultSpeed(defaultSpeed),
       feetDistance(feetDistance),
-      jumpSpeed(24),
+      jumpSpeed(28),
+      doubleJumpSpeed(7),
       airborneControl(0.5f),
       fastFallAcceleration(45),
       jumpGravityModifier(15),
@@ -30,11 +31,15 @@ float Movement::GetDirection() { return targetSpeed / defaultSpeed; }
 void Movement::Start()
 {
   originalGravityScale = rigidbody.gravityScale;
+}
 
+void Movement::OnLandInternal()
+{
   // Reset gravity modifier when reaching ground
-  OnReachGround.AddListener("gravity-modifier-reset", [this]()
-                            { currentGravityModifier = 1;
-                            rigidbody.gravityScale = originalGravityScale; });
+  SetCurrentGravityModifier(1);
+
+  // Reset double jump
+  doubleJumpAvailable = true;
 }
 
 void Movement::PhysicsUpdate(float deltaTime)
@@ -81,20 +86,43 @@ void Movement::Run(float deltaTime)
   rigidbody.velocity += accelerationVector;
 }
 
+void Movement::SetCurrentGravityModifier(float value)
+{
+  currentGravityModifier = value;
+  rigidbody.gravityScale = originalGravityScale * currentGravityModifier;
+}
+
 void Movement::Jump()
 {
-  if (isGrounded == false || lastJumpTime < jumpCooldown)
+  if (lastJumpTime < jumpCooldown)
     return;
 
   // Reset counter
   lastJumpTime = 0;
 
+  // If not grounded
+  if (isGrounded == false)
+  {
+    // Stop if can't double jump
+    if (doubleJumpAvailable == false)
+      return;
+
+    // Apply double jump speed
+    rigidbody.velocity.y = -doubleJumpSpeed;
+
+    // Reset gravity modifier
+    SetCurrentGravityModifier(1);
+
+    doubleJumpAvailable = false;
+
+    return;
+  }
+
   // Apply speed
-  rigidbody.velocity.y -= jumpSpeed;
+  rigidbody.velocity.y = -jumpSpeed;
 
   // Apply gravity modifier
-  currentGravityModifier = jumpGravityModifier;
-  rigidbody.gravityScale = originalGravityScale * currentGravityModifier;
+  SetCurrentGravityModifier(jumpGravityModifier);
 }
 
 void Movement::FallFast()
@@ -132,5 +160,8 @@ void Movement::GroundCheck()
   isGrounded = rigidbody.Raycast(M_PI / 2, feetDistance + jumpRange);
 
   if (wasGrounded == false && isGrounded)
-    OnReachGround.Invoke();
+  {
+    OnLandInternal();
+    OnLand.Invoke();
+  }
 }

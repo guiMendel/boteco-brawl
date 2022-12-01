@@ -10,7 +10,7 @@ class Movement : public Component
 {
 public:
   // Triggers when character touches the ground
-  Event OnReachGround;
+  Event OnLand;
 
   Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance);
   virtual ~Movement() {}
@@ -54,6 +54,9 @@ public:
   // Speed to be injected on jump
   float jumpSpeed;
 
+  // Speed to be injected on double jump
+  float doubleJumpSpeed;
+
   // How much control character has of horizontal speed when airborne
   float airborneControl;
 
@@ -69,6 +72,11 @@ private:
 
   // How long gravity modifier should take to completely vanish, in seconds
   void SetGravityModifierDecayTime(float newValue);
+
+  // Triggered on landing
+  void OnLandInternal();
+
+  void SetCurrentGravityModifier(float value);
 
   // === HORIZONTAL MOVEMENT
 
@@ -100,6 +108,9 @@ private:
 
   // Whether fall fast is active
   bool fastFallActive{false};
+
+  // Whether second jump is available
+  bool doubleJumpAvailable{true};
 
   // === OTHER
 
