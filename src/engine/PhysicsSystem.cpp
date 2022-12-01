@@ -9,7 +9,7 @@ using namespace std;
 using namespace Collision;
 
 // Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 1};
+const Vector2 PhysicsSystem::initialGravity{0, 12};
 
 // Min velocity before friction simply cuts it to 0
 const float maxFrictionCutSpeed{0.001f};

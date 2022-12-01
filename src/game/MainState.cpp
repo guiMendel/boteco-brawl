@@ -11,7 +11,7 @@ void MainState::InitializeObjects()
   CreateObject("Background", Recipes::Background("./assets/image/boteco.jpg"));
 
   // Add player
-  auto player1 = CreateObject("Player", Recipes::Character(), Vector2(-4, -2))->GetComponent<Rigidbody>();
+  auto player1 = CreateObject("Player", Recipes::Character(), Vector2(-4, -10))->GetComponent<Rigidbody>();
 
   // auto player2 = CreateObject("Player2", Recipes::Character(), Vector2(4, -2))->GetComponent<Rigidbody>();
 
@@ -25,7 +25,7 @@ void MainState::InitializeObjects()
   // auto thingBody = thing->GetComponent<Rigidbody>();
   // thingBody->velocity += Vector2({-1, 0});
 
-  player1->velocity = Vector2(2, 1);
+  player1->velocity = Vector2(2, 0);
   // player2->velocity = Vector2(-2, 1);
 
   // Play music

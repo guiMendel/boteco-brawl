@@ -50,8 +50,8 @@ auto Recipes::Character() -> std::function<void(std::shared_ptr<GameObject>)>
     auto sprite = character->AddComponent<Sprite>("./assets/image/character.png", RenderLayer::Characters);
 
     auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0, 0);
-    character->AddComponent<Collider>(sprite, false, ColliderDensity::Character);
-    character->AddComponent<Movement>(30, 4);
+    auto collider = character->AddComponent<Collider>(sprite, false, ColliderDensity::Character);
+    character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
     character->AddComponent<PlayerController>();
 
     // Turn on continuous collision
