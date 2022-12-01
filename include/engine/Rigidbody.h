@@ -7,13 +7,13 @@
 #include "PhysicsSystem.h"
 #include <unordered_set>
 
+class Collider;
+
 enum class RigidbodyType
 {
   Static,
   Dynamic
 };
-
-class Collider;
 
 class Rigidbody : public Component
 {
@@ -30,7 +30,7 @@ public:
   void Render() override;
   RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
-  void OnCollision(SatCollision::CollisionData collisionData) override;
+  void OnCollision(Collision::CollisionData collisionData) override;
 
   float GetMass() const;
   float GetInverseMass() const;
@@ -57,6 +57,11 @@ public:
 
   RigidbodyType GetType() const;
   void SetType(RigidbodyType newType);
+
+  // Returns whether a particle collides with any other body when cast from this object's position in some direction, over a fixed distance
+  // Populates the raycast collision struct if a collision is detected
+  bool Raycast(float angle, float maxDistance, RaycastCollisionData &data);
+  bool Raycast(float angle, float maxDistance);
 
   // Velocity for each axis
   Vector2 velocity{0, 0};

@@ -6,13 +6,16 @@
 #include <tuple>
 
 using namespace std;
-using namespace SatCollision;
+using namespace Collision;
 
 // Initial gravity
 const Vector2 PhysicsSystem::initialGravity{0, 1};
 
 // Min velocity before friction simply cuts it to 0
 const float maxFrictionCutSpeed{0.001f};
+
+// How many units to displace the raycast particle in each iteration
+const float raycastGranularity{0.15f};
 
 // Defines a point's position relative to 2 lines
 enum class PointPosition
@@ -747,4 +750,73 @@ Vector2 PhysicsSystem::ApplyFriction(Vector2 velocity, float friction)
   // cout << "Friction: " << proportionalFriction << ". Old: " << velocity.Magnitude() << ", New: " << (velocity * proportionalFriction).Magnitude() << endl;
 
   return velocity * proportionalFriction;
+}
+
+bool PhysicsSystem::Raycast(Vector2 origin, float angle, float maxDistance, CollisionFilter filter)
+{
+  RaycastCollisionData discardedData;
+  return Raycast(origin, angle, maxDistance, discardedData, filter);
+}
+
+bool PhysicsSystem::Raycast(Vector2 origin, float angle, float maxDistance, RaycastCollisionData &data, CollisionFilter filter)
+{
+  // How much the particle has already been displaced
+  float displacement{0};
+
+  while (displacement < maxDistance)
+  {
+    // Displace it
+    displacement = min(displacement + raycastGranularity, maxDistance);
+
+    // Get it's new position
+    Vector2 particle = Vector2::Angled(angle, displacement) + origin;
+
+    // Check for collision
+    if (gameState.physicsSystem.DetectCollisions(particle, data, filter))
+    {
+      // Register distance
+      data.elapsedDistance = displacement;
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+bool PhysicsSystem::DetectCollisions(Vector2 particle, RaycastCollisionData &data, CollisionFilter filter)
+{
+  // For a given collider structure, performs the check
+  auto CheckForStructure = [&](std::unordered_map<int, PhysicsSystem::WeakColliders> structure)
+  {
+    for (auto [bodyId, bodyColliders] : ValidateAllColliders(structure))
+    {
+      // Skip filtered bodies
+      if (filter.ignoredObjects.count(bodyId) > 0)
+        continue;
+
+      // For each collider
+      for (auto collider : bodyColliders)
+      {
+        // Check if particle is far enough that we don't need to bother
+        float sqrParticleDistance = Vector2::SqrDistance(collider->GetBox().Center(), particle);
+        float maxDimension = collider->GetMaxVertexDistance();
+
+        if (sqrParticleDistance > maxDimension * maxDimension)
+          break;
+
+        // Detect collision
+        if (DetectIntersection(collider->GetBox(), particle, collider->gameObject.GetRotation()))
+        {
+          data.other = collider;
+
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+
+  return CheckForStructure(dynamicColliderStructure) || CheckForStructure(staticColliderStructure);
 }

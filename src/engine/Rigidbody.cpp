@@ -126,7 +126,7 @@ bool Rigidbody::WasCollidingWith(int id)
   return oldCollidingBodies.count(id) > 0;
 }
 
-void Rigidbody::OnCollision(SatCollision::CollisionData collisionData)
+void Rigidbody::OnCollision(Collision::CollisionData collisionData)
 {
   // Add to collision set
   collidingBodies.insert(collisionData.other->gameObject.id);
@@ -278,6 +278,21 @@ void Rigidbody::SetType(RigidbodyType newType)
   // Re-register colliders
   for (auto collider : GetColliders())
     gameState.physicsSystem.RegisterCollider(collider, gameObject.id);
+}
+
+bool Rigidbody::Raycast(float angle, float maxDistance, RaycastCollisionData &data)
+{
+  // Create a filter of this own object
+  CollisionFilter filter;
+  filter.ignoredObjects.insert(gameObject.id);
+
+  return gameState.physicsSystem.Raycast(gameObject.GetPosition(), angle, maxDistance, data, filter);
+}
+
+bool Rigidbody::Raycast(float angle, float maxDistance)
+{
+  RaycastCollisionData discardedData;
+  return Raycast(angle, maxDistance, discardedData);
 }
 
 //

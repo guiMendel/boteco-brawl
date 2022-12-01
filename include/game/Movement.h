@@ -9,7 +9,7 @@ class Rigidbody;
 class Movement : public Component
 {
 public:
-  Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float decelerationModifier = 0.5f);
+  Movement(GameObject &associatedObject, float acceleration, float defaultSpeed);
   virtual ~Movement() {}
 
   void Update(float deltaTime) override;
@@ -18,6 +18,15 @@ public:
   void SetDirection(float direction);
   float GetDirection();
 
+  // Iniates a jump
+  void Jump();
+
+  // Starts falling faster
+  void FallFaster();
+
+  // Stops falling faster
+  void FallNormally();
+
   // Movement acceleration, in units/s/s
   float acceleration;
 
@@ -25,7 +34,7 @@ public:
   float defaultSpeed;
 
   // Acceleration modifier applied when targetSpeed is 0 
-  float decelerationModifier;
+  float decelerationModifier{0.5f};
 
 private:
   // Each frame, current velocity will be accelerated towards this

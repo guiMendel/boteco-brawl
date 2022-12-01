@@ -10,7 +10,7 @@ class Collider;
 
 // Implementation of SAT collision, limited to rectangle polygons
 // Based on this guide: https://youtu.be/-EsWKT7Doww
-namespace SatCollision
+namespace Collision
 {
   struct CollisionData
   {
@@ -76,6 +76,39 @@ namespace SatCollision
     return distance1.first >= distance2.first ? distance1 : distance2;
   }
 
+  // Indicates whether point is inside the perimeter of the rectangle
+  // Rotation in radians
+  [[maybe_unused]] static bool DetectIntersection(Rectangle rect, Vector2 point, float rotation = 0)
+  {
+    // Detects if point is inside projection of rectangle on a given axis
+    auto DetectForAxis = [rect, rotation, point](Vector2 axis)
+    {
+      // Store lowest projection
+      float lowestProjection = std::numeric_limits<float>::max();
+
+      // Store biggest projection
+      float biggestProjection = std::numeric_limits<float>::lowest();
+
+      // Project each vertex
+      for (auto vertex : rect.Vertices())
+      {
+        float projection = Vector2::Dot(vertex, axis);
+        lowestProjection = std::min(lowestProjection, projection);
+        biggestProjection = std::max(biggestProjection, projection);
+      }
+
+      // Get the own point's projection
+      float pointProjection = Vector2::Dot(point, axis);
+
+      // It's inside if it's between the lowest & biggest projections
+      return lowestProjection <= pointProjection && pointProjection <= biggestProjection;
+    };
+
+    // First normal to be used
+    Vector2 normal = Vector2::Angled(rotation);
+
+    return DetectForAxis(normal) && DetectForAxis(normal.Rotated(M_PI / 2.0));
+  }
 }
 
 #endif

@@ -20,6 +20,17 @@ void PlayerController::Update([[maybe_unused]] float deltaTime)
 
   else if (inputManager.KeyPress(SDLK_a))
     SetDirection(-1);
+
+  // Detect jump
+  if (inputManager.KeyPress(SDLK_SPACE))
+    movement.Jump();
+
+  // Detect fall acceleration
+  if (inputManager.KeyPress(SDLK_s))
+    movement.FallFaster();
+
+  else if (inputManager.KeyRelease(SDLK_s))
+    movement.FallNormally();
 }
 
 void PlayerController::SetDirection(float direction)

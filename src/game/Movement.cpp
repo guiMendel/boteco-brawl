@@ -1,8 +1,8 @@
 #include "Movement.h"
 #include "Rigidbody.h"
 
-Movement::Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float decelerationModifier)
-    : Component(associatedObject), acceleration(acceleration), defaultSpeed(defaultSpeed), decelerationModifier(decelerationModifier), rigidbody(*gameObject.RequireComponent<Rigidbody>()) {}
+Movement::Movement(GameObject &associatedObject, float acceleration, float defaultSpeed)
+    : Component(associatedObject), acceleration(acceleration), defaultSpeed(defaultSpeed), rigidbody(*gameObject.RequireComponent<Rigidbody>()) {}
 
 void Movement::SetDirection(float direction) { targetSpeed = direction * defaultSpeed; }
 
@@ -22,3 +22,10 @@ void Movement::Update(float deltaTime)
   // Accelerate
   rigidbody.velocity += accelerationVector;
 }
+
+void Movement::Jump()
+{
+}
+
+void Movement::FallFaster() {}
+void Movement::FallNormally() {}

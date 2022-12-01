@@ -80,8 +80,8 @@ protected:
 
 private:
   // Allows for reacting to collision
-  virtual void OnCollision([[maybe_unused]] SatCollision::CollisionData collisionData) {}
-  virtual void OnCollisionEnter([[maybe_unused]] SatCollision::CollisionData collisionData) {}
+  virtual void OnCollision([[maybe_unused]] Collision::CollisionData collisionData) {}
+  virtual void OnCollisionEnter([[maybe_unused]] Collision::CollisionData collisionData) {}
 
   // Allows for reacting to trigger collision
   virtual void OnTriggerCollision([[maybe_unused]] GameObject &other) {}

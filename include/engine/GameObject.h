@@ -167,8 +167,8 @@ private:
   void UnlinkParent();
 
   // Announces collision to all components
-  void OnCollision(SatCollision::CollisionData collisionData);
-  void OnCollisionEnter(SatCollision::CollisionData collisionData);
+  void OnCollision(Collision::CollisionData collisionData);
+  void OnCollisionEnter(Collision::CollisionData collisionData);
 
   // Announces trigger collision to all components
   void OnTriggerCollision(GameObject &other);
