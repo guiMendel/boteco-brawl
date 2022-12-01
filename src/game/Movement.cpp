@@ -3,9 +3,6 @@
 
 using namespace std;
 
-// How much downwards speed is injected when fall faster is active
-const float fallFasterBonus{3};
-
 // Interval between each valid jump input, in seconds
 const float jumpCooldown{0.2f};
 
@@ -13,7 +10,15 @@ const float jumpCooldown{0.2f};
 const float jumpRange{0.2f};
 
 Movement::Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance)
-    : Component(associatedObject), acceleration(acceleration), defaultSpeed(defaultSpeed), feetDistance(feetDistance), jumpSpeed(30), jumpGravityModifier(20), rigidbody(*gameObject.RequireComponent<Rigidbody>())
+    : Component(associatedObject),
+      acceleration(acceleration),
+      defaultSpeed(defaultSpeed),
+      feetDistance(feetDistance),
+      jumpSpeed(24),
+      airborneControl(0.5f),
+      fastFallAcceleration(45),
+      jumpGravityModifier(15),
+      rigidbody(*gameObject.RequireComponent<Rigidbody>())
 {
   SetGravityModifierDecayTime(0.2f);
 }
@@ -40,6 +45,10 @@ void Movement::PhysicsUpdate(float deltaTime)
     currentGravityModifier = max(1.0f, currentGravityModifier - gravityModifierDecay * deltaTime);
     rigidbody.gravityScale = originalGravityScale * currentGravityModifier;
   }
+
+  // Fast fall
+  if (fastFallActive)
+    rigidbody.velocity.y += fastFallAcceleration * deltaTime;
 }
 
 void Movement::Update(float deltaTime)
@@ -61,6 +70,9 @@ void Movement::Run(float deltaTime)
 
   // Use deceleration modifier
   float frameAcceleration = targetSpeed == 0 ? acceleration * decelerationModifier : acceleration;
+
+  // Use airborne modifier
+  frameAcceleration = isGrounded ? frameAcceleration : frameAcceleration * airborneControl;
 
   // Get the frame's acceleration vector
   Vector2 accelerationVector = Vector2::Right(targetSpeed - rigidbody.velocity.x).CapMagnitude(frameAcceleration * deltaTime);
@@ -85,14 +97,14 @@ void Movement::Jump()
   rigidbody.gravityScale = originalGravityScale * currentGravityModifier;
 }
 
-void Movement::FallFaster()
+void Movement::FallFast()
 {
-  rigidbody.velocity.y += fallFasterBonus;
+  fastFallActive = true;
 }
 
-void Movement::FallNormally()
+void Movement::StopFallFast()
 {
-  rigidbody.velocity.y -= fallFasterBonus;
+  fastFallActive = false;
 }
 
 void Movement::SetGravityModifierDecayTime(float newValue)

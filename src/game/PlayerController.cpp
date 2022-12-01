@@ -27,10 +27,10 @@ void PlayerController::Update([[maybe_unused]] float deltaTime)
 
   // Detect fall acceleration
   if (inputManager.KeyPress(SDLK_s))
-    movement.FallFaster();
+    movement.FallFast();
 
   else if (inputManager.KeyRelease(SDLK_s))
-    movement.FallNormally();
+    movement.StopFallFast();
 }
 
 void PlayerController::SetDirection(float direction)

@@ -27,10 +27,10 @@ public:
   void Jump();
 
   // Starts falling faster
-  void FallFaster();
+  void FallFast();
 
   // Stops falling faster
-  void FallNormally();
+  void StopFallFast();
 
   // Set gravity modifier applied on jump
   void SetJumpGravityModifier(float value);
@@ -53,6 +53,12 @@ public:
 
   // Speed to be injected on jump
   float jumpSpeed;
+
+  // How much control character has of horizontal speed when airborne
+  float airborneControl;
+
+  // Acceleration added when falling faster
+  float fastFallAcceleration;
 
 private:
   // Checks if character is grounded
@@ -91,6 +97,9 @@ private:
 
   // Whether character was grounded last frame
   bool wasGrounded{false};
+
+  // Whether fall fast is active
+  bool fastFallActive{false};
 
   // === OTHER
 
