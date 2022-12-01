@@ -51,6 +51,17 @@ void GameObject::Start()
     component->StartAndRegisterLayer();
 }
 
+void GameObject::Awake()
+{
+  if (awoke)
+    return;
+
+  awoke = true;
+
+  for (auto component : components)
+    component->Awake();
+}
+
 void GameObject::Update(float deltaTime)
 {
   // Update timers

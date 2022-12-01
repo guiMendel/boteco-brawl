@@ -136,6 +136,9 @@ void GameState::Start()
 
   started = true;
 
+  // Wake objects
+  CASCADE_OBJECTS(Awake, );
+
   // Start objects
   CASCADE_OBJECTS(Start, );
 

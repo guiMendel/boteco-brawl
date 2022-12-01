@@ -15,6 +15,8 @@ public:
 
   Camera(GameObject &associatedObject, float size = 5);
 
+  virtual ~Camera() {}
+
   Vector2 GetPosition() const { return gameObject.GetPosition(); }
 
   void SetPosition(Vector2 newPosition) { gameObject.SetPosition(newPosition); }

@@ -27,6 +27,7 @@ public:
   ~GameObject();
 
   // Initialize
+  void Awake();
   void Start();
 
   // Called once per frame
@@ -181,6 +182,7 @@ private:
 
   // Whether has already run started
   bool started{false};
+  bool awoke{false};
 
   // Parent object
   std::weak_ptr<GameObject> weakParent;

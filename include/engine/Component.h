@@ -59,6 +59,7 @@ public:
   const int id;
 
 protected:
+  virtual void Awake() {}
   virtual void Start() {}
 
   // Called once per frame
