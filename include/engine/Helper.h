@@ -31,6 +31,11 @@ namespace Helper
     Assert(condition, message, SDL_GetError());
   }
 
+  [[maybe_unused]] static float GetSign(float value)
+  {
+    return value >= 0 ? 1 : -1;
+  }
+
   // Splits the given string into an array of strings, using the given delimiter as the separator token
   [[maybe_unused]] static auto SplitString(std::string text, std::string delimiter) -> std::vector<std::string>
   {

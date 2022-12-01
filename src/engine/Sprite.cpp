@@ -49,6 +49,10 @@ void Sprite::Render(Vector2 position)
   SDL_Rect destinationRect = (SDL_Rect)Camera::GetMain()->WorldToScreen(
       Rectangle(position, GetWidth(), GetHeight()));
 
+  // Detect flips
+  SDL_RendererFlip horizontalFlip = gameObject.localScale.x < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+  SDL_RendererFlip verticalFlip = gameObject.localScale.y < 0 ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;
+
   // Put the texture in the renderer
   SDL_RenderCopyEx(
       Game::GetInstance().GetRenderer(),
@@ -57,7 +61,7 @@ void Sprite::Render(Vector2 position)
       &destinationRect,
       Helper::RadiansToDegrees(gameObject.GetRotation()),
       nullptr,
-      SDL_FLIP_NONE);
+      SDL_RendererFlip(horizontalFlip | verticalFlip));
 }
 
 void Sprite::SetTargetDimension(int width, int height)
@@ -68,28 +72,34 @@ void Sprite::SetTargetDimension(int width, int height)
 
 float Sprite::GetWidth() const
 {
+  // Get scale magnitude
+  float scale = abs(gameObject.localScale.x);
+
   if (targetWidth >= 0)
-    return targetWidth * gameObject.localScale.x;
+    return targetWidth * scale;
 
   // If target height is also -1, use clip width (convert pixels to game units using own proportion)
   if (targetHeight < 0)
-    return clipRect.w * gameObject.localScale.x / pixelsPerUnit;
+    return clipRect.w * scale / pixelsPerUnit;
 
   // Otherwise, use aspect ratio
-  return targetHeight * clipRect.w / clipRect.h * gameObject.localScale.x;
+  return targetHeight * clipRect.w / clipRect.h * scale;
 }
 
 float Sprite::GetHeight() const
 {
+  // Get scale magnitude
+  float scale = abs(gameObject.localScale.y);
+
   if (targetHeight >= 0)
-    return targetHeight * gameObject.localScale.y;
+    return targetHeight * scale;
 
   // If target width is also -1, use clip Height (convert pixels to game units using own proportion)
   if (targetWidth < 0)
   {
-    return clipRect.h * gameObject.localScale.y / pixelsPerUnit;
+    return clipRect.h * scale / pixelsPerUnit;
   }
 
   // Otherwise, use aspect ratio
-  return targetWidth * clipRect.h / clipRect.w * gameObject.localScale.y;
+  return targetWidth * clipRect.h / clipRect.w * scale;
 }

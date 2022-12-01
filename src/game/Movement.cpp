@@ -84,6 +84,13 @@ void Movement::Run(float deltaTime)
 
   // Accelerate
   rigidbody.velocity += accelerationVector;
+
+  // Velocity to use as direction reference
+  float referenceSpeed = isGrounded ? rigidbody.velocity.x : targetSpeed;
+
+  // Set object direction according to velocity
+  if (referenceSpeed != 0)
+    gameObject.localScale = Vector2(GetSign(referenceSpeed), 1);
 }
 
 void Movement::SetCurrentGravityModifier(float value)
