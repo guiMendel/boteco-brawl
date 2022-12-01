@@ -59,6 +59,8 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
   // Move according to velocity
   gameObject.Translate(velocity * deltaTime);
 
+  cout << "Velocity: " << velocity.x << endl;
+
   // Set this frame's possibly calculated trajectory as outdated
   frameTrajectoryOutdated = true;
 }

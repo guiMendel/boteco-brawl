@@ -84,7 +84,7 @@ public:
   }
 
   // Sets the magnitude to either it's current value or the given value, in case the current one is greater
-  void CapMagnitude(float value)
+  Vector2 CapMagnitude(float value)
   {
     // Check that it does not exceed the limits
     if (SqrMagnitude() > value * value)
@@ -92,6 +92,8 @@ public:
       // Cap it
       SetMagnitude(value);
     }
+
+    return *this;
   }
 
   Vector2 Normalized() const

@@ -9,7 +9,7 @@ class Rigidbody;
 class Movement : public Component
 {
 public:
-  Movement(GameObject &associatedObject, float acceleration, float defaultSpeed);
+  Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float decelerationModifier = 0.5f);
   virtual ~Movement() {}
 
   void Update(float deltaTime) override;
@@ -18,19 +18,18 @@ public:
   void SetDirection(float direction);
   float GetDirection();
 
-  // Movement acceleration, in range [0, 1]. It's the proportion of targetSpeed injected each second.
-  void SetAcceleration(float acceleration);
-  float GetAcceleration();
+  // Movement acceleration, in units/s/s
+  float acceleration;
 
   // The default max speed achieved by moving, units/s, when direction is normalized
   float defaultSpeed;
 
-private:
-  // A horizontal vector. Each frame, current velocity will be accelerated towards this
-  Vector2 targetVelocity{Vector2::Zero()};
+  // Acceleration modifier applied when targetSpeed is 0 
+  float decelerationModifier;
 
-  // How much speed is retained each second
-  float speedInertia;
+private:
+  // Each frame, current velocity will be accelerated towards this
+  float targetSpeed{0};
 
   // Reference to rigidbody
   Rigidbody& rigidbody;

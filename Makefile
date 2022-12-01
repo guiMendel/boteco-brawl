@@ -97,13 +97,13 @@ INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATIO
 # FOR GAME
 
 # Header files
-_GAME_DEPS = MainState.h 
+_GAME_DEPS = MainState.h Movement.h PlayerController.h
 
 # Generate header filepaths
 GAME_DEPS = $(patsubst %,$(GAME_INCLUDE_DIRECTORY)\\%,$(_GAME_DEPS))
 
 # Object files
-_GAME_OBJS = MainState.o
+_GAME_OBJS = MainState.o Movement.o PlayerController.o
 
 # Generate object filepaths
 GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))
@@ -121,7 +121,7 @@ $(ENGINE_OBJECT_DIRECTORY)\\%.o: $(ENGINE_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_
 
 # Define how to make .o files, and make them dependent on their .c counterparts and the h files
 # The void cast is simply there to hide output of mkdir
-$(INTEGRATION_OBJECT_DIRECTORY)\\%.o: $(INTEGRATION_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(ENGINE_DEPS)
+$(INTEGRATION_OBJECT_DIRECTORY)\\%.o: $(INTEGRATION_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(ENGINE_DEPS) $(GAME_DEPS)
 	$(CC) -c -o $@ $< $(COMPILATION_ARGS)
 
 # FOR GAME
