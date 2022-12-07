@@ -1,9 +1,20 @@
 #include "Collider.h"
 #include "Game.h"
 #include "Camera.h"
+#include "Animation.h"
 #include <memory>
 
 using namespace std;
+
+Rectangle RectangleFromAnimator(Animator &animator, Vector2 scale)
+{
+  Animation &initialAnimation = animator.GetAnimation(animator.initialAnimation);
+  return Rectangle(
+      0,
+      0,
+      initialAnimation[0].GetSprite()->GetWidth() * scale.x,
+      initialAnimation[0].GetSprite()->GetHeight() * scale.y);
+}
 
 // Explicitly initialize box
 Collider::Collider(GameObject &associatedObject, Rectangle box, bool isTrigger, ColliderDensity density) : Component(associatedObject), isTrigger(isTrigger), density(density)
@@ -11,15 +22,15 @@ Collider::Collider(GameObject &associatedObject, Rectangle box, bool isTrigger, 
   SetBox(box);
 }
 
-// Use sprite's box
-Collider::Collider(GameObject &associatedObject, shared_ptr<Sprite> sprite, bool isTrigger, ColliderDensity density, Vector2 scale)
+// Use spriteRenderer's box
+Collider::Collider(GameObject &associatedObject, shared_ptr<SpriteRenderer> spriteRenderer, bool isTrigger, ColliderDensity density, Vector2 scale)
     : Collider(associatedObject,
-               Rectangle(0, 0, sprite->GetWidth() * scale.x, sprite->GetHeight() * scale.y), isTrigger, density) {}
+               Rectangle(0, 0, spriteRenderer->sprite->GetWidth() * scale.x, spriteRenderer->sprite->GetHeight() * scale.y), isTrigger, density) {}
 
-// Use sprite's box
-Collider::Collider(GameObject &associatedObject, shared_ptr<SpriteAnimator> animator, bool isTrigger, ColliderDensity density, Vector2 scale)
+// Use spriteRenderer's box
+Collider::Collider(GameObject &associatedObject, shared_ptr<Animator> animator, bool isTrigger, ColliderDensity density, Vector2 scale)
     : Collider(associatedObject,
-               Rectangle(0, 0, animator->GetFrameWidth() * scale.x, animator->GetFrameHeight() * scale.y), isTrigger, density) {}
+               RectangleFromAnimator(*animator, scale), isTrigger, density) {}
 
 void Collider::SetBox(const Rectangle &newBox)
 {

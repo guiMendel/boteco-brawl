@@ -9,6 +9,8 @@
 #include <SDL_image.h>
 #include <SDL_ttf.h>
 #include "Helper.h"
+#include "Sprite.h"
+#include "Rectangle.h"
 
 class Resources
 {
@@ -19,6 +21,11 @@ public:
 
   // Get an image texture
   static std::shared_ptr<SDL_Texture> GetTexture(std::string filename);
+
+  // Get a cropped sprite
+  static std::shared_ptr<Sprite> GetSprite(std::string filename, Rectangle clipRect = Rectangle(0, 0, -1, -1));
+  static std::shared_ptr<Sprite> GetSprite(
+      std::string filename, SpriteConfig config, Rectangle clipRect = Rectangle(0, 0, -1, -1));
 
   // Get a music
   static std::shared_ptr<Mix_Music> GetMusic(std::string filename);
@@ -39,13 +46,15 @@ public:
 
 private:
   // Get a resource
+  // resourceKeyRaw is useful when the key is a construct of a filename and something else. It will be provided to the loader
   template <class Resource>
   static std::shared_ptr<Resource> GetResource(
       std::string resourceType,
       std::string resourceKey,
       table<Resource> &table,
       std::function<Resource *(std::string)> resourceLoader,
-      void (*resourceDestructor)(Resource *))
+      void (*resourceDestructor)(Resource *),
+      std::string resourceKeyRaw = "")
   {
     // Check if it's already loaded
     auto resourceIterator = table.find(resourceKey);
@@ -56,8 +65,11 @@ private:
 
     // At this point, we know the asset isn't loaded yet
 
+    // Get which key will be sent to loader
+    std::string key = resourceKeyRaw == "" ? resourceKey : resourceKeyRaw;
+
     // Load it
-    Resource *resourcePointer = resourceLoader(resourceKey);
+    Resource *resourcePointer = resourceLoader(key);
 
     // Catch any errors
     Helper::Assert(resourcePointer != nullptr, "Failed to load " + resourceType + " at " + resourceKey);
@@ -94,6 +106,9 @@ private:
 
   // Store textures
   static table<SDL_Texture> textureTable;
+
+  // Store sprites
+  static table<Sprite> spriteTable;
 
   // Store music
   static table<Mix_Music> musicTable;

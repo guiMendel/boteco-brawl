@@ -1,11 +1,11 @@
-#ifndef __RECIPES__
-#define __RECIPES__
+#ifndef __OBJECT_RECIPES__
+#define __OBJECT_RECIPES__
 
 #include <memory>
 #include "GameObject.h"
 #include "Text.h"
 
-class Recipes
+class ObjectRecipes
 {
 public:
   static auto Camera(float size = 5) -> std::function<void(std::shared_ptr<GameObject>)>;

@@ -5,7 +5,7 @@
 #include "Sound.h"
 #include "Camera.h"
 #include "Resources.h"
-#include "Recipes.h"
+#include "ObjectRecipes.h"
 #include <iostream>
 
 #define CASCADE_OBJECTS(method, param) CascadeDown(rootObject, [param](GameObject &object) { object.method(param); });
@@ -126,7 +126,7 @@ void GameState::Start()
   LoadAssets();
 
   // Create the main camera
-  auto mainCamera = CreateObject("MainCamera", Recipes::Camera())->GetComponent<Camera>();
+  auto mainCamera = CreateObject("MainCamera", ObjectRecipes::Camera())->GetComponent<Camera>();
 
   // Register it before going on
   RegisterCamera(mainCamera);

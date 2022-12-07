@@ -9,7 +9,7 @@
 #include <list>
 #include <SDL.h>
 #include "GameObject.h"
-#include "Sprite.h"
+#include "SpriteRenderer.h"
 #include "Music.h"
 #include "InputManager.h"
 #include "Vector2.h"

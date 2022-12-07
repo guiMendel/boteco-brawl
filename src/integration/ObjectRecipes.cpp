@@ -1,6 +1,6 @@
-#include "Recipes.h"
+#include "ObjectRecipes.h"
 #include "CameraFollower.h"
-#include "SpriteAnimator.h"
+#include "Animator.h"
 #include "Sound.h"
 #include "Camera.h"
 #include "Game.h"
@@ -8,11 +8,13 @@
 #include "Rectangle.h"
 #include "Movement.h"
 #include "PlayerController.h"
+#include "Animator.h"
+#include "AnimationRecipes.h"
 #include <iostream>
 
 using namespace std;
 
-auto Recipes::Camera(float size) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Camera(float size) -> function<void(shared_ptr<GameObject>)>
 {
   return [size](shared_ptr<GameObject> cameraObject)
   {
@@ -20,12 +22,12 @@ auto Recipes::Camera(float size) -> function<void(shared_ptr<GameObject>)>
   };
 }
 
-auto Recipes::Background(string imagePath) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Background(string imagePath) -> function<void(shared_ptr<GameObject>)>
 {
   return [imagePath](shared_ptr<GameObject> background)
   {
     // Get a background sprite
-    auto sprite = background->AddComponent<Sprite>(imagePath, RenderLayer::Background);
+    auto sprite = background->AddComponent<SpriteRenderer>(imagePath, RenderLayer::Background)->sprite;
 
     // Make it follow the camera
     background->AddComponent<CameraFollower>();
@@ -42,24 +44,33 @@ auto Recipes::Background(string imagePath) -> function<void(shared_ptr<GameObjec
   };
 }
 
-auto Recipes::Character() -> std::function<void(std::shared_ptr<GameObject>)>
+auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject>)>
 {
   return [](shared_ptr<GameObject> character)
   {
     // Get sprite
-    auto sprite = character->AddComponent<Sprite>("./assets/image/character.png", RenderLayer::Characters);
+    auto spriteRenderer = character->AddComponent<SpriteRenderer>(RenderLayer::Characters);
 
+    // Add animator
+    auto animator = character->AddComponent<Animator>();
+
+    // Add animations
+    animator->AddAnimation(AnimationRecipes::Run);
+
+    // Give it collision
     auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0, 0);
-    auto collider = character->AddComponent<Collider>(sprite, false, ColliderDensity::Character);
-    character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
-    character->AddComponent<PlayerController>();
+    auto collider = character->AddComponent<Collider>(animator, false, ColliderDensity::Character);
 
     // Turn on continuous collision
     body->continuousCollisions = true;
+
+    // Give it movement
+    character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
+    character->AddComponent<PlayerController>();
   };
 }
 
-auto Recipes::Platform(Vector2 size, bool isStatic) -> std::function<void(std::shared_ptr<GameObject>)>
+auto ObjectRecipes::Platform(Vector2 size, bool isStatic) -> std::function<void(std::shared_ptr<GameObject>)>
 {
   return [size, isStatic](shared_ptr<GameObject> platform)
   {

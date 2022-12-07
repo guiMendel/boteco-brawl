@@ -214,7 +214,7 @@ Vector2 GameObject::GetScale() const
 {
   if (IsRoot())
     return localScale;
-  return InternalGetParent()->GetScale() + localScale;
+  return InternalGetParent()->GetScale() * localScale;
 }
 void GameObject::SetScale(const Vector2 newScale)
 {

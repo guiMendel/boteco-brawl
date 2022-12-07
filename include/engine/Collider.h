@@ -8,8 +8,8 @@
 #include "Rigidbody.h"
 #include "ColliderDensity.h"
 
-class Sprite;
-class SpriteAnimator;
+class SpriteRenderer;
+class Animator;
 
 class Collider : public Component
 {
@@ -18,10 +18,10 @@ public:
   Collider(GameObject &associatedObject, Rectangle box, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default);
 
   // Use sprite's box
-  Collider(GameObject &associatedObject, std::shared_ptr<Sprite> sprite, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
+  Collider(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> sprite, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
 
-  // Use sprite animator's frame size
-  Collider(GameObject &associatedObject, std::shared_ptr<SpriteAnimator> animator, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
+  // Use sprite animator's initial animation sprite size
+  Collider(GameObject &associatedObject, std::shared_ptr<Animator> animator, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
 
   virtual ~Collider() {}
 
@@ -61,7 +61,7 @@ private:
   float maxVertexDistance;
 };
 
-#include "Sprite.h"
-#include "SpriteAnimator.h"
+#include "SpriteRenderer.h"
+#include "Animator.h"
 
 #endif

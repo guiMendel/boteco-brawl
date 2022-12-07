@@ -69,13 +69,13 @@ COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(ENGINE_INCLUDE_DIRECTORY) -
 # FOR ENGINE
 
 # Header files
-_ENGINE_DEPS = Game.h GameState.h Sprite.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h SpriteAnimator.h SatCollision.h Collider.h Text.h Color.h Timer.h Rigidbody.h PhysicsSystem.h
+_ENGINE_DEPS = Game.h GameState.h SpriteRenderer.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h Animator.h SatCollision.h Collider.h Text.h Color.h Timer.h Rigidbody.h PhysicsSystem.h Sprite.h Animation.h AnimationFrame.h
 
 # Generate header filepaths
 ENGINE_DEPS = $(patsubst %,$(ENGINE_INCLUDE_DIRECTORY)\\%,$(_ENGINE_DEPS))
 
 # Object files
-_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o SpriteAnimator.o Collider.o Text.o Rigidbody.o PhysicsSystem.o
+_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o Animator.o Collider.o Text.o Rigidbody.o PhysicsSystem.o Sprite.o Animation.o AnimationFrame.o SpriteRenderer.o
 
 # Generate object filepaths
 ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
@@ -83,13 +83,13 @@ ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
 # FOR INTEGRATION
 
 # Header files
-_INTEGRATION_DEPS = ColliderDensity.h GameData.h Recipes.h RenderLayer.h Tag.h
+_INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h Tag.h AnimationRecipes.h
 
 # Generate header filepaths
 INTEGRATION_DEPS = $(patsubst %,$(INTEGRATION_INCLUDE_DIRECTORY)\\%,$(_INTEGRATION_DEPS))
 
 # Object files
-_INTEGRATION_OBJS = Recipes.o InitialState.o
+_INTEGRATION_OBJS = ObjectRecipes.o InitialState.o AnimationRecipes.o
 
 # Generate object filepaths
 INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATION_OBJS))
@@ -97,13 +97,13 @@ INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATIO
 # FOR GAME
 
 # Header files
-_GAME_DEPS = MainState.h Movement.h PlayerController.h
+_GAME_DEPS = MainState.h Movement.h PlayerController.h Action.h Character.h
 
 # Generate header filepaths
 GAME_DEPS = $(patsubst %,$(GAME_INCLUDE_DIRECTORY)\\%,$(_GAME_DEPS))
 
 # Object files
-_GAME_OBJS = MainState.o Movement.o PlayerController.o
+_GAME_OBJS = MainState.o Movement.o PlayerController.o Character.o
 
 # Generate object filepaths
 GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))

@@ -11,6 +11,7 @@ class MainState : public GameState
 public:
   virtual ~MainState() {}
 
+  void LoadAssets() override;
   void InitializeObjects() override;
 
 private:

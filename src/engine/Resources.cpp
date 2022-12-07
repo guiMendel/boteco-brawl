@@ -10,6 +10,8 @@ using namespace Helper;
 
 Resources::table<SDL_Texture> Resources::textureTable;
 
+Resources::table<Sprite> Resources::spriteTable;
+
 Resources::table<Mix_Music> Resources::musicTable;
 
 Resources::table<Mix_Chunk> Resources::soundTable;
@@ -28,6 +30,38 @@ shared_ptr<SDL_Texture> Resources::GetTexture(string filename)
   };
 
   return GetResource<SDL_Texture>("texture", filename, textureTable, textureLoader, SDL_DestroyTexture);
+}
+
+shared_ptr<Sprite> Resources::GetSprite(string filename, Rectangle clipRect)
+{
+  function<Sprite *(string)> spriteLoader = [clipRect](string filename)
+  {
+    // Gets the spite pointer
+    auto sprite = new Sprite(filename);
+
+    // Clip it
+    sprite->SetClip(clipRect);
+
+    return sprite;
+  };
+
+  // Its destructor
+  void (*spriteDestructor)(Sprite *) = [](Sprite *sprite)
+  { delete sprite; };
+
+  // Its store key
+  string storeKey = filename + (string)clipRect;
+
+  return GetResource<Sprite>("sprite", storeKey, spriteTable, spriteLoader, spriteDestructor, filename);
+}
+
+shared_ptr<Sprite> Resources::GetSprite(string filename, SpriteConfig config, Rectangle clipRect)
+{
+  auto sprite = GetSprite(filename, clipRect);
+
+  sprite->SetConfig(config);
+
+  return sprite;
 }
 
 shared_ptr<Mix_Music> Resources::GetMusic(string filename)

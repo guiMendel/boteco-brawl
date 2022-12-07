@@ -1,21 +1,13 @@
 #include "Sprite.h"
 #include "Resources.h"
-#include "Game.h"
-#include "Camera.h"
-#include <string>
 
 using namespace std;
-using namespace Helper;
 
-Sprite::Sprite(GameObject &associatedObject, RenderLayer renderLayer, float pixelsPerUnit, int renderOrder, bool centerObject)
-    : Component(associatedObject), centered(centerObject), pixelsPerUnit(pixelsPerUnit), renderLayer(renderLayer), renderOrder(renderOrder)
-{
-}
+float SpriteConfig::defaultPixelsPerUnit{32};
 
-// Constructor with image file name
-Sprite::Sprite(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer, float pixelsPerUnit, int renderOrder, bool centerObject) : Sprite(associatedObject, renderLayer, pixelsPerUnit, renderOrder, centerObject)
+Sprite::Sprite(const string initialTexture, SpriteConfig config) : config(config)
 {
-  Load(fileName);
+  Load(initialTexture);
 }
 
 void Sprite::Load(const string fileName)
@@ -23,83 +15,58 @@ void Sprite::Load(const string fileName)
   // Get texture from resource manager
   texture = Resources::GetTexture(fileName);
 
-  int width, height;
-
   // Get it's dimensions
   SDL_QueryTexture(texture.get(), nullptr, nullptr, &width, &height);
 
   // Set the clip to the full image
-  SetClip(0, 0, width, height);
+  SetClip(Rectangle(0, 0, width, height));
 }
 
-void Sprite::SetClip(int x, int y, int width, int height)
+SDL_Rect Sprite::GetClip() const { return clipRect; }
+
+void Sprite::SetClip(Rectangle rect)
 {
-  clipRect = {x, y, width, height};
-}
+  // Sanitize dimensions and allow automatic size clipping
+  if (rect.width < 0)
+    rect.width = width - rect.x;
+  if (rect.height < 0)
+    rect.height = height - rect.y;
 
-void Sprite::Render(Vector2 position)
-{
-  // Offset coordinates if centered
-  if (centered)
-  {
-    position -= Vector2(GetWidth() / 2, GetHeight() / 2);
-  }
-
-  // Get the real position box
-  SDL_Rect destinationRect = (SDL_Rect)Camera::GetMain()->WorldToScreen(
-      Rectangle(position, GetWidth(), GetHeight()));
-
-  // Detect flips
-  SDL_RendererFlip horizontalFlip = gameObject.localScale.x < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
-  SDL_RendererFlip verticalFlip = gameObject.localScale.y < 0 ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;
-
-  // Put the texture in the renderer
-  SDL_RenderCopyEx(
-      Game::GetInstance().GetRenderer(),
-      texture.get(),
-      &clipRect,
-      &destinationRect,
-      Helper::RadiansToDegrees(gameObject.GetRotation()),
-      nullptr,
-      SDL_RendererFlip(horizontalFlip | verticalFlip));
+  clipRect = (SDL_Rect)rect;
 }
 
 void Sprite::SetTargetDimension(int width, int height)
 {
-  targetWidth = width;
-  targetHeight = height;
+  config.targetWidth = width;
+  config.targetHeight = height;
 }
 
-float Sprite::GetWidth() const
+float Sprite::GetWidth(float scale) const
 {
-  // Get scale magnitude
-  float scale = abs(gameObject.localScale.x);
-
-  if (targetWidth >= 0)
-    return targetWidth * scale;
+  if (config.targetWidth >= 0)
+    return config.targetWidth * scale;
 
   // If target height is also -1, use clip width (convert pixels to game units using own proportion)
-  if (targetHeight < 0)
-    return clipRect.w * scale / pixelsPerUnit;
+  if (config.targetHeight < 0)
+    return clipRect.w * scale / config.pixelsPerUnit;
 
   // Otherwise, use aspect ratio
-  return targetHeight * clipRect.w / clipRect.h * scale;
+  return config.targetHeight * clipRect.w / clipRect.h * scale;
 }
 
-float Sprite::GetHeight() const
+float Sprite::GetHeight(float scale) const
 {
-  // Get scale magnitude
-  float scale = abs(gameObject.localScale.y);
-
-  if (targetHeight >= 0)
-    return targetHeight * scale;
+  if (config.targetHeight >= 0)
+    return config.targetHeight * scale;
 
   // If target width is also -1, use clip Height (convert pixels to game units using own proportion)
-  if (targetWidth < 0)
+  if (config.targetWidth < 0)
   {
-    return clipRect.h * scale / pixelsPerUnit;
+    return clipRect.h * scale / config.pixelsPerUnit;
   }
 
   // Otherwise, use aspect ratio
-  return targetWidth * clipRect.h / clipRect.w * scale;
+  return config.targetWidth * clipRect.h / clipRect.w * scale;
 }
+
+void Sprite::SetConfig(SpriteConfig newConfig) { config = newConfig; }
