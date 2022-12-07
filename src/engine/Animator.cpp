@@ -23,6 +23,9 @@ void Animator::Update(float deltaTime)
 
 void Animator::AddAnimation(shared_ptr<Animation> animation, bool makeInitial)
 {
+  // Check for unique name
+  Assert(animations.find(animation->name) == animations.end(), "Tried to add two animations with the same name");
+
   animations[animation->name] = animation;
 
   if (makeInitial || initialAnimation == "")

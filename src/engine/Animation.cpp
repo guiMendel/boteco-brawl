@@ -5,14 +5,14 @@
 
 using namespace std;
 
-Animation::Animation(string name, Animator &animator, vector<AnimationFrame> frames)
-    : name(name), frames(frames), animator(animator)
+Animation::Animation(string name, Animator &animator, vector<AnimationFrame> frames, bool loop)
+    : name(name), frames(frames), loop(loop), animator(animator)
 {
   Assert(name != "", "Invalid animation name: it can't be empty");
 }
 
-Animation::Animation(string name, Animator &animator, initializer_list<AnimationFrame> frames)
-    : Animation(name, animator, vector(frames)) {}
+Animation::Animation(string name, Animator &animator, initializer_list<AnimationFrame> frames, bool loop)
+    : Animation(name, animator, vector(frames), loop) {}
 
 void Animation::Start()
 {
@@ -83,7 +83,7 @@ void Animation::Update(float deltaTime)
     if (loop == false)
     {
       // Stop
-      Stop();
+      animator.Stop();
       return;
     }
   }

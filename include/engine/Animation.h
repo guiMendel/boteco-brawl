@@ -38,10 +38,10 @@ class Animation
 
 public:
   // Initialize manually
-  Animation(std::string name, Animator &animator, std::initializer_list<AnimationFrame> frames);
+  Animation(std::string name, Animator &animator, std::initializer_list<AnimationFrame> frames, bool loop = false);
 
   // Initialize with frame vector
-  Animation(std::string name, Animator &animator, std::vector<AnimationFrame> frames);
+  Animation(std::string name, Animator &animator, std::vector<AnimationFrame> frames, bool loop = false);
 
   void SetNext(std::weak_ptr<Animation> next);
 
