@@ -35,7 +35,7 @@ public:
   void AddAnimation(std::function<std::shared_ptr<Animation>(Animator &)> recipe, bool makeInitial = false);
 
   // Stops current animation and starts the given one
-  void Play(std::string animation);
+  void Play(std::string animation, std::function<void()> stopCallback = nullptr);
 
   void Stop();
 
@@ -48,7 +48,7 @@ public:
   Event OnAnimationStop;
 
   // Which animation to play on Start
-  std::string initialAnimation;
+  std::string defaultAnimation;
 
 private:
   // Store animations

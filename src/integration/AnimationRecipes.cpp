@@ -1,4 +1,5 @@
 #include "AnimationRecipes.h"
+#include "Movement.h"
 #include "Animator.h"
 
 using namespace std;
@@ -19,9 +20,15 @@ auto AnimationRecipes::Idle(Animator &animator) -> shared_ptr<Animation>
 
 auto AnimationRecipes::Jump(Animator &animator) -> shared_ptr<Animation>
 {
-  return make_shared<Animation>("jump",
-                                animator,
-                                Animation::SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 2), 0.1));
+  auto animation = make_shared<Animation>("jump",
+                                          animator,
+                                          Animation::SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 2), 0.1));
+
+  // Add jump impulse to jump frame
+  animation->frames[1].AddCallback([](GameObject &object)
+                                   { object.RequireComponent<Movement>()->Jump(); });
+
+  return animation;
 }
 
 auto AnimationRecipes::Rise(Animator &animator) -> shared_ptr<Animation>

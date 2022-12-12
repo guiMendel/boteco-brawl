@@ -3,14 +3,27 @@
 
 #include "GameObject.h"
 #include "Component.h"
+#include "Event.h"
 
 class Movement;
 
-class PlayerController : public Component
+class PlayerInput : public Component
 {
 public:
-  PlayerController(GameObject &associatedObject);
-  virtual ~PlayerController() {}
+  PlayerInput(GameObject &associatedObject);
+  virtual ~PlayerInput() {}
+
+  // Raised on movement input
+  EventI<float> OnMoveDirection;
+
+  // Raised on jump input
+  Event OnJump;
+
+  // Raised on fast fall
+  Event OnFastFall;
+
+  // Raised on stop fast fall
+  Event OnFastFallStop;
 
   void Update(float deltaTime) override;
 
@@ -20,9 +33,6 @@ private:
 
   // Issues new direction
   void SetDirection(float direction);
-
-  // Reference to movement component
-  Movement &movement;
 
   // Last direction issued to Movement
   float currentDirection{0};

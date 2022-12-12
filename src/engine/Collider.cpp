@@ -8,12 +8,12 @@ using namespace std;
 
 Rectangle RectangleFromAnimator(Animator &animator, Vector2 scale)
 {
-  Animation &initialAnimation = animator.GetAnimation(animator.initialAnimation);
+  Animation &defaultAnimation = animator.GetAnimation(animator.defaultAnimation);
   return Rectangle(
       0,
       0,
-      initialAnimation[0].GetSprite()->GetWidth() * scale.x,
-      initialAnimation[0].GetSprite()->GetHeight() * scale.y);
+      defaultAnimation[0].GetSprite()->GetWidth() * scale.x,
+      defaultAnimation[0].GetSprite()->GetHeight() * scale.y);
 }
 
 // Explicitly initialize box

@@ -52,7 +52,10 @@ public:
   static std::vector<AnimationFrame> SliceSpritesheet(
       std::string filename, SpritesheetClipInfo clipInfo, float frameDuration, SpriteConfig config = SpriteConfig());
 
+  // Raised when the last frame finishes, even if is looping
   Event OnCycleEnd;
+
+  // Raised when this animation stops playing (either interrupted or finished)
   Event OnStop;
 
   // It's identifier
@@ -66,6 +69,9 @@ public:
 
   // Whether to loop
   bool loop{false};
+
+  // Whether to transition to animator default animation after finish (ignored if looping)
+  bool transitionToDefault{true};
 
 protected:
   // Starts playing each frame sequentially, according to their duration and the playback speed

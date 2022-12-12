@@ -82,8 +82,13 @@ void Animation::Update(float deltaTime)
     // If not looping
     if (loop == false)
     {
+      // Transition to default
+      if (transitionToDefault)
+        animator.Play(animator.defaultAnimation);
+
       // Stop
-      animator.Stop();
+      else
+        animator.Stop();
       return;
     }
   }

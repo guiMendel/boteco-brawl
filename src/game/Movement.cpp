@@ -1,4 +1,5 @@
 #include "Movement.h"
+#include "Character.h"
 #include "Rigidbody.h"
 
 using namespace std;
@@ -30,7 +31,12 @@ float Movement::GetDirection() { return targetSpeed / defaultSpeed; }
 
 void Movement::Start()
 {
+  // Remember gravity scale
   originalGravityScale = rigidbody.gravityScale;
+
+  // When control is lost, stop fast falling
+  gameObject.RequireComponent<Character>()->OnControlChange.AddListener("stop-fast-falling", [this](bool hasControl)
+                                                                        { if (hasControl == false) StopFallFast(); });
 }
 
 void Movement::OnLandInternal()

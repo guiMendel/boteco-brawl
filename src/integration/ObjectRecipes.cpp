@@ -7,9 +7,11 @@
 #include "Rigidbody.h"
 #include "Rectangle.h"
 #include "Movement.h"
-#include "PlayerController.h"
+#include "PlayerInput.h"
 #include "Animator.h"
 #include "AnimationRecipes.h"
+#include "CharacterController.h"
+#include "Character.h"
 #include <iostream>
 
 using namespace std;
@@ -55,7 +57,14 @@ auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject
     auto animator = character->AddComponent<Animator>();
 
     // Add animations
+    animator->AddAnimation(AnimationRecipes::Idle);
     animator->AddAnimation(AnimationRecipes::Run);
+    animator->AddAnimation(AnimationRecipes::Jump);
+    animator->AddAnimation(AnimationRecipes::Rise);
+    animator->AddAnimation(AnimationRecipes::Fall);
+    animator->AddAnimation(AnimationRecipes::Land);
+    animator->AddAnimation(AnimationRecipes::Brake);
+    animator->AddAnimation(AnimationRecipes::Punch);
 
     // Give it collision
     auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0, 0);
@@ -66,7 +75,9 @@ auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject
 
     // Give it movement
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
-    character->AddComponent<PlayerController>();
+    character->AddComponent<::Character>();
+    character->AddComponent<PlayerInput>();
+    character->AddComponent<CharacterController>();
   };
 }
 

@@ -34,5 +34,5 @@ void MainState::InitializeObjects()
   // player2->velocity = Vector2(-2, 1);
 
   // Play music
-  music.Play("./assets/music/main.mp3");
+  // music.Play("./assets/music/main.mp3");
 }
