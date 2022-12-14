@@ -17,6 +17,7 @@ public:
 
 private:
   void Start() override;
+  void Update(float deltaTime) override;
 
   void Dispatch(Action::Callback callback, int priority, Action::state_getter getState, std::unordered_set<std::string> friends = {});
   void DispatchAnimation(std::string animation, int priority, Action::state_getter getState, std::unordered_set<std::string> friends = {});
@@ -24,8 +25,12 @@ private:
 
   void DispatchMovement(float direction);
 
+  void HandleMovementAnimation();
+
   Character &character;
   Movement &movement;
+  Rigidbody &rigidbody;
+  Animator &animator;
 };
 
 #endif

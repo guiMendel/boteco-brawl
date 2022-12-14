@@ -8,14 +8,14 @@ class Action;
 
 struct CharacterState
 {
-  // Unique identifier pool
+  // Unique name pool
   static unsigned idGenerator;
 
   // State unique identifier
   const unsigned id{idGenerator++};
 
-  // State identifier
-  const std::string identifier;
+  // State name
+  const std::string name;
 
   // Interruption priority of this state
   // Only actions with this priority or higher will be allowed to interrupt this state
@@ -24,8 +24,8 @@ struct CharacterState
   // The action that resulted in this state (if any)
   const std::shared_ptr<Action> parentAction;
 
-  CharacterState(std::string identifier, int priority, std::shared_ptr<Action> parentAction = nullptr)
-      : identifier(identifier), priority(priority), parentAction(parentAction) {}
+  CharacterState(std::string name, int priority, std::shared_ptr<Action> parentAction = nullptr)
+      : name(name), priority(priority), parentAction(parentAction) {}
 };
 
 #endif

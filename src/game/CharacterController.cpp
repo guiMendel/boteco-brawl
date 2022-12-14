@@ -3,15 +3,57 @@
 #include "Action.h"
 #include "PlayerInput.h"
 
+// Action priorities
 #define MOVEMENT_PRIORITY 1
 #define JUMP_PRIORITY 1
+#define LAND_PRIORITY 2
 
 using namespace std;
 
 CharacterController::CharacterController(GameObject &associatedObject)
     : Component(associatedObject),
       character(*gameObject.RequireComponent<Character>()),
-      movement(*gameObject.RequireComponent<Movement>()) {}
+      movement(*gameObject.RequireComponent<Movement>()),
+      rigidbody(*gameObject.RequireComponent<Rigidbody>()),
+      animator(*gameObject.RequireComponent<Animator>()) {}
+
+void CharacterController::Update([[maybe_unused]] float deltaTime)
+{
+  HandleMovementAnimation();
+}
+
+void CharacterController::HandleMovementAnimation()
+{
+  // Moving animations
+  auto states = character.GetStates();
+
+  // Whether just moving
+  bool justMoving = states.size() == 1 && states.front()->name == "moving";
+
+  if (movement.IsGrounded())
+  {
+    // When grounded, run animation if moving is the only state
+    if (justMoving)
+    {
+      // See if moving in the same direction as input
+      if (GetSign(movement.GetDirection()) == GetSign(rigidbody.velocity.x))
+        animator.Play("run");
+
+      // If not, use brake animation
+      else
+        animator.Play("brake");
+    }
+
+    // Otherwise, stop run animation if it's playing
+    else if (animator.GetCurrentAnimation() == "run")
+      animator.Play("idle");
+  }
+
+  else
+    // When not grounded, rise & fall animations
+    if (justMoving || states.size() == 0)
+      animator.Play(rigidbody.velocity.y >= 0 ? "fall" : "rise");
+}
 
 void CharacterController::Start()
 {
@@ -26,13 +68,17 @@ void CharacterController::Start()
   // Subscribe to jumps
   // Make it a friend of moving
   input->OnJump.AddListener("character-controller", [this, animator]()
-                            { DispatchAnimation("jump", JUMP_PRIORITY, CharacterStateRecipes::Jumping, unordered_set({"moving"s})); });
+                            { if (movement.CanJump() ) DispatchAnimation("jump", JUMP_PRIORITY, CharacterStateRecipes::Jumping, unordered_set({"moving"s})); });
 
   // Fast falling isn't an action
   input->OnFastFall.AddListener("character-controller", [this]()
                                 { if (character.HasControl()) movement.FallFast(); });
   input->OnFastFallStop.AddListener("character-controller", [this]()
                                     { movement.StopFallFast(); });
+
+  // Land behavior
+  movement.OnLand.AddListener("character-controller", [this]()
+                              { DispatchAnimation("land", LAND_PRIORITY, CharacterStateRecipes::Landing, unordered_set({"moving"s})); });
 }
 
 void CharacterController::Dispatch(Action::Callback callback, int priority, Action::state_getter getState, unordered_set<string> friends)
@@ -59,7 +105,7 @@ void CharacterController::DispatchMovement(float direction)
                                         MOVEMENT_PRIORITY,
                                         direction == 0 ? nullptr : CharacterStateRecipes::Moving,
                                         // Add jump as friend state
-                                        unordered_set({"jumping"s}));
+                                        unordered_set({"jumping"s, "landing"s}));
 
   // Add a stop callback to stop movement
   moveAction->stopCallback = [this](GameObject &)

@@ -35,6 +35,12 @@ public:
   // Set gravity modifier applied on jump
   void SetJumpGravityModifier(float value);
 
+  // Whether is grounded
+  bool IsGrounded() const;
+
+  // Whether character can jump this frame
+  bool CanJump() const;
+
   // === HORIZONTAL MOVEMENT
 
   // Movement acceleration, in units/s/s

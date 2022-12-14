@@ -141,7 +141,7 @@ public:
   // Object's rotation, in radians
   double localRotation{0};
 
-  // Object's unique identifier
+  // Object's unique name
   const int id;
 
   // This object's tag

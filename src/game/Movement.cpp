@@ -114,7 +114,7 @@ void Movement::Jump()
   lastJumpTime = 0;
 
   // If not grounded
-  if (isGrounded == false)
+  if (IsGrounded() == false)
   {
     // Stop if can't double jump
     if (doubleJumpAvailable == false)
@@ -178,3 +178,7 @@ void Movement::GroundCheck()
     OnLand.Invoke();
   }
 }
+
+bool Movement::IsGrounded() const { return isGrounded; }
+
+bool Movement::CanJump() const { return IsGrounded() || doubleJumpAvailable; }

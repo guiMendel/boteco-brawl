@@ -101,7 +101,7 @@ public:
   // Preloads all the assets so that they are ready when required
   virtual void LoadAssets() {}
 
-  // Supplies a valid unique identifier for a game object or a component
+  // Supplies a valid unique name for a game object or a component
   int SupplyId() { return nextId++; }
 
   void RegisterLayerRenderer(std::shared_ptr<Component> component);

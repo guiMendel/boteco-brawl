@@ -58,7 +58,7 @@ public:
   // Raised when this animation stops playing (either interrupted or finished)
   Event OnStop;
 
-  // It's identifier
+  // It's name
   const std::string name;
 
   // Each and every animation frame, to be played sequentially

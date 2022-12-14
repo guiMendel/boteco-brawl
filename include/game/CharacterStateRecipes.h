@@ -14,6 +14,7 @@ public:
   static std::shared_ptr<CharacterState> Dashing(std::shared_ptr<Action>);
   static std::shared_ptr<CharacterState> Jumping(std::shared_ptr<Action>);
   static std::shared_ptr<CharacterState> Attacking(std::shared_ptr<Action>);
+  static std::shared_ptr<CharacterState> Landing(std::shared_ptr<Action>);
 };
 
 #endif

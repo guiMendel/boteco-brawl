@@ -11,8 +11,8 @@ const list<shared_ptr<CharacterState>> Character::GetStates() const { return sta
 void Character::SetState(shared_ptr<CharacterState> newState, unordered_set<string> keepStates)
 {
   // Check if new state is in keep states
-  if (keepStates.count(newState->identifier) > 0)
-    keepStates.erase(newState->identifier);
+  if (keepStates.count(newState->name) > 0)
+    keepStates.erase(newState->name);
 
   RemoveStatesNotIn(keepStates);
 
@@ -32,7 +32,7 @@ void Character::RemoveStatesNotIn(std::unordered_set<std::string> keepStates)
       auto state = *stateIterator;
 
       // If it's in the list, continue
-      if (keepStates.count(state->identifier) > 0)
+      if (keepStates.count(state->name) > 0)
         stateIterator++;
 
       // Otherwise, remove it

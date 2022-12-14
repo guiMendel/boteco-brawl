@@ -33,12 +33,12 @@ auto AnimationRecipes::Jump(Animator &animator) -> shared_ptr<Animation>
 
 auto AnimationRecipes::Rise(Animator &animator) -> shared_ptr<Animation>
 {
-  auto clipInfo = SpritesheetClipInfo(8, 8, 1);
+  auto clipInfo = SpritesheetClipInfo(8, 8, 4);
   clipInfo.startingFrame = 2;
 
   return make_shared<Animation>("rise",
                                 animator,
-                                Animation::SliceSpritesheet("./assets/sprites/jump.png", clipInfo, 0.1));
+                                Animation::SliceSpritesheet("./assets/sprites/jump.png", clipInfo, 0.3), true);
 }
 
 auto AnimationRecipes::Fall(Animator &animator) -> shared_ptr<Animation>
@@ -58,7 +58,7 @@ auto AnimationRecipes::Land(Animator &animator) -> shared_ptr<Animation>
 
   return make_shared<Animation>("land",
                                 animator,
-                                Animation::SliceSpritesheet("./assets/sprites/jump.png", clipInfo, 0.1));
+                                Animation::SliceSpritesheet("./assets/sprites/jump.png", clipInfo, 0.2));
 }
 
 auto AnimationRecipes::Brake(Animator &animator) -> shared_ptr<Animation>

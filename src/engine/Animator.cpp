@@ -49,8 +49,18 @@ void Animator::Stop()
   currentAnimation = "";
 }
 
+void Animator::Stop(string animation)
+{
+  if (currentAnimation == animation)
+    Stop();
+}
+
 void Animator::Play(string animation, function<void()> stopCallback)
 {
+  // Skip if already playing this
+  if (animation == currentAnimation)
+    return;
+
   // Validate name
   Assert(animations.find(animation) != animations.end(), "Animator couldn't find animation with name \"" + animation + "\"");
 
@@ -73,3 +83,5 @@ Animation &Animator::GetAnimation(string name)
 {
   return *animations[name];
 }
+
+string Animator::GetCurrentAnimation() const { return currentAnimation; }

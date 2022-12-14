@@ -16,7 +16,7 @@ struct Action
   using Callback = std::function<void(GameObject &, std::shared_ptr<CharacterState>)>;
 
   // Whether this action is friends with this state
-  bool IsFriend(std::shared_ptr<CharacterState> state) const { return friendStates.count(state->identifier) > 0; }
+  bool IsFriend(std::shared_ptr<CharacterState> state) const { return friendStates.count(state->name) > 0; }
 
   // Executed when this action is triggered
   const Callback callback;

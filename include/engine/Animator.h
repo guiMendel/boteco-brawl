@@ -37,9 +37,15 @@ public:
   // Stops current animation and starts the given one
   void Play(std::string animation, std::function<void()> stopCallback = nullptr);
 
+  // Stops any animation
   void Stop();
 
+  // If the current animation is this, stops it
+  void Stop(std::string animation);
+
   Animation &GetAnimation(std::string name);
+
+  std::string GetCurrentAnimation() const;
 
   // Triggered on animation cycle end
   Event OnCycleEnd;

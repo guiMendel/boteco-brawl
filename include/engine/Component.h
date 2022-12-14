@@ -55,7 +55,7 @@ public:
   // Whether the component is active
   bool enabled{true};
 
-  // Component's unique identifier
+  // Component's unique name
   const int id;
 
 protected:

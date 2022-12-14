@@ -127,7 +127,7 @@ vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetC
   vector<AnimationFrame> frames;
 
   // Get initial frame coordinate
-  int initialRow = clipInfo.startingFrame / rowFrameCount, initialColumn = clipInfo.startingFrame % columnFrameCount;
+  int initialRow = clipInfo.startingFrame / columnFrameCount, initialColumn = clipInfo.startingFrame % columnFrameCount;
 
   // For each row
   for (int row = initialRow; row < rowFrameCount && frames.size() < (size_t)clipInfo.totalFrames; row++)
