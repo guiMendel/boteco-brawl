@@ -8,10 +8,20 @@ void PlayerInput::Update([[maybe_unused]] float deltaTime)
 {
   // Detect idle
   if (inputManager.KeyRelease(SDLK_d))
-    CancelDirection(1);
+  {
+    if (inputManager.IsKeyDown(SDLK_a))
+      SetDirection(-1);
+    else
+      CancelDirection(1);
+  }
 
   if (inputManager.KeyRelease(SDLK_a))
-    CancelDirection(-1);
+  {
+    if (inputManager.IsKeyDown(SDLK_d))
+      SetDirection(1);
+    else
+      CancelDirection(-1);
+  }
 
   // Detect keyboard movement keys
   if (inputManager.KeyPress(SDLK_d))

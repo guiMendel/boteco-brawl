@@ -4,6 +4,12 @@
 #include <string>
 #include <memory>
 
+#define MOVING_STATE "moving"
+#define DASHING_STATE "dashing"
+#define JUMPING_STATE "jumping"
+#define ATTACKING_STATE "attacking"
+#define LANDING_STATE "landing"
+
 class CharacterState;
 class Action;
 

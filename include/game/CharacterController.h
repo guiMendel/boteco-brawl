@@ -19,11 +19,11 @@ private:
   void Start() override;
   void Update(float deltaTime) override;
 
-  void Dispatch(Action::Callback callback, int priority, Action::state_getter getState, std::unordered_set<std::string> friends = {});
-  void DispatchAnimation(std::string animation, int priority, Action::state_getter getState, std::unordered_set<std::string> friends = {});
-  void DispatchAttack(std::string animation, std::unordered_set<std::string> friends = {});
-
-  void DispatchMovement(float direction);
+  template <class ActionType, typename... Args>
+  void Dispatch(Args &&...args)
+  {
+    character.Perform(std::make_shared<ActionType>(std::forward<Args>(args)...));
+  }
 
   void HandleMovementAnimation();
 

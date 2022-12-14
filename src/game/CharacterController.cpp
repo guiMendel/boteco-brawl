@@ -1,12 +1,8 @@
 #include "CharacterController.h"
 #include "CharacterStateRecipes.h"
 #include "Action.h"
+#include "Actions.h"
 #include "PlayerInput.h"
-
-// Action priorities
-#define MOVEMENT_PRIORITY 1
-#define JUMP_PRIORITY 1
-#define LAND_PRIORITY 2
 
 using namespace std;
 
@@ -17,7 +13,7 @@ CharacterController::CharacterController(GameObject &associatedObject)
       rigidbody(*gameObject.RequireComponent<Rigidbody>()),
       animator(*gameObject.RequireComponent<Animator>()) {}
 
-void CharacterController::Update([[maybe_unused]] float deltaTime)
+void CharacterController::Update(float)
 {
   HandleMovementAnimation();
 }
@@ -63,12 +59,12 @@ void CharacterController::Start()
 
   // Subscribe to movement
   input->OnMoveDirection.AddListener("character-controller", [this](float direction)
-                                     { DispatchMovement(direction); });
+                                     { Dispatch<Actions::Move>(direction); });
 
   // Subscribe to jumps
   // Make it a friend of moving
   input->OnJump.AddListener("character-controller", [this, animator]()
-                            { if (movement.CanJump() ) DispatchAnimation("jump", JUMP_PRIORITY, CharacterStateRecipes::Jumping, unordered_set({"moving"s})); });
+                            { if (movement.CanJump() ) Dispatch<Actions::Jump>(); });
 
   // Fast falling isn't an action
   input->OnFastFall.AddListener("character-controller", [this]()
@@ -78,40 +74,5 @@ void CharacterController::Start()
 
   // Land behavior
   movement.OnLand.AddListener("character-controller", [this]()
-                              { DispatchAnimation("land", LAND_PRIORITY, CharacterStateRecipes::Landing, unordered_set({"moving"s})); });
-}
-
-void CharacterController::Dispatch(Action::Callback callback, int priority, Action::state_getter getState, unordered_set<string> friends)
-{
-  character.Perform(make_shared<Action>(callback, priority, getState, friends));
-}
-
-void CharacterController::DispatchAnimation(string animation, int priority, Action::state_getter getState, unordered_set<string> friends)
-{
-  character.Perform(make_shared<AnimationAction>(animation, priority, getState, friends));
-}
-
-void CharacterController::DispatchAttack(string animation, unordered_set<string> friends)
-{
-  character.Perform(make_shared<AttackAction>(animation, friends));
-}
-
-void CharacterController::DispatchMovement(float direction)
-{
-  // Create action
-  // If direction is 0, do not push a moving state
-  auto moveAction = make_shared<Action>([this, direction](GameObject &, [[maybe_unused]] auto _)
-                                        { movement.SetDirection(direction); },
-                                        MOVEMENT_PRIORITY,
-                                        direction == 0 ? nullptr : CharacterStateRecipes::Moving,
-                                        // Add jump as friend state
-                                        unordered_set({"jumping"s, "landing"s}));
-
-  // Add a stop callback to stop movement
-  moveAction->stopCallback = [this](GameObject &)
-  {
-    movement.SetDirection(0);
-  };
-
-  character.Perform(moveAction);
+                              { Dispatch<Actions::Land>(); });
 }

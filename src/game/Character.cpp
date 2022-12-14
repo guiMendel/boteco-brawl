@@ -40,8 +40,8 @@ void Character::RemoveStatesNotIn(std::unordered_set<std::string> keepStates)
       {
         // Call it's stop callback if necessary
         auto parentAction = state->parentAction;
-        if (parentAction != nullptr && parentAction->stopCallback)
-          parentAction->stopCallback(gameObject);
+        if (parentAction != nullptr)
+          parentAction->StopHook(gameObject);
 
         // Announce interruption
         OnInterruptState.Invoke(state);
@@ -56,32 +56,29 @@ void Character::Perform(shared_ptr<Action> action)
 {
   // Check if this action has lower priority than a state which IS NOT in it's friends list
   if (any_of(states.begin(), states.end(), [action](shared_ptr<CharacterState> state)
-             { return state->priority > action->priority && !action->IsFriend(state); }))
+             { return state->priority > action->GetPriority() && !action->IsFriend(state); }))
     return;
 
   // This action's yielded state
-  shared_ptr<CharacterState> newState;
+  shared_ptr<CharacterState> newState = action->NextState(action);
 
   // Set new state
-  if (action->getState)
-  {
-    newState = action->getState(action);
-    SetState(newState, action->friendStates);
-  }
+  if (newState != nullptr)
+    SetState(newState, action->GetFriendStates());
 
   // If no new state, simply remove those not in the list
   else
-    RemoveStatesNotIn(action->friendStates);
+    RemoveStatesNotIn(action->GetFriendStates());
 
   // Trigger this action
-  action->callback(gameObject, newState);
+  action->Trigger(gameObject, newState);
 }
 
 void Character::RemoveState(unsigned id)
 {
   // Find this state
   auto stateIterator = find_if(states.begin(), states.end(), [id](shared_ptr<CharacterState> state)
-                            { return state->id == id; });
+                               { return state->id == id; });
 
   //  If it's not there, stop
   if (stateIterator == states.end())

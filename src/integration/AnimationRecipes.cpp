@@ -58,7 +58,7 @@ auto AnimationRecipes::Land(Animator &animator) -> shared_ptr<Animation>
 
   return make_shared<Animation>("land",
                                 animator,
-                                Animation::SliceSpritesheet("./assets/sprites/jump.png", clipInfo, 0.2));
+                                Animation::SliceSpritesheet("./assets/sprites/jump.png", clipInfo, 0.1));
 }
 
 auto AnimationRecipes::Brake(Animator &animator) -> shared_ptr<Animation>

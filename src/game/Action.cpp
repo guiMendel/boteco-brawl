@@ -5,21 +5,18 @@
 
 using namespace std;
 
-Action::Action(Callback callback, int priority, state_getter getState, unordered_set<string> friendStates)
-    : callback(callback), priority(priority), getState(getState), friendStates(friendStates) {}
-
-AnimationAction::AnimationAction(string animation, int priority, state_getter getState, unordered_set<string> friendStates)
-    : Action([animation, this](GameObject &gameObject, shared_ptr<CharacterState> state)
-             { Trigger(animation, gameObject, state); },
-             priority, getState, friendStates) {}
-
-void AnimationAction::Trigger(string animation, GameObject &gameObject, shared_ptr<CharacterState> state)
+void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
 {
+  // Store these info
+  auto character = target.RequireComponent<Character>();
+  int stateId = actionState->id;
+
   // Start this animation
   // When animation is over, make sure this action's state is no longer active
-  gameObject.RequireComponent<Animator>()->Play(animation, [state, gameObject]()
-                                                { gameObject.RequireComponent<Character>()->RemoveState(state->id); });
+  target.RequireComponent<Animator>()->Play(GetAnimation(), [stateId, character]()
+                                            { if (character) character->RemoveState(stateId); });
 }
 
-AttackAction::AttackAction(string animation, unordered_set<string> friendStates)
-    : AnimationAction(animation, 2, CharacterStateRecipes::Attacking, friendStates) {}
+int AttackAction::GetPriority() const { return 2; }
+
+shared_ptr<CharacterState> AttackAction::NextState(shared_ptr<Action> sharedAction) { return CharacterStateRecipes::Attacking(sharedAction); }
