@@ -379,6 +379,8 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 // Source https://youtu.be/1L2g4ZqmFLQ and https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/previousinformation/physics6collisionresponse/
 void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 {
+  // cout << "Resolving collision between " << collisionData.source->gameObject.GetName() << " and " << collisionData.other->gameObject.GetName() << endl;
+
   // If this collision was already dealt with this frame, ignore it
   if (collisionData.source->RequireRigidbody()->IsCollidingWith(collisionData.other->gameObject))
     return;
@@ -471,6 +473,9 @@ void ApplyImpulse(CollisionData collisionData)
   float displacementDirection = impulseMagnitude < 0 ? -1 : 1;
 
   bodyA->gameObject.Translate(collisionData.normal * bodyADisplacement * displacementDirection);
+
+  // cout << "Displacement: " << bodyADisplacement << endl;
+  // cout << "Normal: " << (string)collisionData.normal << endl;
 
   if (bodyBStatic == false)
     bodyB->gameObject.Translate(-collisionData.normal * bodyBDisplacement * displacementDirection);

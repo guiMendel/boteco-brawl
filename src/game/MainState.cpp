@@ -20,7 +20,7 @@ void MainState::InitializeObjects()
 
   // auto player2 = CreateObject("Player2", ObjectRecipes::Character(), Vector2(4, -2))->GetComponent<Rigidbody>();
 
-  CreateObject("Ground", ObjectRecipes::Platform({20, 1}), Vector2(0, 4));
+  CreateObject("Ground", ObjectRecipes::Platform({20, 2}), Vector2(0, 4));
 
   CreateObject("WallLeft", ObjectRecipes::Platform({1, 5}), Vector2(-5, 0));
   CreateObject("WallRight", ObjectRecipes::Platform({1, 5}), Vector2(5, 0));

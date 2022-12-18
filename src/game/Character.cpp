@@ -10,10 +10,10 @@ Character::Character(GameObject &associatedObject)
 
 void Character::Update(float deltaTime)
 {
-  cout << "States: ";
-  for (auto state : states)
-    cout << state->name << " ";
-  cout << endl;
+  // cout << "States: ";
+  // for (auto state : states)
+  //   cout << state->name << " ";
+  // cout << endl;
 
   // Discount queue time
   if (queuedActionTTL <= 0)
@@ -147,7 +147,7 @@ void Character::AddState(std::shared_ptr<CharacterState> newState)
                                { return state->name == newState->name; });
 
   if (stateIterator != states.end())
-    RemoveState(stateIterator, true);
+    RemoveState(stateIterator, true, true);
 
   // Add it
   states.push_back(newState);

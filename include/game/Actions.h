@@ -52,7 +52,6 @@ namespace Actions
     Dash(Vector2 direction) : direction(direction) {}
     Vector2 direction;
     Vector2 originalGravityScale;
-    Vector2 originalVelocity;
     float originalAirFriction;
 
     // Params

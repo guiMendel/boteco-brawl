@@ -41,7 +41,8 @@ void CharacterController::HandleMovementAnimation()
     }
 
     // Otherwise, stop run animation if it's playing
-    else if (animator.GetCurrentAnimation() == "run")
+    else if (animator.GetCurrentAnimation() == "run" || animator.GetCurrentAnimation() == "brake")
+    // else if (animator.GetCurrentAnimation() == "run")
       animator.Play("idle");
   }
 

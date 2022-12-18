@@ -31,16 +31,19 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   // Store original values
   originalGravityScale = rigidbody->gravityScale;
   originalAirFriction = rigidbody->airFriction;
-  originalVelocity = rigidbody->velocity;
 
   // Ignore gravity throughout dash
-  rigidbody->gravityScale = Vector2::Zero();
+  rigidbody->gravityScale = Vector2(0, 0.01);
 
   // Use dash friction
   rigidbody->airFriction = dashFriction;
 
   // Apply dash velocity
   rigidbody->velocity = direction * dashSpeed;
+
+  // Align facing direction to dash direction
+  if (direction.x != 0)
+    target.localScale.x = Helper::GetSign(direction.x);
 
   // Disable character control
   character->SetControl(false);
@@ -53,14 +56,13 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   int recoveringStateId = recoveringState->id;
 
   // Add a callback to the animation to switch to recovering state
-  Animator::frame_callbacks dashCallbacks = {};
-  // Animator::frame_callbacks dashCallbacks = {
-  //     {2, [dashState, character, recoveringState, this]()
-  //      {
-  //        cout << "Switching to recovering state" << endl;
-  //        dashState->parentAction = nullptr;
-  //        character->SetState(recoveringState, GetFriendStates());
-  //      }}};
+  // Animator::frame_callbacks dashCallbacks = {};
+  Animator::frame_callbacks dashCallbacks = {
+      {2, [dashState, character, recoveringState, this]()
+       {
+         dashState->parentAction = nullptr;
+         character->SetState(recoveringState, GetFriendStates());
+       }}};
 
   // Start this animation
   // When animation is over, make sure this action's states are disabled
@@ -73,13 +75,10 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
 
 void Dash::StopHook(GameObject &target)
 {
-  cout << "Restoring rigidbody" << endl;
-
   auto rigidbody = target.GetComponent<Rigidbody>();
 
   // Restore original values
   rigidbody->gravityScale = originalGravityScale;
   rigidbody->airFriction = originalAirFriction;
-  rigidbody->velocity = originalVelocity;
   target.GetComponent<Character>()->SetControl(true);
 }
