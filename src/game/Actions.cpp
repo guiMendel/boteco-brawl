@@ -19,8 +19,8 @@ void Move::StopHook(GameObject &target)
 
 // ============================= DASH =============================
 
-const float Dash::dashFriction{0};
-const float Dash::dashSpeed{5};
+const float Dash::dashFriction{0.995};
+const float Dash::dashSpeed{50};
 
 void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
 {

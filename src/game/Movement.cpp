@@ -183,3 +183,11 @@ void Movement::GroundCheck()
 bool Movement::IsGrounded() const { return isGrounded; }
 
 bool Movement::CanJump() const { return IsGrounded() || doubleJumpAvailable; }
+
+void Movement::WasteDoubleJump()
+{
+  if (IsGrounded())
+    return;
+
+  doubleJumpAvailable = false;
+}

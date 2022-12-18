@@ -85,5 +85,5 @@ auto AnimationRecipes::Dash(Animator &animator) -> shared_ptr<Animation>
 
   return make_shared<Animation>("dash",
                                 animator,
-                                Animation::SliceSpritesheet("./assets/sprites/carry.png", clipInfo, 0.2));
+                                Animation::SliceSpritesheet("./assets/sprites/carry.png", clipInfo, 0.1));
 }

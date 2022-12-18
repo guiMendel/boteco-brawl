@@ -33,6 +33,19 @@ private:
 
   void HandleMovementAnimation();
 
+  void DispatchDash(Vector2 direction);
+
+  void OnLand();
+
+  // Whether an air dash is available
+  bool airDashAvailable{true};
+
+  // Current seconds remaining before a dash can be used again
+  float dashCooldown{0};
+
+  // How long (seconds) character must wait between successive dashes
+  static const float totalDashCooldown;
+
   Character &character;
   Movement &movement;
   Rigidbody &rigidbody;

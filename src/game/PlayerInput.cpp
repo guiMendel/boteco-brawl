@@ -68,16 +68,7 @@ void PlayerInput::Update([[maybe_unused]] float deltaTime)
 
   // Detect dash input
   if (inputManager.KeyPress(SDLK_k))
-  {
-    // Get direction
-    Vector2 direction = inputDirection;
-
-    // If no direction was provided, use object's facing direction
-    if (!direction)
-      direction = Vector2(gameObject.localScale.x, 0);
-
-    OnDash.Invoke(direction);
-  }
+    OnDash.Invoke(inputDirection);
 }
 
 void PlayerInput::SetDirection(float direction)

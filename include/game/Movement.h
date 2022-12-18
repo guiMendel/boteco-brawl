@@ -42,6 +42,9 @@ public:
   // Whether character can jump this frame
   bool CanJump() const;
 
+  // Wastes the double jump, making it so it can't be used until landing
+  void WasteDoubleJump();
+
   // === HORIZONTAL MOVEMENT
 
   // Movement acceleration, in units/s/s

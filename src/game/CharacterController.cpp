@@ -6,6 +6,8 @@
 
 using namespace std;
 
+const float CharacterController::totalDashCooldown{1};
+
 CharacterController::CharacterController(GameObject &associatedObject)
     : Component(associatedObject),
       character(*gameObject.RequireComponent<Character>()),
@@ -13,9 +15,13 @@ CharacterController::CharacterController(GameObject &associatedObject)
       rigidbody(*gameObject.RequireComponent<Rigidbody>()),
       animator(*gameObject.RequireComponent<Animator>()) {}
 
-void CharacterController::Update(float)
+void CharacterController::Update(float deltaTime)
 {
   HandleMovementAnimation();
+
+  // Update dash cooldown
+  if (dashCooldown > 0)
+    dashCooldown -= deltaTime;
 }
 
 void CharacterController::HandleMovementAnimation()
@@ -42,7 +48,7 @@ void CharacterController::HandleMovementAnimation()
 
     // Otherwise, stop run animation if it's playing
     else if (animator.GetCurrentAnimation() == "run" || animator.GetCurrentAnimation() == "brake")
-    // else if (animator.GetCurrentAnimation() == "run")
+      // else if (animator.GetCurrentAnimation() == "run")
       animator.Play("idle");
   }
 
@@ -80,7 +86,7 @@ void CharacterController::Start()
 
   // Land behavior
   movement.OnLand.AddListener("character-controller", [this]()
-                              { DispatchNonDelayable<Actions::Land>(); });
+                              { OnLand(); });
 
   // Attacks
   input->OnNeutralAttack.AddListener("character-controller", [this]()
@@ -88,5 +94,44 @@ void CharacterController::Start()
 
   //  Dash
   input->OnDash.AddListener("character-controller", [this](Vector2 direction)
-                            { Dispatch<Actions::Dash>(direction); });
+                            { DispatchDash(direction); });
+}
+
+void CharacterController::OnLand()
+{
+  airDashAvailable = true;
+
+  // Perform land action
+  DispatchNonDelayable<Actions::Land>();
+}
+
+void CharacterController::DispatchDash(Vector2 direction)
+{
+  // Check cooldown
+  if (dashCooldown > 0)
+    return;
+
+  // Check if airborne
+  if (movement.IsGrounded() == false)
+  {
+    if (airDashAvailable == false)
+      return;
+
+    airDashAvailable = false;
+
+    // Also remove the double jump
+    movement.WasteDoubleJump();
+  }
+
+  // If not airborne, forbid vertical dashes
+  else
+    direction.y = 0;
+
+  // If no direction, use object's facing direction
+  if (!direction)
+    direction = Vector2(gameObject.localScale.x, 0);
+
+  dashCooldown = totalDashCooldown;
+
+  Dispatch<Actions::Dash>(direction);
 }
