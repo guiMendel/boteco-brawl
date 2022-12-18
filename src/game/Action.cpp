@@ -7,6 +7,8 @@ using namespace std;
 
 void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
 {
+  // cout << "Playing " << GetAnimation() << endl;
+
   // Store these info
   auto character = target.RequireComponent<Character>();
   int stateId = actionState->id;

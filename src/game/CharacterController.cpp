@@ -59,7 +59,7 @@ void CharacterController::Start()
 
   // Subscribe to movement
   input->OnMoveDirection.AddListener("character-controller", [this](float direction)
-                                     { Dispatch<Actions::Move>(direction); });
+                                     { DispatchNonDelayable<Actions::Move>(direction); });
 
   // Make sure to dispatch another movement if movement key is being held when character becomes idle
   character.OnEnterIdle.AddListener("check-if-moving", [this, input]()
@@ -79,7 +79,7 @@ void CharacterController::Start()
 
   // Land behavior
   movement.OnLand.AddListener("character-controller", [this]()
-                              { Dispatch<Actions::Land>(); });
+                              { DispatchNonDelayable<Actions::Land>(); });
 
   // Attacks
   input->OnNeutralAttack.AddListener("character-controller", [this]()

@@ -17,6 +17,7 @@ public:
   static auto Idle(Animator &animator) -> std::shared_ptr<Animation>;
   static auto Brake(Animator &animator) -> std::shared_ptr<Animation>;
   static auto Punch(Animator &animator) -> std::shared_ptr<Animation>;
+  static auto Dash(Animator &animator) -> std::shared_ptr<Animation>;
 };
 
 #endif

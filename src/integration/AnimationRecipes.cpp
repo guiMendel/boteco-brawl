@@ -15,7 +15,7 @@ auto AnimationRecipes::Idle(Animator &animator) -> shared_ptr<Animation>
 {
   return make_shared<Animation>("idle",
                                 animator,
-                                Animation::SliceSpritesheet("./assets/sprites/idle.png", SpritesheetClipInfo(8, 8), 0.1));
+                                Animation::SliceSpritesheet("./assets/sprites/idle.png", SpritesheetClipInfo(8, 8), 0.1), true);
 }
 
 auto AnimationRecipes::Jump(Animator &animator) -> shared_ptr<Animation>
@@ -48,7 +48,7 @@ auto AnimationRecipes::Fall(Animator &animator) -> shared_ptr<Animation>
 
   return make_shared<Animation>("fall",
                                 animator,
-                                Animation::SliceSpritesheet("./assets/sprites/jump.png", clipInfo, 0.1));
+                                Animation::SliceSpritesheet("./assets/sprites/jump.png", clipInfo, 0.1), true);
 }
 
 auto AnimationRecipes::Land(Animator &animator) -> shared_ptr<Animation>
@@ -68,7 +68,7 @@ auto AnimationRecipes::Brake(Animator &animator) -> shared_ptr<Animation>
 
   return make_shared<Animation>("brake",
                                 animator,
-                                Animation::SliceSpritesheet("./assets/sprites/carry.png", clipInfo, 0.1));
+                                Animation::SliceSpritesheet("./assets/sprites/carry.png", clipInfo, 0.1), true);
 }
 
 auto AnimationRecipes::Punch(Animator &animator) -> shared_ptr<Animation>
@@ -76,4 +76,14 @@ auto AnimationRecipes::Punch(Animator &animator) -> shared_ptr<Animation>
   return make_shared<Animation>("punch",
                                 animator,
                                 Animation::SliceSpritesheet("./assets/sprites/throw.png", SpritesheetClipInfo(8, 8), 0.1));
+}
+
+auto AnimationRecipes::Dash(Animator &animator) -> shared_ptr<Animation>
+{
+  auto clipInfo = SpritesheetClipInfo(8, 8, 3);
+  clipInfo.startingFrame = 5;
+
+  return make_shared<Animation>("dash",
+                                animator,
+                                Animation::SliceSpritesheet("./assets/sprites/carry.png", clipInfo, 0.2));
 }

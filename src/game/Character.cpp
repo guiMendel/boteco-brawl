@@ -3,9 +3,36 @@
 #include <algorithm>
 
 using namespace std;
+const float Character::maxActionDelay{1};
 
 Character::Character(GameObject &associatedObject)
     : Component(associatedObject) {}
+
+void Character::Update(float deltaTime)
+{
+  // cout << "States: ";
+  // for (auto state : states)
+  //   cout << state->name << " ";
+  // cout << endl;
+
+  // Discount queue time
+  if (queuedActionTTL <= 0)
+    return;
+
+  // Maybe perform the queued action
+  if (queuedAction != nullptr && CanPerform(queuedAction))
+  {
+    Perform(queuedAction);
+    queuedAction = nullptr;
+    queuedActionTTL = 0;
+    return;
+  }
+
+  queuedActionTTL -= deltaTime;
+
+  if (queuedActionTTL <= 0)
+    queuedAction = nullptr;
+}
 
 const list<shared_ptr<CharacterState>> Character::GetStates() const { return states; }
 void Character::SetState(shared_ptr<CharacterState> newState, unordered_set<string> keepStates)
@@ -47,12 +74,30 @@ void Character::RemoveStatesNotIn(std::unordered_set<std::string> keepStates)
   }
 }
 
-void Character::Perform(shared_ptr<Action> action)
+void Character::QueueAction(std::shared_ptr<Action> action)
+{
+  queuedAction = action;
+
+  // Reset time
+  queuedActionTTL = maxActionDelay;
+}
+
+bool Character::CanPerform(std::shared_ptr<Action> action)
 {
   // Check if this action has lower priority than a state which IS NOT in it's friends list
-  if (any_of(states.begin(), states.end(), [action](shared_ptr<CharacterState> state)
-             { return state->priority > action->GetPriority() && !action->IsFriend(state); }))
+  return !any_of(states.begin(), states.end(), [action](shared_ptr<CharacterState> state)
+                 { return state->priority > action->GetPriority() && !action->IsFriend(state); });
+}
+
+void Character::Perform(shared_ptr<Action> action, bool canDelay)
+{
+  if (CanPerform(action) == false)
+  {
+    // Push to queue if possible
+    if (canDelay)
+      QueueAction(action);
     return;
+  }
 
   // This action's yielded state
   shared_ptr<CharacterState> newState = action->NextState(action);

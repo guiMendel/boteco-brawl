@@ -42,11 +42,13 @@ void Animator::Stop()
   if (currentAnimation == "")
     return;
 
-  // Stop it
-  animations[currentAnimation]->Stop();
+  auto stoppedAnimation = currentAnimation;
 
   // Forget it
   currentAnimation = "";
+
+  // Stop it
+  animations[stoppedAnimation]->Stop();
 }
 
 void Animator::Stop(string animation)
@@ -65,8 +67,7 @@ void Animator::Play(string animation, function<void()> stopCallback)
   Assert(animations.find(animation) != animations.end(), "Animator couldn't find animation with name \"" + animation + "\"");
 
   // Stop current animation
-  if (currentAnimation != "")
-    animations[currentAnimation]->Stop();
+  Stop();
 
   // Remember it
   currentAnimation = animation;

@@ -40,19 +40,37 @@ public:
   void RemoveState(unsigned id);
 
   // If the action's priority is high enough, trigger it for this character and set it's state accordingly
-  void Perform(std::shared_ptr<Action> action);
+  // The canDelay param specifies if this action can wait until the current state is over, if it's not able to interrupt it immediately
+  void Perform(std::shared_ptr<Action> action, bool canDelay = false);
 
   // Whether character has control
   bool HasControl() const { return hasControl; }
 
+  void Update(float) override;
+
 private:
   void AddState(std::shared_ptr<CharacterState> newState);
+
+  // Puts an action in the queue
+  void QueueAction(std::shared_ptr<Action> action);
+
+  // Checks if character is able to perform this action this frame
+  bool CanPerform(std::shared_ptr<Action> action);
+
+  // Action waiting to be performed as soon as there isn't an impeding state anymore
+  std::shared_ptr<Action> queuedAction;
+
+  // How much time the queued action still has to trigger before being discarded
+  float queuedActionTTL{0};
 
   // Whether character currently has control over itself
   bool hasControl{true};
 
   // Current states of the character
   std::list<std::shared_ptr<CharacterState>> states;
+
+  // Max seconds an action can stay in the queue before being discarded
+  static const float maxActionDelay;
 
   auto RemoveState(decltype(states)::iterator stateIterator, bool ignoreIdleEvent = false) -> decltype(states)::iterator;
 };
