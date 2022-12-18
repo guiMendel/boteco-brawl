@@ -49,6 +49,9 @@ void Animator::Stop()
 
   // Stop it
   animations[stoppedAnimation]->Stop();
+
+  // Erase all callbacks
+  currentAnimationCallbacks.clear();
 }
 
 void Animator::Stop(string animation)
@@ -57,7 +60,7 @@ void Animator::Stop(string animation)
     Stop();
 }
 
-void Animator::Play(string animation, function<void()> stopCallback)
+void Animator::Play(string animation, frame_callbacks callbacks, function<void()> stopCallback)
 {
   // Skip if already playing this
   if (animation == currentAnimation)
@@ -75,9 +78,17 @@ void Animator::Play(string animation, function<void()> stopCallback)
   // Start it
   animations[animation]->Start();
 
-  // Add it's callback
+  // Add it's stop callback
   if (stopCallback)
     animations[animation]->OnStop.AddOneShotListener("play-callback", stopCallback);
+
+  // Add it's frame callbacks
+  currentAnimationCallbacks = callbacks;
+}
+
+void Animator::Play(string animation, function<void()> stopCallback)
+{
+  Play(animation, {}, stopCallback);
 }
 
 Animation &Animator::GetAnimation(string name)
@@ -86,3 +97,10 @@ Animation &Animator::GetAnimation(string name)
 }
 
 string Animator::GetCurrentAnimation() const { return currentAnimation; }
+
+void Animator::IndicateCurrentFrame(int frame)
+{
+  // Trigger this frames callback if it's there
+  if (currentAnimationCallbacks.count(frame) > 0)
+    currentAnimationCallbacks[frame]();
+}

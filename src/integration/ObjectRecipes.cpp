@@ -65,6 +65,7 @@ auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject
     animator->AddAnimation(AnimationRecipes::Land);
     animator->AddAnimation(AnimationRecipes::Brake);
     animator->AddAnimation(AnimationRecipes::Punch);
+    animator->AddAnimation(AnimationRecipes::Dash);
 
     // Give it collision
     auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0, 0);
@@ -74,8 +75,8 @@ auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject
     body->continuousCollisions = true;
 
     // Give it movement
-    character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
     character->AddComponent<::Character>();
+    character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
     character->AddComponent<PlayerInput>();
     character->AddComponent<CharacterController>();
   };

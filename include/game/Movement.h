@@ -5,6 +5,7 @@
 #include "Component.h"
 
 class Rigidbody;
+class Character;
 
 class Movement : public Component
 {
@@ -122,6 +123,7 @@ private:
 
   // Reference to rigidbody
   Rigidbody &rigidbody;
+  Character &character;
 };
 
 #endif

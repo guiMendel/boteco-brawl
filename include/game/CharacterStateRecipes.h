@@ -9,6 +9,7 @@
 #define JUMPING_STATE "jumping"
 #define ATTACKING_STATE "attacking"
 #define LANDING_STATE "landing"
+#define RECOVERING_STATE "recovering"
 
 class CharacterState;
 class Action;
@@ -21,6 +22,7 @@ public:
   static std::shared_ptr<CharacterState> Jumping(std::shared_ptr<Action>);
   static std::shared_ptr<CharacterState> Attacking(std::shared_ptr<Action>);
   static std::shared_ptr<CharacterState> Landing(std::shared_ptr<Action>);
+  static std::shared_ptr<CharacterState> Recovering(std::shared_ptr<Action>);
 };
 
 #endif

@@ -4,8 +4,30 @@
 
 PlayerInput::PlayerInput(GameObject &associatedObject) : Component(associatedObject) {}
 
+Vector2 PlayerInput::GetInputDirection() const
+{
+  Vector2 inputDirection = Vector2::Zero();
+
+  if (inputManager.IsKeyDown(SDLK_a))
+    inputDirection.x -= 1;
+
+  if (inputManager.IsKeyDown(SDLK_d))
+    inputDirection.x += 1;
+
+  if (inputManager.IsKeyDown(SDLK_w))
+    inputDirection.y -= 1;
+
+  if (inputManager.IsKeyDown(SDLK_s))
+    inputDirection.y += 1;
+
+  return inputDirection;
+}
+
 void PlayerInput::Update([[maybe_unused]] float deltaTime)
 {
+  // Get this frame's input direction
+  Vector2 inputDirection = GetInputDirection();
+
   // Detect idle
   if (inputManager.KeyRelease(SDLK_d))
   {
@@ -43,6 +65,19 @@ void PlayerInput::Update([[maybe_unused]] float deltaTime)
 
   if (inputManager.KeyPress(SDLK_j))
     OnNeutralAttack.Invoke();
+
+  // Detect dash input
+  if (inputManager.KeyPress(SDLK_k))
+  {
+    // Get direction
+    Vector2 direction = inputDirection;
+
+    // If no direction was provided, use object's facing direction
+    if (!direction)
+      direction = Vector2(gameObject.localScale.x, 0);
+
+    OnDash.Invoke(direction);
+  }
 }
 
 void PlayerInput::SetDirection(float direction)

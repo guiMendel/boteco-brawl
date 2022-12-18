@@ -28,3 +28,8 @@ shared_ptr<CharacterState> CharacterStateRecipes::Attacking(shared_ptr<Action> a
 {
   return make_shared<CharacterState>(ATTACKING_STATE, 2, action);
 }
+
+shared_ptr<CharacterState> CharacterStateRecipes::Recovering(shared_ptr<Action> action)
+{
+  return make_shared<CharacterState>(RECOVERING_STATE, 2, action);
+}

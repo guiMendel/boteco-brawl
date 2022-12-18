@@ -34,10 +34,10 @@ public:
   void SetState(std::shared_ptr<CharacterState> newState, std::unordered_set<std::string> keepStates = {});
 
   // Removes any states not in the list
-  void RemoveStatesNotIn(std::unordered_set<std::string> keepStates);
+  void RemoveStatesNotIn(std::unordered_set<std::string> keepStates, bool interruption = false);
 
   // Removes a state from it's unique id
-  void RemoveState(unsigned id);
+  void RemoveState(unsigned id, bool interruption = false);
 
   // If the action's priority is high enough, trigger it for this character and set it's state accordingly
   // The canDelay param specifies if this action can wait until the current state is over, if it's not able to interrupt it immediately
@@ -45,6 +45,9 @@ public:
 
   // Whether character has control
   bool HasControl() const { return hasControl; }
+
+  // Change character control
+  void SetControl(bool value);
 
   void Update(float) override;
 
@@ -72,7 +75,7 @@ private:
   // Max seconds an action can stay in the queue before being discarded
   static const float maxActionDelay;
 
-  auto RemoveState(decltype(states)::iterator stateIterator, bool ignoreIdleEvent = false) -> decltype(states)::iterator;
+  auto RemoveState(decltype(states)::iterator stateIterator, bool interruption, bool ignoreIdleEvent = false) -> decltype(states)::iterator;
 };
 
 #endif

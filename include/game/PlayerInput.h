@@ -16,6 +16,9 @@ public:
   // Raised on movement input
   EventI<float> OnMoveDirection;
 
+  // Raised on dash
+  EventI<Vector2> OnDash;
+
   // Raised on jump input
   Event OnJump;
 
@@ -37,6 +40,9 @@ private:
 
   // Issues new direction
   void SetDirection(float direction);
+
+  // Gets input direction for this frame
+  Vector2 GetInputDirection() const;
 
   // Last direction issued to Movement
   float currentDirection{0};

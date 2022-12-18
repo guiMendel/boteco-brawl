@@ -19,6 +19,7 @@ class Animator : public Component
 
 public:
   typedef std::unordered_map<std::string, std::shared_ptr<Animation>> animation_map;
+  typedef std::unordered_map<int, std::function<void()>> frame_callbacks;
 
   Animator(GameObject &associatedObject);
 
@@ -36,6 +37,9 @@ public:
 
   // Stops current animation and starts the given one
   void Play(std::string animation, std::function<void()> stopCallback = nullptr);
+
+  // Stops current animation and starts the given one
+  void Play(std::string animation, frame_callbacks callbacks, std::function<void()> stopCallback = nullptr);
 
   // Stops any animation
   void Stop();
@@ -57,11 +61,17 @@ public:
   std::string defaultAnimation;
 
 private:
+  // Indicates to the animator which frame the playing animation is currently on
+  void IndicateCurrentFrame(int frame);
+
   // Store animations
   animation_map animations;
 
   // Which animation is currently playing
   std::string currentAnimation{""};
+
+  // Frame callbacks for current animation
+  frame_callbacks currentAnimationCallbacks;
 };
 
 #endif

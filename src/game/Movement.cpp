@@ -20,7 +20,8 @@ Movement::Movement(GameObject &associatedObject, float acceleration, float defau
       airborneControl(0.5f),
       fastFallAcceleration(45),
       jumpGravityModifier(15),
-      rigidbody(*gameObject.RequireComponent<Rigidbody>())
+      rigidbody(*gameObject.RequireComponent<Rigidbody>()),
+      character(*gameObject.RequireComponent<Character>())
 {
   SetGravityModifierDecayTime(0.2f);
 }
@@ -35,8 +36,8 @@ void Movement::Start()
   originalGravityScale = rigidbody.gravityScale;
 
   // When control is lost, stop fast falling
-  gameObject.RequireComponent<Character>()->OnControlChange.AddListener("stop-fast-falling", [this](bool hasControl)
-                                                                        { if (hasControl == false) StopFallFast(); });
+  character.OnControlChange.AddListener("stop-fast-falling", [this](bool hasControl)
+                                        { if (hasControl == false) StopFallFast(); });
 }
 
 void Movement::OnLandInternal()
@@ -76,7 +77,7 @@ void Movement::Update(float deltaTime)
 
 void Movement::Run(float deltaTime)
 {
-  if (targetSpeed == rigidbody.velocity.x)
+  if (targetSpeed == rigidbody.velocity.x || character.HasControl() == false)
     return;
 
   // Use deceleration modifier

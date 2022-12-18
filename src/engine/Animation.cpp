@@ -44,6 +44,9 @@ void Animation::SetFrame(int frame)
   secondsToNextFrame = frames[frame].GetDuration() * speedModifier;
 
   currentFrame = frame;
+
+  // Tell animator
+  animator.IndicateCurrentFrame(frame);
 }
 
 bool Animation::IsPlaying() const

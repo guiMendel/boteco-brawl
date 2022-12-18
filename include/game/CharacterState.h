@@ -22,7 +22,7 @@ struct CharacterState
   const int priority;
 
   // The action that resulted in this state (if any)
-  const std::shared_ptr<Action> parentAction;
+  std::shared_ptr<Action> parentAction;
 
   CharacterState(std::string name, int priority, std::shared_ptr<Action> parentAction = nullptr)
       : name(name), priority(priority), parentAction(parentAction) {}

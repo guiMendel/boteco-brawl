@@ -10,10 +10,10 @@ Character::Character(GameObject &associatedObject)
 
 void Character::Update(float deltaTime)
 {
-  // cout << "States: ";
-  // for (auto state : states)
-  //   cout << state->name << " ";
-  // cout << endl;
+  cout << "States: ";
+  for (auto state : states)
+    cout << state->name << " ";
+  cout << endl;
 
   // Discount queue time
   if (queuedActionTTL <= 0)
@@ -44,10 +44,10 @@ void Character::SetState(shared_ptr<CharacterState> newState, unordered_set<stri
   keepStates.insert(newState->name);
 
   // Remove other states
-  RemoveStatesNotIn(keepStates);
+  RemoveStatesNotIn(keepStates, true);
 }
 
-void Character::RemoveStatesNotIn(std::unordered_set<std::string> keepStates)
+void Character::RemoveStatesNotIn(std::unordered_set<std::string> keepStates, bool interruption)
 {
   auto stateIterator = states.begin();
   while (stateIterator != states.end())
@@ -60,17 +60,7 @@ void Character::RemoveStatesNotIn(std::unordered_set<std::string> keepStates)
 
     // Otherwise, remove it
     else
-    {
-      // Call it's stop callback if necessary
-      auto parentAction = state->parentAction;
-      if (parentAction != nullptr)
-        parentAction->StopHook(gameObject);
-
-      // Announce interruption
-      OnInterruptState.Invoke(state);
-
-      stateIterator = RemoveState(stateIterator);
-    }
+      stateIterator = RemoveState(stateIterator, interruption);
   }
 }
 
@@ -108,13 +98,13 @@ void Character::Perform(shared_ptr<Action> action, bool canDelay)
 
   // If no new state, simply remove those not in the list
   else
-    RemoveStatesNotIn(action->GetFriendStates());
+    RemoveStatesNotIn(action->GetFriendStates(), true);
 
   // Trigger this action
   action->Trigger(gameObject, newState);
 }
 
-void Character::RemoveState(unsigned id)
+void Character::RemoveState(unsigned id, bool interruption)
 {
   // Find this state
   auto stateIterator = find_if(states.begin(), states.end(), [id](shared_ptr<CharacterState> state)
@@ -125,11 +115,21 @@ void Character::RemoveState(unsigned id)
     return;
 
   // Remove it
-  RemoveState(stateIterator);
+  RemoveState(stateIterator, interruption);
 }
 
-auto Character::RemoveState(decltype(states)::iterator stateIterator, bool ignoreIdleEvent) -> decltype(states)::iterator
+auto Character::RemoveState(decltype(states)::iterator stateIterator, bool interruption, bool ignoreIdleEvent) -> decltype(states)::iterator
 {
+  auto state = *stateIterator;
+
+  // Call it's stop callback if necessary
+  if (state->parentAction != nullptr)
+    state->parentAction->StopHook(gameObject);
+
+  // Announce interruption
+  if (interruption)
+    OnInterruptState.Invoke(state);
+
   // Remove it
   auto newIterator = states.erase(stateIterator);
 
@@ -151,4 +151,14 @@ void Character::AddState(std::shared_ptr<CharacterState> newState)
 
   // Add it
   states.push_back(newState);
+}
+
+void Character::SetControl(bool value)
+{
+  if (hasControl == value)
+    return;
+
+  hasControl = value;
+
+  OnControlChange.Invoke(value);
 }

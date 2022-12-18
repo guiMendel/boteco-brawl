@@ -22,8 +22,8 @@ void MainState::InitializeObjects()
 
   CreateObject("Ground", ObjectRecipes::Platform({20, 1}), Vector2(0, 4));
 
-  // CreateObject("WallLeft", ObjectRecipes::Platform({1, 5}), Vector2(-5, 0));
-  // CreateObject("WallRight", ObjectRecipes::Platform({1, 5}), Vector2(5, 0));
+  CreateObject("WallLeft", ObjectRecipes::Platform({1, 5}), Vector2(-5, 0));
+  CreateObject("WallRight", ObjectRecipes::Platform({1, 5}), Vector2(5, 0));
 
   // auto thing = CreateObject("Thing", ObjectRecipes::Platform({1, 1}, false), Vector2(2, 0));
 
