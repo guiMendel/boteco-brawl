@@ -17,6 +17,6 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
                                             { if (character) character->RemoveState(stateId); });
 }
 
-int AttackAction::GetPriority() const { return 2; }
+int AttackAction::GetPriority() const { return 1; }
 
 shared_ptr<CharacterState> AttackAction::NextState(shared_ptr<Action> sharedAction) { return CharacterStateRecipes::Attacking(sharedAction); }

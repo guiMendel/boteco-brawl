@@ -25,7 +25,11 @@ public:
   // Raised on stop fast fall
   Event OnFastFallStop;
 
+  Event OnNeutralAttack;
+
   void Update(float deltaTime) override;
+
+  float GetCurrentMoveDirection() const;
 
 private:
   // Sets direction to 0, if current direction equals the provided one (both have the same sign)

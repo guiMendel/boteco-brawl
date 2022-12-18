@@ -40,6 +40,9 @@ void PlayerInput::Update([[maybe_unused]] float deltaTime)
 
   else if (inputManager.KeyRelease(SDLK_s))
     OnFastFallStop.Invoke();
+
+  if (inputManager.KeyPress(SDLK_j))
+    OnNeutralAttack.Invoke();
 }
 
 void PlayerInput::SetDirection(float direction)
@@ -53,6 +56,8 @@ void PlayerInput::CancelDirection(float direction)
   if ((currentDirection <= 0 && direction >= 0) || (currentDirection >= 0 && direction <= 0))
     return;
 
-  OnMoveDirection.Invoke(0);
   currentDirection = 0;
+  OnMoveDirection.Invoke(0);
 }
+
+float PlayerInput::GetCurrentMoveDirection() const { return currentDirection; }

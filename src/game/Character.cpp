@@ -10,44 +10,39 @@ Character::Character(GameObject &associatedObject)
 const list<shared_ptr<CharacterState>> Character::GetStates() const { return states; }
 void Character::SetState(shared_ptr<CharacterState> newState, unordered_set<string> keepStates)
 {
-  // Check if new state is in keep states
-  if (keepStates.count(newState->name) > 0)
-    keepStates.erase(newState->name);
+  // Add it
+  AddState(newState);
 
+  // Make sure not to remove it right away
+  keepStates.insert(newState->name);
+
+  // Remove other states
   RemoveStatesNotIn(keepStates);
-
-  states.push_back(newState);
 }
 
 void Character::RemoveStatesNotIn(std::unordered_set<std::string> keepStates)
 {
-  if (keepStates.size() == 0)
-    states.clear();
-
-  else
+  auto stateIterator = states.begin();
+  while (stateIterator != states.end())
   {
-    auto stateIterator = states.begin();
-    while (stateIterator != states.end())
+    auto state = *stateIterator;
+
+    // If it's in the list, continue
+    if (keepStates.count(state->name) > 0)
+      stateIterator++;
+
+    // Otherwise, remove it
+    else
     {
-      auto state = *stateIterator;
+      // Call it's stop callback if necessary
+      auto parentAction = state->parentAction;
+      if (parentAction != nullptr)
+        parentAction->StopHook(gameObject);
 
-      // If it's in the list, continue
-      if (keepStates.count(state->name) > 0)
-        stateIterator++;
+      // Announce interruption
+      OnInterruptState.Invoke(state);
 
-      // Otherwise, remove it
-      else
-      {
-        // Call it's stop callback if necessary
-        auto parentAction = state->parentAction;
-        if (parentAction != nullptr)
-          parentAction->StopHook(gameObject);
-
-        // Announce interruption
-        OnInterruptState.Invoke(state);
-
-        stateIterator = states.erase(stateIterator);
-      }
+      stateIterator = RemoveState(stateIterator);
     }
   }
 }
@@ -85,5 +80,30 @@ void Character::RemoveState(unsigned id)
     return;
 
   // Remove it
-  states.erase(stateIterator);
+  RemoveState(stateIterator);
+}
+
+auto Character::RemoveState(decltype(states)::iterator stateIterator, bool ignoreIdleEvent) -> decltype(states)::iterator
+{
+  // Remove it
+  auto newIterator = states.erase(stateIterator);
+
+  // Check for raise
+  if (ignoreIdleEvent == false && states.empty())
+    OnEnterIdle.Invoke();
+
+  return newIterator;
+}
+
+void Character::AddState(std::shared_ptr<CharacterState> newState)
+{
+  // If it's already there, remove it first
+  auto stateIterator = find_if(states.begin(), states.end(), [newState](shared_ptr<CharacterState> state)
+                               { return state->name == newState->name; });
+
+  if (stateIterator != states.end())
+    RemoveState(stateIterator, true);
+
+  // Add it
+  states.push_back(newState);
 }

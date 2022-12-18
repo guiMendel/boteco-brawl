@@ -24,6 +24,9 @@ public:
   // When control is lost or recovered
   EventI<bool> OnControlChange;
 
+  // When states becomes empty
+  Event OnEnterIdle;
+
   // Get the current states
   const std::list<std::shared_ptr<CharacterState>> GetStates() const;
 
@@ -43,11 +46,15 @@ public:
   bool HasControl() const { return hasControl; }
 
 private:
+  void AddState(std::shared_ptr<CharacterState> newState);
+
   // Whether character currently has control over itself
   bool hasControl{true};
 
   // Current states of the character
   std::list<std::shared_ptr<CharacterState>> states;
+
+  auto RemoveState(decltype(states)::iterator stateIterator, bool ignoreIdleEvent = false) -> decltype(states)::iterator;
 };
 
 #endif
