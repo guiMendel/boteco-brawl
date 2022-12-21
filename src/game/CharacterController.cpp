@@ -124,7 +124,8 @@ void CharacterController::DispatchDash(Vector2 direction)
   }
 
   // If not airborne, forbid vertical dashes
-  else
+  // UNLESS in jump animation!
+  else if (animator.GetCurrentAnimation() != "jump")
     direction.y = 0;
 
   // If no direction, use object's facing direction

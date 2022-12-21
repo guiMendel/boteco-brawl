@@ -54,8 +54,11 @@ void Movement::PhysicsUpdate(float deltaTime)
   // Discount gravity modifier
   if (currentGravityModifier > 1)
   {
-    currentGravityModifier = max(1.0f, currentGravityModifier - gravityModifierDecay * deltaTime);
-    rigidbody.gravityScale = originalGravityScale * currentGravityModifier;
+    if (character.HasControl() == false)
+      SetCurrentGravityModifier(1);
+
+    else
+      SetCurrentGravityModifier(max(1.0f, currentGravityModifier - gravityModifierDecay * deltaTime));
   }
 
   // Fast fall

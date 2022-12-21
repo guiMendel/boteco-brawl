@@ -30,10 +30,6 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   auto rigidbody = target.GetComponent<Rigidbody>();
   auto character = target.GetComponent<Character>();
 
-  // Store original values
-  originalGravityScale = rigidbody->gravityScale;
-  originalAirFriction = rigidbody->airFriction;
-
   // Ignore gravity throughout dash
   rigidbody->gravityScale = Vector2(0, 0.01);
 
@@ -87,8 +83,8 @@ void Dash::StopHook(GameObject &target)
   auto rigidbody = target.GetComponent<Rigidbody>();
 
   // Restore original values
-  rigidbody->gravityScale = originalGravityScale;
-  rigidbody->airFriction = originalAirFriction;
+  rigidbody->gravityScale = Vector2::One();
+  rigidbody->airFriction = 0;
   target.GetComponent<Character>()->SetControl(true);
 
   // Stop particles

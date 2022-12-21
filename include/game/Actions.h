@@ -51,8 +51,6 @@ namespace Actions
 
     Dash(Vector2 direction) : direction(direction) {}
     Vector2 direction;
-    Vector2 originalGravityScale;
-    float originalAirFriction;
 
     // Params
     static const float dashFriction;
