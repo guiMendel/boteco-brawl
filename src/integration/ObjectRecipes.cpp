@@ -12,6 +12,7 @@
 #include "AnimationRecipes.h"
 #include "CharacterController.h"
 #include "Character.h"
+#include "ParticleEmitter.h"
 #include <iostream>
 
 using namespace std;
@@ -37,11 +38,11 @@ auto ObjectRecipes::Background(string imagePath) -> function<void(shared_ptr<Gam
     // Make it cover the screen
     if (sprite->GetWidth() < sprite->GetHeight())
     {
-      sprite->SetTargetDimension(Game::screenWidth / Camera::GetMain()->GetPixelsPerUnit());
+      sprite->SetTargetDimension(Game::screenWidth / Camera::GetMain()->GetRealPixelsPerUnit());
     }
     else
     {
-      sprite->SetTargetDimension(-1, Game::screenHeight / Camera::GetMain()->GetPixelsPerUnit());
+      sprite->SetTargetDimension(-1, Game::screenHeight / Camera::GetMain()->GetRealPixelsPerUnit());
     }
   };
 }
@@ -79,6 +80,9 @@ auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
     character->AddComponent<PlayerInput>();
     character->AddComponent<CharacterController>();
+
+    // Particle testing
+    character->AddComponent<ParticleEmitter>(RenderLayer::VFX, 1, true);
   };
 }
 

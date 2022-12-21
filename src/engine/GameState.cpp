@@ -14,7 +14,10 @@ using namespace std;
 
 // Initialize root object
 GameState::GameState()
-    : physicsSystem(*this), inputManager(Game::GetInstance().GetInputManager()), rootObject(new GameObject("Root", *this))
+    : physicsSystem(*this),
+      particleSystem(*this),
+      inputManager(Game::GetInstance().GetInputManager()),
+      rootObject(new GameObject("Root", *this))
 {
 }
 
@@ -83,6 +86,9 @@ void GameState::PhysicsUpdate(float deltaTime)
 
   // Resolve collisions
   physicsSystem.PhysicsUpdate(deltaTime);
+
+  // Update particles
+  particleSystem.PhysicsUpdate(deltaTime);
 }
 
 void GameState::Render()

@@ -7,7 +7,6 @@ using namespace std;
 
 void MainState::LoadAssets()
 {
-  SpriteConfig::defaultPixelsPerUnit = 8;
 }
 
 void MainState::InitializeObjects()

@@ -32,7 +32,7 @@ shared_ptr<SDL_Texture> Resources::GetTexture(string filename)
   return GetResource<SDL_Texture>("texture", filename, textureTable, textureLoader, SDL_DestroyTexture);
 }
 
-shared_ptr<Sprite> Resources::GetSprite(string filename, Rectangle clipRect)
+shared_ptr<Sprite> Resources::GetSprite(string filename, SDL_Rect clipRect)
 {
   function<Sprite *(string)> spriteLoader = [clipRect](string filename)
   {
@@ -50,12 +50,12 @@ shared_ptr<Sprite> Resources::GetSprite(string filename, Rectangle clipRect)
   { delete sprite; };
 
   // Its store key
-  string storeKey = filename + (string)clipRect;
+  string storeKey = filename + (string)Rectangle(clipRect);
 
   return GetResource<Sprite>("sprite", storeKey, spriteTable, spriteLoader, spriteDestructor, filename);
 }
 
-shared_ptr<Sprite> Resources::GetSprite(string filename, SpriteConfig config, Rectangle clipRect)
+shared_ptr<Sprite> Resources::GetSprite(string filename, SpriteConfig config, SDL_Rect clipRect)
 {
   auto sprite = GetSprite(filename, clipRect);
 

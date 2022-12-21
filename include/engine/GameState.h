@@ -14,6 +14,7 @@
 #include "InputManager.h"
 #include "Vector2.h"
 #include "PhysicsSystem.h"
+#include "ParticleSystem.h"
 
 class Component;
 class Collider;
@@ -112,6 +113,9 @@ public:
 
   // The state's own physics system instance
   PhysicsSystem physicsSystem;
+
+  // Particle system
+  ParticleSystem particleSystem;
 
   // A timer helper
   Timer timer;

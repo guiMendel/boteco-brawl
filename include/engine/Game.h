@@ -28,6 +28,9 @@ public:
   // Defines the resolution height
   static const int screenHeight;
 
+  // Default pixels per unit
+  static const int defaultVirtualPixelsPerUnit;
+
   // === FUNCTIONS
 
   // Gets the game instance if it exists or creates one if it doesn't

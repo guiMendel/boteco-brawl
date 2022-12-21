@@ -3,8 +3,6 @@
 
 using namespace std;
 
-float SpriteConfig::defaultPixelsPerUnit{32};
-
 Sprite::Sprite(const string initialTexture, SpriteConfig config) : config(config)
 {
   Load(initialTexture);
@@ -19,20 +17,20 @@ void Sprite::Load(const string fileName)
   SDL_QueryTexture(texture.get(), nullptr, nullptr, &width, &height);
 
   // Set the clip to the full image
-  SetClip(Rectangle(0, 0, width, height));
+  SetClip(SDL_Rect{0, 0, width, height});
 }
 
 SDL_Rect Sprite::GetClip() const { return clipRect; }
 
-void Sprite::SetClip(Rectangle rect)
+void Sprite::SetClip(SDL_Rect rect)
 {
   // Sanitize dimensions and allow automatic size clipping
-  if (rect.width < 0)
-    rect.width = width - rect.x;
-  if (rect.height < 0)
-    rect.height = height - rect.y;
+  if (rect.w < 0)
+    rect.w = width - rect.x;
+  if (rect.h < 0)
+    rect.h = height - rect.y;
 
-  clipRect = (SDL_Rect)rect;
+  clipRect = rect;
 }
 
 void Sprite::SetTargetDimension(int width, int height)

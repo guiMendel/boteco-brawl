@@ -22,12 +22,15 @@ void SpriteRenderer::Render(Vector2 position)
 {
   auto [width, height] = make_pair(sprite->GetWidth(abs(gameObject.GetScale().x)), sprite->GetHeight(gameObject.GetScale().y));
 
+  // cout << gameObject.GetName() << " size:" << width << ", " << height << endl;
+
   // Offset coordinates if centered
   if (centered)
     position -= Vector2(width / 2, height / 2);
 
   // Get the real position box
-  SDL_Rect destinationRect = (SDL_Rect)Camera::GetMain()->WorldToScreen(Rectangle(position, width, height));
+  SDL_Rect destinationRect = (SDL_Rect)Camera::GetMain()->WorldToScreen(
+      Rectangle{Rectangle::TopLeftInitialize, position, width, height});
 
   // Detect flips
   SDL_RendererFlip horizontalFlip = gameObject.localScale.x < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;

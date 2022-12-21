@@ -804,7 +804,7 @@ bool PhysicsSystem::DetectCollisions(Vector2 particle, RaycastCollisionData &dat
       for (auto collider : bodyColliders)
       {
         // Check if particle is far enough that we don't need to bother
-        float sqrParticleDistance = Vector2::SqrDistance(collider->GetBox().Center(), particle);
+        float sqrParticleDistance = Vector2::SqrDistance(collider->GetBox().center, particle);
         float maxDimension = collider->GetMaxVertexDistance();
 
         if (sqrParticleDistance > maxDimension * maxDimension)

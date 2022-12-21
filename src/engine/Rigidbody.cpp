@@ -204,7 +204,7 @@ float CollidersProjectionSize(Rigidbody &body, Vector2 normal)
   for (auto collider : body.GetColliders())
   {
     // Get collider's center
-    Vector2 center = collider->GetBox().Center();
+    Vector2 center = collider->GetBox().center;
 
     // For each of the collider's vertices
     for (auto vertex : collider->GetBox().Vertices(rotation))
@@ -225,26 +225,11 @@ float CollidersProjectionSize(Rigidbody &body, Vector2 normal)
 void Rigidbody::Render()
 {
   auto [box, rotation] = frameTrajectory;
-  auto camera = Camera::GetMain();
 
-  // Create an SDL point for each vertex
-  SDL_Point vertices[5];
+  Debug::DrawBox(box, rotation);
 
-  // Starting and final points are top left
-  vertices[0] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
-  vertices[1] = (SDL_Point)camera->WorldToScreen(box.BottomLeft(rotation));
-  vertices[2] = (SDL_Point)camera->WorldToScreen(box.BottomRight(rotation));
-  vertices[3] = (SDL_Point)camera->WorldToScreen(box.TopRight(rotation));
-  vertices[4] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
-
-  // Get renderer
   auto renderer = Game::GetInstance().GetRenderer();
-
-  // Set paint color to blu
-  SDL_SetRenderDrawColor(renderer, 0, 0, 255, SDL_ALPHA_OPAQUE);
-
-  // Paint collider edges
-  SDL_RenderDrawLines(renderer, vertices, 5);
+  auto camera = Camera::GetMain();
 
   for (auto line : printLines)
   {
@@ -256,7 +241,7 @@ void Rigidbody::Render()
   if (printIntersectionPoint)
   {
     for (auto inter : intersectionPoints)
-      Debug::DrawCircle(inter, 0.3);
+      Debug::DrawCircle(Circle{inter, 0.3});
   }
 }
 

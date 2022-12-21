@@ -2,34 +2,27 @@
 #define __COLOR__
 
 #include "SDL.h"
+#include "Helper.h"
+#include <iostream>
+
+#define CAP(colorChannel) std::max(std::min(colorChannel, 256), 0)
 
 struct Color
 {
   // With each channel
-  Color(int red, int green, int blue, int alpha) : red(red), green(green), blue(blue), alpha(alpha) {}
+  Color(int red, int green, int blue, int alpha);
 
   // With only colors
-  Color(int red, int green, int blue) : Color(red, green, blue, 255) {}
+  Color(int red, int green, int blue);
 
   // Copy constructor
-  Color(const Color &other) : Color(other.red, other.green, other.blue, other.alpha) {}
+  Color(const Color &other);
 
   // Default to white
-  Color() : Color(White()) {}
+  Color();
 
   // From SDL
-  Color(const SDL_Color &other) : Color(other.r, other.g, other.b, other.a) {}
-
-  // === OPERATORS
-
-  Color &operator=(const Color &other)
-  {
-    red = other.red;
-    green = other.green;
-    blue = other.blue;
-    alpha = other.alpha;
-    return *this;
-  }
+  Color(const SDL_Color &other);
 
   // === PREFAB COLORS
 
@@ -40,9 +33,22 @@ struct Color
   static Color Blue() { return Color(0, 255, 255); }
   static Color Yellow() { return Color(255, 240, 18); }
 
+  // === OPERATORS
+
+  Color &operator=(const Color &other);
+
+  Color operator+(const Color &other);
+
+  Color operator-(const Color &other);
+
+  Color operator*(float value);
+
+  Color operator/(float value);
+
   // === SDL INTEGRATION
 
-  operator SDL_Color() const { return SDL_Color{(Uint8)red, (Uint8)green, (Uint8)blue, (Uint8)alpha}; }
+  operator SDL_Color() const;
+  explicit operator std::string() const;
 
   // === FIELDS
 
@@ -51,5 +57,8 @@ struct Color
   int blue;
   int alpha;
 };
+
+Color operator*(float value, const Color &color);
+std::ostream &operator<<(std::ostream &stream, const Color &color);
 
 #endif

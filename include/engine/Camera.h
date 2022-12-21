@@ -44,16 +44,16 @@ public:
   Vector2 WorldToScreen(const Vector2 &worldCoordinates) const;
 
   // Convert coordinates & dimensions (screen pixels to game units)
-  Rectangle ScreenToWorld(const Rectangle &screenCoordinates) const;
+  Rectangle ScreenToWorld(const Rectangle &screenRectangle) const;
 
   // Convert coordinates & dimensions (game units to screen pixels)
-  Rectangle WorldToScreen(const Rectangle &worldCoordinates) const;
+  Rectangle WorldToScreen(const Rectangle &worldRectangle) const;
 
-  float GetPixelsPerUnit() const { return pixelsPerUnit; }
+  float GetRealPixelsPerUnit() const { return realPixelsPerUnit; }
 
 private:
   // Current unit resolution of camera
-  float pixelsPerUnit;
+  float realPixelsPerUnit;
 };
 
 #endif

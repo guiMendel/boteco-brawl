@@ -1,0 +1,110 @@
+#ifndef __PARTICLE_EMITTER__
+#define __PARTICLE_EMITTER__
+
+#include "GameObject.h"
+#include "Component.h"
+#include "Circle.h"
+#include "Color.h"
+#include "ParticleSystem.h"
+#include <utility>
+#include <functional>
+#include <list>
+
+class Particle;
+
+class ParticleEmitter : public Component
+{
+public:
+  template <class T>
+  using range = std::pair<T, T>;
+
+  ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float radius = 0.01, bool loop = false, float duration = 1);
+
+  ~ParticleEmitter() {}
+
+  void SetOffset(Vector2 offset);
+
+  void SetRadius(float radius);
+
+  Circle GetOrigin() const;
+
+  void Start() override;
+  void Update(float deltaTime) override;
+  void Render() override;
+  RenderLayer GetRenderLayer() override { return renderLayer; }
+  int GetRenderOrder() override { return renderOrder; }
+
+  // Start an emission cycle
+  void StartEmission();
+
+  // Stop emission
+  void Stop();
+
+  // How many seconds to emit for
+  float duration;
+
+  // Whether to loop when emission cycle ends
+  bool loop;
+
+  // How often particles are emitted, in seconds
+  range<float> emissionFrequency;
+
+  // Angle of emitted particles, in radians
+  range<float> emissionAngle;
+
+  // Color of emitted particles
+  range<Color> emissionColor;
+
+  // Speed of emitted particles, in units / second
+  range<float> emissionSpeed;
+
+  // Lifetime of emitted particles, in seconds
+  range<float> emissionLifetime;
+
+  // Frame behavior to attach to emitted particles
+  std::function<void(Particle &)> particleBehavior{nullptr};
+
+  // Whether to simulate particle with reference to this emitter or the world
+  bool attachToEmitter{false};
+
+  // Whether to emit on start hook
+  bool emitOnStart{true};
+
+private:
+  void Emit();
+
+  // Gets a list of all active particles emitted by this emitter
+  std::list<std::shared_ptr<Particle>> GetEmittedParticles();
+
+  // Circle from which particles will be emitted
+  // Its coordinates act as an offset from the object's position
+  Circle origin;
+
+  // Whether is currently emitting
+  bool active{false};
+
+  // Seconds the current cycle still has to finish
+  float cycleLifetime{0};
+
+  // Time until next emission
+  float emitCooldown{0};
+
+  // Reference to particle system
+  ParticleSystem &particleSystem;
+
+  // Which particles it has emitted
+  std::list<std::weak_ptr<Particle>> weakEmittedParticles;
+
+  // Layer to render to
+  RenderLayer renderLayer;
+
+  // Render order
+  int renderOrder{0};
+};
+
+namespace ParticleBehaviors
+{
+  static void Oscillate(Particle &);
+}
+
+#endif

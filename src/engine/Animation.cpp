@@ -139,10 +139,10 @@ vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetC
     for (int column = initialColumn; column < columnFrameCount && frames.size() < (size_t)clipInfo.totalFrames; column++)
     {
       // Get this frame's clip
-      Rectangle clip(column * (clipInfo.width + clipInfo.horizontalGap) + clipInfo.paddingLeft,
+      SDL_Rect clip{column * (clipInfo.width + clipInfo.horizontalGap) + clipInfo.paddingLeft,
                      row * (clipInfo.height + clipInfo.verticalGap) + clipInfo.paddingTop,
                      clipInfo.width,
-                     clipInfo.height);
+                     clipInfo.height};
 
       frames.push_back(AnimationFrame(Resources::GetSprite(filename, config, clip), frameDuration));
     }

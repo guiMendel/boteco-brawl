@@ -37,22 +37,22 @@ void Camera::Start()
 }
 
 // Get how many units occupy half the camera's height
-float Camera::GetSize() const { return Game::screenHeight / pixelsPerUnit / 2; }
+float Camera::GetSize() const { return Game::screenHeight / realPixelsPerUnit / 2; }
 
 void Camera::SetSize(float newSize)
 {
-  pixelsPerUnit = Game::screenHeight / 2 / newSize;
+  realPixelsPerUnit = Game::screenHeight / 2 / newSize;
 }
 
 Vector2 Camera::GetTopLeft() const
 {
-  static auto currentPixelsPerUnit = pixelsPerUnit;
+  static auto currentPixelsPerUnit = realPixelsPerUnit;
 
   static Vector2 topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
 
-  if (currentPixelsPerUnit != pixelsPerUnit)
+  if (currentPixelsPerUnit != realPixelsPerUnit)
   {
-    currentPixelsPerUnit = pixelsPerUnit;
+    currentPixelsPerUnit = realPixelsPerUnit;
     topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
   }
 
@@ -61,13 +61,13 @@ Vector2 Camera::GetTopLeft() const
 
 void Camera::SetTopLeft(Vector2 newPosition)
 {
-  static auto currentPixelsPerUnit = pixelsPerUnit;
+  static auto currentPixelsPerUnit = realPixelsPerUnit;
 
   static Vector2 topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
 
-  if (currentPixelsPerUnit != pixelsPerUnit)
+  if (currentPixelsPerUnit != realPixelsPerUnit)
   {
-    currentPixelsPerUnit = pixelsPerUnit;
+    currentPixelsPerUnit = realPixelsPerUnit;
     topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
   }
 
@@ -77,21 +77,23 @@ void Camera::SetTopLeft(Vector2 newPosition)
 // Convert coordinates
 Vector2 Camera::ScreenToWorld(const Vector2 &screenCoordinates) const
 {
-  return screenCoordinates / pixelsPerUnit + GetTopLeft();
+  return screenCoordinates / realPixelsPerUnit + GetTopLeft();
 }
 
 // Convert coordinates
 Vector2 Camera::WorldToScreen(const Vector2 &worldCoordinates) const
 {
-  return (worldCoordinates - GetTopLeft()) * pixelsPerUnit;
+  return (worldCoordinates - GetTopLeft()) * realPixelsPerUnit;
 }
 
-Rectangle Camera::ScreenToWorld(const Rectangle &screenCoordinates) const
+// Convert coordinates & dimensions (screen pixels to game units)
+Rectangle Camera::ScreenToWorld(const Rectangle &screenRectangle) const
 {
-  return screenCoordinates / pixelsPerUnit + GetTopLeft();
+  return screenRectangle / realPixelsPerUnit + GetTopLeft();
 }
 
-Rectangle Camera::WorldToScreen(const Rectangle &worldCoordinates) const
+// Convert coordinates & dimensions (game units to screen pixels)
+Rectangle Camera::WorldToScreen(const Rectangle &worldRectangle) const
 {
-  return (worldCoordinates - GetTopLeft()) * pixelsPerUnit;
+  return (worldRectangle - GetTopLeft()) * realPixelsPerUnit;
 }

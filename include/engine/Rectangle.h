@@ -4,16 +4,19 @@
 #include <initializer_list>
 #include <vector>
 #include <SDL.h>
+#include <iostream>
 #include "Vector2.h"
 
 class Rectangle
 {
 public:
-  // X coordinate (rect's center)
-  float x;
+  // Used for initializing rectangle with top left coordinates
+  enum TopLeftInitializerLabel
+  {
+    TopLeftInitialize
+  };
 
-  // Y coordinate (rect's center)
-  float y;
+  Vector2 center;
 
   // Width
   float width;
@@ -23,107 +26,43 @@ public:
 
   // === CONSTRUCTORS
 
-  Rectangle(float x, float y, float width, float height) : x(x), y(y), width(width), height(height) {}
-
-  Rectangle(const Vector2 &coordinates, float width, float height) : x(coordinates.x), y(coordinates.y), width(width), height(height) {}
-
-  Rectangle() : x(0), y(0), width(0), height(0) {}
-
-  Rectangle(const Rectangle &other) : x(other.x), y(other.y), width(other.width), height(other.height) {}
-
-  Rectangle(const Rectangle &&other) : x(other.x), y(other.y), width(other.width), height(other.height) {}
+  Rectangle(const Vector2 &coordinates, float width, float height);
+  Rectangle(float x, float y, float width, float height);
+  Rectangle();
+  Rectangle(const Rectangle &other);
+  Rectangle(const Rectangle &&other);
+  Rectangle(const SDL_Rect &rect);
+  // Interprets coordinates as top left
+  Rectangle(TopLeftInitializerLabel, const Vector2 &coordinates, float width, float height);
 
   // === OPERATIONS
 
-  Rectangle operator=(const Rectangle &other)
-  {
-    x = other.x;
-    y = other.y;
-    width = other.width;
-    height = other.height;
-    return *this;
-  }
-
-  Rectangle operator+(const Vector2 &vector) const
-  {
-    return Rectangle(x + vector.x, y + vector.y, width, height);
-  }
-
-  Rectangle operator-(const Vector2 &vector) const
-  {
-    return Rectangle(x - vector.x, y - vector.y, width, height);
-  }
-
-  Rectangle operator=(const Vector2 &vector)
-  {
-    x = vector.x;
-    y = vector.y;
-    return *this;
-  }
-
-  Rectangle operator+=(const Vector2 &vector) { return *this = *this + vector; }
-
-  Rectangle operator-=(const Vector2 &vector) { return *this = *this - vector; }
-
-  Rectangle operator*(float value) const
-  {
-    return Rectangle(x * value, y * value, width * value, height * value);
-  }
-
-  Rectangle operator/(float value) const
-  {
-    return Rectangle(x / value, y / value, width / value, height / value);
-  }
-
-  Rectangle operator*=(float value) { return *this = *this * value; }
-  Rectangle operator/=(float value) { return *this = *this / value; }
-
-  Vector2 Coordinates() const { return Vector2(x, y); }
+  Rectangle operator=(const Rectangle &other);
+  Rectangle operator+(const Vector2 &vector) const;
+  Rectangle operator-(const Vector2 &vector) const;
+  Rectangle operator*(float value) const;
+  Rectangle operator/(float value) const;
 
   // Indicates if a given coordinate is contained by the rectangle
-  bool Contains(const Vector2 &vector) const
-  {
-    return vector.x >= x && vector.x <= x + width && vector.y >= y && vector.y <= y + height;
-  }
+  bool Contains(const Vector2 &vector) const;
 
-  // Pivot's a point around a rectangles center
-  Vector2 Pivot(Vector2 point, float radians) const
-  {
-    return (point - Center()).Rotated(radians) + Center();
-  }
+  Vector2 TopLeft(float pivoted = 0.0f) const;
+  Vector2 BottomLeft(float pivoted = 0.0f) const;
+  Vector2 BottomRight(float pivoted = 0.0f) const;
+  Vector2 TopRight(float pivoted = 0.0f) const;
 
-  Vector2 Center() const { return Vector2(x, y); }
-  Vector2 TopLeft(float pivoted = 0.0f) const
-  {
-    return Pivot(Vector2(x - width / 2, y - height / 2), pivoted);
-  }
-  Vector2 BottomLeft(float pivoted = 0.0f) const
-  {
-    return Pivot(Vector2(x - width / 2, y + height / 2), pivoted);
-  }
-  Vector2 BottomRight(float pivoted = 0.0f) const
-  {
-    return Pivot(Vector2(x + width / 2, y + height / 2), pivoted);
-  }
-  Vector2 TopRight(float pivoted = 0.0f) const
-  {
-    return Pivot(Vector2(x + width / 2, y - height / 2), pivoted);
-  }
-
-  std::vector<Vector2> Vertices(float pivoted = 0.0f) const
-  {
-    return {TopRight(pivoted), BottomRight(pivoted), BottomLeft(pivoted), TopLeft(pivoted)};
-  }
+  std::vector<Vector2> Vertices(float pivoted = 0.0f) const;
 
   // Convert to sdl rect
-  explicit operator SDL_Rect() const { return SDL_Rect{(int)x, (int)y, (int)width, (int)height}; }
+  explicit operator SDL_Rect() const;
 
-  explicit operator Vector2() const { return Vector2{x, y}; }
+  explicit operator Vector2() const;
 
-  explicit operator std::string() const
-  {
-    return "{ x: " + std::to_string(x) + ", y: " + std::to_string(y) + ", w: " + std::to_string(width) + ", h: " + std::to_string(height) + " }";
-  }
+  explicit operator std::string() const;
 };
+
+Rectangle operator*(float value, const Rectangle &rectangle);
+Rectangle operator/(float value, const Rectangle &rectangle);
+std::ostream &operator<<(std::ostream &stream, const Rectangle &rectangle);
 
 #endif

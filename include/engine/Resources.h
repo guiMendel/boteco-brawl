@@ -23,9 +23,9 @@ public:
   static std::shared_ptr<SDL_Texture> GetTexture(std::string filename);
 
   // Get a cropped sprite
-  static std::shared_ptr<Sprite> GetSprite(std::string filename, Rectangle clipRect = Rectangle(0, 0, -1, -1));
+  static std::shared_ptr<Sprite> GetSprite(std::string filename, SDL_Rect clipRect = SDL_Rect{0, 0, -1, -1});
   static std::shared_ptr<Sprite> GetSprite(
-      std::string filename, SpriteConfig config, Rectangle clipRect = Rectangle(0, 0, -1, -1));
+      std::string filename, SpriteConfig config, SDL_Rect clipRect = SDL_Rect{0, 0, -1, -1});
 
   // Get a music
   static std::shared_ptr<Mix_Music> GetMusic(std::string filename);

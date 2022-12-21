@@ -8,6 +8,7 @@
 #include <memory>
 #include <string>
 #include <iostream>
+#include <utility>
 #include <SDL.h>
 
 #define RAD2DEG (180 / M_PI)
@@ -80,6 +81,32 @@ namespace Helper
   [[maybe_unused]] static float RandomRange(float min, float max)
   {
     return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
+  }
+
+  template <typename T>
+  [[maybe_unused]] static T Lerp(T min, T max, float amount)
+  {
+    // Range distance
+    T rangeDistance = max - min;
+
+    return min + amount * rangeDistance;
+  }
+
+  template <typename T>
+  [[maybe_unused]] static T Lerp(std::pair<T, T> range, float amount)
+  {
+    return Lerp(range.first, range.second, amount);
+  }
+
+  template <typename T>
+  [[maybe_unused]] static T RandomRange(T min, T max)
+  {
+    return Lerp(min, max, RandomRange(0.0f, 1.0f));
+  }
+  template <typename T>
+  [[maybe_unused]] static T RandomRange(std::pair<T, T> range)
+  {
+    return RandomRange(range.first, range.second);
   }
 
   // Gets a random valid index of the array

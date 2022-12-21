@@ -5,13 +5,11 @@
 #include <string>
 #include "SDL_image.h"
 #include "Rectangle.h"
+#include "Game.h"
 
 // Holds parameters for configuring a sprite
 struct SpriteConfig
 {
-  // The default value of pixelsPerUnit
-  static float defaultPixelsPerUnit;
-
   // The size of a pixel from this image relative to a game unit
   float pixelsPerUnit;
 
@@ -22,7 +20,7 @@ struct SpriteConfig
   // Target height of image
   int targetHeight{-1};
 
-  SpriteConfig() : SpriteConfig(defaultPixelsPerUnit) {}
+  SpriteConfig() : SpriteConfig(Game::defaultVirtualPixelsPerUnit) {}
   SpriteConfig(float ppu) : pixelsPerUnit(ppu) {}
 };
 
@@ -37,7 +35,7 @@ public:
   std::shared_ptr<SDL_Texture> GetTexture() const { return texture; }
 
   // Sets which rectangle of the image is to be displayed
-  void SetClip(Rectangle rect);
+  void SetClip(SDL_Rect rect);
 
   // Set the dimensions of the image to be displayed (in game units, NOT pixels)
   void SetTargetDimension(int width, int height = -1);

@@ -69,13 +69,13 @@ COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(ENGINE_INCLUDE_DIRECTORY) -
 # FOR ENGINE
 
 # Header files
-_ENGINE_DEPS = Game.h GameState.h SpriteRenderer.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h Animator.h SatCollision.h Collider.h Text.h Color.h Timer.h Rigidbody.h PhysicsSystem.h Sprite.h Animation.h AnimationFrame.h
+_ENGINE_DEPS = Game.h GameState.h SpriteRenderer.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h Animator.h SatCollision.h Collider.h Text.h Color.h Timer.h Rigidbody.h PhysicsSystem.h Sprite.h Animation.h AnimationFrame.h ParticleEmitter.h Circle.h Particle.h ParticleSystem.h
 
 # Generate header filepaths
 ENGINE_DEPS = $(patsubst %,$(ENGINE_INCLUDE_DIRECTORY)\\%,$(_ENGINE_DEPS))
 
 # Object files
-_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o Animator.o Collider.o Text.o Rigidbody.o PhysicsSystem.o Sprite.o Animation.o AnimationFrame.o SpriteRenderer.o
+_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o Animator.o Collider.o Text.o Rigidbody.o PhysicsSystem.o Sprite.o Animation.o AnimationFrame.o SpriteRenderer.o ParticleEmitter.o Particle.o ParticleSystem.o Circle.o Vector2.o Rectangle.o Color.o
 
 # Generate object filepaths
 ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
@@ -83,13 +83,13 @@ ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
 # FOR INTEGRATION
 
 # Header files
-_INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h Tag.h AnimationRecipes.h
+_INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h Tag.h AnimationRecipes.h 
 
 # Generate header filepaths
 INTEGRATION_DEPS = $(patsubst %,$(INTEGRATION_INCLUDE_DIRECTORY)\\%,$(_INTEGRATION_DEPS))
 
 # Object files
-_INTEGRATION_OBJS = ObjectRecipes.o InitialState.o AnimationRecipes.o
+_INTEGRATION_OBJS = ObjectRecipes.o InitialState.o AnimationRecipes.o GameConfiguration.o
 
 # Generate object filepaths
 INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATION_OBJS))
