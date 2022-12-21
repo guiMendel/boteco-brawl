@@ -5,7 +5,7 @@
 #include "Helper.h"
 #include <iostream>
 
-#define CAP(colorChannel) std::max(std::min(colorChannel, 256), 0)
+#define CAP(colorChannel) std::max(std::min(colorChannel, 255), 0)
 
 struct Color
 {
@@ -27,6 +27,7 @@ struct Color
   // === PREFAB COLORS
 
   static Color White() { return Color(255, 255, 255); }
+  static Color Gray() { return Color(127, 127, 127); }
   static Color Black() { return Color(0, 0, 0); }
   static Color Red() { return Color(255, 0, 0); }
   static Color Green() { return Color(0, 255, 0); }

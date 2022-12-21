@@ -97,7 +97,11 @@ public:
 
   std::string GetName() const { return name; }
 
+  std::shared_ptr<GameObject> CreateChild(std::string name);
+  std::shared_ptr<GameObject> CreateChild(std::string name, Vector2 offset);
+  std::shared_ptr<GameObject> CreateChild(std::string name, Vector2 offset, float offsetRotation);
   std::vector<std::shared_ptr<GameObject>> GetChildren();
+  std::shared_ptr<GameObject> GetChild(std::string name);
 
   // Returns this object's shared pointer
   std::shared_ptr<GameObject> GetShared() const;

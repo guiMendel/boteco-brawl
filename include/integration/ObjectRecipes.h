@@ -5,6 +5,8 @@
 #include "GameObject.h"
 #include "Text.h"
 
+#define DASH_PARTICLES_OBJECT "DashParticles"
+
 class ObjectRecipes
 {
 public:

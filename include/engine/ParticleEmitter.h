@@ -12,12 +12,30 @@
 
 class Particle;
 
-class ParticleEmitter : public Component
+struct ParticleEmissionParameters
 {
-public:
   template <class T>
   using range = std::pair<T, T>;
 
+  // How often particles are emitted, in seconds
+  range<float> frequency;
+
+  // Angle of emitted particles, in radians
+  range<float> angle;
+
+  // Color of emitted particles
+  range<Color> color;
+
+  // Speed of emitted particles, in units / second
+  range<float> speed;
+
+  // Lifetime of emitted particles, in seconds
+  range<float> lifetime;
+};
+
+class ParticleEmitter : public Component
+{
+public:
   ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float radius = 0.01, bool loop = false, float duration = 1);
 
   ~ParticleEmitter() {}
@@ -29,7 +47,8 @@ public:
   Circle GetOrigin() const;
 
   void Start() override;
-  void Update(float deltaTime) override;
+  void Update(float) override;
+  void PhysicsUpdate(float deltaTime) override;
   void Render() override;
   RenderLayer GetRenderLayer() override { return renderLayer; }
   int GetRenderOrder() override { return renderOrder; }
@@ -46,23 +65,15 @@ public:
   // Whether to loop when emission cycle ends
   bool loop;
 
-  // How often particles are emitted, in seconds
-  range<float> emissionFrequency;
-
-  // Angle of emitted particles, in radians
-  range<float> emissionAngle;
-
-  // Color of emitted particles
-  range<Color> emissionColor;
-
-  // Speed of emitted particles, in units / second
-  range<float> emissionSpeed;
-
-  // Lifetime of emitted particles, in seconds
-  range<float> emissionLifetime;
+  // Initial parameters at each cycle
+  ParticleEmissionParameters emission;
 
   // Frame behavior to attach to emitted particles
   std::function<void(Particle &)> particleBehavior{nullptr};
+
+  // Permits altering the emission params over an emission cycle
+  // Called each frame
+  std::function<void(ParticleEmissionParameters &, float)> emissionEvolution{nullptr};
 
   // Whether to simulate particle with reference to this emitter or the world
   bool attachToEmitter{false};
@@ -100,6 +111,9 @@ private:
 
   // Render order
   int renderOrder{0};
+
+  // Current value of params in the current cycle
+  ParticleEmissionParameters currentParams;
 };
 
 namespace ParticleBehaviors

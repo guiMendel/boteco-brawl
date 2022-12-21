@@ -75,14 +75,26 @@ auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject
     // Turn on continuous collision
     body->continuousCollisions = true;
 
+    // Give it a dash particle emitter
+    auto dashParticleObject = character->CreateChild(DASH_PARTICLES_OBJECT);
+    auto particleEmitter = dashParticleObject->AddComponent<ParticleEmitter>(RenderLayer::VFX, 0.25, true, 5);
+    particleEmitter->SetOffset({0, 0.25});
+    particleEmitter->emission.color = {Color::Black(), Color::Gray()};
+    particleEmitter->emission.frequency = {0.0001, 0.001};
+    particleEmitter->emission.speed = {0.01, 0.1};
+    particleEmitter->emission.lifetime = {0.2, 0.6};
+    particleEmitter->emitOnStart = false;
+    // Reduce frequency over emission
+    particleEmitter->emissionEvolution = [](ParticleEmissionParameters &params, float deltaTime)
+    { auto reduction = 0.5 * deltaTime;
+      params.frequency = {params.frequency.first + reduction,
+                          params.frequency.second + reduction}; };
+
     // Give it movement
     character->AddComponent<::Character>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
     character->AddComponent<PlayerInput>();
     character->AddComponent<CharacterController>();
-
-    // Particle testing
-    character->AddComponent<ParticleEmitter>(RenderLayer::VFX, 1, true);
   };
 }
 

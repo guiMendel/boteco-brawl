@@ -16,6 +16,8 @@ shared_ptr<Particle> ParticleSystem::CreateParticle(Vector2 position, float life
 
 void ParticleSystem::PhysicsUpdate(float deltaTime)
 {
+  // cout << particles.size() << " particles" << endl;
+
   // Update each particle
   for (auto [id, particle] : particles)
     particle->PhysicsUpdate(deltaTime);

@@ -3,19 +3,19 @@
 #include "Camera.h"
 #include <SDL.h>
 
-void Debug::DrawPoint(Vector2 point)
+void Debug::DrawPoint(Vector2 point, Color color)
 {
   point = Camera::GetMain()->WorldToScreen(point);
 
   auto renderer = Game::GetInstance().GetRenderer();
 
-  SDL_SetRenderDrawColor(renderer, 255, 255, 255, SDL_ALPHA_OPAQUE);
+  SDL_SetRenderDrawColor(renderer, color.red, color.green, color.blue, color.alpha);
 
   SDL_RenderDrawPoint(renderer, point.x, point.y);
 }
 
 // Got this from the internet
-void Debug::DrawCircle(Circle circle)
+void Debug::DrawCircle(Circle circle, Color color)
 {
   auto renderer = Game::GetInstance().GetRenderer();
 
@@ -33,6 +33,8 @@ void Debug::DrawCircle(Circle circle)
   int32_t tx = 1;
   int32_t ty = 1;
   int32_t error = (tx - diameter);
+
+  SDL_SetRenderDrawColor(renderer, color.red, color.green, color.blue, color.alpha);
 
   while (x >= y)
   {
@@ -62,7 +64,7 @@ void Debug::DrawCircle(Circle circle)
   }
 }
 
-void Debug::DrawBox(Rectangle box, float rotation)
+void Debug::DrawBox(Rectangle box, float rotation, Color color)
 {
   auto camera = Camera::GetMain();
 
@@ -80,7 +82,7 @@ void Debug::DrawBox(Rectangle box, float rotation)
   auto renderer = Game::GetInstance().GetRenderer();
 
   // Set paint color to green
-  SDL_SetRenderDrawColor(renderer, 0, 255, 0, SDL_ALPHA_OPAQUE);
+  SDL_SetRenderDrawColor(renderer, color.red, color.green, color.blue, color.alpha);
 
   // Paint collider edges
   SDL_RenderDrawLines(renderer, vertices, 5);

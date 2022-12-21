@@ -195,6 +195,10 @@ Vector2 GameObject::GetPosition() const
 {
   if (IsRoot())
     return localPosition;
+
+  // if (GetName() == "DashParticles")
+  //   cout << localPosition << endl;
+
   return InternalGetParent()->GetPosition() + localPosition;
 }
 void GameObject::SetPosition(const Vector2 newPosition)
@@ -237,6 +241,22 @@ void GameObject::SetRotation(const double newRotation)
   localRotation = newRotation - InternalGetParent()->GetRotation();
 }
 
+shared_ptr<GameObject> GameObject::CreateChild(string name)
+{
+  return CreateChild(name, GetPosition(), GetRotation());
+}
+
+shared_ptr<GameObject> GameObject::CreateChild(string name, Vector2 offset)
+{
+  return CreateChild(name, offset, GetRotation());
+}
+
+shared_ptr<GameObject> GameObject::CreateChild(string name, Vector2 offset, float offsetRotation)
+{
+  auto childId = (new GameObject(name, offset, offsetRotation, GetShared()))->id;
+  return gameState.GetObject(childId);
+}
+
 vector<shared_ptr<GameObject>> GameObject::GetChildren()
 {
   vector<shared_ptr<GameObject>> verifiedChildren;
@@ -262,6 +282,33 @@ vector<shared_ptr<GameObject>> GameObject::GetChildren()
   }
 
   return verifiedChildren;
+}
+
+shared_ptr<GameObject> GameObject::GetChild(string name)
+{
+  // For each child entry
+  auto childEntryIterator = children.begin();
+  while (childEntryIterator != children.end())
+  {
+    // If it's expired
+    if (childEntryIterator->second.expired())
+    {
+      // Remove it
+      childEntryIterator = children.erase(childEntryIterator);
+
+      continue;
+    }
+
+    // Otherwise check if this is it
+    auto child = childEntryIterator->second.lock();
+    if (child->GetName() == name)
+      return child;
+
+    // Advance
+    childEntryIterator++;
+  }
+
+  return nullptr;
 }
 
 void GameObject::InternalDestroy()

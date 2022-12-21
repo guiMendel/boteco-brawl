@@ -4,6 +4,8 @@
 #include "Game.h"
 #include <SDL_image.h>
 
+using namespace std;
+
 Particle::Particle(ParticleSystem &particleSystem, int id, Vector2 position, float lifetime, Vector2 velocity, Color color)
     : position(position), velocity(velocity), color(color), lifetime(lifetime), particleSystem(particleSystem), id(id)
 {
@@ -41,7 +43,7 @@ void Particle::Render()
   auto camera = Camera::GetMain();
 
   // Size of virtual pixel, in units
-  float virtualPixelSize = 1 / Game::defaultVirtualPixelsPerUnit;
+  float virtualPixelSize = 1.0f / Game::defaultVirtualPixelsPerUnit;
 
   // Size of virtual pixel, in real pixels
   float pixelSize = camera->GetRealPixelsPerUnit() * virtualPixelSize;
@@ -49,6 +51,12 @@ void Particle::Render()
   // Get rect representing this particle
   SDL_Rect pixel = (SDL_Rect)Rectangle{camera->WorldToScreen(position), pixelSize, pixelSize};
 
+  // Get renderer
+  auto renderer = Game::GetInstance().GetRenderer();
+
+  // Use color
+  SDL_SetRenderDrawColor(renderer, color.red, color.green, color.blue, color.alpha);
+
   // Fill a rect at this particle's position
-  SDL_RenderFillRect(Game::GetInstance().GetRenderer(), &pixel);
+  SDL_RenderFillRect(renderer, &pixel);
 }

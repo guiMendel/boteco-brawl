@@ -1,4 +1,5 @@
 #include "Helper.h"
+#include "Debug.h"
 #include "ParticleEmitter.h"
 
 using namespace std;
@@ -8,16 +9,16 @@ ParticleEmitter::ParticleEmitter(GameObject &associatedObject, RenderLayer rende
     : Component(associatedObject),
       duration(duration),
       loop(loop),
-      // Default parameters:
-      emissionFrequency({0.1f, 0.5f}),
-      emissionAngle({0, 2 * M_PI}),
-      emissionColor({Color::White(), Color::White()}),
-      emissionSpeed({0.5f, 2}),
-      emissionLifetime({1, 2}),
       origin(radius),
       particleSystem(gameState.particleSystem),
       renderLayer(renderLayer)
 {
+  // Default parameters:
+  emission.frequency = {0.1f, 0.5f};
+  emission.angle = {0, 2 * M_PI};
+  emission.color = {Color::White(), Color::White()};
+  emission.speed = {0.5f, 2};
+  emission.lifetime = {1, 2};
 }
 
 void ParticleEmitter::SetOffset(Vector2 offset) { origin.center = offset; }
@@ -27,6 +28,11 @@ Circle ParticleEmitter::GetOrigin() const { return origin; }
 
 void ParticleEmitter::Render()
 {
+  // cout << gameObject.GetPosition() << endl;
+
+  // Debug
+  Debug::DrawCircle(GetOrigin() + gameObject.GetPosition(), Color::Yellow());
+
   // Render each of this emitter's particles
   for (auto particle : GetEmittedParticles())
     particle->Render();
@@ -42,17 +48,27 @@ void ParticleEmitter::Update(float deltaTime)
 {
   if (active == false)
     return;
+}
+
+void ParticleEmitter::PhysicsUpdate(float deltaTime)
+{
+  if (active == false)
+    return;
 
   // Count emission time
   emitCooldown -= deltaTime;
 
-  if (emitCooldown <= 0)
+  while (emitCooldown <= 0)
   {
     // Restart timer
-    emitCooldown += RandomRange(emissionFrequency);
+    emitCooldown += RandomRange(currentParams.frequency);
 
     Emit();
   }
+
+  // Call evolution callback
+  if (emissionEvolution)
+    emissionEvolution(currentParams, deltaTime);
 
   // Count cycleLifetime
   cycleLifetime -= deltaTime;
@@ -73,15 +89,15 @@ void ParticleEmitter::Update(float deltaTime)
 void ParticleEmitter::Emit()
 {
   // Get base parameters
-  float angle = RandomRange(emissionAngle);
-  Color color = RandomRange(emissionColor);
-  float lifetime = RandomRange(emissionLifetime);
-  float speed = RandomRange(emissionSpeed);
+  float angle = RandomRange(currentParams.angle);
+  Color color = RandomRange(currentParams.color);
+  float lifetime = RandomRange(currentParams.lifetime);
+  float speed = RandomRange(currentParams.speed);
 
   // Get position
   float positionAngle = RandomRange(0.0f, 2 * M_PI);
   float positionRadius = RandomRange(0.0f, origin.radius);
-  Vector2 position = origin.center + Vector2::Angled(positionAngle, positionRadius);
+  Vector2 position = gameObject.GetPosition() + origin.center + Vector2::Angled(positionAngle, positionRadius);
 
   // Create particle
   auto particle = particleSystem.CreateParticle(position, lifetime, Vector2::Angled(angle, speed), color);
@@ -89,6 +105,9 @@ void ParticleEmitter::Emit()
   // Attachment
   if (attachToEmitter)
     particle->AttachTo(gameObject.GetShared());
+
+  // Register it
+  weakEmittedParticles.emplace_back(particle);
 }
 
 void ParticleEmitter::StartEmission()
@@ -96,6 +115,9 @@ void ParticleEmitter::StartEmission()
   cycleLifetime = duration;
   active = true;
   emitCooldown = 0;
+
+  // Reset params
+  currentParams = emission;
 }
 
 void ParticleEmitter::Stop()

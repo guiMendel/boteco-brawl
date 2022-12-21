@@ -20,7 +20,7 @@ Vector2 PlayerInput::GetInputDirection() const
   if (inputManager.IsKeyDown(SDLK_s))
     inputDirection.y += 1;
 
-  return inputDirection;
+  return inputDirection.Normalized();
 }
 
 void PlayerInput::Update([[maybe_unused]] float deltaTime)

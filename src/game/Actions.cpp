@@ -2,6 +2,8 @@
 #include "Movement.h"
 #include "Rigidbody.h"
 #include "Character.h"
+#include "ParticleEmitter.h"
+#include "ObjectRecipes.h"
 
 using namespace std;
 using namespace Actions;
@@ -71,6 +73,13 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
                                               character->RemoveState(dashStateId);
                                               character->RemoveState(recoveringStateId);
                                             } });
+
+  // Play particles
+  auto particleObject = target.GetChild(DASH_PARTICLES_OBJECT);
+
+  Assert(particleObject != nullptr, target.GetName() + " had no " DASH_PARTICLES_OBJECT " child");
+
+  particleObject->RequireComponent<ParticleEmitter>()->StartEmission();
 }
 
 void Dash::StopHook(GameObject &target)
@@ -81,4 +90,7 @@ void Dash::StopHook(GameObject &target)
   rigidbody->gravityScale = originalGravityScale;
   rigidbody->airFriction = originalAirFriction;
   target.GetComponent<Character>()->SetControl(true);
+
+  // Stop particles
+  target.GetChild(DASH_PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>()->Stop();
 }
