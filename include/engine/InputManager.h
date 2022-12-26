@@ -4,6 +4,7 @@
 #include "Vector2.h"
 #include <iostream>
 #include <unordered_map>
+#include <vector>
 #include <SDL.h>
 
 #define LEFT_ARROW_KEY SDLK_LEFT
@@ -18,6 +19,13 @@
 class InputManager
 {
 public:
+  // Controller analogue movement, with Controller instance id
+  // Vector axis range from -1 to 1
+  EventII<Vector2, int> OnControllerLeftAnalogue, OnControllerRightAnalogue;
+
+  // Controller button event, with button & Controller instance id
+  EventII<SDL_GameControllerButton, int> OnControllerButtonPress, OnControllerButtonRelease;
+
   void Update();
 
   bool KeyPress(int key) { return keyState[key] == true && keyUpdate[key] == updateCounter; }
@@ -41,6 +49,9 @@ public:
   bool QuitRequested() const { return quitRequested; }
 
 private:
+  // Opens any new joysticks or closes disconnected ones
+  void ConnectControllers();
+
   // Mouse state flags
   bool mouseState[6]{};
 
@@ -61,6 +72,12 @@ private:
 
   // Mouse Y coordinates
   int mouseY;
+
+  // Currently open controllers
+  std::vector<auto_unique_ptr<SDL_GameController>> controllers;
+
+  // Tolerance of joystick axis jitter
+  static const int joystickDeadZone;
 };
 
 #endif

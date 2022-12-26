@@ -3,6 +3,7 @@
 #include <SDL_image.h>
 #include <SDL_mixer.h>
 #include <SDL_ttf.h>
+#include <SDL_gamecontroller.h>
 #include <cstdlib>
 #include <ctime>
 #include "Game.h"
@@ -28,7 +29,7 @@ auto InitializeSDL(string title, int width, int height) -> pair<SDL_Window *, SD
   // === BASE SDL
 
   // Initialize SDL & all it's necessary subsystems
-  auto encounteredError = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER);
+  auto encounteredError = SDL_Init(SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER);
 
   // Catch any errors
   Assert(!encounteredError, "Failed to initialize SDL");
@@ -75,6 +76,11 @@ auto InitializeSDL(string title, int width, int height) -> pair<SDL_Window *, SD
 
   // Catch any errors
   Assert(renderer != nullptr, "Failed to create SDL renderer");
+
+  // === CONTROLLERS
+
+  // Enable controller events
+  SDL_GameControllerEventState(SDL_ENABLE);
 
   return make_pair(gameWindow, renderer);
 }
