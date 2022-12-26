@@ -19,16 +19,18 @@ public:
   virtual ~PlayerManager() {}
 
   std::vector<std::shared_ptr<Player>> GetPlayers() const;
+  std::shared_ptr<Player> GetMainPlayer() const;
 
   // Sets which player should be the main
-  void SetMainPlayer(int newId);
+  void SetMainPlayer(std::shared_ptr<Player> player);
 
   // Creates a new player
-  void AddNewPlayer();
+  std::shared_ptr<Player> AddNewPlayer();
 
 private:
-  // Component id of main player
-  int mainPlayerId;
+  // Component id of main player gameObject
+  // -1 if no player
+  int mainPlayerId{-1};
 };
 
 #endif

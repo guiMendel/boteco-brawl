@@ -14,6 +14,7 @@
 #include "CharacterController.h"
 #include "Character.h"
 #include "ParticleEmitter.h"
+#include "PlayerManager.h"
 #include <iostream>
 
 using namespace std;
@@ -23,6 +24,15 @@ auto ObjectRecipes::Camera(float size) -> function<void(shared_ptr<GameObject>)>
   return [size](shared_ptr<GameObject> cameraObject)
   {
     cameraObject->AddComponent<::Camera>(size);
+  };
+}
+
+auto ObjectRecipes::PlayerManager() -> function<void(shared_ptr<GameObject>)>
+{
+  return [](shared_ptr<GameObject> managerObject)
+  {
+    managerObject->AddComponent<::PlayerManager>();
+    managerObject->DontDestroyOnLoad();
   };
 }
 
@@ -48,9 +58,9 @@ auto ObjectRecipes::Background(string imagePath) -> function<void(shared_ptr<Gam
   };
 }
 
-auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject>)>
+auto ObjectRecipes::Character(shared_ptr<Player> player) -> std::function<void(std::shared_ptr<GameObject>)>
 {
-  return [](shared_ptr<GameObject> character)
+  return [player](shared_ptr<GameObject> character)
   {
     // Get sprite
     auto spriteRenderer = character->AddComponent<SpriteRenderer>(RenderLayer::Characters);
@@ -94,7 +104,7 @@ auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject
     // Give it movement
     character->AddComponent<::Character>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
-    character->AddComponent<ControllerInput>(0);
+    character->AddComponent<ControllerInput>(player);
     character->AddComponent<CharacterController>();
   };
 }

@@ -264,11 +264,20 @@ vector<shared_ptr<GameObject>> GameState::GetObjectsToCarryOn()
   return savedObjects;
 }
 
-std::shared_ptr<GameState> GameState::GetShared()
+shared_ptr<GameState> GameState::GetShared()
 {
   auto currentState = Game::GetInstance().GetState();
 
   Assert(id == currentState->id, "Tried to get shared pointer of inactive game state");
 
   return currentState;
+}
+
+shared_ptr<GameObject> GameState::FindObject(string name)
+{
+  for (auto [objectId, object] : gameObjects)
+    if (object->GetName() == name)
+      return object;
+
+  return nullptr;
 }

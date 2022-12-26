@@ -166,51 +166,25 @@ void InputManager::Update()
 
 void InputManager::OpenController(int index)
 {
-  // Open this controller
-  auto newController = SDL_GameControllerOpen(index);
+  // Create device
+  auto controller = make_shared<ControllerDevice>(index);
 
-  // Check for it's health
-  Assert(newController != nullptr, "Failed to open newly connected controller");
+  // Register it
+  controllers[controller->GetId()] = controller;
 
-  // Get it's instance ID
-  int controllerId = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(newController));
-
-  cout << "Controller \"" << SDL_GameControllerName(newController) << "\" added with instance ID " << controllerId << endl;
-
-  // Register it, passing in the destructor
-  controllers.emplace(
-      std::piecewise_construct,
-      std::forward_as_tuple(controllerId),
-      std::forward_as_tuple(newController, SDL_GameControllerClose));
+  // Search for available players
+  controller->SearchPlayersForAssociation();
 }
-
-// void InputManager::ConnectControllers()
-// {
-//   // Get how many joysticks are connected to the system
-//   int connectedJoystickCount = SDL_NumJoysticks();
-
-//   // Catch errors
-//   Assert(connectedJoystickCount >= 0, "Failed to retrieve current number of connected joysticks");
-
-//   // If there are new joysticks, open them
-//   while (size_t(connectedJoystickCount) > controllers.size())
-//   {
-//     // For now, let's enforce joysticks which are also game controllers
-//     Assert(SDL_IsGameController(controllers.size()), "Connected game controller was not recognized");
-
-//     // Create it's unique ptr with a destructor
-//     controllers.emplace_back(SDL_GameControllerOpen(controllers.size()), SDL_GameControllerClose);
-
-//     // Check for it's health
-//     Assert(controllers[controllers.size() - 1] != nullptr, "Failed to open newly connected controller");
-//   }
-
-//   // If joysticks have been removed, close them
-//   while (size_t(connectedJoystickCount) < controllers.size())
-//     controllers.pop_back();
-// }
 
 Vector2 InputManager::GetMouseWorldCoordinates() const
 {
   return Camera::GetMain()->ScreenToWorld(Vector2((float)mouseX, (float)mouseY));
+}
+
+std::shared_ptr<ControllerDevice> InputManager::GetController(int id)
+{
+  if (controllers.count(id) == 0)
+    return nullptr;
+
+  return controllers[id];
 }

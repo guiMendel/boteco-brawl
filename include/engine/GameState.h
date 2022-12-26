@@ -102,6 +102,8 @@ public:
     return nullptr;
   }
 
+  std::shared_ptr<GameObject> FindObject(std::string name);
+
   // Initializes the state's objects
   virtual void InitializeObjects() = 0;
 

@@ -219,7 +219,8 @@ private:
     auto newComponents = GetComponents<T>();
 
     // Merge
-    foundComponents.insert(foundComponents.end(), newComponents.begin(), newComponents.end());
+    if (newComponents.size() > 0)
+      foundComponents.insert(foundComponents.end(), newComponents.begin(), newComponents.end());
 
     return foundComponents;
   }

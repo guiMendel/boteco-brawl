@@ -1,6 +1,7 @@
 #include "MainState.h"
 #include "GameData.h"
 #include "ObjectRecipes.h"
+#include "PlayerManager.h"
 #include "Camera.h"
 
 using namespace std;
@@ -11,11 +12,14 @@ void MainState::LoadAssets()
 
 void MainState::InitializeObjects()
 {
+  // Add player manager
+  auto playerManager = CreateObject("PlayerManager", ObjectRecipes::PlayerManager())->RequireComponent<PlayerManager>();
+
   // Add a background
   CreateObject("Background", ObjectRecipes::Background("./assets/image/boteco.jpg"));
 
   // Add player
-  auto player1 = CreateObject("Player", ObjectRecipes::Character(), Vector2(-4, -10))->GetComponent<Rigidbody>();
+  auto player1 = CreateObject("Player", ObjectRecipes::Character(playerManager->GetMainPlayer()), Vector2(-4, -10))->GetComponent<Rigidbody>();
 
   // auto player2 = CreateObject("Player2", ObjectRecipes::Character(), Vector2(4, -2))->GetComponent<Rigidbody>();
 

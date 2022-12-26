@@ -4,6 +4,7 @@
 #include "Vector2.h"
 #include "Event.h"
 #include "Helper.h"
+#include "ControllerDevice.h"
 #include <iostream>
 #include <unordered_map>
 #include <vector>
@@ -48,12 +49,11 @@ public:
   int GetMouseY() const { return mouseY; }
   Vector2 GetMouseWorldCoordinates() const;
 
+  std::shared_ptr<ControllerDevice> GetController(int id);
+
   bool QuitRequested() const { return quitRequested; }
 
 private:
-  // Opens any new joysticks or closes disconnected ones
-  void ConnectControllers();
-
   // Flattens joystick axis value in range -1 to 1, and sets it to 0 if below deadzone
   float TreatAxisValue(int value);
 
@@ -82,7 +82,7 @@ private:
   int mouseY;
 
   // Currently open controllers
-  std::unordered_map<int, Helper::auto_unique_ptr<SDL_GameController>> controllers;
+  std::unordered_map<int, std::shared_ptr<ControllerDevice>> controllers;
 
   // Tolerance of joystick axis jitter
   static const int joystickDeadZone;
