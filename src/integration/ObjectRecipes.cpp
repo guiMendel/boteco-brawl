@@ -7,7 +7,8 @@
 #include "Rigidbody.h"
 #include "Rectangle.h"
 #include "Movement.h"
-#include "PlayerInput.h"
+#include "KeyboardInput.h"
+#include "ControllerInput.h"
 #include "Animator.h"
 #include "AnimationRecipes.h"
 #include "CharacterController.h"
@@ -93,7 +94,7 @@ auto ObjectRecipes::Character() -> std::function<void(std::shared_ptr<GameObject
     // Give it movement
     character->AddComponent<::Character>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
-    character->AddComponent<PlayerInput>();
+    character->AddComponent<ControllerInput>(0);
     character->AddComponent<CharacterController>();
   };
 }

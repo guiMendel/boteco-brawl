@@ -47,7 +47,6 @@ public:
   Circle GetOrigin() const;
 
   void Start() override;
-  void Update(float) override;
   void PhysicsUpdate(float deltaTime) override;
   void Render() override;
   RenderLayer GetRenderLayer() override { return renderLayer; }

@@ -30,20 +30,16 @@ public:
 
   Event OnNeutralAttack;
 
-  void Update(float deltaTime) override;
-
   float GetCurrentMoveDirection() const;
 
-private:
+protected:
   // Sets direction to 0, if current direction equals the provided one (both have the same sign)
   void CancelDirection(float direction);
 
   // Issues new direction
   void SetDirection(float direction);
 
-  // Gets input direction for this frame
-  Vector2 GetInputDirection() const;
-
+private:
   // Last direction issued to Movement
   float currentDirection{0};
 };

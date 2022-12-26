@@ -44,12 +44,6 @@ void ParticleEmitter::Start()
     StartEmission();
 }
 
-void ParticleEmitter::Update(float deltaTime)
-{
-  if (active == false)
-    return;
-}
-
 void ParticleEmitter::PhysicsUpdate(float deltaTime)
 {
   if (active == false)

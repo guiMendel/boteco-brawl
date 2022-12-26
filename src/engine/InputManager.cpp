@@ -8,7 +8,12 @@ using namespace std;
 
 const int InputManager::joystickDeadZone{8000};
 
-// No need for constructor since all values were initialized in class definition
+// Flattens joystick axis value in range -1 to 1, and sets it to 0 if below deadzone
+float InputManager::TreatAxisValue(int value)
+{
+  float flattenValue = float(value) / CONTROLLER_AXIS_MAX;
+  return abs(flattenValue) < joystickDeadZone ? 0 : flattenValue;
+}
 
 void InputManager::Update()
 {
@@ -18,7 +23,7 @@ void InputManager::Update()
   SDL_GetMouseState(&mouseX, &mouseY);
 
   // Handle changes to connected controllers
-  ConnectControllers();
+  // ConnectControllers();
 
   // Reset quit request
   quitRequested = false;
@@ -26,11 +31,11 @@ void InputManager::Update()
   // Increment counter
   updateCounter++;
 
-  // Game controller mapping for analogues in last frame
-  static unordered_map<int, Vector2> lastLeftControllerAnalogues, lastRightControllerAnalogues;
+  // Game controller mapping for analogs in last frame
+  static unordered_map<int, Vector2> lastLeftControllerAnalogs, lastRightControllerAnalogs;
 
-  // Game controller mapping for analogues in this frame
-  static unordered_map<int, Vector2> currentLeftControllerAnalogues, currentRightControllerAnalogues;
+  // Game controller mapping for analogs in this frame
+  static unordered_map<int, Vector2> currentLeftControllerAnalogs, currentRightControllerAnalogs;
 
   // If there are any input events in the SDL stack pile, this function returns 1 and sets the argument to next event
   while (SDL_PollEvent(&event))
@@ -87,11 +92,20 @@ void InputManager::Update()
 
     // On controller connected
     else if (event.type == SDL_CONTROLLERDEVICEADDED)
+    {
       cout << "Controller connected. Device index: " << event.cdevice.which << endl;
+
+      OpenController(event.cdevice.which);
+    }
 
     // On controller disconnected
     else if (event.type == SDL_CONTROLLERDEVICEREMOVED)
+    {
       cout << "Controller disconnected. Instance id: " << event.cdevice.which << endl;
+
+      // Remove this entry
+      controllers.erase(event.cdevice.which);
+    }
 
     // On controller remapped
     else if (event.type == SDL_CONTROLLERDEVICEREMAPPED)
@@ -108,71 +122,93 @@ void InputManager::Update()
     // On controller axis move
     else if (event.type == SDL_CONTROLLERAXISMOTION)
     {
+      float value = TreatAxisValue(event.caxis.value);
+
       // Register this axis variation for this frame
       if (event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTX)
-        currentLeftControllerAnalogues[event.caxis.which].x = float(event.caxis.value) / CONTROLLER_AXIS_MAX;
+        currentLeftControllerAnalogs[event.caxis.which].x = value;
 
       if (event.caxis.axis == SDL_CONTROLLER_AXIS_LEFTY)
-        currentLeftControllerAnalogues[event.caxis.which].y = float(event.caxis.value) / CONTROLLER_AXIS_MAX;
+        currentLeftControllerAnalogs[event.caxis.which].y = value;
 
       if (event.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTX)
-        currentRightControllerAnalogues[event.caxis.which].x = float(event.caxis.value) / CONTROLLER_AXIS_MAX;
+        currentRightControllerAnalogs[event.caxis.which].x = value;
 
       if (event.caxis.axis == SDL_CONTROLLER_AXIS_RIGHTY)
-        currentRightControllerAnalogues[event.caxis.which].y = float(event.caxis.value) / CONTROLLER_AXIS_MAX;
+        currentRightControllerAnalogs[event.caxis.which].y = value;
     }
   }
 
-  // Detect variation of controller analogue
-  for (auto [instanceId, analogue] : currentLeftControllerAnalogues)
+  // Detect variation of controller analog
+  for (auto [instanceId, analog] : currentLeftControllerAnalogs)
   {
-    // Compare to the analogue state last frame
-    if (analogue != lastLeftControllerAnalogues[instanceId])
+    // Compare to the analog state last frame
+    if (analog != lastLeftControllerAnalogs[instanceId])
       // If they are different, raise
-      OnControllerLeftAnalogue.Invoke(analogue, instanceId);
+      OnControllerLeftAnalog.Invoke(analog, instanceId);
   }
-  for (auto [instanceId, analogue] : currentRightControllerAnalogues)
+  for (auto [instanceId, analog] : currentRightControllerAnalogs)
   {
-    // Compare to the analogue state last frame
-    if (analogue != lastRightControllerAnalogues[instanceId])
+    // Compare to the analog state last frame
+    if (analog != lastRightControllerAnalogs[instanceId])
       // If they are different, raise
-      OnControllerRightAnalogue.Invoke(analogue, instanceId);
+      OnControllerRightAnalog.Invoke(analog, instanceId);
   }
 
   // Store for next frame
-  lastLeftControllerAnalogues = currentLeftControllerAnalogues;
-  lastRightControllerAnalogues = currentRightControllerAnalogues;
+  lastLeftControllerAnalogs = currentLeftControllerAnalogs;
+  lastRightControllerAnalogs = currentRightControllerAnalogs;
 
   // Empty these for next frame
-  currentLeftControllerAnalogues.clear();
-  currentRightControllerAnalogues.clear();
+  currentLeftControllerAnalogs.clear();
+  currentRightControllerAnalogs.clear();
 }
 
-void InputManager::ConnectControllers()
+void InputManager::OpenController(int index)
 {
-  // Get how many joysticks are connected to the system
-  int connectedJoystickCount = SDL_NumJoysticks();
+  // Open this controller
+  auto newController = SDL_GameControllerOpen(index);
 
-  // Catch errors
-  Assert(connectedJoystickCount >= 0, "Failed to retrieve current number of connected joysticks");
+  // Check for it's health
+  Assert(newController != nullptr, "Failed to open newly connected controller");
 
-  // If there are new joysticks, open them
-  while (connectedJoystickCount > controllers.size())
-  {
-    // For now, let's enforce joysticks which are also game controllers
-    Assert(SDL_IsGameController(controllers.size()), "Connected game controller was not recognized");
+  // Get it's instance ID
+  int controllerId = SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(newController));
 
-    // Create it's unique ptr with a destructor
-    controllers.emplace_back(SDL_GameControllerOpen(controllers.size()), SDL_GameControllerClose);
+  cout << "Controller \"" << SDL_GameControllerName(newController) << "\" added with instance ID " << controllerId << endl;
 
-    // Check for it's health
-    Assert(controllers[controllers.size() - 1] != nullptr, "Failed to open newly connected controller");
-  }
-
-  // If joysticks have been removed, close them
-  while (connectedJoystickCount < controllers.size())
-    controllers.pop_back();
+  // Register it, passing in the destructor
+  controllers.emplace(
+      std::piecewise_construct,
+      std::forward_as_tuple(controllerId),
+      std::forward_as_tuple(newController, SDL_GameControllerClose));
 }
+
+// void InputManager::ConnectControllers()
+// {
+//   // Get how many joysticks are connected to the system
+//   int connectedJoystickCount = SDL_NumJoysticks();
+
+//   // Catch errors
+//   Assert(connectedJoystickCount >= 0, "Failed to retrieve current number of connected joysticks");
+
+//   // If there are new joysticks, open them
+//   while (size_t(connectedJoystickCount) > controllers.size())
+//   {
+//     // For now, let's enforce joysticks which are also game controllers
+//     Assert(SDL_IsGameController(controllers.size()), "Connected game controller was not recognized");
+
+//     // Create it's unique ptr with a destructor
+//     controllers.emplace_back(SDL_GameControllerOpen(controllers.size()), SDL_GameControllerClose);
+
+//     // Check for it's health
+//     Assert(controllers[controllers.size() - 1] != nullptr, "Failed to open newly connected controller");
+//   }
+
+//   // If joysticks have been removed, close them
+//   while (size_t(connectedJoystickCount) < controllers.size())
+//     controllers.pop_back();
+// }
 
 Vector2 InputManager::GetMouseWorldCoordinates() const
 {

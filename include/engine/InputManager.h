@@ -2,6 +2,8 @@
 #define __INPUT_MANAGER__
 
 #include "Vector2.h"
+#include "Event.h"
+#include "Helper.h"
 #include <iostream>
 #include <unordered_map>
 #include <vector>
@@ -19,9 +21,9 @@
 class InputManager
 {
 public:
-  // Controller analogue movement, with Controller instance id
+  // Controller analog movement, with Controller instance id
   // Vector axis range from -1 to 1
-  EventII<Vector2, int> OnControllerLeftAnalogue, OnControllerRightAnalogue;
+  EventII<Vector2, int> OnControllerLeftAnalog, OnControllerRightAnalog;
 
   // Controller button event, with button & Controller instance id
   EventII<SDL_GameControllerButton, int> OnControllerButtonPress, OnControllerButtonRelease;
@@ -52,6 +54,12 @@ private:
   // Opens any new joysticks or closes disconnected ones
   void ConnectControllers();
 
+  // Flattens joystick axis value in range -1 to 1, and sets it to 0 if below deadzone
+  float TreatAxisValue(int value);
+
+  // Opens a new controller with the given index
+  void OpenController(int index);
+
   // Mouse state flags
   bool mouseState[6]{};
 
@@ -74,7 +82,7 @@ private:
   int mouseY;
 
   // Currently open controllers
-  std::vector<auto_unique_ptr<SDL_GameController>> controllers;
+  std::unordered_map<int, Helper::auto_unique_ptr<SDL_GameController>> controllers;
 
   // Tolerance of joystick axis jitter
   static const int joystickDeadZone;
