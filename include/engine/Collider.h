@@ -25,7 +25,7 @@ public:
 
   virtual ~Collider() {}
 
-  void Start() override;
+  void RegisterToState() override;
   void Render() override;
 
   // Get the box, with it's x & y coordinates corresponding to it's actual position in game

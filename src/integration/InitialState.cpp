@@ -3,7 +3,7 @@
 
 using namespace std;
 
-unique_ptr<GameState> Game::GetInitialState() const
+shared_ptr<GameState> Game::GetInitialState() const
 {
   return make_unique<MainState>();
 }

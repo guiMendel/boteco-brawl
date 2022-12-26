@@ -83,6 +83,9 @@ public:
 private:
   void Emit();
 
+  // Get the particle system
+  ParticleSystem &GetSystem() const;
+
   // Gets a list of all active particles emitted by this emitter
   std::list<std::shared_ptr<Particle>> GetEmittedParticles();
 
@@ -98,9 +101,6 @@ private:
 
   // Time until next emission
   float emitCooldown{0};
-
-  // Reference to particle system
-  ParticleSystem &particleSystem;
 
   // Which particles it has emitted
   std::list<std::weak_ptr<Particle>> weakEmittedParticles;

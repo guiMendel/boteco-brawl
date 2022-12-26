@@ -19,12 +19,15 @@
 class Component;
 class Collider;
 class Camera;
+class Game;
 
 // Abstract class that defines a state of the game
 class GameState
 {
-  friend Collider;
-  friend Camera;
+  friend class Collider;
+  friend class Camera;
+  friend class GameObject;
+  friend class Game;
 
 public:
   GameState();
@@ -54,6 +57,7 @@ public:
   void RemoveObject(std::shared_ptr<GameObject> gameObject) { RemoveObject(gameObject->id); }
 
   std::shared_ptr<GameObject> RegisterObject(GameObject *gameObject);
+  std::shared_ptr<GameObject> RegisterObject(std::shared_ptr<GameObject> gameObject);
 
   // Creates a new game object
   template <typename... Args>
@@ -81,6 +85,8 @@ public:
 
   std::shared_ptr<GameObject> GetObject(int id);
 
+  std::shared_ptr<GameState> GetShared();
+
   template <class T>
   auto FindObjectOfType() -> std::shared_ptr<T>
   {
@@ -102,12 +108,10 @@ public:
   // Preloads all the assets so that they are ready when required
   virtual void LoadAssets() {}
 
-  // Supplies a valid unique name for a game object or a component
-  int SupplyId() { return nextId++; }
+  // Supplies a valid unique id for a game object or a component
+  int SupplyId();
 
   void RegisterLayerRenderer(std::shared_ptr<Component> component);
-
-  std::shared_ptr<GameObject> GetRootObject() { return rootObject; }
 
   std::list<std::shared_ptr<Camera>> GetCameras();
 
@@ -119,6 +123,9 @@ public:
 
   // A timer helper
   Timer timer;
+
+  // Unique identifier of this state
+  const int id;
 
 protected:
   // Reference to input manager
@@ -137,6 +144,11 @@ protected:
   bool quitRequested{false};
 
 private:
+  std::shared_ptr<GameObject> GetRootObject() { return rootObject; }
+
+  // Gets all objects which must be carried on to the next frame
+  std::vector<std::shared_ptr<GameObject>> GetObjectsToCarryOn();
+
   void RegisterCamera(std::shared_ptr<Camera> camera);
 
   // Executes this function for each object, cascading down the hierarchy
@@ -145,9 +157,6 @@ private:
 
   // Whether the state has executed the start method
   bool started{false};
-
-  // ID counter for game objects
-  int nextId{1};
 
   // Stores it's cameras
   std::list<std::weak_ptr<Camera>> camerasWeak;

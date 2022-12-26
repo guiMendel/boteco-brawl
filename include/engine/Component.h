@@ -38,19 +38,17 @@ public:
   // The order in which to render this component in it's layer (higher numbers are shown on top)
   virtual int GetRenderOrder() { return 0; }
 
-  void StartAndRegisterLayer();
-
   // Returns this component's shared pointer
   std::shared_ptr<Component> GetShared() const;
 
   void SetEnabled(bool enabled) { this->enabled = enabled; }
   bool IsEnabled() const;
 
+  // The associated game state
+  std::shared_ptr<GameState> GetState() const;
+
   // The associated game object
   GameObject &gameObject;
-
-  // The associated game state
-  GameState &gameState;
 
   // Whether the component is active
   bool enabled{true};
@@ -61,6 +59,7 @@ public:
 protected:
   virtual void Awake() {}
   virtual void Start() {}
+  virtual void RegisterToState() {}
 
   // Called once per frame
   virtual void Update([[maybe_unused]] float deltaTime) {}
@@ -75,10 +74,6 @@ protected:
   // Called on the frame it is destroyed, right before being destroyed
   virtual void OnBeforeDestroy() {}
 
-  // Reference to input manager
-  InputManager &inputManager;
-
-private:
   // Allows for reacting to collision
   virtual void OnCollision([[maybe_unused]] Collision::CollisionData collisionData) {}
   virtual void OnCollisionEnter([[maybe_unused]] Collision::CollisionData collisionData) {}
@@ -87,7 +82,17 @@ private:
   virtual void OnTriggerCollision([[maybe_unused]] GameObject &other) {}
   virtual void OnTriggerCollisionEnter([[maybe_unused]] GameObject &other) {}
 
-  // Whether StartAndRegisterLayer has been called already
+  // Reference to input manager
+  InputManager &inputManager;
+
+private:
+  void RegisterLayer();
+  void SafeStart();
+
+  // Allows for registering to the state's variables
+  void RegisterToStateWithLayer();
+
+  // Whether Start has been called already
   bool started{false};
 };
 

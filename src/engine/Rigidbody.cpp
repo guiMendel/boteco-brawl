@@ -48,7 +48,7 @@ void Rigidbody::PhysicsUpdate(float deltaTime)
 void Rigidbody::DynamicBodyUpdate(float deltaTime)
 {
   // Apply gravity
-  velocity += gameState.physicsSystem.gravity * gravityScale * deltaTime;
+  velocity += GetState()->physicsSystem.gravity * gravityScale * deltaTime;
 
   // Apply air friction
   velocity = PhysicsSystem::ApplyFriction(velocity, airFriction);
@@ -103,7 +103,7 @@ void Rigidbody::DeriveMassFromColliders()
 // Gets the list of colliders associated with this body
 vector<shared_ptr<Collider>> Rigidbody::GetColliders() const
 {
-  return gameState.physicsSystem.ValidateColliders(gameObject.id);
+  return GetState()->physicsSystem.ValidateColliders(gameObject.id);
 }
 
 void Rigidbody::ApplyImpulse(Vector2 impulse)
@@ -253,11 +253,11 @@ void Rigidbody::SetType(RigidbodyType newType)
     return;
 
   type = newType;
-  gameState.physicsSystem.UnregisterColliders(gameObject.id);
+  GetState()->physicsSystem.UnregisterColliders(gameObject.id);
 
   // Re-register colliders
   for (auto collider : GetColliders())
-    gameState.physicsSystem.RegisterCollider(collider, gameObject.id);
+    GetState()->physicsSystem.RegisterCollider(collider, gameObject.id);
 }
 
 bool Rigidbody::Raycast(float angle, float maxDistance, RaycastCollisionData &data)
@@ -266,7 +266,7 @@ bool Rigidbody::Raycast(float angle, float maxDistance, RaycastCollisionData &da
   CollisionFilter filter;
   filter.ignoredObjects.insert(gameObject.id);
 
-  return gameState.physicsSystem.Raycast(gameObject.GetPosition(), angle, maxDistance, data, filter);
+  return GetState()->physicsSystem.Raycast(gameObject.GetPosition(), angle, maxDistance, data, filter);
 }
 
 bool Rigidbody::Raycast(float angle, float maxDistance)

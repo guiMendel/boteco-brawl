@@ -53,7 +53,10 @@ public:
 
     // Start it
     if (started)
-      component->StartAndRegisterLayer();
+    {
+      component->RegisterToStateWithLayer();
+      component->SafeStart();
+    }
 
     return component;
   }
@@ -64,7 +67,7 @@ public:
   // Gets pointer to a component of the given type
   // Needs to be in header file so the compiler knows how to build the necessary methods
   template <class T>
-  auto GetComponent() const -> std::shared_ptr<T>
+  auto GetComponent() -> std::shared_ptr<T>
   {
     // Find the position of the component that is of the requested type
     auto componentIterator = std::find_if(
@@ -78,9 +81,33 @@ public:
     return std::dynamic_pointer_cast<T>(*componentIterator);
   }
 
+  // Gets pointer to a component of the given type
+  // Needs to be in header file so the compiler knows how to build the necessary methods
+  template <class T>
+  auto GetComponents() -> std::vector<std::shared_ptr<T>>
+  {
+    std::vector<std::shared_ptr<T>> foundComponents;
+
+    for (auto component : components)
+    {
+      if (dynamic_cast<T *>(component.get()) != nullptr)
+        foundComponents.push_back(std::dynamic_pointer_cast<T>(component));
+    }
+
+    return foundComponents;
+  }
+
+  // Gets pointer to a component of the given type
+  // Needs to be in header file so the compiler knows how to build the necessary methods
+  template <class T>
+  auto GetComponentsInChildren() -> std::vector<std::shared_ptr<T>>
+  {
+    return InternalGetComponentsInChildren<T>({});
+  }
+
   // Like GetComponent, but raises if it's not present
   template <class T>
-  auto RequireComponent() const -> std::shared_ptr<T>
+  auto RequireComponent() -> std::shared_ptr<T>
   {
     auto component = GetComponent<T>();
 
@@ -92,8 +119,8 @@ public:
     return component;
   }
 
-  auto GetComponent(const Component *componentPointer) const -> std::shared_ptr<Component>;
-  auto RequireComponent(const Component *componentPointer) const -> std::shared_ptr<Component>;
+  auto GetComponent(const Component *componentPointer) -> std::shared_ptr<Component>;
+  auto RequireComponent(const Component *componentPointer) -> std::shared_ptr<Component>;
 
   std::string GetName() const { return name; }
 
@@ -104,10 +131,10 @@ public:
   std::shared_ptr<GameObject> GetChild(std::string name);
 
   // Returns this object's shared pointer
-  std::shared_ptr<GameObject> GetShared() const;
+  std::shared_ptr<GameObject> GetShared();
 
   // Get's pointer to parent, and ensures it's valid, unless this is the root object. If the parent is the root object, returns nullptr
-  std::shared_ptr<GameObject> GetParent() const;
+  std::shared_ptr<GameObject> GetParent();
 
   // Set the parent
   void SetParent(std::shared_ptr<GameObject> newParent);
@@ -115,26 +142,28 @@ public:
   // === ABSOLUTE VALUES
 
   // Where this object exists in game space, in absolute coordinates
-  Vector2 GetPosition() const;
+  Vector2 GetPosition();
   void SetPosition(const Vector2 newPosition);
   void Translate(const Vector2 translation);
 
   // Absolute scale of the object
-  Vector2 GetScale() const;
+  Vector2 GetScale();
   void SetScale(const Vector2 newScale);
 
   // Absolute rotation in radians
-  double GetRotation() const;
+  double GetRotation();
   void SetRotation(const double newRotation);
 
   void SetEnabled(bool enabled) { this->enabled = enabled; }
   bool IsEnabled() const { return enabled; }
 
+  std::shared_ptr<GameState> GetState();
+
+  // Whether to keep this object when loading next state (only works for root objects)
+  void DontDestroyOnLoad(bool value = true);
+
   // A timer helper
   Timer timer;
-
-  // State reference
-  GameState &gameState;
 
   // Where this object exists in game space, relative to it's parent's position
   Vector2 localPosition;
@@ -156,13 +185,13 @@ public:
 
 private:
   // Initialize with given state
-  GameObject(std::string name, GameState &gameState);
+  GameObject(std::string name, int gameStateId, int id = -1);
 
   // Whether this is the root object
   bool IsRoot() const { return id == 0; }
 
   // Get's pointer to parent, and ensures it's valid, unless this is the root object
-  std::shared_ptr<GameObject> InternalGetParent() const;
+  std::shared_ptr<GameObject> InternalGetParent();
 
   // Unlinks from parent, destroys all children and destroys self
   void InternalDestroy();
@@ -178,8 +207,33 @@ private:
   void OnTriggerCollision(GameObject &other);
   void OnTriggerCollisionEnter(GameObject &other);
 
+  // Gets pointer to a component of the given type
+  // Needs to be in header file so the compiler knows how to build the necessary methods
+  template <class T>
+  auto InternalGetComponentsInChildren(std::vector<std::shared_ptr<T>> foundComponents) -> std::vector<std::shared_ptr<T>>
+  {
+    // For each child
+    for (auto child : GetChildren())
+      foundComponents = child->InternalGetComponentsInChildren<T>(foundComponents);
+
+    auto newComponents = GetComponents<T>();
+
+    // Merge
+    foundComponents.insert(foundComponents.end(), newComponents.begin(), newComponents.end());
+
+    return foundComponents;
+  }
+
+  // Allows for registering to the state's variables
+  void RegisterToState();
+
+  void StartComponents();
+
   // Vector with all components of this object
   std::vector<std::shared_ptr<Component>> components;
+
+  // State reference id
+  int gameStateId;
 
   // Whether is dead
   bool destroyRequested{false};
@@ -196,6 +250,9 @@ private:
 
   // Whether this object is enabled (updating & rendering)
   bool enabled{true};
+
+  // Whether to keep this object when loading next state
+  bool keepOnLoad{false};
 };
 
 #include "GameState.h"

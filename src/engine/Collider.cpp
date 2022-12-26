@@ -42,7 +42,7 @@ void Collider::SetBox(const Rectangle &newBox)
 
 Rectangle Collider::GetBox() const { return box + gameObject.GetPosition(); }
 
-void Collider::Start()
+void Collider::RegisterToState()
 {
   // Id of gameObject on which to subscribe this collider
   int ownerId = isTrigger ? gameObject.id : -1;
@@ -75,7 +75,7 @@ void Collider::Start()
   // Subscribe, if managed to find a valid id
   if (ownerId >= 0)
   {
-    gameState.physicsSystem.RegisterCollider(dynamic_pointer_cast<Collider>(GetShared()), ownerId);
+    GetState()->physicsSystem.RegisterCollider(dynamic_pointer_cast<Collider>(GetShared()), ownerId);
   }
 }
 

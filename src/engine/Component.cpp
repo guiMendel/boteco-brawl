@@ -5,22 +5,7 @@
 using namespace std;
 
 Component::Component(GameObject &associatedObject)
-    : gameObject(associatedObject), gameState(gameObject.gameState), id(gameState.SupplyId()), inputManager(Game::GetInstance().GetInputManager()) {}
-
-void Component::StartAndRegisterLayer()
-{
-  if (started)
-    return;
-
-  if (GetRenderLayer() != RenderLayer::None)
-  {
-    Game::GetInstance().GetState().RegisterLayerRenderer(GetShared());
-  }
-
-  started = true;
-
-  Start();
-}
+    : gameObject(associatedObject), id(GetState()->SupplyId()), inputManager(Game::GetInstance().GetInputManager()) {}
 
 shared_ptr<Component> Component::GetShared() const
 {
@@ -35,3 +20,27 @@ shared_ptr<Component> Component::GetShared() const
 }
 
 bool Component::IsEnabled() const { return enabled && gameObject.IsEnabled(); }
+
+std::shared_ptr<GameState> Component::GetState() const { return gameObject.GetState(); }
+
+void Component::RegisterToStateWithLayer()
+{
+  RegisterLayer();
+  RegisterToState();
+}
+
+void Component::RegisterLayer()
+{
+  if (GetRenderLayer() != RenderLayer::None)
+  {
+    Game::GetInstance().GetState()->RegisterLayerRenderer(GetShared());
+  }
+}
+
+void Component::SafeStart()
+{
+  if (started)
+    return;
+  started = true;
+  Start();
+}

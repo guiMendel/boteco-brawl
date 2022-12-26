@@ -10,7 +10,6 @@ ParticleEmitter::ParticleEmitter(GameObject &associatedObject, RenderLayer rende
       duration(duration),
       loop(loop),
       origin(radius),
-      particleSystem(gameState.particleSystem),
       renderLayer(renderLayer)
 {
   // Default parameters:
@@ -94,7 +93,7 @@ void ParticleEmitter::Emit()
   Vector2 position = gameObject.GetPosition() + origin.center + Vector2::Angled(positionAngle, positionRadius);
 
   // Create particle
-  auto particle = particleSystem.CreateParticle(position, lifetime, Vector2::Angled(angle, speed), color);
+  auto particle = GetSystem().CreateParticle(position, lifetime, Vector2::Angled(angle, speed), color);
 
   // Attachment
   if (attachToEmitter)
@@ -123,4 +122,9 @@ void ParticleEmitter::Stop()
 list<shared_ptr<Particle>> ParticleEmitter::GetEmittedParticles()
 {
   return ParseWeakIntoShared(weakEmittedParticles);
+}
+
+ParticleSystem &ParticleEmitter::GetSystem() const
+{
+  return GetState()->particleSystem;
 }

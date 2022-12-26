@@ -179,7 +179,7 @@ void Game::Start()
   started = true;
 
   // Start the initial state
-  GetState().Start();
+  GetState()->Start();
 
   GameLoop();
 }
@@ -199,7 +199,7 @@ void Game::GameLoop()
   int nextPhysicsFrameIn{0};
 
   // Loop while exit not requested
-  while (GetState().QuitRequested() == false)
+  while (GetState()->QuitRequested() == false)
   {
     // Calculate how long this loop will take to execute
     int executionStart = SDL_GetTicks();
@@ -254,17 +254,27 @@ void Game::GameLoop()
 
 void Game::Frame()
 {
+  // Objects to add to state
+  vector<shared_ptr<GameObject>> objectsToAdd;
+
   // Check if state needs to be popped
   // Throws when it's the last state (and no nextState is set)
-  if (GetState().PopRequested())
+  if (GetState()->PopRequested())
+  {
+    objectsToAdd = GetState()->GetObjectsToCarryOn();
     PopState();
+  }
 
   // Load next state if necessary
   if (nextState != nullptr)
     PushNextState();
 
   // Get reference to current state
-  GameState &state{GetState()};
+  GameState &state{*GetState()};
+
+  // Add new objects
+  for (auto newObject : objectsToAdd)
+    state.RegisterObject(newObject);
 
   // Calculate frame's delta time
   CalculateDeltaTime(frameStart, deltaTime);
@@ -289,24 +299,21 @@ void Game::Frame()
 
 void Game::PhysicsFrame()
 {
-  // Get reference to current state
-  GameState &state{GetState()};
-
   // Calculate physics frame's delta time
   CalculateDeltaTime(physicsFrameStart, physicsDeltaTime);
 
   // Update the state
-  state.PhysicsUpdate(physicsDeltaTime);
+  GetState()->PhysicsUpdate(physicsDeltaTime);
 }
 
-GameState &Game::GetState() const
+shared_ptr<GameState> Game::GetState()
 {
   Assert(loadedStates.size() > 0, "No game state loaded");
 
-  return *loadedStates.top();
+  return loadedStates.top();
 }
 
-void Game::PushState(std::unique_ptr<GameState> &&state)
+void Game::PushState(std::shared_ptr<GameState> &&state)
 {
   // Alert if next is overridden
   if (nextState != nullptr)
@@ -322,14 +329,14 @@ void Game::PushNextState()
 
   // Put current state on hold
   if (loadedStates.size() > 0)
-    GetState().Pause();
+    GetState()->Pause();
 
   // Move this state to the stack
   loadedStates.emplace(move(nextState));
 
   // Start it if necessary
   if (started)
-    GetState().Start();
+    GetState()->Start();
 }
 
 void Game::PopState()
@@ -348,5 +355,5 @@ void Game::PopState()
   }
 
   // Resume next state
-  GetState().Resume();
+  GetState()->Resume();
 }

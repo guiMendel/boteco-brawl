@@ -7,23 +7,24 @@
 using namespace std;
 
 // Private constructor
-GameObject::GameObject(string name, GameState &gameState) : gameState(gameState), id(gameState.SupplyId()), name(name)
+GameObject::GameObject(string name, int gameStateId, int id) : id(id >= 0 ? id : Game::GetInstance().SupplyId()), gameStateId(gameStateId), name(name)
 {
 }
 
 // With dimensions
 GameObject::GameObject(string name, Vector2 coordinates, double rotation, shared_ptr<GameObject> parent)
-    : GameObject(name, Game::GetInstance().GetState())
+    : GameObject(name, Game::GetInstance().GetState()->id)
 {
   // Add gameState reference
-  auto shared = gameState.RegisterObject(this);
+  auto gameState = GetState();
+  auto shared = gameState->RegisterObject(this);
 
   // Only add a parent if not the root object
   if (IsRoot() == false)
   {
     // If no parent, add root as parent
     if (parent == nullptr)
-      parent = gameState.GetRootObject();
+      parent = gameState->GetRootObject();
 
     // Add reference to parent
     this->weakParent = parent;
@@ -48,7 +49,10 @@ void GameObject::Start()
   started = true;
 
   for (auto component : components)
-    component->StartAndRegisterLayer();
+  {
+    component->RegisterToStateWithLayer();
+    component->SafeStart();
+  }
 }
 
 void GameObject::Awake()
@@ -60,6 +64,13 @@ void GameObject::Awake()
 
   for (auto component : components)
     component->Awake();
+}
+
+// Allows for registering to the state's variables
+void GameObject::RegisterToState()
+{
+  for (auto component : components)
+    component->RegisterToStateWithLayer();
 }
 
 void GameObject::Update(float deltaTime)
@@ -119,12 +130,12 @@ void GameObject::RemoveComponent(shared_ptr<Component> component)
   components.erase(componentPosition);
 }
 
-shared_ptr<GameObject> GameObject::GetShared() const
+shared_ptr<GameObject> GameObject::GetShared()
 {
-  return gameState.GetObject(id);
+  return GetState()->GetObject(id);
 }
 
-auto GameObject::GetComponent(const Component *componentPointer) const -> shared_ptr<Component>
+auto GameObject::GetComponent(const Component *componentPointer) -> shared_ptr<Component>
 {
   auto componentIterator = find_if(
       components.begin(), components.end(),
@@ -137,7 +148,7 @@ auto GameObject::GetComponent(const Component *componentPointer) const -> shared
   return *componentIterator;
 }
 
-auto GameObject::RequireComponent(const Component *componentPointer) const -> shared_ptr<Component>
+auto GameObject::RequireComponent(const Component *componentPointer) -> shared_ptr<Component>
 {
   auto component = GetComponent(componentPointer);
 
@@ -149,7 +160,7 @@ auto GameObject::RequireComponent(const Component *componentPointer) const -> sh
   return component;
 }
 
-shared_ptr<GameObject> GameObject::InternalGetParent() const
+shared_ptr<GameObject> GameObject::InternalGetParent()
 {
   // Ensure not root
   Assert(IsRoot() == false, "Getting parent is forbidden on root object");
@@ -163,7 +174,7 @@ shared_ptr<GameObject> GameObject::InternalGetParent() const
   return weakParent.lock();
 }
 
-shared_ptr<GameObject> GameObject::GetParent() const
+shared_ptr<GameObject> GameObject::GetParent()
 {
   auto parent = InternalGetParent();
 
@@ -191,7 +202,7 @@ void GameObject::SetParent(shared_ptr<GameObject> newParent)
 }
 
 // Where this object exists in game space, in absolute coordinates
-Vector2 GameObject::GetPosition() const
+Vector2 GameObject::GetPosition()
 {
   if (IsRoot())
     return localPosition;
@@ -214,7 +225,7 @@ void GameObject::Translate(const Vector2 translation)
 }
 
 // Absolute scale of the object
-Vector2 GameObject::GetScale() const
+Vector2 GameObject::GetScale()
 {
   if (IsRoot())
     return localScale;
@@ -228,7 +239,7 @@ void GameObject::SetScale(const Vector2 newScale)
 }
 
 // Absolute rotation in radians
-double GameObject::GetRotation() const
+double GameObject::GetRotation()
 {
   if (IsRoot())
     return localRotation;
@@ -254,7 +265,7 @@ shared_ptr<GameObject> GameObject::CreateChild(string name, Vector2 offset)
 shared_ptr<GameObject> GameObject::CreateChild(string name, Vector2 offset, float offsetRotation)
 {
   auto childId = (new GameObject(name, offset, offsetRotation, GetShared()))->id;
-  return gameState.GetObject(childId);
+  return GetState()->GetObject(childId);
 }
 
 vector<shared_ptr<GameObject>> GameObject::GetChildren()
@@ -332,7 +343,7 @@ void GameObject::InternalDestroy()
   UnlinkParent();
 
   // Delete self from state's list
-  gameState.RemoveObject(id);
+  GetState()->RemoveObject(id);
 
   // Ensure no more references to self than the one in this function and the one which called this function
   Assert(shared.use_count() == 2, "Found leaked references to game object " + GetName() + " when trying to destroy it");
@@ -364,4 +375,24 @@ void GameObject::OnTriggerCollisionEnter(GameObject &other)
   // Alert all components
   for (auto component : components)
     component->OnTriggerCollisionEnter(other);
+}
+
+void GameObject::DontDestroyOnLoad(bool value)
+{
+  if (InternalGetParent()->IsRoot() == false)
+  {
+    cout << "WARNING: Tried to set non-root object to not destroy on load" << endl;
+    return;
+  }
+
+  keepOnLoad = value;
+}
+
+shared_ptr<GameState> GameObject::GetState()
+{
+  auto currentState = Game::GetInstance().GetState();
+
+  Assert(gameStateId == currentState->id, "Trying to access state of object which is not in the current state");
+
+  return currentState;
 }

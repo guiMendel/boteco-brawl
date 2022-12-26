@@ -16,8 +16,9 @@ using namespace std;
 GameState::GameState()
     : physicsSystem(*this),
       particleSystem(*this),
+      id(SupplyId()),
       inputManager(Game::GetInstance().GetInputManager()),
-      rootObject(new GameObject("Root", *this))
+      rootObject(new GameObject("Root", id, 0))
 {
 }
 
@@ -33,7 +34,7 @@ void GameState::CascadeDown(shared_ptr<GameObject> object, function<void(GameObj
   if (topDown)
     callback(*object);
 
-  // Update it's children
+  // Execute on it's children
   for (auto child : object->GetChildren())
     CascadeDown(child, callback, topDown);
 
@@ -169,11 +170,18 @@ void GameState::RemoveObject(int id)
   gameObjects.erase(id);
 }
 
-shared_ptr<GameObject> GameState::RegisterObject(GameObject *gameObject)
+shared_ptr<GameObject> GameState::RegisterObject(shared_ptr<GameObject> gameObject)
 {
-  gameObjects[gameObject->id] = shared_ptr<GameObject>(gameObject);
-  return gameObjects[gameObject->id];
+  gameObjects[gameObject->id] = gameObject;
+  gameObject->gameStateId = id;
+
+  // Register this object's hierarchy to this new state
+  CASCADE_OBJECTS(RegisterToState, );
+
+  return gameObject;
 }
+
+shared_ptr<GameObject> GameState::RegisterObject(GameObject *gameObject) { return RegisterObject(shared_ptr<GameObject>(gameObject)); }
 
 shared_ptr<GameObject> GameState::GetPointer(const GameObject *targetObject)
 {
@@ -241,4 +249,26 @@ void GameState::RegisterCamera(shared_ptr<Camera> camera)
 list<shared_ptr<Camera>> GameState::GetCameras()
 {
   return ParseWeakIntoShared(camerasWeak);
+}
+
+int GameState::SupplyId() { return Game::GetInstance().SupplyId(); }
+
+vector<shared_ptr<GameObject>> GameState::GetObjectsToCarryOn()
+{
+  vector<shared_ptr<GameObject>> savedObjects;
+
+  for (auto firstObject : GetRootObject()->GetChildren())
+    if (firstObject->keepOnLoad)
+      savedObjects.push_back(firstObject);
+
+  return savedObjects;
+}
+
+std::shared_ptr<GameState> GameState::GetShared()
+{
+  auto currentState = Game::GetInstance().GetState();
+
+  Assert(id == currentState->id, "Tried to get shared pointer of inactive game state");
+
+  return currentState;
 }
