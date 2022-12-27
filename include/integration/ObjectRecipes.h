@@ -7,6 +7,7 @@
 #include "Text.h"
 
 #define DASH_PARTICLES_OBJECT "DashParticles"
+#define GROUND_DETECTOR_OBJECT "GroundDetector"
 
 class ObjectRecipes
 {

@@ -62,8 +62,8 @@ protected:
   virtual void RegisterToState() {}
 
   // Called once per frame
-  virtual void Update([[maybe_unused]] float deltaTime) {}
-  virtual void PhysicsUpdate([[maybe_unused]] float deltaTime) {}
+  virtual void Update(float) {}
+  virtual void PhysicsUpdate(float) {}
 
   // Called once per frame to render to the screen
   virtual void Render() {}
@@ -75,12 +75,14 @@ protected:
   virtual void OnBeforeDestroy() {}
 
   // Allows for reacting to collision
-  virtual void OnCollision([[maybe_unused]] Collision::CollisionData collisionData) {}
-  virtual void OnCollisionEnter([[maybe_unused]] Collision::CollisionData collisionData) {}
+  virtual void OnCollision(Collision::CollisionData) {}
+  virtual void OnCollisionEnter(Collision::CollisionData) {}
+  virtual void OnCollisionExit(GameObject &) {}
 
   // Allows for reacting to trigger collision
-  virtual void OnTriggerCollision([[maybe_unused]] GameObject &other) {}
-  virtual void OnTriggerCollisionEnter([[maybe_unused]] GameObject &other) {}
+  virtual void OnTriggerCollision(GameObject &) {}
+  virtual void OnTriggerCollisionEnter(GameObject &) {}
+  virtual void OnTriggerCollisionExit(GameObject &) {}
 
   // Reference to input manager
   InputManager &inputManager;

@@ -162,6 +162,9 @@ public:
   // Whether to keep this object when loading next state (only works for root objects)
   void DontDestroyOnLoad(bool value = true);
 
+  // Check if this gameObject is in the descendant lineage of the other object
+  bool IsDescendant(GameObject &other);
+
   // A timer helper
   Timer timer;
 
@@ -202,10 +205,12 @@ private:
   // Announces collision to all components
   void OnCollision(Collision::CollisionData collisionData);
   void OnCollisionEnter(Collision::CollisionData collisionData);
+  void OnCollisionExit(GameObject &other);
 
   // Announces trigger collision to all components
   void OnTriggerCollision(GameObject &other);
   void OnTriggerCollisionEnter(GameObject &other);
+  void OnTriggerCollisionExit(GameObject &other);
 
   // Gets pointer to a component of the given type
   // Needs to be in header file so the compiler knows how to build the necessary methods

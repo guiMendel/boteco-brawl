@@ -1,4 +1,5 @@
 #include "Movement.h"
+#include "ObjectRecipes.h"
 #include "Character.h"
 #include "Rigidbody.h"
 
@@ -170,7 +171,7 @@ void Movement::GroundCheck()
   // Update old value
   wasGrounded = isGrounded;
 
-  isGrounded = rigidbody.Raycast(M_PI / 2, feetDistance + jumpRange);
+  isGrounded = rigidbody.ColliderCast(M_PI / 2, feetDistance + jumpRange, 0.9f);
 
   if (wasGrounded == false && isGrounded)
   {

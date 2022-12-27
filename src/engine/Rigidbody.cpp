@@ -43,6 +43,8 @@ void Rigidbody::PhysicsUpdate(float deltaTime)
   // Update collision sets
   oldCollidingBodies = collidingBodies;
   collidingBodies.clear();
+  oldCollidingTriggerBodies = collidingTriggerBodies;
+  collidingTriggerBodies.clear();
 }
 
 void Rigidbody::DynamicBodyUpdate(float deltaTime)
@@ -124,10 +126,25 @@ bool Rigidbody::WasCollidingWith(int id)
   return oldCollidingBodies.count(id) > 0;
 }
 
+bool Rigidbody::IsCollidingTriggerWith(int id)
+{
+  return collidingTriggerBodies.count(id) > 0;
+}
+
+bool Rigidbody::WasCollidingTriggerWith(int id)
+{
+  return oldCollidingTriggerBodies.count(id) > 0;
+}
+
 void Rigidbody::OnCollision(Collision::CollisionData collisionData)
 {
   // Add to collision set
   collidingBodies.insert(collisionData.other->gameObject.id);
+}
+
+void Rigidbody::OnTriggerCollision(GameObject &other)
+{
+  collidingTriggerBodies.insert(other.id);
 }
 
 void Rigidbody::CalculateSmallestColliderDimension()
@@ -273,4 +290,19 @@ bool Rigidbody::Raycast(float angle, float maxDistance)
 {
   RaycastCollisionData discardedData;
   return Raycast(angle, maxDistance, discardedData);
+}
+
+bool Rigidbody::ColliderCast(float angle, float maxDistance, RaycastCollisionData &data, float scaleColliders)
+{
+  // Create a filter of this own object
+  CollisionFilter filter;
+  filter.ignoredObjects.insert(gameObject.id);
+
+  return GetState()->physicsSystem.ColliderCast(GetColliders(), gameObject.GetPosition(), angle, maxDistance, data, filter, scaleColliders);
+}
+
+bool Rigidbody::ColliderCast(float angle, float maxDistance, float scaleColliders)
+{
+  RaycastCollisionData discardedData;
+  return ColliderCast(angle, maxDistance, discardedData, scaleColliders);
 }

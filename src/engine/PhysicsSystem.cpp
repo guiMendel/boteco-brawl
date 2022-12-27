@@ -66,18 +66,55 @@ PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 void PhysicsSystem::PhysicsUpdate([[maybe_unused]] float deltaTime)
 {
   HandleCollisions();
+
+  // Detect collision exits
+  // For each dynamic body
+  for (auto [objectId, _] : dynamicColliderStructure)
+  {
+    // Get it's body
+    auto object = gameState.GetObject(objectId);
+
+    if (object == nullptr)
+      continue;
+
+    auto body = object->GetComponent<Rigidbody>();
+
+    if (body == nullptr)
+      continue;
+
+    // For each of the collision it had last frame
+    for (auto collisionOtherId : body->oldCollidingBodies)
+    {
+      // If it's no longer, colliding, raise
+      if (body->IsCollidingWith(collisionOtherId) == false)
+        body->gameObject.OnCollisionExit(*gameState.GetObject(collisionOtherId));
+    }
+
+    // For each of the trigger collision it had last frame
+    for (auto collisionOtherId : body->oldCollidingTriggerBodies)
+    {
+      // If it's no longer, colliding, raise
+      if (body->IsCollidingTriggerWith(collisionOtherId) == false)
+        body->gameObject.OnTriggerCollisionExit(*gameState.GetObject(collisionOtherId));
+    }
+  }
 }
 
 // Returns whether the two collider lists have some pair of colliders which are intersecting
 // If there is, also populates the collision data struct
 bool PhysicsSystem::CheckForCollision(
-    vector<shared_ptr<Collider>> colliders1, vector<shared_ptr<Collider>> colliders2, CollisionData &collisionData)
+    vector<shared_ptr<Collider>> colliders1, vector<shared_ptr<Collider>> colliders2,
+    CollisionData &collisionData, bool raiseTriggers, Vector2 displaceColliders1, float scaleColliders1)
 {
   for (auto collider1 : colliders1)
   {
     for (auto collider2 : colliders2)
     {
-      auto [distance, normal] = FindMinDistance(collider1->GetBox(), collider2->GetBox(),
+      auto box1 = collider1->GetBox() + displaceColliders1;
+      box1.width *= scaleColliders1;
+      box1.height *= scaleColliders1;
+
+      auto [distance, normal] = FindMinDistance(box1, collider2->GetBox(),
                                                 collider1->gameObject.GetRotation(), collider2->gameObject.GetRotation());
 
       // If distance is positive, there is no collision
@@ -87,15 +124,18 @@ bool PhysicsSystem::CheckForCollision(
       // If one of the colliders is a trigger, simply announce the trigger and carry on
       if (collider1->isTrigger || collider2->isTrigger)
       {
-        // Try to find a body in one of the 2
-        shared_ptr<Rigidbody> body;
+        if (raiseTriggers)
+        {
+          // Try to find a body in one of the 2
+          shared_ptr<Rigidbody> body;
 
-        if ((body = collider1->rigidbodyWeak.lock()) != nullptr)
-          ResolveTriggerCollision(*body, *collider2);
-        else if ((body = collider2->rigidbodyWeak.lock()) != nullptr)
-          ResolveTriggerCollision(*body, *collider1);
+          if ((body = collider1->rigidbodyWeak.lock()) != nullptr)
+            ResolveTriggerCollision(*body, *collider2);
+          else if ((body = collider2->rigidbodyWeak.lock()) != nullptr)
+            ResolveTriggerCollision(*body, *collider1);
 
-        // If no body was found, no trigger
+          // If no body was found, no trigger
+        }
 
         continue;
       }
@@ -218,6 +258,12 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
   // Now test for static bodies
   for (auto staticEntry : staticColliders)
   {
+    auto otherObject = staticEntry.second.at(0)->gameObject;
+
+    // Ignore entries that are the same object or some parent
+    if (otherObject.IsDescendant(objectBody->gameObject))
+      continue;
+
     // Find out if there is intersection between this other object and our trajectory
     auto [intersectedColliders, intersectionDistance, intersectionDependencyCallback] =
         FindTrajectoryIntersection(staticEntry.second, *objectBody);
@@ -415,14 +461,14 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 void PhysicsSystem::ResolveTriggerCollision(Rigidbody &body, Collider &collider)
 {
   // If this collision was already dealt with this frame, ignore it
-  if (body.IsCollidingWith(collider.gameObject))
+  if (body.IsCollidingTriggerWith(collider.gameObject))
     return;
 
   body.gameObject.OnTriggerCollision(collider.gameObject);
   collider.gameObject.OnTriggerCollision(body.gameObject);
 
   // Check if is entering collision
-  if (body.WasCollidingWith(collider.gameObject) == false)
+  if (body.WasCollidingTriggerWith(collider.gameObject) == false)
   {
     body.gameObject.OnTriggerCollisionEnter(collider.gameObject);
     collider.gameObject.OnTriggerCollisionEnter(body.gameObject);
@@ -777,7 +823,7 @@ bool PhysicsSystem::Raycast(Vector2 origin, float angle, float maxDistance, Rayc
     Vector2 particle = Vector2::Angled(angle, displacement) + origin;
 
     // Check for collision
-    if (gameState.physicsSystem.DetectCollisions(particle, data, filter))
+    if (DetectRaycastCollisions(particle, data, filter))
     {
       // Register distance
       data.elapsedDistance = displacement;
@@ -789,10 +835,10 @@ bool PhysicsSystem::Raycast(Vector2 origin, float angle, float maxDistance, Rayc
   return false;
 }
 
-bool PhysicsSystem::DetectCollisions(Vector2 particle, RaycastCollisionData &data, CollisionFilter filter)
+bool PhysicsSystem::DetectRaycastCollisions(Vector2 particle, RaycastCollisionData &data, CollisionFilter filter)
 {
   // For a given collider structure, performs the check
-  auto CheckForStructure = [&](std::unordered_map<int, PhysicsSystem::WeakColliders> structure)
+  auto CheckForStructure = [&](unordered_map<int, PhysicsSystem::WeakColliders> structure)
   {
     for (auto [bodyId, bodyColliders] : ValidateAllColliders(structure))
     {
@@ -817,6 +863,70 @@ bool PhysicsSystem::DetectCollisions(Vector2 particle, RaycastCollisionData &dat
 
           return true;
         }
+      }
+    }
+
+    return false;
+  };
+
+  return CheckForStructure(dynamicColliderStructure) || CheckForStructure(staticColliderStructure);
+}
+
+bool PhysicsSystem::ColliderCast(vector<shared_ptr<Collider>> colliders, Vector2 origin, float angle, float maxDistance, CollisionFilter filter, float colliderSizeScale)
+{
+  RaycastCollisionData discardedData;
+  return ColliderCast(colliders, origin, angle, maxDistance, discardedData, filter, colliderSizeScale);
+}
+
+bool PhysicsSystem::ColliderCast(vector<shared_ptr<Collider>> colliders, Vector2 origin, float angle, float maxDistance, RaycastCollisionData &data, CollisionFilter filter, float colliderSizeScale)
+{
+  if (colliders.size() == 0)
+    return false;
+
+  // Vector to displace from colliders' current position to the origin parameter
+  Vector2 originDisplacement = origin - colliders[0]->gameObject.GetPosition();
+
+  // How much the colliders have already been displaced
+  float displacement{0};
+
+  while (displacement < maxDistance)
+  {
+    // Displace them
+    displacement = min(displacement + raycastGranularity, maxDistance);
+
+    // Check for collision
+    if (DetectColliderCastCollisions(colliders, originDisplacement + Vector2::Angled(angle, displacement), data, filter, colliderSizeScale))
+    {
+      // Register distance
+      data.elapsedDistance = displacement;
+
+      return true;
+    }
+  }
+
+  return false;
+}
+
+// Returns whether detected a collision between the given colliders and any bodies
+bool PhysicsSystem::DetectColliderCastCollisions(vector<shared_ptr<Collider>> colliders, Vector2 displacement, RaycastCollisionData &data, CollisionFilter filter, float colliderSizeScale)
+{
+  int collidersId = colliders[0]->gameObject.id;
+
+  // For a given collider structure, performs the check
+  auto CheckForStructure = [&](unordered_map<int, PhysicsSystem::WeakColliders> structure)
+  {
+    for (auto [otherId, otherColliders] : ValidateAllColliders(structure))
+    {
+      // Skip filtered bodies & these colliders' body
+      if (filter.ignoredObjects.count(otherId) > 0 || otherId == collidersId)
+        continue;
+
+      // Detect collisions between the given colliders
+      CollisionData collisionData;
+      if (CheckForCollision(colliders, otherColliders, collisionData, false, displacement, colliderSizeScale))
+      {
+        data.other = collisionData.other;
+        return true;
       }
     }
 

@@ -363,6 +363,13 @@ void GameObject::OnCollisionEnter(Collision::CollisionData collisionData)
     component->OnCollisionEnter(collisionData);
 }
 
+void GameObject::OnCollisionExit(GameObject &other)
+{
+  // Alert all components
+  for (auto component : components)
+    component->OnCollisionExit(other);
+}
+
 void GameObject::OnTriggerCollision(GameObject &other)
 {
   // Alert all components
@@ -375,6 +382,13 @@ void GameObject::OnTriggerCollisionEnter(GameObject &other)
   // Alert all components
   for (auto component : components)
     component->OnTriggerCollisionEnter(other);
+}
+
+void GameObject::OnTriggerCollisionExit(GameObject &other)
+{
+  // Alert all components
+  for (auto component : components)
+    component->OnTriggerCollisionExit(other);
 }
 
 void GameObject::DontDestroyOnLoad(bool value)
@@ -395,4 +409,15 @@ shared_ptr<GameState> GameObject::GetState()
   Assert(gameStateId == currentState->id, "Trying to access state of object which is not in the current state");
 
   return currentState;
+}
+
+bool GameObject::IsDescendant(GameObject &other)
+{
+  if (id == other.id)
+    return true;
+
+  if (GetParent() == nullptr)
+    return false;
+
+  return GetParent()->IsDescendant(other);
 }

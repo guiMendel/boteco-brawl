@@ -60,6 +60,12 @@ public:
   bool Raycast(Vector2 origin, float angle, float maxDistance, RaycastCollisionData &data, CollisionFilter filter = CollisionFilter());
   bool Raycast(Vector2 origin, float angle, float maxDistance, CollisionFilter filter = CollisionFilter());
 
+  // Returns whether a group of colliders collides with any body when cast from the given position in some direction, over a fixed distance
+  // Populates the raycast collision struct if a collision is detected
+  // Allows filtering collisions with a CollisionFilter
+  bool ColliderCast(std::vector<std::shared_ptr<Collider>> colliders, Vector2 origin, float angle, float maxDistance, RaycastCollisionData &data, CollisionFilter filter = CollisionFilter(), float colliderSizeScale = 1);
+  bool ColliderCast(std::vector<std::shared_ptr<Collider>> colliders, Vector2 origin, float angle, float maxDistance, CollisionFilter filter = CollisionFilter(), float colliderSizeScale = 1);
+
   // Current gravity of the system
   Vector2 gravity{initialGravity};
 
@@ -69,9 +75,10 @@ private:
   using WeakColliders = std::vector<std::weak_ptr<Collider>>;
 
   // Checks if there is collision between the two collider lists. If there is, populates the collisionData struct
-  // Automatically raises trigger collisions
+  // Automatically raises trigger collisions if raise flag is set to true
+  // Last 3 parameters are useful when this function is used by collider casts
   bool CheckForCollision(
-      std::vector<std::shared_ptr<Collider>> colliders1, std::vector<std::shared_ptr<Collider>> colliders2, Collision::CollisionData &collisionData);
+      std::vector<std::shared_ptr<Collider>> colliders1, std::vector<std::shared_ptr<Collider>> colliders2, Collision::CollisionData &collisionData, bool raiseTriggers = true, Vector2 displaceColliders1 = Vector2::Zero(), float scaleColliders1 = 1);
 
   // Detects all collisions (triggers included) and resolves them
   void HandleCollisions();
@@ -83,16 +90,16 @@ private:
   void DetectBetweenFramesCollision(ValidatedCollidersMap::iterator objectIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &staticColliders);
 
   // Returns whether detected a collision between the given particle and any bodies
-  bool DetectCollisions(Vector2 particle, RaycastCollisionData &data, CollisionFilter filter);
+  bool DetectRaycastCollisions(Vector2 particle, RaycastCollisionData &data, CollisionFilter filter);
+
+  // Returns whether detected a collision between the given colliders and any bodies
+  bool DetectColliderCastCollisions(std::vector<std::shared_ptr<Collider>> colliders, Vector2 position, RaycastCollisionData &data, CollisionFilter filter, float colliderSizeScale);
 
   // Applies impulse, checks if collision is entering & announces regular collision
   void ResolveCollision(Collision::CollisionData collisionData);
 
   // Checks if collision is entering & announces regular collision
   void ResolveTriggerCollision(Rigidbody &body, Collider &collider);
-
-  // Announces collision enter
-  void EnterCollision(Collision::CollisionData collisionData);
 
   // Pass each object through ValidateColliders and collect the results in a map
   ValidatedCollidersMap ValidateAllColliders(std::unordered_map<int, WeakColliders> &);

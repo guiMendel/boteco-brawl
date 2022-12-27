@@ -31,6 +31,7 @@ public:
   RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
   void OnCollision(Collision::CollisionData collisionData) override;
+  void OnTriggerCollision(GameObject &other) override;
 
   float GetMass() const;
   float GetInverseMass() const;
@@ -62,6 +63,11 @@ public:
   // Populates the raycast collision struct if a collision is detected
   bool Raycast(float angle, float maxDistance, RaycastCollisionData &data);
   bool Raycast(float angle, float maxDistance);
+
+  // Returns whether this body's colliders collide with any other body when cast from this object's position in some direction, over a fixed distance
+  // Populates the raycast collision struct if a collision is detected
+  bool ColliderCast(float angle, float maxDistance, RaycastCollisionData &data, float scaleColliders = 1);
+  bool ColliderCast(float angle, float maxDistance, float scaleColliders = 1);
 
   // Velocity for each axis
   Vector2 velocity{0, 0};
@@ -101,6 +107,14 @@ private:
   bool WasCollidingWith(int id);
   bool WasCollidingWith(GameObject &other) { return WasCollidingWith(other.id); }
 
+  // Whether collision with the given collider happened THIS frame
+  bool IsCollidingTriggerWith(int id);
+  bool IsCollidingTriggerWith(GameObject &other) { return IsCollidingTriggerWith(other.id); }
+
+  // Whether collision with the given body happened last frame
+  bool WasCollidingTriggerWith(int id);
+  bool WasCollidingTriggerWith(GameObject &other) { return WasCollidingTriggerWith(other.id); }
+
   // Calculates the value of the smallest dimension of it's colliders
   void CalculateSmallestColliderDimension();
 
@@ -136,6 +150,12 @@ private:
 
   // Holds the content of collidingBodies from the last frame
   std::unordered_set<int> oldCollidingBodies;
+
+  // Keeps track of all other bodies with which collision was detected on the current frame
+  std::unordered_set<int> collidingTriggerBodies;
+
+  // Holds the content of collidingTriggerBodies from the last frame
+  std::unordered_set<int> oldCollidingTriggerBodies;
 };
 
 #endif
