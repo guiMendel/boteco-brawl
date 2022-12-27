@@ -17,6 +17,12 @@ ControllerInput::ControllerInput(GameObject &associatedObject, std::shared_ptr<P
 
 void ControllerInput::HandleAnalogMovement(Vector2 newDirection)
 {
+  // Normalize direction
+  newDirection = newDirection.Normalized();
+
+  if (newDirection == analogDirection)
+    return;
+
   // Move on X axis
   if (newDirection.x != analogDirection.x)
     SetDirection(newDirection.x);

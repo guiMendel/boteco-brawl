@@ -1,11 +1,17 @@
 #include "PlayerInput.h"
 
+using namespace std;
+
 PlayerInput::PlayerInput(GameObject &associatedObject) : Component(associatedObject) {}
 
 void PlayerInput::SetDirection(float direction)
 {
-  OnMoveDirection.Invoke(direction);
+  // "Normalize" direction
+  if (direction != 0)
+    direction = direction > 0 ? 1 : -1;
+
   currentDirection = direction;
+  OnMoveDirection.Invoke(direction);
 }
 
 void PlayerInput::CancelDirection(float direction)

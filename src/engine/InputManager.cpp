@@ -6,7 +6,7 @@
 
 using namespace std;
 
-const int InputManager::joystickDeadZone{8000};
+const float InputManager::joystickDeadZone{0.1f};
 
 // Flattens joystick axis value in range -1 to 1, and sets it to 0 if below deadzone
 float InputManager::TreatAxisValue(int value)
@@ -144,24 +144,26 @@ void InputManager::Update()
   {
     // Compare to the analog state last frame
     if (analog != lastLeftControllerAnalogs[instanceId])
+    {
       // If they are different, raise
+      // cout << "Left analog: " << analog << endl;
       OnControllerLeftAnalog.Invoke(analog, instanceId);
+    }
   }
   for (auto [instanceId, analog] : currentRightControllerAnalogs)
   {
     // Compare to the analog state last frame
     if (analog != lastRightControllerAnalogs[instanceId])
+    {
       // If they are different, raise
+      // cout << "Right analog: " << analog << endl;
       OnControllerRightAnalog.Invoke(analog, instanceId);
+    }
   }
 
   // Store for next frame
   lastLeftControllerAnalogs = currentLeftControllerAnalogs;
   lastRightControllerAnalogs = currentRightControllerAnalogs;
-
-  // Empty these for next frame
-  currentLeftControllerAnalogs.clear();
-  currentRightControllerAnalogs.clear();
 }
 
 void InputManager::OpenController(int index)

@@ -34,10 +34,6 @@ void Movement::Start()
 {
   // Remember gravity scale
   originalGravityScale = rigidbody.gravityScale;
-
-  // When control is lost, stop fast falling
-  character.OnControlChange.AddListener("stop-fast-falling", [this](bool hasControl)
-                                        { if (hasControl == false) StopFallFast(); });
 }
 
 void Movement::OnLandInternal()
@@ -62,7 +58,7 @@ void Movement::PhysicsUpdate(float deltaTime)
   }
 
   // Fast fall
-  if (fastFallActive)
+  if (fastFallActive && character.HasControl())
     rigidbody.velocity.y += fastFallAcceleration * deltaTime;
 }
 

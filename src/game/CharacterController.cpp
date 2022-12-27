@@ -3,6 +3,7 @@
 #include "Action.h"
 #include "Actions.h"
 #include "PlayerInput.h"
+#include <iostream>
 
 using namespace std;
 
@@ -71,7 +72,7 @@ void CharacterController::Start()
   // Make sure to dispatch another movement if movement key is being held when character becomes idle
   character.OnEnterIdle.AddListener("check-if-moving", [this, input]()
                                     { if (input->GetCurrentMoveDirection() != 0)
-                                    Dispatch<Actions::Move>(input->GetCurrentMoveDirection()); });
+                                    DispatchNonDelayable<Actions::Move>(input->GetCurrentMoveDirection()); });
 
   // Subscribe to jumps
   // Make it a friend of moving
@@ -80,7 +81,7 @@ void CharacterController::Start()
 
   // Fast falling isn't an action
   input->OnFastFall.AddListener("character-controller", [this]()
-                                { if (character.HasControl()) movement.FallFast(); });
+                                { movement.FallFast(); });
   input->OnFastFallStop.AddListener("character-controller", [this]()
                                     { movement.StopFallFast(); });
 

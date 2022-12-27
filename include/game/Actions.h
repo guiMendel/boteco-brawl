@@ -12,10 +12,13 @@
 #define LAND_PRIORITY 2
 
 // Shorthand for attack actions
-#define ATTACK(actionName, animationName)                               \
-  struct actionName : public AttackAction                               \
-  {                                                                     \
-    std::string GetAnimation() const override { return animationName; } \
+#define ATTACK(actionName, animationName)     \
+  struct actionName : public AttackAction     \
+  {                                           \
+    std::string GetAnimation() const override \
+    {                                         \
+      return animationName;                   \
+    }                                         \
   }
 
 namespace Actions

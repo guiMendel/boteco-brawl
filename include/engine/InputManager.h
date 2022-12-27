@@ -84,8 +84,8 @@ private:
   // Currently open controllers
   std::unordered_map<int, std::shared_ptr<ControllerDevice>> controllers;
 
-  // Tolerance of joystick axis jitter
-  static const int joystickDeadZone;
+  // Tolerance of joystick axis jitter, in range 0 to 1
+  static const float joystickDeadZone;
 };
 
 #endif
