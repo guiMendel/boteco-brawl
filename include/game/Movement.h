@@ -73,6 +73,9 @@ public:
   // Acceleration added when falling faster
   float fastFallAcceleration;
 
+  // How long character still has to perform a coyote jump after having left ground
+  float remainingCoyoteTime{totalCoyoteTime};
+
 private:
   // Checks if character is grounded
   void GroundCheck();
@@ -121,6 +124,9 @@ private:
 
   // Whether second jump is available
   bool doubleJumpAvailable{true};
+
+  // Total time to perform coyote jump
+  static const float totalCoyoteTime;
 
   // === OTHER
 

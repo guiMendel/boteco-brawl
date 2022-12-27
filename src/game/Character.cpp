@@ -1,6 +1,7 @@
 #include "Character.h"
 #include "Action.h"
 #include <algorithm>
+#include <typeinfo>
 
 using namespace std;
 const float Character::maxActionDelay{1};
@@ -79,8 +80,26 @@ bool Character::CanPerform(std::shared_ptr<Action> action)
                  { return state->priority > action->GetPriority() && !action->IsFriend(state); });
 }
 
+void Character::SetSequenceIndex(shared_ptr<Action> action)
+{
+  // For each state
+  for (auto state : states)
+  {
+    // Check if this state's parent action is the same
+    // cout << "Comparing actions " << typeid(*state->parentAction).name() << " and " << typeid(*action).name() << endl;
+    if (typeid(*state->parentAction) == typeid(*action))
+    {
+      // Check if the sequence index for this action will be higher than the current one
+      action->sequenceIndex = max(action->sequenceIndex, state->parentAction->sequenceIndex + 1);
+    }
+  }
+}
+
 void Character::Perform(shared_ptr<Action> action, bool canDelay)
 {
+  // Set incoming action's sequence index
+  SetSequenceIndex(action);
+
   if (CanPerform(action) == false)
   {
     // Push to queue if possible

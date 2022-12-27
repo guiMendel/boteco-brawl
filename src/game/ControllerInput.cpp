@@ -45,13 +45,13 @@ void ControllerInput::HandleAnalogButton(SDL_GameControllerButton button)
   if (button == SDL_CONTROLLER_BUTTON_A || button == SDL_CONTROLLER_BUTTON_B)
     OnJump.Invoke();
 
-  // Detect neutral attack
-  if (button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
-    OnNeutralAttack.Invoke();
-
   // Detect dash
-  if (button == SDL_CONTROLLER_BUTTON_X || button == SDL_CONTROLLER_BUTTON_Y)
+  if (button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
     OnDash.Invoke(analogDirection);
+
+  // Detect neutral attack
+  if (button == SDL_CONTROLLER_BUTTON_X || button == SDL_CONTROLLER_BUTTON_Y)
+    OnNeutralAttack.Invoke();
 }
 
 void ControllerInput::Start()

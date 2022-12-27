@@ -103,13 +103,6 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> std::function<void(s
       params.frequency = {params.frequency.first + reduction,
                           params.frequency.second + reduction}; };
 
-    // // Give it ground detector
-    // auto groundDetectorObject = character->CreateChild(GROUND_DETECTOR_OBJECT);
-    // auto detector = groundDetectorObject->AddComponent<Collider>(
-    //     Rectangle({0, collider->GetBox().height / 4 + JUMP_RANGE}, collider->GetBox().width * 0.95, collider->GetBox().height * 0.5), true);
-
-    // cout << "Detector: " << detector->GetBox() << endl;
-
     // Give it movement
     character->AddComponent<::Character>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);

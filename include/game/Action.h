@@ -35,6 +35,9 @@ struct Action
   virtual void StopHook(GameObject &) {}
 
   virtual ~Action() {}
+
+  // How many time this action has been executed in succession prior to this execution
+  int sequenceIndex{0};
 };
 
 // A specialization which simply plays an animation on trigger

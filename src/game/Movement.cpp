@@ -11,6 +11,8 @@ const float jumpCooldown{0.1f};
 // How far from the ground character can jump
 const float jumpRange{0.2f};
 
+const float Movement::totalCoyoteTime{0.2f};
+
 Movement::Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance)
     : Component(associatedObject),
       acceleration(acceleration),
@@ -44,6 +46,9 @@ void Movement::OnLandInternal()
 
   // Reset double jump
   doubleJumpAvailable = true;
+
+  // Reset coyote time
+  remainingCoyoteTime = totalCoyoteTime;
 }
 
 void Movement::PhysicsUpdate(float deltaTime)
@@ -67,6 +72,10 @@ void Movement::Update(float deltaTime)
 {
   // Update grounded state
   GroundCheck();
+
+  // Update coyote timer
+  if (IsGrounded() == false && remainingCoyoteTime > 0)
+    remainingCoyoteTime -= deltaTime;
 
   // Count jump time
   lastJumpTime += deltaTime;
@@ -114,8 +123,8 @@ void Movement::Jump()
   // Reset counter
   lastJumpTime = 0;
 
-  // If not grounded
-  if (IsGrounded() == false)
+  // If not grounded and coyote jump not available
+  if (IsGrounded() == false && remainingCoyoteTime <= 0)
   {
     // Stop if can't double jump
     if (doubleJumpAvailable == false)
@@ -131,6 +140,9 @@ void Movement::Jump()
 
     return;
   }
+
+  // Spend coyote jump
+  remainingCoyoteTime = 0;
 
   // Apply speed
   rigidbody.velocity.y = -jumpSpeed;

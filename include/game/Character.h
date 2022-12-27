@@ -60,6 +60,9 @@ private:
   // Checks if character is able to perform this action this frame
   bool CanPerform(std::shared_ptr<Action> action);
 
+  // Sets the action's sequence index based on current state
+  void SetSequenceIndex(std::shared_ptr<Action> action);
+
   // Action waiting to be performed as soon as there isn't an impeding state anymore
   std::shared_ptr<Action> queuedAction;
 
