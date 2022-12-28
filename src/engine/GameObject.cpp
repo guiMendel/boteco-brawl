@@ -39,6 +39,12 @@ GameObject::GameObject(string name, Vector2 coordinates, double rotation, shared
 
 GameObject::~GameObject()
 {
+  cout << "In destructor of " << GetName() << endl;
+
+  for (auto component : components)
+  {
+    cout << "Component: " << typeid(*component).name() << ", references: " << component.use_count() << endl;
+  }
 }
 
 void GameObject::Start()
@@ -295,6 +301,19 @@ vector<shared_ptr<GameObject>> GameObject::GetChildren()
   return verifiedChildren;
 }
 
+shared_ptr<GameObject> GameObject::GetChild(int id)
+{
+  if (children.count(id) == 0)
+    return nullptr;
+
+  auto child = children[id].lock();
+
+  if (child == nullptr)
+    children.erase(id);
+
+  return child;
+}
+
 shared_ptr<GameObject> GameObject::GetChild(string name)
 {
   // For each child entry
@@ -411,7 +430,7 @@ shared_ptr<GameState> GameObject::GetState()
   return currentState;
 }
 
-bool GameObject::IsDescendant(GameObject &other)
+bool GameObject::IsDescendantOf(GameObject &other)
 {
   if (id == other.id)
     return true;
@@ -419,5 +438,5 @@ bool GameObject::IsDescendant(GameObject &other)
   if (GetParent() == nullptr)
     return false;
 
-  return GetParent()->IsDescendant(other);
+  return GetParent()->IsDescendantOf(other);
 }

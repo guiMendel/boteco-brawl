@@ -72,12 +72,6 @@ public:
     if (recipe)
       recipe(object);
 
-    // Call it's start method
-    if (started)
-    {
-      object->Start();
-    }
-
     return object;
   }
 

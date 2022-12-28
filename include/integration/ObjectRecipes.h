@@ -18,9 +18,20 @@ public:
 
   static auto Character(std::shared_ptr<Player> player) -> std::function<void(std::shared_ptr<GameObject>)>;
 
-  static auto PlayerManager() -> std::function<void(std::shared_ptr<GameObject>)>;
+  template <class T>
+  static auto SingleComponent(bool dontDestroyOnLoad = false) -> std::function<void(std::shared_ptr<GameObject>)>
+  {
+    return [dontDestroyOnLoad](std::shared_ptr<GameObject> object)
+    {
+      object->AddComponent<T>();
+      if (dontDestroyOnLoad)
+        object->DontDestroyOnLoad();
+    };
+  }
 
   static auto Platform(Vector2 size, bool isStatic = true) -> std::function<void(std::shared_ptr<GameObject>)>;
+
+  static auto Projectile(Vector2 initialSpeed, std::shared_ptr<GameObject> parent) -> std::function<void(std::shared_ptr<GameObject>)>;
 };
 
 #endif

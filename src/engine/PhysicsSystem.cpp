@@ -261,7 +261,7 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
     auto otherObject = staticEntry.second.at(0)->gameObject;
 
     // Ignore entries that are the same object or some parent
-    if (otherObject.IsDescendant(objectBody->gameObject))
+    if (otherObject.IsDescendantOf(objectBody->gameObject))
       continue;
 
     // Find out if there is intersection between this other object and our trajectory
@@ -314,6 +314,9 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
 
 vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id)
 {
+  if (gameState.GetObject(id) == nullptr)
+    return {};
+
   auto objectBody = gameState.GetObject(id)->GetComponent<Rigidbody>();
 
   bool isDynamic = objectBody != nullptr && objectBody->GetType() == RigidbodyType::Dynamic;
@@ -426,36 +429,41 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 void PhysicsSystem::ResolveCollision(CollisionData collisionData)
 {
   // cout << "Resolving collision between " << collisionData.source->gameObject.GetName() << " and " << collisionData.other->gameObject.GetName() << endl;
+  auto sourceCollider = collisionData.source.lock();
+  auto otherCollider = collisionData.other.lock();
+
+  if (sourceCollider == nullptr || otherCollider == nullptr)
+    return;
 
   // If this collision was already dealt with this frame, ignore it
-  if (collisionData.source->RequireRigidbody()->IsCollidingWith(collisionData.other->gameObject))
+  if (sourceCollider->RequireRigidbody()->IsCollidingWith(otherCollider->gameObject))
     return;
 
   ApplyImpulse(collisionData);
 
   // Check if is entering collision
-  if (collisionData.source->RequireRigidbody()->WasCollidingWith(collisionData.other->gameObject) == false)
-  // if (collisionData.source->WasCollidingWith(*collisionData.other) == false ||
+  if (sourceCollider->RequireRigidbody()->WasCollidingWith(otherCollider->gameObject) == false)
+  // if (sourceCollider->WasCollidingWith(*otherCollider) == false ||
   //     collisionData.penetration < minStayPenetration)
   {
     // Announce collision enter to components
-    collisionData.source->gameObject.OnCollisionEnter(collisionData);
+    collisionData.source.lock()->gameObject.OnCollisionEnter(collisionData);
 
     // Switch reference
     swap(collisionData.source, collisionData.other);
 
     // Announce to other object
-    collisionData.source->gameObject.OnCollisionEnter(collisionData);
+    collisionData.source.lock()->gameObject.OnCollisionEnter(collisionData);
   }
 
   // Announce collision to components
-  collisionData.source->gameObject.OnCollision(collisionData);
+  collisionData.source.lock()->gameObject.OnCollision(collisionData);
 
   // Switch reference
   swap(collisionData.source, collisionData.other);
 
   // Announce to other object
-  collisionData.source->gameObject.OnCollision(collisionData);
+  collisionData.source.lock()->gameObject.OnCollision(collisionData);
 }
 
 void PhysicsSystem::ResolveTriggerCollision(Rigidbody &body, Collider &collider)
@@ -478,8 +486,8 @@ void PhysicsSystem::ResolveTriggerCollision(Rigidbody &body, Collider &collider)
 void ApplyImpulse(CollisionData collisionData)
 {
   // Ease of access
-  auto bodyA = collisionData.source->RequireRigidbody();
-  auto bodyB = collisionData.other->RequireRigidbody();
+  auto bodyA = collisionData.source.lock()->RequireRigidbody();
+  auto bodyB = collisionData.other.lock()->RequireRigidbody();
 
   // Friction to apply
   float frictionModifier = min(bodyA->friction, bodyB->friction);
@@ -525,10 +533,6 @@ void ApplyImpulse(CollisionData collisionData)
 
   if (bodyBStatic == false)
     bodyB->gameObject.Translate(-collisionData.normal * bodyBDisplacement * displacementDirection);
-
-  // cout << "Distance before: " << penetration << ", after: " << FindMinDistance(bodyA->GetColliders()[0]->GetBox(), bodyB->GetColliders()[0]->GetBox(), bodyA->gameObject.GetRotation(), bodyB->gameObject.GetRotation()).first << endl;
-
-  // cout << "Normal before: " << (string)collisionData.normal << ", after: " << (string)FindMinDistance(bodyA->GetColliders()[0]->GetBox(), bodyB->GetColliders()[0]->GetBox(), bodyA->gameObject.GetRotation(), bodyB->gameObject.GetRotation()).second << endl;
 }
 
 auto PhysicsSystem::FindTrajectoryIntersection(ValidatedColliders colliders, Rigidbody &sourceBody)

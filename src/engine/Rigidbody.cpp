@@ -138,8 +138,11 @@ bool Rigidbody::WasCollidingTriggerWith(int id)
 
 void Rigidbody::OnCollision(Collision::CollisionData collisionData)
 {
+  if (collisionData.other.expired())
+    return;
+
   // Add to collision set
-  collidingBodies.insert(collisionData.other->gameObject.id);
+  collidingBodies.insert(collisionData.other.lock()->gameObject.id);
 }
 
 void Rigidbody::OnTriggerCollision(GameObject &other)

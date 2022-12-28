@@ -29,6 +29,8 @@ public:
   Event OnFastFallStop;
 
   Event OnNeutralAttack;
+  
+  Event OnNeutralSpecial;
 
   float GetCurrentMoveDirection() const;
 

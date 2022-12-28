@@ -78,6 +78,8 @@ void GameState::Update(float deltaTime)
 
   // Delete dead ones
   DeleteObjects();
+
+  // cout << gameObjects.size() << endl;
 }
 
 void GameState::PhysicsUpdate(float deltaTime)
@@ -177,6 +179,9 @@ shared_ptr<GameObject> GameState::RegisterObject(shared_ptr<GameObject> gameObje
 
   // Register this object's hierarchy to this new state
   CASCADE_OBJECTS(RegisterToState, );
+
+  if (started)
+    gameObject->Start();
 
   return gameObject;
 }

@@ -22,7 +22,9 @@ void Particle::PhysicsUpdate(float deltaTime)
 
   // Count lifetime
   if ((lifetime -= deltaTime) <= 0)
+  {
     particleSystem.DeleteParticle(id);
+  }
 }
 
 // Attach position to a gameObject

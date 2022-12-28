@@ -36,6 +36,8 @@ struct ParticleEmissionParameters
 class ParticleEmitter : public Component
 {
 public:
+  Event OnStop;
+
   ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float radius = 0.01, bool loop = false, float duration = 1);
 
   ~ParticleEmitter() {}

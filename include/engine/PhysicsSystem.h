@@ -19,7 +19,7 @@ struct RaycastCollisionData
   float elapsedDistance;
 
   // The collider with which collision happened
-  std::shared_ptr<Collider> other;
+  std::weak_ptr<Collider> other;
 };
 
 // Stores data on how to filter a collision detection

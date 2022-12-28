@@ -15,6 +15,7 @@
 #include "Character.h"
 #include "ParticleEmitter.h"
 #include "PlayerManager.h"
+#include "Projectile.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
@@ -26,15 +27,6 @@ auto ObjectRecipes::Camera(float size) -> function<void(shared_ptr<GameObject>)>
   return [size](shared_ptr<GameObject> cameraObject)
   {
     cameraObject->AddComponent<::Camera>(size);
-  };
-}
-
-auto ObjectRecipes::PlayerManager() -> function<void(shared_ptr<GameObject>)>
-{
-  return [](shared_ptr<GameObject> managerObject)
-  {
-    managerObject->AddComponent<::PlayerManager>();
-    managerObject->DontDestroyOnLoad();
   };
 }
 
@@ -60,13 +52,14 @@ auto ObjectRecipes::Background(string imagePath) -> function<void(shared_ptr<Gam
   };
 }
 
-auto ObjectRecipes::Character(shared_ptr<Player> player) -> std::function<void(std::shared_ptr<GameObject>)>
+auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared_ptr<GameObject>)>
 {
   return [player](shared_ptr<GameObject> character)
   {
     // Get sprite
     auto spriteRenderer = character->AddComponent<SpriteRenderer>(RenderLayer::Characters);
 
+    // TODO: fix leaked references to this component on destructor call
     // Add animator
     auto animator = character->AddComponent<Animator>();
 
@@ -80,6 +73,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> std::function<void(s
     animator->AddAnimation(AnimationRecipes::Brake);
     animator->AddAnimation(AnimationRecipes::Punch);
     animator->AddAnimation(AnimationRecipes::Dash);
+    animator->AddAnimation(AnimationRecipes::Special);
 
     // Give it collision
     auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0, 0);
@@ -104,18 +98,34 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> std::function<void(s
                           params.frequency.second + reduction}; };
 
     // Give it movement
+    // TODO: fix leaked references to this component on destructor call
     character->AddComponent<::Character>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
+    // TODO: fix leaked references to this component on destructor call
     character->AddComponent<ControllerInput>(player);
     character->AddComponent<CharacterController>();
   };
 }
 
-auto ObjectRecipes::Platform(Vector2 size, bool isStatic) -> std::function<void(std::shared_ptr<GameObject>)>
+auto ObjectRecipes::Platform(Vector2 size, bool isStatic) -> function<void(shared_ptr<GameObject>)>
 {
   return [size, isStatic](shared_ptr<GameObject> platform)
   {
     platform->AddComponent<Rigidbody>(isStatic ? RigidbodyType::Static : RigidbodyType::Dynamic);
     platform->AddComponent<Collider>(Rectangle(0, 0, size.x, size.y), false, ColliderDensity::Ground);
+  };
+}
+
+auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> parent) -> function<void(shared_ptr<GameObject>)>
+{
+  return [initialVelocity, parent](shared_ptr<GameObject> projectile)
+  {
+    auto body = projectile->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
+    auto collider = projectile->AddComponent<Collider>(Rectangle({0, 0}, 0.2, 0.2), false, ColliderDensity::Wood);
+    projectile->AddComponent<::Projectile>(parent);
+
+    cout << "Collider now has " << collider.use_count() << endl;
+
+    body->velocity = initialVelocity;
   };
 }

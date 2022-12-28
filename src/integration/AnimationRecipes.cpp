@@ -1,6 +1,8 @@
 #include "AnimationRecipes.h"
 #include "Movement.h"
 #include "Animator.h"
+#include "ParticleFX.h"
+#include "ObjectRecipes.h"
 
 using namespace std;
 
@@ -24,9 +26,38 @@ auto AnimationRecipes::Jump(Animator &animator) -> shared_ptr<Animation>
                                           animator,
                                           Animation::SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 2), 0.1));
 
+  // Particles to emit on jump
+  ParticleEmissionParameters particleEmission;
+  particleEmission.angle = {-2.1, -2.8};
+  particleEmission.color = {Color::Black(), Color::Gray()};
+  particleEmission.frequency = {0.0001, 0.005};
+  particleEmission.lifetime = {0.2, 1.0};
+  particleEmission.speed = {0.8, 3.5};
+
   // Add jump impulse to jump frame
-  animation->frames[1].AddCallback([](GameObject &object)
-                                   { object.RequireComponent<Movement>()->Jump(); });
+  animation->frames[1].AddCallback([particleEmission](GameObject &object)
+                                   {
+                                     // Jump
+                                     object.RequireComponent<Movement>()->Jump();
+
+                                     // Get emission position
+                                     auto colliderBox = object.RequireComponent<Collider>()->GetBox();
+                                     auto offset = Vector2(-colliderBox.width / 4, colliderBox.height / 2);
+
+                                     // Particles
+                                     auto emission = particleEmission;
+
+                                     if (object.localScale.x < 0)
+                                     {
+                                       offset.x *= -1;
+                                       emission.angle.first = M_PI - emission.angle.first;
+                                       emission.angle.second = M_PI - emission.angle.second;
+                                     }
+
+                                     // TODO: fix memory leak caused by this (increasing memory usage per call)
+                                     ParticleFX::EffectAt(object.GetPosition() + offset, 0.1, 0.2, emission, 3.0);
+                                     //
+                                   });
 
   return animation;
 }
@@ -86,4 +117,27 @@ auto AnimationRecipes::Dash(Animator &animator) -> shared_ptr<Animation>
   return make_shared<Animation>("dash",
                                 animator,
                                 Animation::SliceSpritesheet("./assets/sprites/carry.png", clipInfo, 0.1));
+}
+
+auto AnimationRecipes::Special(Animator &animator) -> shared_ptr<Animation>
+{
+  auto animation = make_shared<Animation>("special",
+                                          animator,
+                                          Animation::SliceSpritesheet("./assets/sprites/throw.png", SpritesheetClipInfo(8, 8), 0.1));
+
+  animation->frames[2].AddCallback([](GameObject &object)
+                                   {
+                                     Vector2 initialVelocity{5, -1};
+
+                                     if (object.localScale.x < 0)
+                                       initialVelocity.x *= -1;
+
+                                     object.GetState()->CreateObject(
+                                         "Projectile",
+                                         ObjectRecipes::Projectile(initialVelocity, object.GetShared()),
+                                         object.GetPosition());
+                                     //
+                                   });
+
+  return animation;
 }

@@ -2,6 +2,7 @@
 #include "GameData.h"
 #include "ObjectRecipes.h"
 #include "PlayerManager.h"
+#include "ParticleFX.h"
 #include "Camera.h"
 
 using namespace std;
@@ -13,16 +14,20 @@ void MainState::LoadAssets()
 void MainState::InitializeObjects()
 {
   // Add player manager
-  auto playerManager = CreateObject("PlayerManager", ObjectRecipes::PlayerManager())->RequireComponent<PlayerManager>();
+  auto playerManager = CreateObject("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true))->RequireComponent<PlayerManager>();
+
+  // Add particle fx
+  CreateObject("ParticleFX", ObjectRecipes::SingleComponent<ParticleFX>());
 
   // Add a background
   CreateObject("Background", ObjectRecipes::Background("./assets/image/boteco.jpg"));
 
   // Add player
-  auto player1 = CreateObject("Player", ObjectRecipes::Character(playerManager->GetMainPlayer()), Vector2(-4, -10))->GetComponent<Rigidbody>();
+  auto player1 = CreateObject("Character", ObjectRecipes::Character(playerManager->GetMainPlayer()), Vector2(-4, -10))->GetComponent<Rigidbody>();
 
   // auto player2 = CreateObject("Player2", ObjectRecipes::Character(), Vector2(4, -2))->GetComponent<Rigidbody>();
 
+  // TODO: fix theses platforms' destructors being called on start of game for some reason
   CreateObject("Ground", ObjectRecipes::Platform({20, 2}), Vector2(0, 4));
 
   CreateObject("WallLeft", ObjectRecipes::Platform({1, 5}), Vector2(-5, 0));

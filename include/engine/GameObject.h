@@ -41,6 +41,7 @@ public:
   bool DestroyRequested() const { return destroyRequested; }
 
   // Destroys the object
+  // TODO: it seems this is leaking memory. When multiple objects are destroyed, memory usage increases very fast
   void RequestDestroy() { destroyRequested = true; }
 
   // Adds a new component
@@ -129,6 +130,7 @@ public:
   std::shared_ptr<GameObject> CreateChild(std::string name, Vector2 offset, float offsetRotation);
   std::vector<std::shared_ptr<GameObject>> GetChildren();
   std::shared_ptr<GameObject> GetChild(std::string name);
+  std::shared_ptr<GameObject> GetChild(int id);
 
   // Returns this object's shared pointer
   std::shared_ptr<GameObject> GetShared();
@@ -163,7 +165,7 @@ public:
   void DontDestroyOnLoad(bool value = true);
 
   // Check if this gameObject is in the descendant lineage of the other object
-  bool IsDescendant(GameObject &other);
+  bool IsDescendantOf(GameObject &other);
 
   // A timer helper
   Timer timer;

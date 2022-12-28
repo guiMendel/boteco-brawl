@@ -117,6 +117,7 @@ void ParticleEmitter::Stop()
 {
   cycleLifetime = 0;
   active = false;
+  OnStop.Invoke();
 }
 
 list<shared_ptr<Particle>> ParticleEmitter::GetEmittedParticles()

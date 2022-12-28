@@ -85,6 +85,8 @@ namespace Actions
   };
 
   ATTACK(Punch, "punch");
+  
+  ATTACK(Special, "special");
 
 }
 
