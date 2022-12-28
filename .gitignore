@@ -2,6 +2,5 @@ include/SDL2
 lib
 game.exe
 src/**/obj/
-.vscode
 test.*
 .DS_Store

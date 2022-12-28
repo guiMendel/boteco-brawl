@@ -115,23 +115,23 @@ GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))
 # Define how to make .o files, and make them dependent on their .c counterparts and the h files
 # The void cast is simply there to hide output of mkdir
 $(ENGINE_OBJECT_DIRECTORY)\\%.o: $(ENGINE_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(ENGINE_DEPS)
-	$(CC) -c -o $@ $< $(COMPILATION_ARGS)
+	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
 
 # FOR INTEGRATION
 
 # Define how to make .o files, and make them dependent on their .c counterparts and the h files
 # The void cast is simply there to hide output of mkdir
 $(INTEGRATION_OBJECT_DIRECTORY)\\%.o: $(INTEGRATION_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(ENGINE_DEPS) $(GAME_DEPS)
-	$(CC) -c -o $@ $< $(COMPILATION_ARGS)
+	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
 
 # FOR GAME
 
 # Define how to make .o files, and make them dependent on their .c counterparts and the h files
 # The void cast is simply there to hide output of mkdir
 $(GAME_OBJECT_DIRECTORY)\\%.o: $(GAME_SOURCE_DIRECTORY)\%.cpp $(GAME_DEPS) $(ENGINE_DEPS) $(INTEGRATION_DEPS)
-	$(CC) -c -o $@ $< $(COMPILATION_ARGS)
+	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
 	
 # Makes the game
 game: $(GAME_OBJS) $(ENGINE_OBJS) $(INTEGRATION_OBJS)
 #	./src/editor/componentTable/tableScrapper.sh
-	$(CC) $^ $(COMPILATION_ARGS) $(LIBS) $(SDL_LIBRARY) -o $@
+	$(CC) $^ $(COMPILATION_ARGS) $(LIBS) $(SDL_LIBRARY) -g -o $@

@@ -1,0 +1,21 @@
+{
+  "tasks": [
+    {
+      "type": "cppbuild",
+      "label": "C/C++: make build active file",
+      "command": "make",
+      "args": [],
+      "options": {
+        "cwd": "${cwd}"
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ],
+  "version": "2.0.0"
+}
