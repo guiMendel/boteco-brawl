@@ -1,6 +1,7 @@
 {
   "cSpell.words": [
     "boteco",
+    "caxis",
     "cbutton",
     "cdevice",
     "CONTROLLERAXISMOTION",
@@ -11,6 +12,11 @@
     "CONTROLLERDEVICEREMOVED",
     "Delayable",
     "GAMECONTROLLER",
+    "keysym",
+    "LEFTX",
+    "MOUSEBUTTONDOWN",
+    "MOUSEBUTTONUP",
+    "RIGHTX",
     "SDLK",
     "WINDOWPOS"
   ],

@@ -140,7 +140,7 @@ Game::~Game()
   ExitSDL(window.release(), renderer.release());
 }
 
-void Game::CalculateDeltaTime(int &start, float &deltaTime, float discount)
+void Game::CalculateDeltaTime(int &start, float &deltaTime)
 {
   // Get this frame's start time
   int newStart = SDL_GetTicks();
@@ -149,8 +149,7 @@ void Game::CalculateDeltaTime(int &start, float &deltaTime, float discount)
   deltaTime = (float)(newStart - start) / 1000.0f;
 
   // Apply discount
-  Assert(discount < deltaTime, "Delta time discount was higher than the deltaTime itself");
-  deltaTime -= discount;
+  Assert(deltaTime >= 0, "Delta time calculation failed: got a negative number");
 
   // Update frame start variable
   start = newStart;
@@ -283,8 +282,12 @@ void Game::Frame()
   // Get input
   auto pollDelay = inputManager.Update();
 
+  // Discount poll delay from delta times (convert seconds to ms)
+  frameStart += pollDelay * 1000;
+  physicsFrameStart += pollDelay * 1000;
+
   // Calculate frame's delta time
-  CalculateDeltaTime(frameStart, deltaTime, pollDelay);
+  CalculateDeltaTime(frameStart, deltaTime);
 
   // Update the state's timer
   state.timer.Update(deltaTime);
@@ -305,6 +308,8 @@ void Game::PhysicsFrame()
 {
   // Calculate physics frame's delta time
   CalculateDeltaTime(physicsFrameStart, physicsDeltaTime);
+
+  // cout << "Physics delta time: " << physicsDeltaTime << endl;
 
   // Update the state
   GetState()->PhysicsUpdate(physicsDeltaTime);

@@ -13,6 +13,7 @@ public:
 
   void LoadAssets() override;
   void InitializeObjects() override;
+  void OnUpdate(float) override;
 
 private:
   Music music;

@@ -80,6 +80,8 @@ void GameState::Update(float deltaTime)
   DeleteObjects();
 
   // cout << gameObjects.size() << endl;
+
+  OnUpdate(deltaTime);
 }
 
 void GameState::PhysicsUpdate(float deltaTime)

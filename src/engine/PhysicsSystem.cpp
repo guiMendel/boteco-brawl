@@ -258,7 +258,7 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
   // Now test for static bodies
   for (auto staticEntry : staticColliders)
   {
-    auto otherObject = staticEntry.second.at(0)->gameObject;
+    auto &otherObject = staticEntry.second.at(0)->gameObject;
 
     // Ignore entries that are the same object or some parent
     if (otherObject.IsDescendantOf(objectBody->gameObject))

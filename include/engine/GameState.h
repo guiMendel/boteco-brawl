@@ -40,7 +40,8 @@ public:
   // Whether to remove this state from the queue
   bool PopRequested() { return popRequested; }
 
-  virtual void Update(float deltaTime);
+  void Update(float deltaTime);
+  virtual void OnUpdate(float deltaTime) {}
   virtual void PhysicsUpdate(float deltaTime);
 
   virtual void Render();

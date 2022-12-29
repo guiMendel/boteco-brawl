@@ -52,7 +52,10 @@ float InputManager::Update()
   {
     // Quit on quit event
     if (event.type == SDL_QUIT)
+    {
+      cout << "Quit" << endl;
       quitRequested = true;
+    }
 
     // ===  MOUSE
 
