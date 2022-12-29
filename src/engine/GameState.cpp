@@ -90,7 +90,9 @@ void GameState::PhysicsUpdate(float deltaTime)
   CASCADE_OBJECTS(PhysicsUpdate, deltaTime);
 
   // Resolve collisions
+  // float startMs = SDL_GetTicks();
   physicsSystem.PhysicsUpdate(deltaTime);
+  // cout << "Collisions took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
 
   // Update particles
   particleSystem.PhysicsUpdate(deltaTime);
@@ -150,6 +152,9 @@ void GameState::Start()
   // Wake objects
   CASCADE_OBJECTS(Awake, );
 
+  // Register components to state
+  CASCADE_OBJECTS(RegisterToState, );
+
   // Start objects
   CASCADE_OBJECTS(Start, );
 
@@ -179,11 +184,12 @@ shared_ptr<GameObject> GameState::RegisterObject(shared_ptr<GameObject> gameObje
   gameObjects[gameObject->id] = gameObject;
   gameObject->gameStateId = id;
 
-  // Register this object's hierarchy to this new state
-  CASCADE_OBJECTS(RegisterToState, );
-
   if (started)
+  {
+    // Register this object's hierarchy to this new state
+    gameObject->RegisterToState();
     gameObject->Start();
+  }
 
   return gameObject;
 }

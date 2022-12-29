@@ -8,13 +8,14 @@ using namespace std;
 void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
 {
   // Store these info
-  auto character = target.RequireComponent<Character>();
+  auto weakCharacter = weak_ptr(target.RequireComponent<Character>());
   int stateId = actionState->id;
 
   // Start this animation
   // When animation is over, make sure this action's state is no longer active
-  target.RequireComponent<Animator>()->Play(GetAnimation(), [stateId, character]()
-                                            { if (character) character->RemoveState(stateId); });
+  target.RequireComponent<Animator>()->Play(GetAnimation(), [stateId, weakCharacter]()
+                                            { IF_LOCK(weakCharacter, character)
+                                              character->RemoveState(stateId); });
 }
 
 int AttackAction::GetPriority() const { return 1; }

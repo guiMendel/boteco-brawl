@@ -18,9 +18,7 @@ void Particle::PhysicsUpdate(float deltaTime)
 
   // Count lifetime
   if ((lifetime -= deltaTime) <= 0)
-  {
-    particleSystem.DeleteParticle(id);
-  }
+    deleteRequested = true;
 }
 
 // Attach position to a gameObject
@@ -52,3 +50,5 @@ void Particle::Render()
   // Fill a rect at this particle's position
   SDL_RenderFillRect(renderer, &pixel);
 }
+
+bool Particle::DeleteRequested() const { return deleteRequested; }

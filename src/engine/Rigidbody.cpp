@@ -246,7 +246,7 @@ void Rigidbody::Render()
 {
   auto [box, rotation] = frameTrajectory;
 
-  Debug::DrawBox(box, rotation);
+  Debug::DrawBox(box, rotation, Color::Blue());
 
   auto renderer = Game::GetInstance().GetRenderer();
   auto camera = Camera::GetMain();

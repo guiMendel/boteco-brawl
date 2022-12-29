@@ -7,6 +7,8 @@ using namespace std;
 Component::Component(GameObject &associatedObject)
     : gameObject(associatedObject), id(GetState()->SupplyId()), inputManager(Game::GetInstance().GetInputManager()) {}
 
+Component::~Component() {}
+
 shared_ptr<Component> Component::GetShared() const
 {
   try

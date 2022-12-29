@@ -63,7 +63,7 @@ void ApplyImpulse(CollisionData collisionData);
 
 PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 
-void PhysicsSystem::PhysicsUpdate([[maybe_unused]] float deltaTime)
+void PhysicsSystem::PhysicsUpdate(float)
 {
   HandleCollisions();
 
@@ -206,6 +206,7 @@ void PhysicsSystem::DetectCollisions(ValidatedCollidersMap::iterator collidersEn
   // Test for all static objects
   for (auto staticEntry : staticColliders)
   {
+    // cout << "Checking for object " << body->gameObject.GetName() << " with " << collidersEntryIterator->second.size() << " colliders against " << staticEntry.second.at(0)->gameObject.GetName() << " with " << staticEntry.second.size() << " colliders" << endl;
     // Check if they are colliding
     if (CheckForCollision(collidersEntryIterator->second, staticEntry.second, collisionData))
       // Resolve collision (apply impulses)
@@ -399,7 +400,7 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
     return;
 
   // Get rigidbody if it exists
-  auto rigidbody = gameState.GetObject(objectId)->GetComponent<Rigidbody>();
+  auto rigidbody = collider->rigidbodyWeak.lock();
 
   bool isDynamic{false};
 
@@ -423,6 +424,14 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
     // Also recalculate it's smaller dimension
     rigidbody->CalculateSmallestColliderDimension();
   }
+
+  // cout << "After registration:" << endl;
+  // for (auto [id, colliders] : dynamicColliderStructure)
+  //   cout << "  Dynamic Object " << gameState.GetObject(id)->GetName() << " has " << colliders.size() << ", first is expired: " << colliders.at(0).expired() << endl;
+
+  // for (auto [id, colliders] : staticColliderStructure)
+  //   cout << "  Static Object " << gameState.GetObject(id)->GetName() << " has " << colliders.size() << endl;
+  // cout << "Done." << endl;
 }
 
 // Source https://youtu.be/1L2g4ZqmFLQ and https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/previousinformation/physics6collisionresponse/
@@ -450,7 +459,7 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
     collisionData.source.lock()->gameObject.OnCollisionEnter(collisionData);
 
     // Switch reference
-    swap(collisionData.source, collisionData.other);
+    std::swap(collisionData.source, collisionData.other);
 
     // Announce to other object
     collisionData.source.lock()->gameObject.OnCollisionEnter(collisionData);
@@ -460,7 +469,7 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
   collisionData.source.lock()->gameObject.OnCollision(collisionData);
 
   // Switch reference
-  swap(collisionData.source, collisionData.other);
+  std::swap(collisionData.source, collisionData.other);
 
   // Announce to other object
   collisionData.source.lock()->gameObject.OnCollision(collisionData);

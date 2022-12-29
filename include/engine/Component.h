@@ -10,6 +10,12 @@
 #include <memory>
 #include <map>
 
+#define IF_LOCK(weak, shared) if (auto shared = weak.lock(); shared)
+
+#define IF_NOT_LOCK(weak, shared) \
+  auto shared = weak.lock();      \
+  if (shared == nullptr)
+
 #define LOCK(weak, shared)   \
   auto shared = weak.lock(); \
   Assert(shared != nullptr,  \
@@ -29,7 +35,7 @@ class Component
 
 public:
   Component(GameObject &associatedObject);
-  virtual ~Component() {}
+  virtual ~Component();
 
   // In which render layer this component is
   // If None, then it's Render method will never be called

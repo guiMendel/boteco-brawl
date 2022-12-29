@@ -235,8 +235,6 @@ private:
   // Allows for registering to the state's variables
   void RegisterToState();
 
-  void StartComponents();
-
   // Vector with all components of this object
   std::vector<std::shared_ptr<Component>> components;
 
@@ -261,6 +259,9 @@ private:
 
   // Whether to keep this object when loading next state
   bool keepOnLoad{false};
+
+  // Id of last state to which this object has execute RegisterToState()
+  int lastStateRegisteredTo{-1};
 };
 
 #include "GameState.h"

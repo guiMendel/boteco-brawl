@@ -19,8 +19,19 @@ void ParticleSystem::PhysicsUpdate(float deltaTime)
   // cout << particles.size() << " particles" << endl;
 
   // Update each particle
-  for (auto [id, particle] : particles) {
+  for (auto [id, particle] : particles)
+  {
     particle->PhysicsUpdate(deltaTime);
+  }
+
+  // Delete dead particles
+  auto particleIterator = particles.begin();
+  while (particleIterator != particles.end())
+  {
+    if (particleIterator->second->DeleteRequested())
+      particleIterator = particles.erase(particleIterator);
+    else
+      particleIterator++;
   }
 }
 

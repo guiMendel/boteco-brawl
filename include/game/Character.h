@@ -9,6 +9,7 @@
 #include <list>
 #include <unordered_set>
 
+// An arena character that have multiple states, such as moving and jumping
 class Character : public Component
 {
 public:

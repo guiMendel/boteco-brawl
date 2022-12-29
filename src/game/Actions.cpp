@@ -55,17 +55,25 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
 
   // Add a callback to the animation to switch to recovering state
   // Animator::frame_callbacks dashCallbacks = {};
+  auto weakState{weak_ptr(dashState)};
+  auto weakCharacter{weak_ptr(character)};
+  auto weakRecoveringState{weak_ptr(recoveringState)};
+
   Animator::frame_callbacks dashCallbacks = {
-      {2, [dashState, character, recoveringState, this]()
+      {2, [weakState, weakCharacter, weakRecoveringState, this]()
        {
-         dashState->parentAction = nullptr;
-         character->SetState(recoveringState, GetFriendStates());
+         IF_LOCK(weakState, dashState)
+         IF_LOCK(weakCharacter, character) IF_LOCK(weakRecoveringState, recoveringState)
+         {
+           dashState->parentAction = nullptr;
+           character->SetState(recoveringState, GetFriendStates());
+         }
        }}};
 
   // Start this animation
   // When animation is over, make sure this action's states are disabled
-  target.RequireComponent<Animator>()->Play("dash", dashCallbacks, [dashStateId, recoveringStateId, character]()
-                                            { if (character) {
+  target.RequireComponent<Animator>()->Play("dash", dashCallbacks, [dashStateId, recoveringStateId, weakCharacter]()
+                                            { IF_LOCK(weakCharacter, character) {
                                               character->RemoveState(dashStateId);
                                               character->RemoveState(recoveringStateId);
                                             } });

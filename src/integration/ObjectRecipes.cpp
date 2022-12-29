@@ -9,7 +9,6 @@
 #include "Movement.h"
 #include "KeyboardInput.h"
 #include "ControllerInput.h"
-#include "Animator.h"
 #include "AnimationRecipes.h"
 #include "CharacterController.h"
 #include "Character.h"
@@ -54,12 +53,15 @@ auto ObjectRecipes::Background(string imagePath) -> function<void(shared_ptr<Gam
 
 auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared_ptr<GameObject>)>
 {
-  return [player](shared_ptr<GameObject> character)
+  // TODO: fix leaked references to this object's components on destructor call
+  auto weakPlayer{weak_ptr(player)};
+  return [weakPlayer](shared_ptr<GameObject> character)
   {
+    IF_NOT_LOCK(weakPlayer, player) { return; }
+
     // Get sprite
     auto spriteRenderer = character->AddComponent<SpriteRenderer>(RenderLayer::Characters);
 
-    // TODO: fix leaked references to this component on destructor call
     // Add animator
     auto animator = character->AddComponent<Animator>();
 
@@ -98,11 +100,10 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
                           params.frequency.second + reduction}; };
 
     // Give it movement
-    // TODO: fix leaked references to this component on destructor call
     character->AddComponent<::Character>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
-    // TODO: fix leaked references to this component on destructor call
     character->AddComponent<ControllerInput>(player);
+    character->AddComponent<KeyboardInput>();
     character->AddComponent<CharacterController>();
   };
 }
@@ -118,13 +119,14 @@ auto ObjectRecipes::Platform(Vector2 size, bool isStatic) -> function<void(share
 
 auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> parent) -> function<void(shared_ptr<GameObject>)>
 {
-  return [initialVelocity, parent](shared_ptr<GameObject> projectile)
+  auto weakParent{weak_ptr(parent)};
+  return [initialVelocity, weakParent](shared_ptr<GameObject> projectile)
   {
-    auto body = projectile->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
-    auto collider = projectile->AddComponent<Collider>(Rectangle({0, 0}, 0.2, 0.2), false, ColliderDensity::Wood);
-    projectile->AddComponent<::Projectile>(parent);
+    IF_NOT_LOCK(weakParent, parent) { return; }
 
-    cout << "Collider now has " << collider.use_count() << endl;
+    auto body = projectile->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
+    auto collider = projectile->AddComponent<Collider>(Rectangle({0, 0}, 0.2, 0.2), true, ColliderDensity::Wood);
+    projectile->AddComponent<::Projectile>(parent);
 
     body->velocity = initialVelocity;
   };

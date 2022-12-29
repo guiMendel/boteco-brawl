@@ -62,43 +62,49 @@ void CharacterController::HandleMovementAnimation()
 void CharacterController::Start()
 {
   // For now, there must be player input. In the future there may be an AIInput instead
-  auto input = gameObject.RequireComponent<PlayerInput>();
-  auto animator = gameObject.RequireComponent<Animator>();
+  auto inputs = gameObject.GetComponents<PlayerInput>();
 
-  // Subscribe to movement
-  input->OnMoveDirection.AddListener("character-controller", [this](float direction)
-                                     { DispatchNonDelayable<Actions::Move>(direction); });
+  Assert(inputs.empty() == false, "Character had no input methods");
 
-  // Make sure to dispatch another movement if movement key is being held when character becomes idle
-  character.OnEnterIdle.AddListener("check-if-moving", [this, input]()
-                                    { if (input->GetCurrentMoveDirection() != 0)
+  for (auto input : inputs)
+  {
+    auto weakInput = weak_ptr(input);
+
+    // Subscribe to movement
+    input->OnMoveDirection.AddListener("character-controller", [this](float direction)
+                                       { DispatchNonDelayable<Actions::Move>(direction); });
+
+    // Make sure to dispatch another movement if movement key is being held when character becomes idle
+    character.OnEnterIdle.AddListener("check-if-moving", [this, weakInput]()
+                                      { if (auto input = weakInput.lock(); input && input->GetCurrentMoveDirection() != 0)
                                     DispatchNonDelayable<Actions::Move>(input->GetCurrentMoveDirection()); });
 
-  // Subscribe to jumps
-  // Make it a friend of moving
-  input->OnJump.AddListener("character-controller", [this, animator]()
-                            { if (movement.CanJump() ) Dispatch<Actions::Jump>(); });
+    // Subscribe to jumps
+    // Make it a friend of moving
+    input->OnJump.AddListener("character-controller", [this]()
+                              { if (movement.CanJump() ) Dispatch<Actions::Jump>(); });
 
-  // Fast falling isn't an action
-  input->OnFastFall.AddListener("character-controller", [this]()
-                                { movement.FallFast(); });
-  input->OnFastFallStop.AddListener("character-controller", [this]()
-                                    { movement.StopFallFast(); });
+    // Fast falling isn't an action
+    input->OnFastFall.AddListener("character-controller", [this]()
+                                  { movement.FallFast(); });
+    input->OnFastFallStop.AddListener("character-controller", [this]()
+                                      { movement.StopFallFast(); });
 
-  // Land behavior
-  movement.OnLand.AddListener("character-controller", [this]()
-                              { OnLand(); });
+    // Land behavior
+    movement.OnLand.AddListener("character-controller", [this]()
+                                { OnLand(); });
 
-  // Attacks
-  input->OnNeutralAttack.AddListener("character-controller", [this]()
-                                     { Dispatch<Actions::Punch>(); });
+    // Attacks
+    input->OnNeutralAttack.AddListener("character-controller", [this]()
+                                       { Dispatch<Actions::Punch>(); });
 
-  input->OnNeutralSpecial.AddListener("character-controller", [this]()
-                                      { Dispatch<Actions::Special>(); });
+    input->OnNeutralSpecial.AddListener("character-controller", [this]()
+                                        { Dispatch<Actions::Special>(); });
 
-  //  Dash
-  input->OnDash.AddListener("character-controller", [this](Vector2 direction)
-                            { DispatchDash(direction); });
+    //  Dash
+    input->OnDash.AddListener("character-controller", [this](Vector2 direction)
+                              { DispatchDash(direction); });
+  }
 }
 
 void CharacterController::OnLand()

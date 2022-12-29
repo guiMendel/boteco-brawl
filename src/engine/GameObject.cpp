@@ -42,9 +42,8 @@ GameObject::~GameObject()
   cout << "In destructor of " << GetName() << endl;
 
   for (auto component : components)
-  {
-    cout << "Component: " << typeid(*component).name() << ", references: " << component.use_count() << endl;
-  }
+    if (component.use_count() != 2)
+      cout << "WARNING: Component " << typeid(*component).name() << " has " << component.use_count() - 2 << " leaked references" << endl;
 }
 
 void GameObject::Start()
@@ -55,10 +54,7 @@ void GameObject::Start()
   started = true;
 
   for (auto component : components)
-  {
-    component->RegisterToStateWithLayer();
     component->SafeStart();
-  }
 }
 
 void GameObject::Awake()
@@ -75,6 +71,13 @@ void GameObject::Awake()
 // Allows for registering to the state's variables
 void GameObject::RegisterToState()
 {
+  auto currentState = GetState()->id;
+
+  if (lastStateRegisteredTo == currentState)
+    return;
+
+  lastStateRegisteredTo = currentState;
+
   for (auto component : components)
     component->RegisterToStateWithLayer();
 }

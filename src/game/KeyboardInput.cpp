@@ -23,7 +23,7 @@ Vector2 KeyboardInput::GetInputDirection() const
   return inputDirection.Normalized();
 }
 
-void KeyboardInput::Update([[maybe_unused]] float deltaTime)
+void KeyboardInput::Update(float)
 {
   // Get this frame's input direction
   Vector2 inputDirection = GetInputDirection();
@@ -63,8 +63,13 @@ void KeyboardInput::Update([[maybe_unused]] float deltaTime)
   else if (inputManager.KeyRelease(SDLK_s))
     OnFastFallStop.Invoke();
 
+  // Detect attack
   if (inputManager.KeyPress(SDLK_j))
     OnNeutralAttack.Invoke();
+
+  // Detect special
+  if (inputManager.KeyPress(SDLK_l))
+    OnNeutralSpecial.Invoke();
 
   // Detect dash input
   if (inputManager.KeyPress(SDLK_k))

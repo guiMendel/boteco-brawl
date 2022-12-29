@@ -12,6 +12,9 @@
 #include "GameState.h"
 #include "MainState.h"
 
+// #define PRINT_FRAME_DURATION
+// #define PRINT_PHYSICS_FRAME_DURATION
+
 using namespace std;
 using namespace Helper;
 
@@ -257,6 +260,10 @@ void Game::GameLoop()
 
 void Game::Frame()
 {
+#ifdef PRINT_FRAME_DURATION
+  float startMs = SDL_GetTicks();
+#endif
+
   // Objects to add to state
   vector<shared_ptr<GameObject>> objectsToAdd;
 
@@ -302,10 +309,18 @@ void Game::Frame()
 
   // Render the window
   SDL_RenderPresent(GetRenderer());
+
+#ifdef PRINT_FRAME_DURATION
+  cout << "Frame took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
+#endif
 }
 
 void Game::PhysicsFrame()
 {
+#ifdef PRINT_PHYSICS_FRAME_DURATION
+  float startMs = SDL_GetTicks();
+#endif
+
   // Calculate physics frame's delta time
   CalculateDeltaTime(physicsFrameStart, physicsDeltaTime);
 
@@ -313,6 +328,10 @@ void Game::PhysicsFrame()
 
   // Update the state
   GetState()->PhysicsUpdate(physicsDeltaTime);
+
+#ifdef PRINT_PHYSICS_FRAME_DURATION
+  cout << "Physics took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
+#endif
 }
 
 shared_ptr<GameState> Game::GetState()

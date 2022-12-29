@@ -12,12 +12,11 @@ public:
 
   virtual ~Projectile() {}
 
-  void OnCollisionEnter(Collision::CollisionData data) override
+  void OnTriggerCollisionEnter(GameObject& other) override
   {
     auto parent = weakParent.lock();
-    auto otherCollider = data.other.lock();
 
-    if (otherCollider != nullptr && (parent == nullptr || otherCollider->gameObject.id != parent->id))
+    if (parent == nullptr || other.id != parent->id)
       gameObject.RequestDestroy();
   }
 

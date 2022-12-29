@@ -23,6 +23,9 @@ public:
   // Attach position to a gameObject
   void AttachTo(std::shared_ptr<GameObject> gameObject);
 
+  // Whether this particle has requested deletion
+  bool DeleteRequested() const;
+
   Vector2 position;
   Vector2 velocity;
   Color color;
@@ -33,6 +36,9 @@ private:
 
   // Reference to simulated position attachment to
   std::weak_ptr<GameObject> referenceObject;
+
+  // Whether this particle should be deleted asap
+  bool deleteRequested{false};
 
   // This particles unique identifier
   int id;

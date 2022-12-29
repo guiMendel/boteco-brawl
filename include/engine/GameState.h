@@ -41,7 +41,7 @@ public:
   bool PopRequested() { return popRequested; }
 
   void Update(float deltaTime);
-  virtual void OnUpdate(float deltaTime) {}
+  virtual void OnUpdate(float) {}
   virtual void PhysicsUpdate(float deltaTime);
 
   virtual void Render();

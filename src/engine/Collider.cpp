@@ -47,36 +47,32 @@ void Collider::RegisterToState()
   // Id of gameObject on which to subscribe this collider
   int ownerId = isTrigger ? gameObject.id : -1;
 
-  // If not trigger, find the rigidbody
-  if (isTrigger == false)
+  // Object to inspect for a rigidbody
+  shared_ptr<GameObject> inspectingObject = gameObject.GetShared();
+
+  // While it isn't null, check if it has a rigidbody
+  while (inspectingObject != nullptr)
   {
-    // Object to inspect for a rigidbody
-    shared_ptr<GameObject> inspectingObject = gameObject.GetShared();
+    // Check it
+    auto rigidbody = inspectingObject->GetComponent<Rigidbody>();
 
-    // While it isn't null, check if it has a rigidbody
-    while (inspectingObject != nullptr)
+    // If it's not null, then it's the one
+    if (rigidbody != nullptr)
     {
-      // Check it
-      auto rigidbody = inspectingObject->GetComponent<Rigidbody>();
-
-      // If it's not null, then it's the one
-      if (rigidbody != nullptr)
-      {
-        ownerId = rigidbody->gameObject.id;
-        rigidbodyWeak = rigidbody;
-        break;
-      }
-
-      // Check next in line
-      inspectingObject = inspectingObject->GetParent();
+      ownerId = rigidbody->gameObject.id;
+      rigidbodyWeak = rigidbody;
+      break;
     }
+
+    // Check next in line
+    inspectingObject = inspectingObject->GetParent();
   }
 
   // Subscribe, if managed to find a valid id
   if (ownerId >= 0)
-  {
     GetState()->physicsSystem.RegisterCollider(dynamic_pointer_cast<Collider>(GetShared()), ownerId);
-  }
+  else
+    cout << "WARNING: Object " << gameObject.GetName() << " has a non-trigger collider, but has no Rigidbody attached" << endl;
 }
 
 void Collider::Render()
