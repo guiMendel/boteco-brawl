@@ -11,7 +11,8 @@
     "CONTROLLERDEVICEREMOVED",
     "Delayable",
     "GAMECONTROLLER",
-    "SDLK"
+    "SDLK",
+    "WINDOWPOS"
   ],
   "files.associations": {
     "unordered_map": "cpp",

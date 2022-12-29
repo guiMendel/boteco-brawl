@@ -67,7 +67,7 @@ private:
   Game(std::string title, int width, int height);
 
   // Calculates the delta time
-  void CalculateDeltaTime(int &start, float &deltaTime);
+  void CalculateDeltaTime(int &start, float &deltaTime, float discount = 0);
 
   // Removes current state from stack
   // Throws if stack is left empty

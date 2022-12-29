@@ -16,10 +16,6 @@ void Particle::PhysicsUpdate(float deltaTime)
   // Update position
   position += deltaTime * velocity;
 
-  // Perform individual behavior
-  if (behavior)
-    behavior(*this);
-
   // Count lifetime
   if ((lifetime -= deltaTime) <= 0)
   {
@@ -31,12 +27,6 @@ void Particle::PhysicsUpdate(float deltaTime)
 void Particle::AttachTo(std::shared_ptr<GameObject> gameObject)
 {
   referenceObject = gameObject;
-}
-
-// Function to execute on update cycles
-void Particle::SetBehavior(std::function<void(Particle &)> newBehavior)
-{
-  behavior = newBehavior;
 }
 
 void Particle::Render()

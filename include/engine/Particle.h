@@ -23,9 +23,6 @@ public:
   // Attach position to a gameObject
   void AttachTo(std::shared_ptr<GameObject> gameObject);
 
-  // Function to execute on update cycles
-  void SetBehavior(std::function<void(Particle &)> newBehavior);
-
   Vector2 position;
   Vector2 velocity;
   Color color;
@@ -36,9 +33,6 @@ private:
 
   // Reference to simulated position attachment to
   std::weak_ptr<GameObject> referenceObject;
-
-  // Physics update individual behavior
-  std::function<void(Particle &)> behavior;
 
   // This particles unique identifier
   int id;

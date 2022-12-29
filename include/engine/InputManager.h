@@ -29,7 +29,10 @@ public:
   // Controller button event, with button & Controller instance id
   EventII<SDL_GameControllerButton, int> OnControllerButtonPress, OnControllerButtonRelease;
 
-  void Update();
+  // Poll SDL events
+  // Returns how many seconds the SDL_PollEvent function took to execute, in total
+  // Reason: SDL_PollEvent may suspend the execution if user drags or resizes screen
+  float Update();
 
   bool KeyPress(int key) { return keyState[key] == true && keyUpdate[key] == updateCounter; }
   bool KeyRelease(int key) { return keyState[key] == false && keyUpdate[key] == updateCounter; }

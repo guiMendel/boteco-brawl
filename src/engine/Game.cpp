@@ -140,13 +140,17 @@ Game::~Game()
   ExitSDL(window.release(), renderer.release());
 }
 
-void Game::CalculateDeltaTime(int &start, float &deltaTime)
+void Game::CalculateDeltaTime(int &start, float &deltaTime, float discount)
 {
   // Get this frame's start time
   int newStart = SDL_GetTicks();
 
   // Calculate & convert delta time from ms to s
   deltaTime = (float)(newStart - start) / 1000.0f;
+
+  // Apply discount
+  Assert(discount < deltaTime, "Delta time discount was higher than the deltaTime itself");
+  deltaTime -= discount;
 
   // Update frame start variable
   start = newStart;
@@ -276,11 +280,11 @@ void Game::Frame()
   for (auto newObject : objectsToAdd)
     state.RegisterObject(newObject);
 
-  // Calculate frame's delta time
-  CalculateDeltaTime(frameStart, deltaTime);
-
   // Get input
-  inputManager.Update();
+  auto pollDelay = inputManager.Update();
+
+  // Calculate frame's delta time
+  CalculateDeltaTime(frameStart, deltaTime, pollDelay);
 
   // Update the state's timer
   state.timer.Update(deltaTime);

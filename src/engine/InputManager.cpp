@@ -8,6 +8,13 @@ using namespace std;
 
 const float InputManager::joystickDeadZone{0.1f};
 
+// Maximum seconds an event poll can take before discounting it's duration from deltaTime
+const float maximumPollDuration{0.01f};
+
+// Wraps SDL_PollEvent to also measure how long it took to execute
+// Sums execution duration to the timer variable
+bool PollEventsTimed(SDL_Event *event, float &timer);
+
 // Flattens joystick axis value in range -1 to 1, and sets it to 0 if below deadzone
 float InputManager::TreatAxisValue(int value)
 {
@@ -15,7 +22,7 @@ float InputManager::TreatAxisValue(int value)
   return abs(flattenValue) < joystickDeadZone ? 0 : flattenValue;
 }
 
-void InputManager::Update()
+float InputManager::Update()
 {
   SDL_Event event;
 
@@ -37,8 +44,11 @@ void InputManager::Update()
   // Game controller mapping for analogs in this frame
   static unordered_map<int, Vector2> currentLeftControllerAnalogs, currentRightControllerAnalogs;
 
+  // How long SDL_PollEvent will take to execute, in total
+  float eventPollingDelay{0};
+
   // If there are any input events in the SDL stack pile, this function returns 1 and sets the argument to next event
-  while (SDL_PollEvent(&event))
+  while (PollEventsTimed(&event, eventPollingDelay))
   {
     // Quit on quit event
     if (event.type == SDL_QUIT)
@@ -164,6 +174,24 @@ void InputManager::Update()
   // Store for next frame
   lastLeftControllerAnalogs = currentLeftControllerAnalogs;
   lastRightControllerAnalogs = currentRightControllerAnalogs;
+
+  return eventPollingDelay;
+}
+
+bool PollEventsTimed(SDL_Event *event, float &timer)
+{
+  auto start = SDL_GetTicks();
+  bool eventFound = SDL_PollEvent(event);
+  auto end = SDL_GetTicks();
+
+  // Gets duration as seconds
+  float length = float(end - start) / 1000.0f;
+
+  // Add duration to timer
+  if (length > maximumPollDuration)
+    timer += length - maximumPollDuration;
+
+  return eventFound;
 }
 
 void InputManager::OpenController(int index)

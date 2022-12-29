@@ -19,9 +19,15 @@ ControllerDevice::ControllerDevice(int controllerIndex)
   cout << "Controller \"" << SDL_GameControllerName(controllerStruct.get()) << "\" added with instance ID " << GetId() << endl;
 
   // Associate to players searching for a controller, when available
-  Game::GetInstance().GetState()->FindObjectOfType<PlayerManager>()->OnPlayerSearchForController.AddListener(
-      "add-controller", [this](shared_ptr<Player> player)
-      { MaybeAssociateToPlayer(player); });
+  auto playerManager = Game::GetInstance().GetState()->FindObjectOfType<PlayerManager>();
+
+  if (playerManager == nullptr)
+    cout << "WARNING: No PlayerManager instance was found, controller " << instanceId << " will never be used." << endl;
+
+  else
+    playerManager->OnPlayerSearchForController.AddListener(
+        "add-controller", [this](shared_ptr<Player> player)
+        { MaybeAssociateToPlayer(player); });
 }
 
 ControllerDevice::~ControllerDevice() { LosePlayer(); }
@@ -60,7 +66,12 @@ void ControllerDevice::MaybeAssociateToPlayer(std::shared_ptr<Player> player)
 
 void ControllerDevice::SearchPlayersForAssociation()
 {
-  for (auto player : Game::GetInstance().GetState()->FindObjectOfType<PlayerManager>()->GetPlayers())
+  auto playerManager = Game::GetInstance().GetState()->FindObjectOfType<PlayerManager>();
+
+  if (playerManager == nullptr)
+    return;
+
+  for (auto player : playerManager->GetPlayers())
   {
     // When a player is associated, stop
     if (weakAssociationPlayer.expired() == false)
