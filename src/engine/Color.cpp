@@ -17,6 +17,12 @@ Color::Color() : Color(White()) {}
 // From SDL
 Color::Color(const SDL_Color &other) : Color(other.r, other.g, other.b, other.a) {}
 
+// Tells whether this color has valid values for all it's fields
+bool Color::IsValid() const
+{
+  return red >= 0 && red < 255 && green >= 0 && green < 255 && blue >= 0 && blue < 255 && alpha >= 0 && alpha < 255;
+}
+
 Color &Color::operator=(const Color &other)
 {
   red = other.red;
@@ -26,42 +32,42 @@ Color &Color::operator=(const Color &other)
   return *this;
 }
 
-Color Color::operator+(const Color &other)
+Color Color::operator+(const Color &other) const
 {
   return Color(
-      CAP(red + other.red),
-      CAP(green + other.green),
-      CAP(blue + other.blue),
-      CAP(alpha + other.alpha));
+      red + other.red,
+      green + other.green,
+      blue + other.blue,
+      alpha + other.alpha);
 }
 
-Color Color::operator-(const Color &other)
+Color Color::operator-(const Color &other) const
 {
   return Color(
-      CAP(red - other.red),
-      CAP(green - other.green),
-      CAP(blue - other.blue),
-      CAP(alpha - other.alpha));
+      red - other.red,
+      green - other.green,
+      blue - other.blue,
+      alpha - other.alpha);
 }
 
-Color Color::operator*(float value)
+Color Color::operator*(float value) const
 {
   return Color(
-      CAP(int(red * value)),
-      CAP(int(green * value)),
-      CAP(int(blue * value)),
-      CAP(int(alpha * value)));
+      int(red * value),
+      int(green * value),
+      int(blue * value),
+      int(alpha * value));
 }
 
-Color Color::operator/(float value)
+Color Color::operator/(float value) const
 {
   Helper::Assert(value != 0, "Division by zero");
 
   return Color(
-      CAP(int(red / value)),
-      CAP(int(green / value)),
-      CAP(int(blue / value)),
-      CAP(int(alpha / value)));
+      int(red / value),
+      int(green / value),
+      int(blue / value),
+      int(alpha / value));
 }
 
 // === SDL INTEGRATION
@@ -74,11 +80,7 @@ Color::operator std::string() const
 
 Color operator*(float value, const Color &color)
 {
-  return Color(
-      CAP(int(color.red * value)),
-      CAP(int(color.green * value)),
-      CAP(int(color.blue * value)),
-      CAP(int(color.alpha * value)));
+  return color * value;
 }
 
 ostream &operator<<(ostream &stream, const Color &color)

@@ -5,6 +5,7 @@
 #include "ObjectRecipes.h"
 
 using namespace std;
+using namespace Helper;
 
 auto AnimationRecipes::Run(Animator &animator) -> shared_ptr<Animation>
 {
@@ -28,17 +29,23 @@ auto AnimationRecipes::Jump(Animator &animator) -> shared_ptr<Animation>
 
   // Particles to emit on jump
   ParticleEmissionParameters particleEmission;
-  particleEmission.angle = {-2.1, -2.8};
+  particleEmission.angle = {DegreesToRadians(-135), DegreesToRadians(-100)};
   particleEmission.color = {Color::Black(), Color::Gray()};
-  particleEmission.frequency = {0.0001, 0.005};
+  particleEmission.frequency = {0.0005, 0.02};
   particleEmission.lifetime = {0.2, 1.0};
-  particleEmission.speed = {0.8, 3.5};
+  particleEmission.speed = {3, 8};
+  particleEmission.gravityModifier = Vector2::One();
 
   // Add jump impulse to jump frame
   animation->frames[1].AddCallback([particleEmission](GameObject &object)
                                    {
                                      // Jump
-                                     object.RequireComponent<Movement>()->Jump();
+                                     auto movement = object.RequireComponent<Movement>();
+                                     movement->Jump();
+
+                                     //  Don't emit if not grounded
+                                     if (movement->IsGrounded() == false)
+                                       return;
 
                                      // Get emission position
                                      auto colliderBox = object.RequireComponent<Collider>()->GetBox();
@@ -54,8 +61,7 @@ auto AnimationRecipes::Jump(Animator &animator) -> shared_ptr<Animation>
                                        emission.angle.second = M_PI - emission.angle.second;
                                      }
 
-                                     // TODO: fix memory leak caused by this (increasing memory usage per call)
-                                     ParticleFX::EffectAt(object.GetPosition() + offset, 0.1, 0.2, emission, 3.0);
+                                     ParticleFX::EffectAt(object.GetPosition() + offset, 0.1, 0.1, emission, 3.0);
                                      //
                                    });
 

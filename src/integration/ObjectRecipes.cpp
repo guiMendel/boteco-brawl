@@ -53,7 +53,6 @@ auto ObjectRecipes::Background(string imagePath) -> function<void(shared_ptr<Gam
 
 auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared_ptr<GameObject>)>
 {
-  // TODO: fix leaked references to this object's components on destructor call
   auto weakPlayer{weak_ptr(player)};
   return [weakPlayer](shared_ptr<GameObject> character)
   {

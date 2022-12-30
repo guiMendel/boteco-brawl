@@ -3,7 +3,6 @@
 
 using namespace std;
 
-// TODO: moving the game screen for some reason makes memory usage increase very fast
 int main([[maybe_unused]] int argc, [[maybe_unused]] char **argv)
 {
   // Get game instance & run

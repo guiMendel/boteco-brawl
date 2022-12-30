@@ -6,13 +6,18 @@
 
 using namespace std;
 
-Particle::Particle(ParticleSystem &particleSystem, int id, Vector2 position, float lifetime, Vector2 velocity, Color color)
-    : position(position), velocity(velocity), color(color), lifetime(lifetime), particleSystem(particleSystem), id(id)
+Particle::Particle(ParticleSystem &particleSystem, int id, Vector2 position, float lifetime, Vector2 velocity, Vector2 gravityModifier, Color color)
+    : position(position), velocity(velocity), gravityModifier(gravityModifier), color(color), lifetime(lifetime), particleSystem(particleSystem), id(id)
 {
 }
 
 void Particle::PhysicsUpdate(float deltaTime)
 {
+  const static auto &physicsSystem = particleSystem.gameState.physicsSystem;
+
+  // Update velocity
+  velocity += physicsSystem.gravity * gravityModifier * deltaTime;
+
   // Update position
   position += deltaTime * velocity;
 

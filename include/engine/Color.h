@@ -5,8 +5,6 @@
 #include "Helper.h"
 #include <iostream>
 
-#define CAP(colorChannel) std::max(std::min(colorChannel, 255), 0)
-
 struct Color
 {
   // With each channel
@@ -34,17 +32,22 @@ struct Color
   static Color Blue() { return Color(0, 255, 255); }
   static Color Yellow() { return Color(255, 240, 18); }
 
+  // === GENERAL METHODS
+
+  // Tells whether this color has valid values for all it's fields
+  bool IsValid() const;
+
   // === OPERATORS
 
   Color &operator=(const Color &other);
 
-  Color operator+(const Color &other);
+  Color operator+(const Color &other) const;
 
-  Color operator-(const Color &other);
+  Color operator-(const Color &other) const;
 
-  Color operator*(float value);
+  Color operator*(float value) const;
 
-  Color operator/(float value);
+  Color operator/(float value) const;
 
   // === SDL INTEGRATION
 

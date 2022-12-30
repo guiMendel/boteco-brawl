@@ -14,7 +14,9 @@ class Particle
   friend class ParticleSystem;
 
 public:
-  Particle(ParticleSystem &particleSystem, int id, Vector2 position, float lifetime, Vector2 velocity, Color color);
+  Particle(
+      ParticleSystem &particleSystem, int id, Vector2 position,
+      float lifetime, Vector2 velocity, Vector2 gravityModifier, Color color);
 
   void PhysicsUpdate(float deltaTime);
 
@@ -28,6 +30,7 @@ public:
 
   Vector2 position;
   Vector2 velocity;
+  Vector2 gravityModifier;
   Color color;
   float lifetime;
 

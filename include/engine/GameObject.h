@@ -41,7 +41,6 @@ public:
   bool DestroyRequested() const { return destroyRequested; }
 
   // Destroys the object
-  // TODO: it seems this is leaking memory. When multiple objects are destroyed, memory usage increases very fast
   void RequestDestroy() { destroyRequested = true; }
 
   // Adds a new component

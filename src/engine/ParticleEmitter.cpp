@@ -18,6 +18,7 @@ ParticleEmitter::ParticleEmitter(GameObject &associatedObject, RenderLayer rende
   emission.color = {Color::White(), Color::White()};
   emission.speed = {0.5f, 2};
   emission.lifetime = {1, 2};
+  emission.gravityModifier = Vector2::Zero();
 }
 
 void ParticleEmitter::SetOffset(Vector2 offset) { origin.center = offset; }
@@ -93,7 +94,8 @@ void ParticleEmitter::Emit()
   Vector2 position = gameObject.GetPosition() + origin.center + Vector2::Angled(positionAngle, positionRadius);
 
   // Create particle
-  auto particle = GetSystem().CreateParticle(position, lifetime, Vector2::Angled(angle, speed), color);
+  auto particle = GetSystem().CreateParticle(
+      position, lifetime, Vector2::Angled(angle, speed), color, currentParams.gravityModifier);
 
   // Attachment
   if (attachToEmitter)

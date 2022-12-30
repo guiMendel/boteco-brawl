@@ -74,6 +74,10 @@ namespace Helper
   [[maybe_unused]] static double RadiansToDegrees(double radians) { return radians * 180 / M_PI; }
   // Converts degrees to radians
   [[maybe_unused]] static double DegreesToRadians(double degrees) { return degrees / 180 * M_PI; }
+  // Converts radians to degrees
+  [[maybe_unused]] static float RadiansToDegrees(int radians) { return float(radians) * 180 / M_PI; }
+  // Converts degrees to radians
+  [[maybe_unused]] static float DegreesToRadians(int degrees) { return float(degrees) / 180 * M_PI; }
 
   // Gets a random number in the range [min, max[
   [[maybe_unused]] static int RandomRange(int min, int max) { return min + rand() % (max - min); }

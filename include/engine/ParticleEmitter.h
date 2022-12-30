@@ -31,6 +31,9 @@ struct ParticleEmissionParameters
 
   // Lifetime of emitted particles, in seconds
   range<float> lifetime;
+
+  // Modifier applied to particle's gravity
+  Vector2 gravityModifier;
 };
 
 class ParticleEmitter : public Component
