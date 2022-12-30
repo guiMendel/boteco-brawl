@@ -190,13 +190,24 @@ void PhysicsSystem::DetectCollisions(ValidatedCollidersMap::iterator collidersEn
   // Will hold any collision data
   static CollisionData collisionData;
 
+  // Body of this object
   auto body = collidersEntryIterator->second.at(0)->RequireRigidbody();
+
+  // Layer of this object
+  auto objectLayer = body->gameObject.physicsLayer;
 
   // Test, for each OTHER dynamic object in the list (excluding the ones before this one)
   auto otherCollidersEntryIterator{collidersEntryIterator};
 
   for (otherCollidersEntryIterator++; otherCollidersEntryIterator != endIterator; otherCollidersEntryIterator++)
   {
+    // Other object's layer
+    auto otherLayer = gameState.RequireObject(otherCollidersEntryIterator->first)->physicsLayer;
+
+    // Verify collision matrix
+    if (layerHandler.HaveCollision(objectLayer, otherLayer) == false)
+      continue;
+
     // Check if they are colliding
     if (CheckForCollision(collidersEntryIterator->second, otherCollidersEntryIterator->second, collisionData))
       // Resolve collision (apply impulses)
@@ -208,6 +219,13 @@ void PhysicsSystem::DetectCollisions(ValidatedCollidersMap::iterator collidersEn
   {
     // cout << "Checking for object " << body->gameObject.GetName() << " with " << collidersEntryIterator->second.size() << " colliders against " << staticEntry.second.at(0)->gameObject.GetName() << " with " << staticEntry.second.size() << " colliders" << endl;
     // Check if they are colliding
+    // Other object's layer
+    auto otherLayer = gameState.RequireObject(staticEntry.first)->physicsLayer;
+
+    // Verify collision matrix
+    if (layerHandler.HaveCollision(objectLayer, otherLayer) == false)
+      continue;
+
     if (CheckForCollision(collidersEntryIterator->second, staticEntry.second, collisionData))
       // Resolve collision (apply impulses)
       ResolveCollision(collisionData);
@@ -218,6 +236,9 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
 {
   // Get object body
   auto objectBody = collidersEntryIterator->second.at(0)->RequireRigidbody();
+
+  // Layer of this object
+  auto objectLayer = objectBody->gameObject.physicsLayer;
 
   // cout << "Using continuous detection for " << objectBody->gameObject.GetName() << endl;
 
@@ -238,6 +259,12 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
 
   for (otherCollidersEntryIterator++; otherCollidersEntryIterator != endIterator; otherCollidersEntryIterator++)
   {
+    auto otherLayer = gameState.RequireObject(otherCollidersEntryIterator->first)->physicsLayer;
+
+    // Verify collision matrix
+    if (layerHandler.HaveCollision(objectLayer, otherLayer) == false)
+      continue;
+
     // Find out if there is intersection between this other object and our trajectory
     auto [intersectedColliders, intersectionDistance, intersectionDependencyCallback] =
         FindTrajectoryIntersection(otherCollidersEntryIterator->second, *objectBody);
@@ -259,6 +286,12 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
   // Now test for static bodies
   for (auto staticEntry : staticColliders)
   {
+    auto otherLayer = gameState.RequireObject(staticEntry.first)->physicsLayer;
+
+    // Verify collision matrix
+    if (layerHandler.HaveCollision(objectLayer, otherLayer) == false)
+      continue;
+
     auto &otherObject = staticEntry.second.at(0)->gameObject;
 
     // Ignore entries that are the same object or some parent
@@ -402,18 +435,13 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
   // Get rigidbody if it exists
   auto rigidbody = collider->rigidbodyWeak.lock();
 
-  bool isDynamic{false};
-
   // Check if it's dynamic
-  if (rigidbody != nullptr)
-    isDynamic = rigidbody->GetType() == RigidbodyType::Dynamic;
+  bool isDynamic = rigidbody != nullptr && rigidbody->GetType() == RigidbodyType::Dynamic;
 
   if (isDynamic)
     dynamicColliderStructure[objectId].emplace_back(collider);
   else
     staticColliderStructure[objectId].emplace_back(collider);
-
-  // (isDynamic ? dynamicColliderStructure : staticColliderStructure)[objectId].emplace_back(collider);
 
   if (rigidbody != nullptr)
   {

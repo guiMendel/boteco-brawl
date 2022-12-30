@@ -22,6 +22,9 @@ void MainState::InitializeObjects()
   // Add player manager
   auto playerManager = CreateObject("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true))->RequireComponent<PlayerManager>();
 
+  // Add player 2
+  auto player2 = playerManager->AddNewPlayer();
+
   // Add particle fx
   CreateObject("ParticleFX", ObjectRecipes::SingleComponent<ParticleFX>());
 
@@ -29,14 +32,14 @@ void MainState::InitializeObjects()
   CreateObject("Background", ObjectRecipes::Background("./assets/image/boteco.jpg"));
 
   // Add player
-  auto player1 = CreateObject("Character", ObjectRecipes::Character(playerManager->GetMainPlayer()), Vector2(-4, -10))->GetComponent<Rigidbody>();
+  auto character1 = CreateObject("Character", ObjectRecipes::Character(playerManager->GetMainPlayer()), Vector2(-3.5, -10))->GetComponent<Rigidbody>();
 
-  // // auto player2 = CreateObject("Player2", ObjectRecipes::Character(), Vector2(4, -2))->GetComponent<Rigidbody>();
+  auto character2 = CreateObject("Character2", ObjectRecipes::Character(player2), Vector2(3.5, -10))->GetComponent<Rigidbody>();
 
   CreateObject("Ground", ObjectRecipes::Platform({20, 2}), Vector2(0, 4));
 
-  CreateObject("WallLeft", ObjectRecipes::Platform({1, 5}), Vector2(-5, 0));
-  CreateObject("WallRight", ObjectRecipes::Platform({1, 5}), Vector2(5, 0));
+  CreateObject("WallLeft", ObjectRecipes::Platform({1, 5}), Vector2(-7, 0));
+  CreateObject("WallRight", ObjectRecipes::Platform({1, 5}), Vector2(7, 0));
 
   // auto thing = CreateObject("Thing", ObjectRecipes::Platform({1, 1}, false), Vector2(0, 0));
 
@@ -44,8 +47,8 @@ void MainState::InitializeObjects()
   // thingBody->continuousCollisions = true;
   // thingBody->velocity += Vector2({-1, 0});
 
-  // player1->velocity = Vector2(2, 0);
-  // player2->velocity = Vector2(-2, 1);
+  // character1->velocity = Vector2(2, 0);
+  // character2->velocity = Vector2(-2, 1);
 
   // Play music
   // music.Play("./assets/music/main.mp3");

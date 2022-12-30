@@ -101,12 +101,11 @@ void Movement::Run(float deltaTime)
   // Accelerate
   rigidbody.velocity += accelerationVector;
 
-  // Velocity to use as direction reference
-  float referenceSpeed = isGrounded ? rigidbody.velocity.x : targetSpeed;
-
-  // Set object direction according to velocity
-  if (referenceSpeed != 0)
-    gameObject.localScale = Vector2(GetSign(referenceSpeed), 1);
+  // Set object orientation to target speed only if:
+  // A. Is airborne
+  // B. Is moving in the target direction
+  if (IsGrounded() == false || GetSign(targetSpeed) == GetSign(rigidbody.velocity.x))
+    gameObject.localScale = Vector2(GetSign(targetSpeed), 1);
 }
 
 void Movement::SetCurrentGravityModifier(float value)

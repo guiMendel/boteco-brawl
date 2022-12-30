@@ -250,6 +250,15 @@ shared_ptr<GameObject> GameState::GetObject(int id)
   }
 }
 
+shared_ptr<GameObject> GameState::RequireObject(int id)
+{
+  auto object = GetObject(id);
+
+  Assert(object != nullptr, "ERROR: Required an object with id " + to_string(id) + ", but couldn't find one");
+
+  return object;
+}
+
 void GameState::RegisterCamera(shared_ptr<Camera> camera)
 {
   auto cameras = GetCameras();

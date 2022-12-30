@@ -10,6 +10,7 @@
 #include "Component.h"
 #include "Vector2.h"
 #include "Helper.h"
+#include "PhysicsLayer.h"
 #include "Tag.h"
 #include "Timer.h"
 #include "PhysicsSystem.h"
@@ -183,6 +184,9 @@ public:
 
   // This object's tag
   Tag tag{Tag::None};
+
+  // This object's physics layer
+  PhysicsLayer physicsLayer{PhysicsLayer::Default};
 
   // Child objects
   std::unordered_map<int, std::weak_ptr<GameObject>> children;

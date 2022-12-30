@@ -7,6 +7,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include "SatCollision.h"
+#include "PhysicsLayerHandler.h"
 
 class GameState;
 class Rigidbody;
@@ -123,6 +124,9 @@ private:
 
   // Structure that maps each static body object id to the list of it's colliders
   std::unordered_map<int, WeakColliders> staticColliderStructure;
+
+  // This system's collision layer handler
+  PhysicsLayerHandler layerHandler;
 
   GameState &gameState;
 };

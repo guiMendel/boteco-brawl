@@ -79,6 +79,9 @@ public:
   std::shared_ptr<GameObject> GetPointer(const GameObject *gameObject);
 
   std::shared_ptr<GameObject> GetObject(int id);
+  
+  // Throws if this object doesn't exist
+  std::shared_ptr<GameObject> RequireObject(int id);
 
   std::shared_ptr<GameState> GetShared();
 

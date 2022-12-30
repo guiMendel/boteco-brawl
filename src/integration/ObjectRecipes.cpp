@@ -56,6 +56,8 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
   auto weakPlayer{weak_ptr(player)};
   return [weakPlayer](shared_ptr<GameObject> character)
   {
+    character->physicsLayer = PhysicsLayer::Character;
+
     IF_NOT_LOCK(weakPlayer, player) { return; }
 
     // Get sprite
@@ -101,8 +103,14 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     // Give it movement
     character->AddComponent<::Character>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
-    character->AddComponent<ControllerInput>(player);
-    character->AddComponent<KeyboardInput>();
+
+    // Give it input
+    if (player->IsMain())
+      character->AddComponent<KeyboardInput>();
+    else
+      character->AddComponent<ControllerInput>(player);
+
+    // Give it control
     character->AddComponent<CharacterController>();
   };
 }
@@ -111,6 +119,7 @@ auto ObjectRecipes::Platform(Vector2 size, bool isStatic) -> function<void(share
 {
   return [size, isStatic](shared_ptr<GameObject> platform)
   {
+    platform->physicsLayer = PhysicsLayer::Scenario;
     platform->AddComponent<Rigidbody>(isStatic ? RigidbodyType::Static : RigidbodyType::Dynamic);
     platform->AddComponent<Collider>(Rectangle(0, 0, size.x, size.y), false, ColliderDensity::Ground);
   };
@@ -121,6 +130,7 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> p
   auto weakParent{weak_ptr(parent)};
   return [initialVelocity, weakParent](shared_ptr<GameObject> projectile)
   {
+    projectile->physicsLayer = PhysicsLayer::Hazard;
     IF_NOT_LOCK(weakParent, parent) { return; }
 
     auto body = projectile->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
