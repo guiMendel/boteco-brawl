@@ -56,7 +56,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
   auto weakPlayer{weak_ptr(player)};
   return [weakPlayer](shared_ptr<GameObject> character)
   {
-    character->physicsLayer = PhysicsLayer::Character;
+    character->SetPhysicsLayer(PhysicsLayer::Character);
 
     IF_NOT_LOCK(weakPlayer, player) { return; }
 
@@ -119,7 +119,7 @@ auto ObjectRecipes::Platform(Vector2 size, bool isStatic) -> function<void(share
 {
   return [size, isStatic](shared_ptr<GameObject> platform)
   {
-    platform->physicsLayer = PhysicsLayer::Scenario;
+    platform->SetPhysicsLayer(PhysicsLayer::Scenario);
     platform->AddComponent<Rigidbody>(isStatic ? RigidbodyType::Static : RigidbodyType::Dynamic);
     platform->AddComponent<Collider>(Rectangle(0, 0, size.x, size.y), false, ColliderDensity::Ground);
   };
@@ -130,7 +130,7 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> p
   auto weakParent{weak_ptr(parent)};
   return [initialVelocity, weakParent](shared_ptr<GameObject> projectile)
   {
-    projectile->physicsLayer = PhysicsLayer::Hazard;
+    projectile->SetPhysicsLayer(PhysicsLayer::Hazard);
     IF_NOT_LOCK(weakParent, parent) { return; }
 
     auto body = projectile->AddComponent<Rigidbody>(RigidbodyType::Dynamic);

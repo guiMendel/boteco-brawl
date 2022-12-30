@@ -1,12 +1,15 @@
 #include "PhysicsLayerHandler.h"
+#include "GameObject.h"
 #include <algorithm>
 #include <string>
 #include <iostream>
 
 using namespace std;
 
+// Default label for unnamed layer
+static const string defaultLayerLabel = "Layer";
+
 int GetDigitCount(int number);
-void PrintMatrix(bool matrix[PHYSICS_LAYER_COUNT][PHYSICS_LAYER_COUNT]);
 
 PhysicsLayerHandler::PhysicsLayerHandler()
 {
@@ -15,8 +18,16 @@ PhysicsLayerHandler::PhysicsLayerHandler()
 
   InitializeCollisionMatrix();
 
+  // Populate translation table
+  ADD_LAYER_TRANSLATION
+
+  // Add missing entries
+  for (int layer = 0; layer < PHYSICS_LAYER_COUNT; layer++)
+    if (translation.count(PhysicsLayer(layer)) == 0)
+      translation[PhysicsLayer(layer)] = defaultLayerLabel + to_string(layer);
+
 #ifdef PRINT_COLLISION_MATRIX
-  PrintMatrix(collisionMatrix);
+  PrintMatrix();
 #endif
 }
 
@@ -48,68 +59,79 @@ void PhysicsLayerHandler::EnableAll(PhysicsLayer layer)
     Enable(layer, PhysicsLayer(other));
 }
 
-// Checks whether the two given layers collide
+bool PhysicsLayerHandler::HaveCollision(GameObject &object1, GameObject &object2) const
+{
+  return HaveCollision(object1.GetPhysicsLayer(), object2.GetPhysicsLayer());
+}
+
 bool PhysicsLayerHandler::HaveCollision(PhysicsLayer layer1, PhysicsLayer layer2) const
 {
   return collisionMatrix[int(layer1)][int(layer2)];
 }
 
-string Fill(unsigned count, string character) { return count > 0 ? Fill(count - 1, character) + character : ""; }
-string Pad(unsigned count) { return Fill(count, " "); }
+string Fill(size_t count, string character) { return count > 0 ? Fill(count - 1, character) + character : ""; }
+string Pad(size_t count) { return Fill(count, " "); }
 
-void PrintMatrix(bool matrix[PHYSICS_LAYER_COUNT][PHYSICS_LAYER_COUNT])
+// Returns the given string centered in the the given space length
+string CenterFill(string text, size_t space, string filling = " ")
 {
-  // Max digits in layer index
-  int indexMaxDigits = GetDigitCount(PHYSICS_LAYER_COUNT - 1);
+  size_t leftSpace = max((space - text.length()) / 2, size_t(0));
+  bool evenAlignment = (space - text.length()) % 2 == 0;
 
-  const static string header = "COLLISION MATRIX";
-  const static int padding = 3;
-  const static int gap = 2;
+  return Fill(leftSpace, filling) + text + Fill(evenAlignment ? leftSpace : leftSpace + 1, filling);
+}
+string RightFill(string text, size_t space, string filling = " ")
+{
+  size_t leftSpace = max(space - text.length(), size_t(0));
+
+  return Fill(leftSpace, filling) + text;
+}
+
+void PhysicsLayerHandler::PrintMatrix()
+{
+  const static string header = " COLLISION MATRIX ";
+  const static int padding = 1;
+  const static int gap = 1;
   const static string layerLabel = "Layer";
 
+  // Get how many characters each cell has
+  size_t cellLength = 0;
+  for (auto [layer, label] : translation)
+    cellLength = max(cellLength, label.length());
+
+  // Returns a filled cell
+  auto LabelCell = [cellLength, this](int layer, bool right = false)
+  { return right ? RightFill(translation[PhysicsLayer(layer)], cellLength)
+                 : CenterFill(translation[PhysicsLayer(layer)], cellLength); };
+
+  auto ValueCell = [cellLength, this](int layer1, int layer2)
+  { return CenterFill(to_string(collisionMatrix[layer1][layer2]), cellLength); };
+
   // === HEADER
-  string line0 = Pad(layerLabel.length() + indexMaxDigits + padding);
+  string line0 = Pad(cellLength + padding);
 
   // For each layer
   for (int layer = 0; layer < PHYSICS_LAYER_COUNT; layer++)
-    line0 += layerLabel + to_string(layer) + Pad(indexMaxDigits - GetDigitCount(layer)) + Pad(gap);
+    line0 += LabelCell(layer) + (layer == PHYSICS_LAYER_COUNT - 1 ? "" : Pad(gap));
 
-  int headerFilling = (line0.length() - header.length() - 2) / 2;
-
-  if (headerFilling > 0)
-    cout << Fill(headerFilling, "=") << " ";
-
-  cout << header;
-
-  if (headerFilling > 0)
-    cout << " " << Fill(headerFilling, "=");
-
-  cout << endl
+  cout << CenterFill(header, line0.length(), "=") << endl
        << line0 << endl;
 
   // === ROWS
-  // Get how many characters each cell has
-  int cellLength = layerLabel.length() + indexMaxDigits;
-
-  // How much internal cell padding on left
-  string leftAlign = Pad(cellLength / 2);
-
-  // How much internal cell padding on right
-  string rightAlign = Pad(cellLength % 2 == 0 ? leftAlign.length() - 1 : leftAlign.length());
 
   // For each layer
   for (int layer = 0; layer < PHYSICS_LAYER_COUNT; layer++)
   {
     // Print layer label
-    cout << layerLabel << layer << Pad(indexMaxDigits - GetDigitCount(layer)) << Pad(padding);
+    cout << LabelCell(layer, true) << Pad(padding);
 
     // For each other layer
     for (int otherLayer = 0; otherLayer < PHYSICS_LAYER_COUNT; otherLayer++)
-      cout << leftAlign << matrix[layer][otherLayer] << rightAlign << Pad(gap);
+      cout << ValueCell(layer, otherLayer) << (otherLayer == PHYSICS_LAYER_COUNT - 1 ? "" : Pad(gap));
     cout << endl;
   }
 
-  cout << Fill(line0.length() % 2 == 0 ? line0.length() : line0.length() - 1, "=") << endl;
+  cout << Fill(line0.length(), "=") << endl;
 }
 
 int GetDigitCount(int number)

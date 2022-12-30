@@ -1,9 +1,13 @@
 #ifndef __PHYSICS_LAYER_HANDLER__
 #define __PHYSICS_LAYER_HANDLER__
 
-#define PHYSICS_LAYER_COUNT int(PhysicsLayer::Default) + 1
+#define PHYSICS_LAYER_COUNT int(PhysicsLayer::None)
 
 #include "PhysicsLayer.h"
+#include <unordered_map>
+#include <string>
+
+class GameObject;
 
 class PhysicsLayerHandler
 {
@@ -30,10 +34,17 @@ public:
 
   // Checks whether the two given layers collide
   bool HaveCollision(PhysicsLayer, PhysicsLayer) const;
+  bool HaveCollision(GameObject &, GameObject &) const;
 
 private:
+  // Prints the collision matrix table
+  void PrintMatrix();
+
   // Collision detection matrix
   bool collisionMatrix[PHYSICS_LAYER_COUNT][PHYSICS_LAYER_COUNT];
+
+  // Translation table from enum int to string
+  std::unordered_map<PhysicsLayer, std::string> translation;
 };
 
 #endif

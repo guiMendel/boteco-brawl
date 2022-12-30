@@ -156,6 +156,10 @@ public:
   double GetRotation();
   void SetRotation(const double newRotation);
 
+  // Sets a new value for the physics layer
+  PhysicsLayer GetPhysicsLayer();
+  void SetPhysicsLayer(PhysicsLayer);
+
   void SetEnabled(bool enabled) { this->enabled = enabled; }
   bool IsEnabled() const { return enabled; }
 
@@ -184,9 +188,6 @@ public:
 
   // This object's tag
   Tag tag{Tag::None};
-
-  // This object's physics layer
-  PhysicsLayer physicsLayer{PhysicsLayer::Default};
 
   // Child objects
   std::unordered_map<int, std::weak_ptr<GameObject>> children;
@@ -240,6 +241,12 @@ private:
 
   // Vector with all components of this object
   std::vector<std::shared_ptr<Component>> components;
+
+  // This object's physics layer
+  PhysicsLayer physicsLayer{PhysicsLayer::None};
+
+  // Whether current physics layer was the inherited layer
+  bool inheritedPhysicsLayer{true};
 
   // State reference id
   int gameStateId;

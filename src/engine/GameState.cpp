@@ -20,6 +20,8 @@ GameState::GameState()
       inputManager(Game::GetInstance().GetInputManager()),
       rootObject(new GameObject("Root", id, 0))
 {
+  // Set root object layer to default
+  rootObject->physicsLayer = PhysicsLayer::Default;
 }
 
 GameState::~GameState()

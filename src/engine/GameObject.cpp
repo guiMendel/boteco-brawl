@@ -7,7 +7,8 @@
 using namespace std;
 
 // Private constructor
-GameObject::GameObject(string name, int gameStateId, int id) : id(id >= 0 ? id : Game::GetInstance().SupplyId()), gameStateId(gameStateId), name(name)
+GameObject::GameObject(string name, int gameStateId, int id)
+    : id(id >= 0 ? id : Game::GetInstance().SupplyId()), gameStateId(gameStateId), name(name)
 {
 }
 
@@ -32,6 +33,9 @@ GameObject::GameObject(string name, Vector2 coordinates, double rotation, shared
     // Give parent a reference to self
     parent->children[id] = weak_ptr(shared);
   }
+
+  // Inherit parent's layer (don't use SetPhysicsLayer here, as we don't want to set inheritedPhysicsLayer to false)
+  physicsLayer = parent->physicsLayer;
 
   SetPosition(coordinates);
   SetRotation(rotation);
@@ -208,6 +212,10 @@ void GameObject::SetParent(shared_ptr<GameObject> newParent)
 
   // Set new parent
   weakParent = newParent;
+
+  // Inherit this new parent's layer if necessary
+  if (inheritedPhysicsLayer)
+    physicsLayer = newParent->physicsLayer;
 }
 
 // Where this object exists in game space, in absolute coordinates
@@ -443,3 +451,13 @@ bool GameObject::IsDescendantOf(GameObject &other)
 
   return GetParent()->IsDescendantOf(other);
 }
+
+void GameObject::SetPhysicsLayer(PhysicsLayer newLayer)
+{
+  Assert(newLayer != PhysicsLayer::None, "Setting layer to None is forbidden; use Default for irrelevant objects");
+
+  physicsLayer = newLayer;
+  inheritedPhysicsLayer = false;
+}
+
+PhysicsLayer GameObject::GetPhysicsLayer() { return physicsLayer; }
