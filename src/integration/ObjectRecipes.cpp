@@ -1,5 +1,6 @@
 #include "ObjectRecipes.h"
 #include "PlatformEffector.h"
+#include "PlatformDrop.h"
 #include "CameraFollower.h"
 #include "Animator.h"
 #include "Sound.h"
@@ -62,6 +63,8 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     IF_NOT_LOCK(weakPlayer, player) { return; }
 
+    // === RENDERING
+
     // Get sprite
     auto spriteRenderer = character->AddComponent<SpriteRenderer>(RenderLayer::Characters);
 
@@ -80,12 +83,16 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     animator->AddAnimation(AnimationRecipes::Dash);
     animator->AddAnimation(AnimationRecipes::Special);
 
+    // === COLLISION
+
     // Give it collision
     auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0, 0);
     auto collider = character->AddComponent<Collider>(animator, false, ColliderDensity::Character);
 
     // Turn on continuous collision
     body->continuousCollisions = true;
+
+    // === PARTICLE EFFECTS
 
     // Give it a dash particle emitter
     auto dashParticleObject = character->CreateChild(DASH_PARTICLES_OBJECT);
@@ -102,6 +109,8 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
       params.frequency = {params.frequency.first + reduction,
                           params.frequency.second + reduction}; };
 
+    // === MOVEMENT CONTROL
+
     // Give it movement
     character->AddComponent<::Character>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
@@ -115,12 +124,26 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     // Give it control
     character->AddComponent<CharacterController>();
 
-    // Give it a slide box trigger collider, to allow for making 2 characters slide away from each other when overlapping
-    auto slideBox = character->CreateChild(CHARACTER_SLIDE_BOX)->AddComponent<Collider>(collider, true);
+    // === CHARACTER REPELLING
+
+    // Give it a repel box trigger collider, to allow for making 2 characters slide away from each other when overlapping
+    auto repelBox = character->CreateChild(CHARACTER_SLIDE_BOX_OBJECT)->AddComponent<Collider>(collider, true);
 
     // Make it a different layer so that they collide
-    slideBox->gameObject.AddComponent<CharacterSlideCollision>(body);
-    slideBox->gameObject.SetPhysicsLayer(PhysicsLayer::CharacterSlideBox);
+    repelBox->gameObject.AddComponent<CharacterSlideCollision>(body);
+    repelBox->gameObject.SetPhysicsLayer(PhysicsLayer::CharacterRepelBox);
+
+    // === PLATFORM DETECTOR FOR DROPPING
+
+    // Give it a repel box trigger collider, to allow for making 2 characters slide away from each other when overlapping
+    auto platformDropDetector = character->CreateChild(CHARACTER_PLATFORM_DROP_OBJECT);
+    platformDropDetector->AddComponent<PlatformDrop>(body);
+
+    // Rectangle for it's collider: a bit bigger than the regular collider
+    platformDropDetector->AddComponent<Collider>(collider, true, ColliderDensity::Ground, Vector2::One() * 1.2);
+
+    // Make it a different layer so that they collide only with platforms
+    platformDropDetector->SetPhysicsLayer(PhysicsLayer::CharacterPlatformDrop);
   };
 }
 
@@ -128,12 +151,16 @@ auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(s
 {
   return [size, withEffector](shared_ptr<GameObject> platform)
   {
-    platform->SetPhysicsLayer(PhysicsLayer::Scenario);
     platform->AddComponent<Rigidbody>(RigidbodyType::Static);
     platform->AddComponent<Collider>(Rectangle(0, 0, size.x, size.y), false, ColliderDensity::Ground);
-    
+
     if (withEffector)
+    {
       platform->AddComponent<PlatformEffector>();
+      platform->SetPhysicsLayer(PhysicsLayer::Platform);
+    }
+    else
+      platform->SetPhysicsLayer(PhysicsLayer::Scenario);
   };
 }
 

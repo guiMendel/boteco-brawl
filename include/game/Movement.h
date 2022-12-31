@@ -119,7 +119,7 @@ private:
   // Whether character was grounded last frame
   bool wasGrounded{false};
 
-  // Whether fall fast is active
+  // Whether fast fall is active
   bool fastFallActive{false};
 
   // Whether second jump is available

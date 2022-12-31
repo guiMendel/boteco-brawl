@@ -52,7 +52,5 @@ bool PlatformEffector::IsBodyInArc(shared_ptr<Rigidbody> body)
 
 void PlatformEffector::RegisterAllowedBody(shared_ptr<Rigidbody> body)
 {
-  cout << "Allowing " << body->gameObject.GetName() << endl;
-
   allowedIds.insert(body->id);
 }

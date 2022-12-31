@@ -89,6 +89,9 @@ string RightFill(string text, size_t space, string filling = " ")
 
 void PhysicsLayerHandler::PrintMatrix()
 {
+  // Necessary assertions
+  Assert(COLUMNS_PER_SECTION > 0, "Need to be able to print at least one column per table section");
+
   const static string header = " COLLISION MATRIX ";
   const static int padding = 1;
   const static int gap = 1;
@@ -107,31 +110,54 @@ void PhysicsLayerHandler::PrintMatrix()
   auto ValueCell = [cellLength, this](int layer1, int layer2)
   { return CenterFill(to_string(collisionMatrix[layer1][layer2]), cellLength); };
 
+  // How many characters in each line
+  int lineLength = cellLength + padding + COLUMNS_PER_SECTION * (cellLength + gap) - gap;
+
   // === HEADER
-  string line0 = Pad(cellLength + padding);
 
-  // For each layer
-  for (int layer = 0; layer < PHYSICS_LAYER_COUNT; layer++)
-    line0 += LabelCell(layer) + (layer == PHYSICS_LAYER_COUNT - 1 ? "" : Pad(gap));
+  cout << CenterFill(header, lineLength, "=") << endl;
 
-  cout << CenterFill(header, line0.length(), "=") << endl
-       << line0 << endl;
+  // === SECTIONS
 
-  // === ROWS
+  // How many sections there are
+  int sectionCount = max(PHYSICS_LAYER_COUNT / COLUMNS_PER_SECTION, 1);
 
-  // For each layer
-  for (int layer = 0; layer < PHYSICS_LAYER_COUNT; layer++)
+  // Increment by one if there are remaining ones
+  if (PHYSICS_LAYER_COUNT > COLUMNS_PER_SECTION && PHYSICS_LAYER_COUNT % COLUMNS_PER_SECTION > 0)
+    sectionCount++;
+
+  // For each section
+  for (int section = 0; section < sectionCount; section++)
   {
-    // Print layer label
-    cout << LabelCell(layer, true) << Pad(padding);
+    // Print first line empty space
+    cout << Pad(cellLength + padding);
 
-    // For each other layer
-    for (int otherLayer = 0; otherLayer < PHYSICS_LAYER_COUNT; otherLayer++)
-      cout << ValueCell(layer, otherLayer) << (otherLayer == PHYSICS_LAYER_COUNT - 1 ? "" : Pad(gap));
+    // Print this section's column labels
+    for (int layer = section * COLUMNS_PER_SECTION;
+         layer < section * COLUMNS_PER_SECTION + COLUMNS_PER_SECTION && layer < PHYSICS_LAYER_COUNT;
+         layer++)
+      cout << LabelCell(layer) + (layer == section + COLUMNS_PER_SECTION - 1 ? "" : Pad(gap));
     cout << endl;
-  }
 
-  cout << Fill(line0.length(), "=") << endl;
+    // === ROWS
+
+    // For each layer
+    for (int rowLayer = 0; rowLayer < PHYSICS_LAYER_COUNT; rowLayer++)
+    {
+      // Print row's layer label
+      cout << LabelCell(rowLayer, true) << Pad(padding);
+
+      // Print each column layer's value
+      for (int columnLayer = section * COLUMNS_PER_SECTION;
+           columnLayer < section * COLUMNS_PER_SECTION + COLUMNS_PER_SECTION && columnLayer < PHYSICS_LAYER_COUNT;
+           columnLayer++)
+        cout << ValueCell(rowLayer, columnLayer) << (columnLayer == PHYSICS_LAYER_COUNT - 1 ? "" : Pad(gap));
+      cout << endl;
+    }
+
+    // Draw bottom line
+    cout << Fill(lineLength, "=") << endl;
+  }
 }
 
 int GetDigitCount(int number)

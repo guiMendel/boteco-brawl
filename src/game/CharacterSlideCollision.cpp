@@ -10,8 +10,6 @@ CharacterSlideCollision::CharacterSlideCollision(GameObject &associatedObject, s
 
 void CharacterSlideCollision::OnTriggerCollision(GameObject &other)
 {
-  cout << gameObject.GetName() << " sliding with " << other.GetName() << endl;
-
   // Slide away from it
   SlideAwayFrom(other.RequireComponent<Rigidbody>());
 }
