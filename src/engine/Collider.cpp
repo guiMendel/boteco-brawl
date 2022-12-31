@@ -33,6 +33,9 @@ Collider::Collider(GameObject &associatedObject, shared_ptr<Animator> animator, 
     : Collider(associatedObject,
                RectangleFromAnimator(*animator, scale), isTrigger, density) {}
 
+Collider::Collider(GameObject &associatedObject, shared_ptr<Collider> other, bool isTrigger, ColliderDensity density, Vector2 scale)
+    : Collider(associatedObject, Rectangle({0, 0}, other->GetBox().width * scale.x, other->GetBox().height * scale.y), isTrigger, density) {}
+
 void Collider::SetBox(const Rectangle &newBox)
 {
   box = newBox;

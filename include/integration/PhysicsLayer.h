@@ -13,16 +13,18 @@ enum class PhysicsLayer
 {
   Default,
   Character,
+  CharacterSlideBox,
   Scenario,
   Hazard,
   None
 };
 
 // Necessary for each enum value in order to print layer names
-#define ADD_LAYER_TRANSLATION \
-  PRINTABLE(Character)    \
-  PRINTABLE(Scenario)     \
-  PRINTABLE(Hazard)       \
+#define ADD_LAYER_TRANSLATION  \
+  PRINTABLE(Character)         \
+  PRINTABLE(CharacterSlideBox) \
+  PRINTABLE(Scenario)          \
+  PRINTABLE(Hazard)            \
   PRINTABLE(Default)
 
 #endif

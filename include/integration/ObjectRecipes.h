@@ -8,6 +8,7 @@
 
 #define DASH_PARTICLES_OBJECT "DashParticles"
 #define GROUND_DETECTOR_OBJECT "GroundDetector"
+#define CHARACTER_SLIDE_BOX "SlideBox"
 
 class ObjectRecipes
 {

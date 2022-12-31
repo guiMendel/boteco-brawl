@@ -271,17 +271,17 @@ void GameObject::SetRotation(const double newRotation)
 
 shared_ptr<GameObject> GameObject::CreateChild(string name)
 {
-  return CreateChild(name, GetPosition(), GetRotation());
+  return CreateChild(name, Vector2::Zero(), 0);
 }
 
 shared_ptr<GameObject> GameObject::CreateChild(string name, Vector2 offset)
 {
-  return CreateChild(name, offset, GetRotation());
+  return CreateChild(name, offset, 0);
 }
 
 shared_ptr<GameObject> GameObject::CreateChild(string name, Vector2 offset, float offsetRotation)
 {
-  auto childId = (new GameObject(name, offset, offsetRotation, GetShared()))->id;
+  auto childId = (new GameObject(name, GetPosition() + offset, GetRotation() + offsetRotation, GetShared()))->id;
   return GetState()->GetObject(childId);
 }
 

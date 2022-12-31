@@ -15,6 +15,7 @@
 #include "ParticleEmitter.h"
 #include "PlayerManager.h"
 #include "Projectile.h"
+#include "CharacterSlideCollision.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
@@ -112,6 +113,13 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // Give it control
     character->AddComponent<CharacterController>();
+
+    // Give it a slide box trigger collider, to allow for making 2 characters slide away from each other when overlapping
+    auto slideBox = character->CreateChild(CHARACTER_SLIDE_BOX)->AddComponent<Collider>(collider, true);
+
+    // Make it a different layer so that they collide
+    slideBox->gameObject.AddComponent<CharacterSlideCollision>(body);
+    slideBox->gameObject.SetPhysicsLayer(PhysicsLayer::CharacterSlideBox);
   };
 }
 

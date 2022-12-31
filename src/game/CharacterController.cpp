@@ -39,7 +39,7 @@ void CharacterController::HandleMovementAnimation()
     if (justMoving)
     {
       // See if moving in the same direction as input
-      if (GetSign(movement.GetDirection()) == GetSign(rigidbody.velocity.x))
+      if (rigidbody.velocity.x == 0 || GetSign(movement.GetDirection()) == GetSign(rigidbody.velocity.x))
         animator.Play("run");
 
       // If not, use brake animation

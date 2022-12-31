@@ -6,6 +6,7 @@
 #include <memory>
 #include <unordered_set>
 #include <unordered_map>
+#include <functional>
 #include "SatCollision.h"
 #include "PhysicsLayerHandler.h"
 
@@ -100,7 +101,7 @@ private:
   void ResolveCollision(Collision::CollisionData collisionData);
 
   // Checks if collision is entering & announces regular collision
-  void ResolveTriggerCollision(Rigidbody &body, Collider &collider);
+  void ResolveTriggerCollision(Rigidbody &body1, Collider &collider1, Collider &collider2, bool raiseBoth = true);
 
   // Pass each object through ValidateColliders and collect the results in a map
   ValidatedCollidersMap ValidateAllColliders(std::unordered_map<int, WeakColliders> &);

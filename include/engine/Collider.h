@@ -23,6 +23,9 @@ public:
   // Use sprite animator's initial animation sprite size
   Collider(GameObject &associatedObject, std::shared_ptr<Animator> animator, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
 
+  // Use other collider's box
+  Collider(GameObject &associatedObject, std::shared_ptr<Collider> other, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
+
   virtual ~Collider() {}
 
   void RegisterToState() override;

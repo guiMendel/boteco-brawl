@@ -8,9 +8,6 @@
 using namespace std;
 using namespace Collision;
 
-// Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 14};
-
 // Min velocity before friction simply cuts it to 0
 const float maxFrictionCutSpeed{0.001f};
 
@@ -134,9 +131,9 @@ bool PhysicsSystem::CheckForCollision(
           shared_ptr<Rigidbody> body;
 
           if ((body = collider1->rigidbodyWeak.lock()) != nullptr)
-            ResolveTriggerCollision(*body, *collider2);
+            ResolveTriggerCollision(*body, *collider1, *collider2);
           else if ((body = collider2->rigidbodyWeak.lock()) != nullptr)
-            ResolveTriggerCollision(*body, *collider1);
+            ResolveTriggerCollision(*body, *collider2, *collider1);
 
           // If no body was found, no trigger
         }
@@ -476,20 +473,29 @@ void PhysicsSystem::ResolveCollision(CollisionData collisionData)
   collisionData.source.lock()->gameObject.OnCollision(collisionData);
 }
 
-void PhysicsSystem::ResolveTriggerCollision(Rigidbody &body, Collider &collider)
+void PhysicsSystem::ResolveTriggerCollision(Rigidbody &body1, Collider &collider1, Collider &collider2, bool raiseBoth)
 {
   // If this collision was already dealt with this frame, ignore it
-  if (body.IsCollidingTriggerWith(collider.gameObject))
+  if (body1.IsCollidingTriggerWith(collider2.gameObject))
     return;
 
-  body.gameObject.OnTriggerCollision(collider.gameObject);
-  collider.gameObject.OnTriggerCollision(body.gameObject);
+  // Check if other collider has a body
+  if (raiseBoth)
+  {
+    auto body2 = collider2.rigidbodyWeak.lock();
+
+    if (body2 != nullptr)
+      ResolveTriggerCollision(*body2, collider2, collider1, false);
+  }
+
+  body1.gameObject.OnTriggerCollision(collider2.gameObject);
+  collider2.gameObject.OnTriggerCollision(body1.gameObject);
 
   // Check if is entering collision
-  if (body.WasCollidingTriggerWith(collider.gameObject) == false)
+  if (body1.WasCollidingTriggerWith(collider2.gameObject) == false)
   {
-    body.gameObject.OnTriggerCollisionEnter(collider.gameObject);
-    collider.gameObject.OnTriggerCollisionEnter(body.gameObject);
+    body1.gameObject.OnTriggerCollisionEnter(collider2.gameObject);
+    collider2.gameObject.OnTriggerCollisionEnter(body1.gameObject);
   }
 }
 
@@ -591,7 +597,8 @@ auto PhysicsSystem::FindTrajectoryIntersection(ValidatedColliders colliders, Rig
     // If is a trigger, simply trigger it and continue
     if (collider->isTrigger)
     {
-      ResolveTriggerCollision(sourceBody, *collider);
+      // I'm not being paid for this
+      // ResolveTriggerCollision(sourceBody, *collider);
       continue;
     }
 

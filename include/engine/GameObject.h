@@ -106,6 +106,41 @@ public:
     return InternalGetComponentsInChildren<T>({});
   }
 
+  // Gets pointer to a component of the given type
+  // Needs to be in header file so the compiler knows how to build the necessary methods
+  template <class T>
+  auto GetComponentInChildren() -> std::shared_ptr<T>
+  {
+    // Try to get in this object
+    auto component = GetComponent<T>();
+
+    // If found, return it
+    if (component != nullptr)
+      return component;
+
+    // For each child
+    for (auto child : GetChildren())
+    {
+      auto component = child->GetComponentInChildren<T>();
+      if (component != nullptr)
+        return component;
+    }
+
+    return nullptr;
+  }
+
+  // Like GetComponentInChildren, but raises if it's not present
+  template <class T>
+  auto RequireComponentInChildren() -> std::shared_ptr<T>
+  {
+    auto component = GetComponentInChildren<T>();
+
+    if (!component)
+      throw std::runtime_error(std::string("Required component was not found in children.\nRequired component typeid name: ") + typeid(T).name());
+
+    return component;
+  }
+
   // Like GetComponent, but raises if it's not present
   template <class T>
   auto RequireComponent() -> std::shared_ptr<T>

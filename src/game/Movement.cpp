@@ -104,7 +104,7 @@ void Movement::Run(float deltaTime)
   // Set object orientation to target speed only if:
   // A. Is airborne
   // B. Is moving in the target direction
-  if (IsGrounded() == false || GetSign(targetSpeed) == GetSign(rigidbody.velocity.x))
+  if (targetSpeed != 0 && (IsGrounded() == false || GetSign(targetSpeed) == GetSign(rigidbody.velocity.x)))
     gameObject.localScale = Vector2(GetSign(targetSpeed), 1);
 }
 
