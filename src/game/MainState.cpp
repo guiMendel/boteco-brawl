@@ -38,14 +38,10 @@ void MainState::InitializeObjects()
 
   CreateObject("Ground", ObjectRecipes::Platform({20, 2}), Vector2(0, 4));
 
-  CreateObject("WallLeft", ObjectRecipes::Platform({1, 5}), Vector2(-7, 0));
-  CreateObject("WallRight", ObjectRecipes::Platform({1, 5}), Vector2(7, 0));
+  CreateObject("WallLeft", ObjectRecipes::Platform({1, 5}), Vector2(-8, 0));
+  CreateObject("WallRight", ObjectRecipes::Platform({1, 5}), Vector2(8, 0));
 
-  // auto thing = CreateObject("Thing", ObjectRecipes::Platform({1, 1}, false), Vector2(0, 0));
-
-  // auto thingBody = thing->GetComponent<Rigidbody>();
-  // thingBody->continuousCollisions = true;
-  // thingBody->velocity += Vector2({-1, 0});
+  CreateObject("Platform", ObjectRecipes::Platform({2, 0.5}, true), Vector2(0, 0));
 
   // character1->velocity = Vector2(2, 0);
   // character2->velocity = Vector2(-2, 1);

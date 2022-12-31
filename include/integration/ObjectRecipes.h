@@ -30,7 +30,7 @@ public:
 
   static auto Character(std::shared_ptr<Player> player) -> std::function<void(std::shared_ptr<GameObject>)>;
 
-  static auto Platform(Vector2 size, bool isStatic = true) -> std::function<void(std::shared_ptr<GameObject>)>;
+  static auto Platform(Vector2 size, bool withEffector = false) -> std::function<void(std::shared_ptr<GameObject>)>;
 
   static auto Projectile(Vector2 initialSpeed, std::shared_ptr<GameObject> parent) -> std::function<void(std::shared_ptr<GameObject>)>;
 };

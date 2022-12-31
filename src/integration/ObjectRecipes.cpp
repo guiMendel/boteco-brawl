@@ -1,4 +1,5 @@
 #include "ObjectRecipes.h"
+#include "PlatformEffector.h"
 #include "CameraFollower.h"
 #include "Animator.h"
 #include "Sound.h"
@@ -123,13 +124,16 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
   };
 }
 
-auto ObjectRecipes::Platform(Vector2 size, bool isStatic) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(shared_ptr<GameObject>)>
 {
-  return [size, isStatic](shared_ptr<GameObject> platform)
+  return [size, withEffector](shared_ptr<GameObject> platform)
   {
     platform->SetPhysicsLayer(PhysicsLayer::Scenario);
-    platform->AddComponent<Rigidbody>(isStatic ? RigidbodyType::Static : RigidbodyType::Dynamic);
+    platform->AddComponent<Rigidbody>(RigidbodyType::Static);
     platform->AddComponent<Collider>(Rectangle(0, 0, size.x, size.y), false, ColliderDensity::Ground);
+    
+    if (withEffector)
+      platform->AddComponent<PlatformEffector>();
   };
 }
 

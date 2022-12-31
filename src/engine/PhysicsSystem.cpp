@@ -1,5 +1,6 @@
 #include "Game.h"
 #include "Collider.h"
+#include "PlatformEffector.h"
 #include "PhysicsSystem.h"
 #include "GameState.h"
 #include <functional>
@@ -58,6 +59,9 @@ float GetDistanceAlongTrajectory(Collider &collider, Rigidbody &sourceBody);
 
 void ApplyImpulse(CollisionData collisionData);
 
+// Given that the 2 colliders collided, checks if a platform effector allows this collision through
+bool PlatformEffectorCheck(Collider &collider1, Collider &collider2);
+
 PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 
 void PhysicsSystem::PhysicsUpdate(float)
@@ -97,6 +101,29 @@ void PhysicsSystem::PhysicsUpdate(float)
   }
 }
 
+bool PlatformEffectorCheck(Collider &collider1, Collider &collider2)
+{
+  // Checks given a body and a collider
+  auto CheckFor = [](shared_ptr<Rigidbody> body, Collider &collider)
+  {
+    if (body == nullptr)
+      return false;
+
+    auto platform = collider.gameObject.GetComponent<PlatformEffector>();
+
+    if (platform == nullptr)
+      return false;
+
+    return platform->AllowThrough(body);
+  };
+
+  // Both checks need to be performed (for PlatformEffector's internal state coherence), so we perform or on their already computed results
+  bool check1 = CheckFor(collider1.rigidbodyWeak.lock(), collider2);
+  bool check2 = CheckFor(collider2.rigidbodyWeak.lock(), collider1);
+
+  return check1 || check2;
+}
+
 // Returns whether the two collider lists have some pair of colliders which are intersecting
 // If there is, also populates the collision data struct
 bool PhysicsSystem::CheckForCollision(
@@ -118,8 +145,8 @@ bool PhysicsSystem::CheckForCollision(
       auto [distance, normal] = FindMinDistance(box1, collider2->GetBox(),
                                                 collider1->gameObject.GetRotation(), collider2->gameObject.GetRotation());
 
-      // If distance is positive, there is no collision
-      if (distance >= 0)
+      // If distance is positive, or a PlatformEffector allows collision through, there is no collision
+      if (distance >= 0 || PlatformEffectorCheck(*collider1, *collider2))
         continue;
 
       // If one of the colliders is a trigger, simply announce the trigger and carry on
