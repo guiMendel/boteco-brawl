@@ -97,13 +97,13 @@ INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATIO
 # FOR GAME
 
 # Header files
-_GAME_DEPS = MainState.h Movement.h PlayerInput.h Action.h Character.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h Player.h PlayerManager.h ControllerDevice.h ParticleFX.h Projectile.h CharacterRepelCollision.h PlatformDrop.h
+_GAME_DEPS = MainState.h Movement.h PlayerInput.h Action.h Character.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h Player.h PlayerManager.h ControllerDevice.h ParticleFX.h Projectile.h CharacterRepelCollision.h PlatformDrop.h FallOffDeath.h Arena.h
 
 # Generate header filepaths
 GAME_DEPS = $(patsubst %,$(GAME_INCLUDE_DIRECTORY)\\%,$(_GAME_DEPS))
 
 # Object files
-_GAME_OBJS = MainState.o Movement.o PlayerInput.o Character.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o Player.o PlayerManager.o ControllerDevice.o ParticleFX.o Projectile.o CharacterRepelCollision.o PlatformDrop.o
+_GAME_OBJS = MainState.o Movement.o PlayerInput.o Character.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o Player.o PlayerManager.o ControllerDevice.o ParticleFX.o Projectile.o CharacterRepelCollision.o PlatformDrop.o FallOffDeath.o Arena.o
 
 # Generate object filepaths
 GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))

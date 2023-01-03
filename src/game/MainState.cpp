@@ -28,18 +28,15 @@ void MainState::InitializeObjects()
   // Add particle fx
   CreateObject("ParticleFX", ObjectRecipes::SingleComponent<ParticleFX>());
 
-  // Add a background
-  CreateObject("Background", ObjectRecipes::Background("./assets/image/boteco.jpg"));
+  // Add an arena
+  CreateObject("Arena", ObjectRecipes::Arena("./assets/image/boteco.jpg"));
 
   // Add player
   auto character1 = CreateObject("Character", ObjectRecipes::Character(playerManager->GetMainPlayer()), Vector2(-3.5, -10))->GetComponent<Rigidbody>();
 
   auto character2 = CreateObject("Character2", ObjectRecipes::Character(player2), Vector2(3.5, -10))->GetComponent<Rigidbody>();
 
-  CreateObject("Ground", ObjectRecipes::Platform({20, 2}), Vector2(0, 4));
-
-  CreateObject("WallLeft", ObjectRecipes::Platform({1, 5}), Vector2(-8, 0));
-  CreateObject("WallRight", ObjectRecipes::Platform({1, 5}), Vector2(8, 0));
+  CreateObject("Ground", ObjectRecipes::Platform({10, 2}), Vector2(0, 4));
 
   CreateObject("Platform", ObjectRecipes::Platform({2, 0.5}, true), Vector2(0, 0));
 

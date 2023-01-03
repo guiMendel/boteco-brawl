@@ -5,21 +5,20 @@
 using namespace std;
 using namespace Helper;
 
+ParticleEmissionParameters::ParticleEmissionParameters()
+    : frequency({0.1f, 0.5f}),
+      angle({0, 2 * M_PI}),
+      color({Color::White(), Color::White()}),
+      speed({0.5f, 2}),
+      lifetime({1, 2}),
+      gravityModifier({Vector2::Zero(), Vector2::Zero()}) {}
+
 ParticleEmitter::ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer, float radius, bool loop, float duration)
     : Component(associatedObject),
       duration(duration),
       loop(loop),
       origin(radius),
-      renderLayer(renderLayer)
-{
-  // Default parameters:
-  emission.frequency = {0.1f, 0.5f};
-  emission.angle = {0, 2 * M_PI};
-  emission.color = {Color::White(), Color::White()};
-  emission.speed = {0.5f, 2};
-  emission.lifetime = {1, 2};
-  emission.gravityModifier = Vector2::Zero();
-}
+      renderLayer(renderLayer) {}
 
 void ParticleEmitter::SetOffset(Vector2 offset) { origin.center = offset; }
 void ParticleEmitter::SetRadius(float radius) { origin.radius = radius; }
@@ -87,6 +86,7 @@ void ParticleEmitter::Emit()
   Color color = RandomRange(currentParams.color);
   float lifetime = RandomRange(currentParams.lifetime);
   float speed = RandomRange(currentParams.speed);
+  Vector2 gravityModifier = RandomRange(currentParams.gravityModifier);
 
   // Get position
   float positionAngle = RandomRange(0.0f, 2 * M_PI);
@@ -95,7 +95,7 @@ void ParticleEmitter::Emit()
 
   // Create particle
   auto particle = GetSystem().CreateParticle(
-      position, lifetime, Vector2::Angled(angle, speed), color, currentParams.gravityModifier);
+      position, lifetime, Vector2::Angled(angle, speed), color, gravityModifier);
 
   // Attachment
   if (attachToEmitter)

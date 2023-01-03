@@ -296,7 +296,7 @@ auto GameObject::RequireComponent(const Component *componentPointer) -> shared_p
   return component;
 }
 
-shared_ptr<GameObject> GameObject::InternalGetParent()
+shared_ptr<GameObject> GameObject::InternalGetParent() const
 {
   // Ensure not root
   Assert(IsRoot() == false, "Getting parent is forbidden on root object");
@@ -310,7 +310,7 @@ shared_ptr<GameObject> GameObject::InternalGetParent()
   return weakParent.lock();
 }
 
-shared_ptr<GameObject> GameObject::GetParent()
+shared_ptr<GameObject> GameObject::GetParent() const
 {
   auto parent = InternalGetParent();
 
@@ -668,4 +668,15 @@ ostream &operator<<(ostream &stream, const GameObject &object)
 {
   stream << (string)object;
   return stream;
+}
+
+bool GameObject::IsEnabled() const
+{
+  if (enabled == false)
+    return false;
+
+  if (IsRoot())
+    return true;
+
+  return InternalGetParent()->IsEnabled();
 }

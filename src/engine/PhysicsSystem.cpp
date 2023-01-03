@@ -106,8 +106,16 @@ bool PhysicsSystem::CheckForCollision(
 {
   for (auto collider1 : colliders1)
   {
+    // Verify if enabled
+    if (collider1->IsEnabled() == false)
+      continue;
+
     for (auto collider2 : colliders2)
     {
+      // Verify if enabled
+      if (collider2->IsEnabled() == false)
+        continue;
+
       // Verify collision matrix
       if (layerHandler.HaveCollision(collider1->gameObject, collider2->gameObject) == false)
         continue;
@@ -156,6 +164,10 @@ void PhysicsSystem::HandleCollisions()
 
     // Check for continuous detection
     auto objectBody = collidersEntryIterator->second.at(0)->RequireRigidbody();
+
+    // Check for disable
+    if (objectBody->IsEnabled() == false)
+      continue;
 
     if (objectBody->ShouldUseContinuousDetection())
     {

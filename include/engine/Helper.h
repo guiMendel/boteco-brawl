@@ -25,6 +25,10 @@ namespace Helper
   // Throws exception if condition is false, uses SDL_Error as explanation
   void Assert(bool condition, std::string message);
 
+  // Limits a value to a given range
+  template <class T>
+  T Clamp(T value, T minValue, T maxValue) { return std::max(std::min(value, maxValue), minValue); }
+
   // Returns -1 if value is negative, 1 otherwise
   float GetSign(float value);
 

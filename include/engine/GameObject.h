@@ -252,7 +252,7 @@ public:
   void SetPhysicsLayer(PhysicsLayer);
 
   void SetEnabled(bool enabled) { this->enabled = enabled; }
-  bool IsEnabled() const { return enabled; }
+  bool IsEnabled() const;
 
   // Where this object exists in game space, relative to it's parent's position
   Vector2 localPosition;
@@ -287,7 +287,7 @@ public:
   std::shared_ptr<GameObject> GetChild(int id);
 
   // Get's pointer to parent, and ensures it's valid, unless this is the root object. If the parent is the root object, returns nullptr
-  std::shared_ptr<GameObject> GetParent();
+  std::shared_ptr<GameObject> GetParent() const;
 
   // Set the parent
   void SetParent(std::shared_ptr<GameObject> newParent);
@@ -300,7 +300,7 @@ private:
   bool IsRoot() const { return id == 0; }
 
   // Get's pointer to parent, and ensures it's valid, unless this is the root object
-  std::shared_ptr<GameObject> InternalGetParent();
+  std::shared_ptr<GameObject> InternalGetParent() const;
 
   // Child objects
   std::unordered_map<int, std::weak_ptr<GameObject>> children;

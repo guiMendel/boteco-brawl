@@ -34,7 +34,7 @@ auto AnimationRecipes::Jump(Animator &animator) -> shared_ptr<Animation>
   particleEmission.frequency = {0.0005, 0.02};
   particleEmission.lifetime = {0.2, 1.0};
   particleEmission.speed = {3, 8};
-  particleEmission.gravityModifier = Vector2::One();
+  particleEmission.gravityModifier = {Vector2::One(), Vector2::One()};
 
   // Add jump impulse to jump frame
   animation->frames[1].AddCallback([particleEmission](GameObject &object)

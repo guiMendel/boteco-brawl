@@ -1,4 +1,6 @@
 #include "ObjectRecipes.h"
+#include "Arena.h"
+#include "FallOffDeath.h"
 #include "PlatformEffector.h"
 #include "PlatformDrop.h"
 #include "CameraFollower.h"
@@ -32,25 +34,22 @@ auto ObjectRecipes::Camera(float size) -> function<void(shared_ptr<GameObject>)>
   };
 }
 
-auto ObjectRecipes::Background(string imagePath) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Arena(string imagePath) -> function<void(shared_ptr<GameObject>)>
 {
-  return [imagePath](shared_ptr<GameObject> background)
+  return [imagePath](shared_ptr<GameObject> arena)
   {
     // Get a background sprite
-    auto sprite = background->AddComponent<SpriteRenderer>(imagePath, RenderLayer::Background)->sprite;
-
-    // Make it follow the camera
-    background->AddComponent<CameraFollower>();
+    auto spriteRenderer = arena->AddComponent<SpriteRenderer>(imagePath, RenderLayer::Background);
+    auto sprite = spriteRenderer->sprite;
 
     // Make it cover the screen
     if (sprite->GetWidth() < sprite->GetHeight())
-    {
       sprite->SetTargetDimension(Game::screenWidth / Camera::GetMain()->GetRealPixelsPerUnit());
-    }
     else
-    {
       sprite->SetTargetDimension(-1, Game::screenHeight / Camera::GetMain()->GetRealPixelsPerUnit());
-    }
+
+    // Add arena
+    arena->AddComponent<::Arena>(spriteRenderer);
   };
 }
 
@@ -123,6 +122,10 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // Give it control
     character->AddComponent<CharacterController>();
+
+    // === DYING FROM FALLING OFF
+
+    character->AddComponent<FallOffDeath>();
 
     // === CHARACTER REPELLING
 

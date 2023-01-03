@@ -34,6 +34,8 @@ public:
   Color color;
   float lifetime;
 
+  // std::function<void(Particle&, float)>
+
 private:
   ParticleSystem &particleSystem;
 
