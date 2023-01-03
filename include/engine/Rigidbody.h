@@ -12,6 +12,7 @@ class Collider;
 enum class RigidbodyType
 {
   Static,
+  Kinematic,
   Dynamic
 };
 
@@ -30,13 +31,11 @@ public:
   void Render() override;
   RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
-  void OnCollision(Collision::CollisionData collisionData) override;
-  void OnTriggerCollision(GameObject &other) override;
-
   float GetMass() const;
   float GetInverseMass() const;
 
   void DynamicBodyUpdate(float deltaTime);
+  void KinematicBodyUpdate(float deltaTime);
 
   void SetMass(float newMass);
 
@@ -69,6 +68,10 @@ public:
   bool ColliderCast(float angle, float maxDistance, RaycastCollisionData &data, float scaleColliders = 1);
   bool ColliderCast(float angle, float maxDistance, float scaleColliders = 1);
 
+  bool IsStatic() const;
+  bool IsKinematic() const;
+  bool IsDynamic() const;
+
   // Velocity for each axis
   Vector2 velocity{0, 0};
 
@@ -99,22 +102,6 @@ private:
 
   void InternalSetMass(float newMass);
 
-  // Whether collision with the given collider happened THIS frame
-  bool IsCollidingWith(int id);
-  bool IsCollidingWith(GameObject &other) { return IsCollidingWith(other.id); }
-
-  // Whether collision with the given body happened last frame
-  bool WasCollidingWith(int id);
-  bool WasCollidingWith(GameObject &other) { return WasCollidingWith(other.id); }
-
-  // Whether collision with the given collider happened THIS frame
-  bool IsCollidingTriggerWith(int id);
-  bool IsCollidingTriggerWith(GameObject &other) { return IsCollidingTriggerWith(other.id); }
-
-  // Whether collision with the given body happened last frame
-  bool WasCollidingTriggerWith(int id);
-  bool WasCollidingTriggerWith(GameObject &other) { return WasCollidingTriggerWith(other.id); }
-
   // Calculates the value of the smallest dimension of it's colliders
   void CalculateSmallestColliderDimension();
 
@@ -144,18 +131,6 @@ private:
 
   // Whether frameTrajectory is now outdated
   bool frameTrajectoryOutdated{true};
-
-  // Keeps track of all other bodies with which collision was detected on the current frame
-  std::unordered_set<int> collidingBodies;
-
-  // Holds the content of collidingBodies from the last frame
-  std::unordered_set<int> oldCollidingBodies;
-
-  // Keeps track of all other bodies with which collision was detected on the current frame
-  std::unordered_set<int> collidingTriggerBodies;
-
-  // Holds the content of collidingTriggerBodies from the last frame
-  std::unordered_set<int> oldCollidingTriggerBodies;
 };
 
 #endif

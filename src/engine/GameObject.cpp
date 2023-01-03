@@ -8,7 +8,7 @@ using namespace std;
 
 // Private constructor
 GameObject::GameObject(string name, int gameStateId, int id)
-    : id(id >= 0 ? id : Game::GetInstance().SupplyId()), gameStateId(gameStateId), name(name)
+    : id(id >= 0 ? id : Game::GetInstance().SupplyId()), name(name), gameStateId(gameStateId)
 {
 }
 
@@ -45,6 +45,7 @@ GameObject::~GameObject()
 {
   cout << "In destructor of " << GetName() << endl;
 
+  // Detect leaked components
   for (auto component : components)
     if (component.use_count() != 2)
       cout << "WARNING: Component " << typeid(*component).name() << " has " << component.use_count() - 2 << " leaked references" << endl;
@@ -106,11 +107,47 @@ void GameObject::PhysicsUpdate(float deltaTime)
   if (enabled == false)
     return;
 
+  // Check for collision & trigger exit
+  DetectCollisionExits();
+
   for (const auto &component : components)
   {
     if (component->IsEnabled())
       component->PhysicsUpdate(deltaTime);
   }
+}
+
+void GameObject::DetectCollisionExits()
+{
+  // For each of last frame's collisions
+  for (auto [collisionHash, collision] : lastFrameCollisions)
+  {
+    // Check colliders
+    // If it hasn't happened this frame
+    if (collision.weakOther.expired() == false &&
+        collision.weakSource.expired() == false &&
+        frameCollisions.count(collisionHash) == 0)
+      // Raise exit
+      OnCollisionExit(collision);
+  }
+
+  // For each of last frame's triggers
+  for (auto [triggerHash, triggerData] : lastFrameTriggers)
+  {
+    // Check colliders
+    // If it hasn't happened this frame
+    if (triggerData.weakOther.expired() == false &&
+        triggerData.weakSource.expired() == false &&
+        frameTriggers.count(triggerHash) == 0)
+      // Raise exit
+      OnTriggerCollisionExit(triggerData);
+  }
+
+  // Update registers
+  lastFrameCollisions = frameCollisions;
+  lastFrameTriggers = frameTriggers;
+  frameCollisions.clear();
+  frameTriggers.clear();
 }
 
 void GameObject::OnStatePause()
@@ -136,11 +173,97 @@ void GameObject::RemoveComponent(shared_ptr<Component> component)
   if (componentPosition == components.end())
     return;
 
+  HandleColliderDestruction(component);
+
   // Wrap it up
   (*componentPosition)->OnBeforeDestroy();
 
   // Remove it
   components.erase(componentPosition);
+}
+
+void GameObject::HandleColliderDestruction(shared_ptr<Component> component)
+{
+  // Get as a collider
+  auto colliderToDie = dynamic_pointer_cast<Collider>(component);
+
+  // Check if it is indeed a collider
+  if (colliderToDie == nullptr)
+    return;
+
+  // Trigger collisions to exit
+  unordered_map<size_t, TriggerCollisionData> exitTriggers;
+
+  // For each of this frame's triggers
+  for (auto [triggerHash, triggerData] : frameTriggers)
+  {
+    // Raise if the source collider is this one
+    IF_LOCK(triggerData.weakSource, source)
+    IF_LOCK(triggerData.weakOther, other)
+    if (source->id == colliderToDie->id)
+      exitTriggers[triggerHash] = triggerData;
+  }
+
+  // For each of last frame's triggers
+  for (auto [triggerHash, triggerData] : lastFrameTriggers)
+  {
+    // Raise if the source collider is this one
+    IF_LOCK(triggerData.weakSource, source)
+    IF_LOCK(triggerData.weakOther, other)
+    if (source->id == colliderToDie->id)
+      exitTriggers[triggerHash] = triggerData;
+  }
+
+  // Exit all collected triggers
+  for (auto [triggerHash, triggerData] : exitTriggers)
+  {
+    LOCK(triggerData.weakOther, other);
+
+    OnTriggerCollisionExit(triggerData);
+
+    auto otherData = triggerData;
+    otherData.weakOther = triggerData.weakSource;
+    otherData.weakSource = triggerData.weakOther;
+
+    other->OnTriggerCollisionExit(otherData);
+  }
+
+  // Collisions to exit
+  unordered_map<size_t, Collision::Data> exitCollisions;
+
+  // For each of this frame's collisions
+  for (auto [collisionHash, collisionData] : frameCollisions)
+  {
+    // Raise if the source collider is this one
+    IF_LOCK(collisionData.weakSource, source)
+    IF_LOCK(collisionData.weakOther, other)
+    if (source->id == colliderToDie->id)
+      exitCollisions[collisionHash] = collisionData;
+  }
+
+  // For each of last frame's collisions
+  for (auto [collisionHash, collisionData] : lastFrameCollisions)
+  {
+    // Raise if the source collider is this one
+    IF_LOCK(collisionData.weakSource, source)
+    IF_LOCK(collisionData.weakOther, other)
+    if (source->id == colliderToDie->id)
+      exitCollisions[collisionHash] = collisionData;
+  }
+
+  // Exit all collected collisions
+  for (auto [collisionHash, collisionData] : exitCollisions)
+  {
+    LOCK(collisionData.weakOther, other);
+
+    OnCollisionExit(collisionData);
+
+    auto otherData = collisionData;
+    otherData.weakOther = collisionData.weakSource;
+    otherData.weakSource = collisionData.weakOther;
+
+    other->OnCollisionExit(otherData);
+  }
 }
 
 shared_ptr<GameObject> GameObject::GetShared()
@@ -356,7 +479,7 @@ void GameObject::InternalDestroy()
 {
   // Wrap all components up
   for (auto &component : components)
-    component->OnBeforeDestroy();
+    RemoveComponent(component);
 
   // Get pointer to self
   auto shared = GetShared();
@@ -379,46 +502,52 @@ void GameObject::InternalDestroy()
   Assert(shared.use_count() == 2, "Found leaked references to game object " + GetName() + " when trying to destroy it");
 }
 
-void GameObject::OnCollision(Collision::CollisionData collisionData)
+void GameObject::OnCollision(Collision::Data collisionData)
 {
+  // Register collision
+  frameCollisions[collisionData.GetHash()] = collisionData;
+
   // Alert all components
   for (auto component : components)
     component->OnCollision(collisionData);
 }
 
-void GameObject::OnCollisionEnter(Collision::CollisionData collisionData)
+void GameObject::OnCollisionEnter(Collision::Data collisionData)
 {
   // Alert all components
   for (auto component : components)
     component->OnCollisionEnter(collisionData);
 }
 
-void GameObject::OnCollisionExit(GameObject &other)
+void GameObject::OnCollisionExit(Collision::Data collisionData)
 {
   // Alert all components
   for (auto component : components)
-    component->OnCollisionExit(other);
+    component->OnCollisionExit(collisionData);
 }
 
-void GameObject::OnTriggerCollision(GameObject &other)
+void GameObject::OnTriggerCollision(TriggerCollisionData triggerData)
 {
+  // Register trigger
+  frameTriggers[triggerData.GetHash()] = triggerData;
+
   // Alert all components
   for (auto component : components)
-    component->OnTriggerCollision(other);
+    component->OnTriggerCollision(triggerData);
 }
 
-void GameObject::OnTriggerCollisionEnter(GameObject &other)
+void GameObject::OnTriggerCollisionEnter(TriggerCollisionData triggerData)
 {
   // Alert all components
   for (auto component : components)
-    component->OnTriggerCollisionEnter(other);
+    component->OnTriggerCollisionEnter(triggerData);
 }
 
-void GameObject::OnTriggerCollisionExit(GameObject &other)
+void GameObject::OnTriggerCollisionExit(TriggerCollisionData triggerData)
 {
   // Alert all components
   for (auto component : components)
-    component->OnTriggerCollisionExit(other);
+    component->OnTriggerCollisionExit(triggerData);
 }
 
 void GameObject::DontDestroyOnLoad(bool value)
@@ -461,3 +590,82 @@ void GameObject::SetPhysicsLayer(PhysicsLayer newLayer)
 }
 
 PhysicsLayer GameObject::GetPhysicsLayer() { return physicsLayer; }
+
+bool GameObject::IsCollidingWith(shared_ptr<Collider> collider)
+{
+  for (auto [collisionHash, collision] : frameCollisions)
+    IF_LOCK(collision.weakOther, other)
+    {
+      if (other->id == collider->id)
+        return true;
+    }
+
+  return false;
+}
+
+bool GameObject::WasCollidingWith(shared_ptr<Collider> collider)
+{
+  for (auto [collisionHash, collision] : lastFrameCollisions)
+    IF_LOCK(collision.weakOther, other)
+    {
+      if (other->id == collider->id)
+        return true;
+    }
+
+  return false;
+}
+
+bool GameObject::IsTriggerCollidingWith(shared_ptr<Collider> collider)
+{
+  for (auto [triggerHash, triggerData] : frameTriggers)
+    IF_LOCK(triggerData.weakOther, other)
+    {
+      if (other->id == collider->id)
+        return true;
+    }
+
+  return false;
+}
+
+bool GameObject::WasTriggerCollidingWith(shared_ptr<Collider> collider)
+{
+  for (auto [triggerHash, triggerData] : lastFrameTriggers)
+    IF_LOCK(triggerData.weakOther, other)
+    {
+      if (other->id == collider->id)
+        return true;
+    }
+
+  return false;
+}
+
+bool GameObject::CollisionDealtWith(Collision::Data collisionData)
+{
+  return frameCollisions.count(collisionData.GetHash()) > 0;
+}
+bool GameObject::CollisionDealtWithLastFrame(Collision::Data collisionData)
+{
+  return lastFrameCollisions.count(collisionData.GetHash()) > 0;
+}
+
+bool GameObject::TriggerCollisionDealtWith(TriggerCollisionData triggerData)
+{
+  return frameTriggers.count(triggerData.GetHash()) > 0;
+}
+bool GameObject::TriggerCollisionDealtWithLastFrame(TriggerCollisionData triggerData)
+{
+  return lastFrameTriggers.count(triggerData.GetHash()) > 0;
+}
+
+bool GameObject::operator==(const GameObject &other) const { return other.id == id; }
+
+GameObject::operator std::string() const
+{
+  return "[" + GetName() + "::" + to_string(id) + "]";
+}
+
+ostream &operator<<(ostream &stream, const GameObject &object)
+{
+  stream << (string)object;
+  return stream;
+}

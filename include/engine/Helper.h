@@ -20,75 +20,37 @@ namespace Helper
   using auto_unique_ptr = std::unique_ptr<T, void (*)(T *)>;
 
   // Throws exception if condition is false
-  [[maybe_unused]] static void Assert(bool condition, std::string message, std::string explanation)
-  {
-    if (condition == false)
-      throw std::runtime_error(message + ". Reported error: " + explanation);
-  }
+  void Assert(bool condition, std::string message, std::string explanation);
 
-  // Throws exception if condition is false
-  [[maybe_unused]] static void Assert(bool condition, std::string message)
-  {
-    Assert(condition, message, SDL_GetError());
-  }
+  // Throws exception if condition is false, uses SDL_Error as explanation
+  void Assert(bool condition, std::string message);
 
-  [[maybe_unused]] static float GetSign(float value)
-  {
-    return value >= 0 ? 1 : -1;
-  }
+  // Returns -1 if value is negative, 1 otherwise
+  float GetSign(float value);
 
   // Splits the given string into an array of strings, using the given delimiter as the separator token
-  [[maybe_unused]] static auto SplitString(std::string text, std::string delimiter) -> std::vector<std::string>
-  {
-    // Will hold the results
-    std::vector<std::string> items;
-
-    // Holds the position of the next delimiter found
-    size_t next = 0;
-
-    // Remember the last delimiter position
-    size_t last = 0;
-
-    // While there are delimiters to go
-    while ((next = text.find(delimiter, last)) != std::string::npos)
-    {
-      // Push the item right before the found delimiter
-      items.push_back(text.substr(last, next - last));
-
-      // Advance the delimiter position
-      last = next + delimiter.length();
-    }
-
-    // When there's an item left after the last delimiter, push it too
-    if (last < text.length())
-      items.push_back(text.substr(last));
-
-    return items;
-  }
+  auto SplitString(std::string text, std::string delimiter) -> std::vector<std::string>;
 
   // Converts radians to degrees
-  [[maybe_unused]] static float RadiansToDegrees(float radians) { return radians * 180 / M_PI; }
+  float RadiansToDegrees(float radians);
   // Converts degrees to radians
-  [[maybe_unused]] static float DegreesToRadians(float degrees) { return degrees / 180 * M_PI; }
+  float DegreesToRadians(float degrees);
   // Converts radians to degrees
-  [[maybe_unused]] static double RadiansToDegrees(double radians) { return radians * 180 / M_PI; }
+  double RadiansToDegrees(double radians);
   // Converts degrees to radians
-  [[maybe_unused]] static double DegreesToRadians(double degrees) { return degrees / 180 * M_PI; }
+  double DegreesToRadians(double degrees);
   // Converts radians to degrees
-  [[maybe_unused]] static float RadiansToDegrees(int radians) { return float(radians) * 180 / M_PI; }
+  float RadiansToDegrees(int radians);
   // Converts degrees to radians
-  [[maybe_unused]] static float DegreesToRadians(int degrees) { return float(degrees) / 180 * M_PI; }
+  float DegreesToRadians(int degrees);
 
   // Gets a random number in the range [min, max[
-  [[maybe_unused]] static int RandomRange(int min, int max) { return min + rand() % (max - min); }
+  int RandomRange(int min, int max);
   // Gets a random number in the range [min, max[
-  [[maybe_unused]] static float RandomRange(float min, float max)
-  {
-    return min + static_cast<float>(rand()) / (static_cast<float>(RAND_MAX / (max - min)));
-  }
+  float RandomRange(float min, float max);
 
   template <typename T>
-  [[maybe_unused]] static T Lerp(T min, T max, float amount)
+  T Lerp(T min, T max, float amount)
   {
     // Range distance
     T rangeDistance = max - min;
@@ -97,39 +59,39 @@ namespace Helper
   }
 
   template <typename T>
-  [[maybe_unused]] static T Lerp(std::pair<T, T> range, float amount)
+  T Lerp(std::pair<T, T> range, float amount)
   {
     return Lerp(range.first, range.second, amount);
   }
 
   template <typename T>
-  [[maybe_unused]] static T RandomRange(T min, T max)
+  T RandomRange(T min, T max)
   {
     return Lerp(min, max, RandomRange(0.0f, 1.0f));
   }
   template <typename T>
-  [[maybe_unused]] static T RandomRange(std::pair<T, T> range)
+  T RandomRange(std::pair<T, T> range)
   {
     return RandomRange(range.first, range.second);
   }
 
   // Gets a random valid index of the array
   template <typename T>
-  [[maybe_unused]] static int SampleIndex(T array[]) { return RandomRange(0, sizeof(array) / sizeof(T)); }
+  int SampleIndex(T array[]) { return RandomRange(0, sizeof(array) / sizeof(T)); }
   // Gets a random valid index of the vector
   template <typename T>
-  [[maybe_unused]] static int SampleIndex(std::vector<T> array) { return RandomRange(0, array.size()); }
+  int SampleIndex(std::vector<T> array) { return RandomRange(0, array.size()); }
 
   // Gets a random member from the array
   template <typename T>
-  [[maybe_unused]] static int Sample(T array[]) { return array[SampleIndex(array)]; }
+  int Sample(T array[]) { return array[SampleIndex(array)]; }
   // Gets a random member from the vector
   template <typename T>
-  [[maybe_unused]] static int Sample(std::vector<T> array) { return array[SampleIndex(array)]; }
+  int Sample(std::vector<T> array) { return array[SampleIndex(array)]; }
 
   // Iterates through each weak pointer, removing those that are expired, and collecting the rest in a shared ptr collection
   template <typename T>
-  [[maybe_unused]] static std::list<std::shared_ptr<T>> ParseWeakIntoShared(std::list<std::weak_ptr<T>> &weakList)
+  std::list<std::shared_ptr<T>> ParseWeakIntoShared(std::list<std::weak_ptr<T>> &weakList)
   {
     std::list<std::shared_ptr<T>> finalList;
 
@@ -150,6 +112,8 @@ namespace Helper
     return finalList;
   }
 
+  // Apply Szudzik's hash function (https://stackoverflow.com/questions/919612/mapping-two-integers-to-one-in-a-unique-and-deterministic-way)
+  size_t HashTwo(size_t a, size_t b);
 }
 
 #endif

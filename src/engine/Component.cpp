@@ -23,7 +23,7 @@ shared_ptr<Component> Component::GetShared() const
 
 bool Component::IsEnabled() const { return enabled && gameObject.IsEnabled(); }
 
-std::shared_ptr<GameState> Component::GetState() const { return gameObject.GetState(); }
+shared_ptr<GameState> Component::GetState() const { return gameObject.GetState(); }
 
 void Component::RegisterToStateWithLayer()
 {
@@ -45,4 +45,17 @@ void Component::SafeStart()
     return;
   started = true;
   Start();
+}
+
+bool Component::operator==(const Component &other) const { return id == other.id; }
+
+Component::operator std::string() const
+{
+  return "(" + string(typeid(*this).name()) + "::" + to_string(id) + ")>" + (string)gameObject;
+}
+
+ostream &operator<<(ostream &stream, const Component &component)
+{
+  stream << (string)component;
+  return stream;
 }

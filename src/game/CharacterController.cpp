@@ -56,7 +56,9 @@ void CharacterController::HandleMovementAnimation()
   else
     // When not grounded, rise & fall animations
     if (justMoving || states.size() == 0)
-      animator.Play(rigidbody.velocity.y >= 0 ? "fall" : "rise");
+    {
+      animator.Play(rigidbody.velocity.y < -0.01f ? "rise" : "fall");
+    }
 }
 
 void CharacterController::Start()

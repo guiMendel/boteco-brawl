@@ -70,7 +70,7 @@ auto AnimationRecipes::Jump(Animator &animator) -> shared_ptr<Animation>
 
 auto AnimationRecipes::Rise(Animator &animator) -> shared_ptr<Animation>
 {
-  auto clipInfo = SpritesheetClipInfo(8, 8, 4);
+  auto clipInfo = SpritesheetClipInfo(8, 8, 1);
   clipInfo.startingFrame = 2;
 
   return make_shared<Animation>("rise",

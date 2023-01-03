@@ -9,9 +9,9 @@ void PhysicsLayerHandler::InitializeCollisionMatrix()
   // Characters don't collide (normally) with each other
   Disable(PhysicsLayer::Character, PhysicsLayer::Character);
 
-  // But their repel boxes do, and only with each other
+  // But their repel boxes do collide only with characters
   DisableAll(PhysicsLayer::CharacterRepelBox);
-  Enable(PhysicsLayer::CharacterRepelBox, PhysicsLayer::CharacterRepelBox);
+  Enable(PhysicsLayer::CharacterRepelBox, PhysicsLayer::Character);
 
   // Platform detectors only collide with platforms
   DisableAll(PhysicsLayer::CharacterPlatformDrop);

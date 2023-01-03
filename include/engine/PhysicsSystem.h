@@ -7,7 +7,7 @@
 #include <unordered_set>
 #include <unordered_map>
 #include <functional>
-#include "SatCollision.h"
+#include "Collision.h"
 #include "PhysicsLayerHandler.h"
 
 class GameState;
@@ -77,10 +77,9 @@ private:
   using WeakColliders = std::vector<std::weak_ptr<Collider>>;
 
   // Checks if there is collision between the two collider lists. If there is, populates the collisionData struct
-  // Automatically raises trigger collisions if raise flag is set to true
   // Last 3 parameters are useful when this function is used by collider casts
   bool CheckForCollision(
-      std::vector<std::shared_ptr<Collider>> colliders1, std::vector<std::shared_ptr<Collider>> colliders2, Collision::CollisionData &collisionData, bool raiseTriggers = true, Vector2 displaceColliders1 = Vector2::Zero(), float scaleColliders1 = 1);
+      std::vector<std::shared_ptr<Collider>> colliders1, std::vector<std::shared_ptr<Collider>> colliders2, Collision::Data &collisionData, Vector2 displaceColliders1 = Vector2::Zero(), float scaleColliders1 = 1);
 
   // Detects all collisions (triggers included) and resolves them
   void HandleCollisions();
@@ -98,16 +97,18 @@ private:
   bool DetectColliderCastCollisions(std::vector<std::shared_ptr<Collider>> colliders, Vector2 position, RaycastCollisionData &data, CollisionFilter filter, float colliderSizeScale);
 
   // Applies impulse, checks if collision is entering & announces regular collision
-  void ResolveCollision(Collision::CollisionData collisionData);
+  void ResolveCollision(Collision::Data collisionData);
 
   // Checks if collision is entering & announces regular collision
-  void ResolveTriggerCollision(Rigidbody &body1, Collider &collider1, Collider &collider2, bool raiseBoth = true);
+  void ResolveTriggerCollision(std::shared_ptr<Collider> collider1, std::shared_ptr<Collider> collider2);
 
   // Pass each object through ValidateColliders and collect the results in a map
   ValidatedCollidersMap ValidateAllColliders(std::unordered_map<int, WeakColliders> &);
+  
+  std::unordered_map<int, std::shared_ptr<Collider>> ValidateAllColliders(std::unordered_map<int, std::weak_ptr<Collider>> &);
 
   // For a specific object, removes any expired colliders from structure & returns the remaining ones as shared
-  ValidatedColliders ValidateColliders(int id);
+  ValidatedColliders ValidateColliders(int id, WeakColliders& colliders);
 
   // Finds the collider (if any) whose intersection with the trajectory rect is closest to the trajectory start
   // Returns a vector of the found colliders, the distance where this collision happened, and a callback to be executed if this collision is selected to be resolved
@@ -123,8 +124,14 @@ private:
   // Structure that maps each dynamic body object id to the list of it's colliders
   std::unordered_map<int, WeakColliders> dynamicColliderStructure;
 
+  // Structure that maps each kinematic body object id to the list of it's colliders
+  std::unordered_map<int, WeakColliders> kinematicColliderStructure;
+
   // Structure that maps each static body object id to the list of it's colliders
   std::unordered_map<int, WeakColliders> staticColliderStructure;
+
+  // Structure that maps each trigger collider id to itself
+  std::unordered_map<int, std::weak_ptr<Collider>> weakTriggerColliders;
 
   // This system's collision layer handler
   PhysicsLayerHandler layerHandler;

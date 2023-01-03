@@ -5,7 +5,8 @@
 #include "Vector2.h"
 #include "RenderLayer.h"
 #include "ComponentParameter.h"
-#include "SatCollision.h"
+#include "Collision.h"
+#include "TriggerCollisionData.h"
 #include <string>
 #include <memory>
 #include <map>
@@ -53,6 +54,10 @@ public:
   // The associated game state
   std::shared_ptr<GameState> GetState() const;
 
+  bool operator==(const Component &other) const;
+
+  explicit operator std::string() const;
+
   // The associated game object
   GameObject &gameObject;
 
@@ -81,14 +86,14 @@ protected:
   virtual void OnBeforeDestroy() {}
 
   // Allows for reacting to collision
-  virtual void OnCollision(Collision::CollisionData) {}
-  virtual void OnCollisionEnter(Collision::CollisionData) {}
-  virtual void OnCollisionExit(GameObject &) {}
+  virtual void OnCollision(Collision::Data) {}
+  virtual void OnCollisionEnter(Collision::Data) {}
+  virtual void OnCollisionExit(Collision::Data) {}
 
   // Allows for reacting to trigger collision
-  virtual void OnTriggerCollision(GameObject &) {}
-  virtual void OnTriggerCollisionEnter(GameObject &) {}
-  virtual void OnTriggerCollisionExit(GameObject &) {}
+  virtual void OnTriggerCollision(TriggerCollisionData) {}
+  virtual void OnTriggerCollisionEnter(TriggerCollisionData) {}
+  virtual void OnTriggerCollisionExit(TriggerCollisionData) {}
 
   // Reference to input manager
   InputManager &inputManager;
@@ -103,6 +108,8 @@ private:
   // Whether Start has been called already
   bool started{false};
 };
+
+std::ostream &operator<<(std::ostream &stream, const Component &vector);
 
 #include "GameObject.h"
 // #include "GameState.h"

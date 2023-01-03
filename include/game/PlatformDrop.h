@@ -16,10 +16,10 @@ public:
   virtual ~PlatformDrop() {}
 
   // Register platform as a platform which is in range
-  void OnTriggerCollisionEnter(GameObject &) override;
+  void OnTriggerCollisionEnter(TriggerCollisionData triggerData) override;
 
   // Remove a possible whitelist and forget platform
-  void OnTriggerCollisionExit(GameObject &) override;
+  void OnTriggerCollisionExit(TriggerCollisionData triggerData) override;
 
 private:
   // Whitelists all platform which are in range

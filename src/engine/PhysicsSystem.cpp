@@ -57,7 +57,7 @@ pair<float, float> GetLineEquation(Vector2 point1, Vector2 point2);
 // Finds out how far along the trajectory the intersection of this collider happened
 float GetDistanceAlongTrajectory(Collider &collider, Rigidbody &sourceBody);
 
-void ApplyImpulse(CollisionData collisionData);
+void ApplyImpulse(Data collisionData);
 
 // Given that the 2 colliders collided, checks if a platform effector allows this collision through
 bool PlatformEffectorCheck(Collider &collider1, Collider &collider2);
@@ -67,38 +67,6 @@ PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
 void PhysicsSystem::PhysicsUpdate(float)
 {
   HandleCollisions();
-
-  // Detect collision exits
-  // For each dynamic body
-  for (auto [objectId, _] : dynamicColliderStructure)
-  {
-    // Get it's body
-    auto object = gameState.GetObject(objectId);
-
-    if (object == nullptr)
-      continue;
-
-    auto body = object->GetComponent<Rigidbody>();
-
-    if (body == nullptr)
-      continue;
-
-    // For each of the collision it had last frame
-    for (auto collisionOtherId : body->oldCollidingBodies)
-    {
-      // If it's no longer, colliding, raise
-      if (body->IsCollidingWith(collisionOtherId) == false)
-        body->gameObject.OnCollisionExit(*gameState.GetObject(collisionOtherId));
-    }
-
-    // For each of the trigger collision it had last frame
-    for (auto collisionOtherId : body->oldCollidingTriggerBodies)
-    {
-      // If it's no longer, colliding, raise
-      if (body->IsCollidingTriggerWith(collisionOtherId) == false)
-        body->gameObject.OnTriggerCollisionExit(*gameState.GetObject(collisionOtherId));
-    }
-  }
 }
 
 bool PlatformEffectorCheck(Collider &collider1, Collider &collider2)
@@ -121,6 +89,12 @@ bool PlatformEffectorCheck(Collider &collider1, Collider &collider2)
   bool check1 = CheckFor(collider1.rigidbodyWeak.lock(), collider2);
   bool check2 = CheckFor(collider2.rigidbodyWeak.lock(), collider1);
 
+  if (check1)
+    cout << "^" << collider1 << endl;
+
+  if (check2)
+    cout << "^" << collider2 << endl;
+
   return check1 || check2;
 }
 
@@ -128,7 +102,7 @@ bool PlatformEffectorCheck(Collider &collider1, Collider &collider2)
 // If there is, also populates the collision data struct
 bool PhysicsSystem::CheckForCollision(
     vector<shared_ptr<Collider>> colliders1, vector<shared_ptr<Collider>> colliders2,
-    CollisionData &collisionData, bool raiseTriggers, Vector2 displaceColliders1, float scaleColliders1)
+    Data &collisionData, Vector2 displaceColliders1, float scaleColliders1)
 {
   for (auto collider1 : colliders1)
   {
@@ -149,28 +123,9 @@ bool PhysicsSystem::CheckForCollision(
       if (distance >= 0 || PlatformEffectorCheck(*collider1, *collider2))
         continue;
 
-      // If one of the colliders is a trigger, simply announce the trigger and carry on
-      if (collider1->isTrigger || collider2->isTrigger)
-      {
-        if (raiseTriggers)
-        {
-          // Try to find a body in one of the 2
-          shared_ptr<Rigidbody> body;
-
-          if ((body = collider1->rigidbodyWeak.lock()) != nullptr)
-            ResolveTriggerCollision(*body, *collider1, *collider2);
-          else if ((body = collider2->rigidbodyWeak.lock()) != nullptr)
-            ResolveTriggerCollision(*body, *collider2, *collider1);
-
-          // If no body was found, no trigger
-        }
-
-        continue;
-      }
-
       // Populate collision data
-      collisionData.source = collider1;
-      collisionData.other = collider2;
+      collisionData.weakSource = collider1;
+      collisionData.weakOther = collider2;
       collisionData.normal = normal;
       collisionData.penetration = abs(distance);
 
@@ -185,9 +140,13 @@ void PhysicsSystem::HandleCollisions()
 {
   // Get validated colliders
   auto dynamicColliders = ValidateAllColliders(dynamicColliderStructure);
-  auto staticColliders = ValidateAllColliders(staticColliderStructure);
+  auto kinematicColliders = ValidateAllColliders(kinematicColliderStructure);
 
-  // For each dynamic object
+  // Merge static with kinematic
+  auto nonDynamicColliders = ValidateAllColliders(staticColliderStructure);
+  nonDynamicColliders.insert(kinematicColliders.begin(), kinematicColliders.end());
+
+  // Check collisions for each dynamic object
   for (
       auto collidersEntryIterator = dynamicColliders.begin();
       collidersEntryIterator != dynamicColliders.end();
@@ -201,22 +160,73 @@ void PhysicsSystem::HandleCollisions()
     if (objectBody->ShouldUseContinuousDetection())
     {
       objectBody->printDebug = true;
-      DetectBetweenFramesCollision(collidersEntryIterator, dynamicColliders.end(), staticColliders);
+      DetectBetweenFramesCollision(collidersEntryIterator, dynamicColliders.end(), nonDynamicColliders);
     }
 
     else
     {
       objectBody->printDebug = false;
 
-      DetectCollisions(collidersEntryIterator, dynamicColliders.end(), staticColliders);
+      DetectCollisions(collidersEntryIterator, dynamicColliders.end(), nonDynamicColliders);
+    }
+  }
+
+  // Get triggers
+  auto triggerColliders = ValidateAllColliders(weakTriggerColliders);
+
+  // Check trigger collisions for each trigger
+  for (
+      auto triggerEntryIterator = triggerColliders.begin();
+      triggerEntryIterator != triggerColliders.end();
+      triggerEntryIterator++)
+  {
+    // Get trigger data
+    auto [triggerId, triggerCollider] = *triggerEntryIterator;
+    auto triggerBody = triggerCollider->rigidbodyWeak.lock();
+    bool isStatic = triggerBody == nullptr || triggerBody->IsStatic();
+
+    // Store collision data
+    static Collision::Data collisionData;
+
+    // Check against all dynamic objects
+    for (auto [objectId, colliders] : dynamicColliders)
+    {
+      if (CheckForCollision(colliders, {triggerCollider}, collisionData))
+        ResolveTriggerCollision(collisionData.weakSource.lock(), collisionData.weakOther.lock());
+    }
+
+    // Check against other statics only if not static
+    auto nonDynamicTargets = isStatic ? kinematicColliders : nonDynamicColliders;
+    for (auto [objectId, colliders] : nonDynamicTargets)
+    {
+      if (CheckForCollision(colliders, {triggerCollider}, collisionData))
+        ResolveTriggerCollision(collisionData.weakSource.lock(), collisionData.weakOther.lock());
+    }
+
+    // Check against each other trigger collider
+    for (
+        auto otherTriggerEntryIterator = triggerEntryIterator;
+        otherTriggerEntryIterator != triggerColliders.end();
+        otherTriggerEntryIterator++)
+    {
+      // Get it's data
+      auto [otherTriggerId, otherTriggerCollider] = *otherTriggerEntryIterator;
+      auto otherTriggerBody = otherTriggerCollider->rigidbodyWeak.lock();
+
+      // Ignore it if both are static
+      if (isStatic && (otherTriggerBody == nullptr || otherTriggerBody->IsStatic()))
+        continue;
+
+      if (CheckForCollision({otherTriggerCollider}, {triggerCollider}, collisionData))
+        ResolveTriggerCollision(collisionData.weakSource.lock(), collisionData.weakOther.lock());
     }
   }
 }
 
-void PhysicsSystem::DetectCollisions(ValidatedCollidersMap::iterator collidersEntryIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &staticColliders)
+void PhysicsSystem::DetectCollisions(ValidatedCollidersMap::iterator collidersEntryIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &nonDynamicColliders)
 {
   // Will hold any collision data
-  static CollisionData collisionData;
+  static Data collisionData;
 
   // Body of this object
   auto body = collidersEntryIterator->second.at(0)->RequireRigidbody();
@@ -232,19 +242,19 @@ void PhysicsSystem::DetectCollisions(ValidatedCollidersMap::iterator collidersEn
       ResolveCollision(collisionData);
   }
 
-  // Test for all static objects
-  for (auto staticEntry : staticColliders)
+  // Test for all non dynamic objects
+  for (auto [otherObjectId, otherColliders] : nonDynamicColliders)
   {
-    // cout << "Checking for object " << body->gameObject.GetName() << " with " << collidersEntryIterator->second.size() << " colliders against " << staticEntry.second.at(0)->gameObject.GetName() << " with " << staticEntry.second.size() << " colliders" << endl;
+    // cout << "Checking for object " << body->gameObject.GetName() << " with " << collidersEntryIterator->second.size() << " colliders against " << otherColliders.at(0)->gameObject.GetName() << " with " << otherColliders.size() << " colliders" << endl;
     // Check if they are colliding
     // Other object's layer
-    if (CheckForCollision(collidersEntryIterator->second, staticEntry.second, collisionData))
+    if (CheckForCollision(collidersEntryIterator->second, otherColliders, collisionData))
       // Resolve collision (apply impulses)
       ResolveCollision(collisionData);
   }
 }
 
-void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator collidersEntryIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &staticColliders)
+void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator collidersEntryIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &nonDynamicColliders)
 {
   // Get object body
   auto objectBody = collidersEntryIterator->second.at(0)->RequireRigidbody();
@@ -286,10 +296,10 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
     }
   }
 
-  // Now test for static bodies
-  for (auto staticEntry : staticColliders)
+  // Now test for non dynamic bodies
+  for (auto [otherObjectId, otherColliders] : nonDynamicColliders)
   {
-    auto &otherObject = staticEntry.second.at(0)->gameObject;
+    auto &otherObject = otherColliders.at(0)->gameObject;
 
     // Ignore entries that are the same object or some parent
     if (otherObject.IsDescendantOf(objectBody->gameObject))
@@ -297,7 +307,7 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
 
     // Find out if there is intersection between this other object and our trajectory
     auto [intersectedColliders, intersectionDistance, intersectionDependencyCallback] =
-        FindTrajectoryIntersection(staticEntry.second, *objectBody);
+        FindTrajectoryIntersection(otherColliders, *objectBody);
 
     // If no intersection was found, continue
     if (intersectedColliders.empty())
@@ -316,7 +326,7 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
   // If no between frames collision was detected, carry on to regular collision detection
   if (collisionTargets.empty())
   {
-    DetectCollisions(collidersEntryIterator, endIterator, staticColliders);
+    DetectCollisions(collidersEntryIterator, endIterator, nonDynamicColliders);
     return;
   }
 
@@ -335,7 +345,7 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
   collisionDependency();
 
   // And, finally, resolve the actual collision between this body and the collider
-  CollisionData collisionData;
+  Data collisionData;
 
   if (CheckForCollision(collidersEntryIterator->second, collisionTargets, collisionData))
     ResolveCollision(collisionData);
@@ -343,19 +353,10 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
     cout << "WARNING: Unable to resolve continuous collision" << endl;
 }
 
-vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id)
+vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id, WeakColliders &weakColliders)
 {
   if (gameState.GetObject(id) == nullptr)
     return {};
-
-  auto objectBody = gameState.GetObject(id)->GetComponent<Rigidbody>();
-
-  bool isDynamic = objectBody != nullptr && objectBody->GetType() == RigidbodyType::Dynamic;
-
-  auto &weakColliders = isDynamic ? dynamicColliderStructure : staticColliderStructure;
-
-  // Get colliders
-  auto &objectColliders = weakColliders[id];
 
   // Will hold verified colliders
   vector<shared_ptr<Collider>> verifiedColliders;
@@ -364,13 +365,13 @@ vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id)
   bool colliderWasRemoved{false};
 
   // For each of it's colliders
-  auto colliderIterator = objectColliders.begin();
-  while (colliderIterator != objectColliders.end())
+  auto colliderIterator = weakColliders.begin();
+  while (colliderIterator != weakColliders.end())
   {
     // Remove it if it's expired
     if (colliderIterator->expired())
     {
-      colliderIterator = objectColliders.erase(colliderIterator);
+      colliderIterator = weakColliders.erase(colliderIterator);
       colliderWasRemoved = true;
       continue;
     }
@@ -399,6 +400,30 @@ vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id)
   return verifiedColliders;
 }
 
+unordered_map<int, shared_ptr<Collider>> PhysicsSystem::ValidateAllColliders(std::unordered_map<int, std::weak_ptr<Collider>> &weakColliders)
+{
+  unordered_map<int, shared_ptr<Collider>> colliders;
+
+  // For each object entry
+  auto collidersEntryIterator = weakColliders.begin();
+  while (collidersEntryIterator != weakColliders.end())
+  {
+    auto [objectId, weakCollider] = *collidersEntryIterator;
+
+    // If it's empty, remove it from the map
+    if (weakCollider.expired())
+    {
+      collidersEntryIterator = weakColliders.erase(collidersEntryIterator);
+      continue;
+    }
+
+    colliders[objectId] = weakCollider.lock();
+    collidersEntryIterator++;
+  }
+
+  return colliders;
+}
+
 unordered_map<int, vector<shared_ptr<Collider>>> PhysicsSystem::ValidateAllColliders(unordered_map<int, WeakColliders> &weakColliders)
 {
   unordered_map<int, vector<shared_ptr<Collider>>> verifiedCollidersStructure;
@@ -408,7 +433,7 @@ unordered_map<int, vector<shared_ptr<Collider>>> PhysicsSystem::ValidateAllColli
   while (collidersEntryIterator != weakColliders.end())
   {
     int objectId = collidersEntryIterator->first;
-    verifiedCollidersStructure[objectId] = ValidateColliders(objectId);
+    verifiedCollidersStructure[objectId] = ValidateColliders(objectId, collidersEntryIterator->second);
 
     // If it's empty, remove it from the map
     if (verifiedCollidersStructure[objectId].empty())
@@ -429,16 +454,28 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
   if (!collider)
     return;
 
+  if (collider->gameObject.GetName() == "Platform")
+    cout << "Registering collider for " << collider->gameObject.GetName() << endl;
+
+  // Register triggers
+  if (collider->isTrigger)
+  {
+    weakTriggerColliders[collider->id] = collider;
+    return;
+  }
+
   // Get rigidbody if it exists
   auto rigidbody = collider->rigidbodyWeak.lock();
 
-  // Check if it's dynamic
-  bool isDynamic = rigidbody != nullptr && rigidbody->GetType() == RigidbodyType::Dynamic;
+  // Check if it's static
+  bool isStatic = rigidbody == nullptr || rigidbody->IsStatic();
 
-  if (isDynamic)
-    dynamicColliderStructure[objectId].emplace_back(collider);
-  else
+  if (isStatic)
     staticColliderStructure[objectId].emplace_back(collider);
+  else if (rigidbody->IsKinematic())
+    kinematicColliderStructure[objectId].emplace_back(collider);
+  else
+    dynamicColliderStructure[objectId].emplace_back(collider);
 
   if (rigidbody != nullptr)
   {
@@ -460,77 +497,102 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 }
 
 // Source https://youtu.be/1L2g4ZqmFLQ and https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/previousinformation/physics6collisionresponse/
-void PhysicsSystem::ResolveCollision(CollisionData collisionData)
+void PhysicsSystem::ResolveCollision(Data collisionData1)
 {
   // cout << "Resolving collision between " << collisionData.source->gameObject.GetName() << " and " << collisionData.other->gameObject.GetName() << endl;
-  auto sourceCollider = collisionData.source.lock();
-  auto otherCollider = collisionData.other.lock();
+  auto collider1 = collisionData1.weakSource.lock();
+  auto collider2 = collisionData1.weakOther.lock();
 
-  if (sourceCollider == nullptr || otherCollider == nullptr)
+  if (collider1 == nullptr || collider2 == nullptr)
     return;
 
   // If this collision was already dealt with this frame, ignore it
-  if (sourceCollider->RequireRigidbody()->IsCollidingWith(otherCollider->gameObject))
+  if (collider1->gameObject.CollisionDealtWith(collisionData1))
     return;
 
-  ApplyImpulse(collisionData);
+  // Build another collision data, and switch it's reference
+  auto collisionData2{collisionData1};
+  std::swap(collisionData2.weakSource, collisionData2.weakOther);
+
+  // Get bodies
+  auto body1 = collider1->rigidbodyWeak.lock();
+  auto body2 = collider2->rigidbodyWeak.lock();
+
+  // Forget a body if it's the same object as the collider
+  if (body1 != nullptr && body1->gameObject == collider1->gameObject)
+    body1 = nullptr;
+  if (body2 != nullptr && body2->gameObject == collider2->gameObject)
+    body2 = nullptr;
+
+  // Resolve physics
+  ApplyImpulse(collisionData1);
 
   // Check if is entering collision
-  if (sourceCollider->RequireRigidbody()->WasCollidingWith(otherCollider->gameObject) == false)
-  // if (sourceCollider->WasCollidingWith(*otherCollider) == false ||
-  //     collisionData.penetration < minStayPenetration)
+  if (collider1->gameObject.CollisionDealtWithLastFrame(collisionData1) == false)
   {
     // Announce collision enter to components
-    collisionData.source.lock()->gameObject.OnCollisionEnter(collisionData);
-
-    // Switch reference
-    std::swap(collisionData.source, collisionData.other);
-
-    // Announce to other object
-    collisionData.source.lock()->gameObject.OnCollisionEnter(collisionData);
+    collider1->gameObject.OnCollisionEnter(collisionData1);
+    collider2->gameObject.OnCollisionEnter(collisionData2);
+    if (body1 != nullptr)
+      body1->gameObject.OnCollisionEnter(collisionData1);
+    if (body2 != nullptr)
+      body2->gameObject.OnCollisionEnter(collisionData2);
   }
 
-  // Announce collision to components
-  collisionData.source.lock()->gameObject.OnCollision(collisionData);
-
-  // Switch reference
-  std::swap(collisionData.source, collisionData.other);
-
-  // Announce to other object
-  collisionData.source.lock()->gameObject.OnCollision(collisionData);
+  // Announce collision enter to components
+  collider1->gameObject.OnCollision(collisionData1);
+  collider2->gameObject.OnCollision(collisionData2);
+  if (body1 != nullptr)
+    body1->gameObject.OnCollision(collisionData1);
+  if (body2 != nullptr)
+    body2->gameObject.OnCollision(collisionData2);
 }
 
-void PhysicsSystem::ResolveTriggerCollision(Rigidbody &body1, Collider &collider1, Collider &collider2, bool raiseBoth)
+void PhysicsSystem::ResolveTriggerCollision(shared_ptr<Collider> collider1, shared_ptr<Collider> collider2)
 {
+  // Create structs
+  TriggerCollisionData triggerData1{collider1, collider2}, triggerData2{collider2, collider1};
+
   // If this collision was already dealt with this frame, ignore it
-  if (body1.IsCollidingTriggerWith(collider2.gameObject))
+  if (collider1->gameObject.TriggerCollisionDealtWith(triggerData1))
     return;
 
-  // Check if other collider has a body
-  if (raiseBoth)
-  {
-    auto body2 = collider2.rigidbodyWeak.lock();
+  // Get bodies
+  auto body1 = collider1->rigidbodyWeak.lock();
+  auto body2 = collider2->rigidbodyWeak.lock();
 
-    if (body2 != nullptr)
-      ResolveTriggerCollision(*body2, collider2, collider1, false);
-  }
-
-  body1.gameObject.OnTriggerCollision(collider2.gameObject);
-  collider2.gameObject.OnTriggerCollision(body1.gameObject);
+  // Forget a body if it's the same object as the collider
+  if (body1 != nullptr && body1->gameObject == collider1->gameObject)
+    body1 = nullptr;
+  if (body2 != nullptr && body2->gameObject == collider2->gameObject)
+    body2 = nullptr;
 
   // Check if is entering collision
-  if (body1.WasCollidingTriggerWith(collider2.gameObject) == false)
+  if (collider1->gameObject.TriggerCollisionDealtWithLastFrame(triggerData1) == false)
   {
-    body1.gameObject.OnTriggerCollisionEnter(collider2.gameObject);
-    collider2.gameObject.OnTriggerCollisionEnter(body1.gameObject);
+    // Raise for involved objects
+    collider1->gameObject.OnTriggerCollisionEnter(triggerData1);
+    collider2->gameObject.OnTriggerCollisionEnter(triggerData2);
+    if (body1 != nullptr)
+      body1->gameObject.OnTriggerCollisionEnter(triggerData1);
+    if (body2 != nullptr)
+      body2->gameObject.OnTriggerCollisionEnter(triggerData2);
   }
+
+  // Raise for involved objects
+  collider1->gameObject.OnTriggerCollision(triggerData1);
+  collider2->gameObject.OnTriggerCollision(triggerData2);
+  if (body1 != nullptr)
+    body1->gameObject.OnTriggerCollision(triggerData1);
+  if (body2 != nullptr)
+    body2->gameObject.OnTriggerCollision(triggerData2);
 }
 
-void ApplyImpulse(CollisionData collisionData)
+void ApplyImpulse(Data collisionData)
 {
   // Ease of access
-  auto bodyA = collisionData.source.lock()->RequireRigidbody();
-  auto bodyB = collisionData.other.lock()->RequireRigidbody();
+  auto bodyA = collisionData.weakSource.lock()->RequireRigidbody();
+  auto bodyB = collisionData.weakOther.lock()->RequireRigidbody();
 
   // Friction to apply
   float frictionModifier = min(bodyA->friction, bodyB->friction);
@@ -584,9 +646,8 @@ auto PhysicsSystem::FindTrajectoryIntersection(ValidatedColliders colliders, Rig
   auto [trajectoryRectangle, trajectoryAngle] = sourceBody.GetFrameTrajectory();
 
   // Get the associated rigidbody to the other body
-  auto otherBody = colliders.at(0)->gameObject.GetComponent<Rigidbody>();
-
   // Check if it's continuous
+  IF_LOCK(colliders.at(0)->rigidbodyWeak, otherBody)
   if (otherBody->ShouldUseContinuousDetection())
   {
     // Find out if there is intersection between the two trajectories first
@@ -620,14 +681,6 @@ auto PhysicsSystem::FindTrajectoryIntersection(ValidatedColliders colliders, Rig
     // If distance is positive, there is no collision
     if (distance >= 0)
       continue;
-
-    // If is a trigger, simply trigger it and continue
-    if (collider->isTrigger)
-    {
-      // I'm not being paid for this
-      // ResolveTriggerCollision(sourceBody, *collider);
-      continue;
-    }
 
     // Get the distance of this collider along the trajectory
     float colliderDistance = GetDistanceAlongTrajectory(*collider, sourceBody);
@@ -822,6 +875,7 @@ pair<float, float> GetLineEquation(Vector2 point1, Vector2 point2)
 void PhysicsSystem::UnregisterColliders(int objectId)
 {
   dynamicColliderStructure.erase(objectId);
+  kinematicColliderStructure.erase(objectId);
   staticColliderStructure.erase(objectId);
 }
 
@@ -923,7 +977,7 @@ bool PhysicsSystem::DetectRaycastCollisions(Vector2 particle, RaycastCollisionDa
     return false;
   };
 
-  return CheckForStructure(dynamicColliderStructure) || CheckForStructure(staticColliderStructure);
+  return CheckForStructure(dynamicColliderStructure) || CheckForStructure(kinematicColliderStructure) || CheckForStructure(staticColliderStructure);
 }
 
 bool PhysicsSystem::ColliderCast(vector<shared_ptr<Collider>> colliders, Vector2 origin, float angle, float maxDistance, CollisionFilter filter, float colliderSizeScale)
@@ -976,10 +1030,10 @@ bool PhysicsSystem::DetectColliderCastCollisions(vector<shared_ptr<Collider>> co
         continue;
 
       // Detect collisions between the given colliders
-      CollisionData collisionData;
-      if (CheckForCollision(colliders, otherColliders, collisionData, false, displacement, colliderSizeScale))
+      Data collisionData;
+      if (CheckForCollision(colliders, otherColliders, collisionData, displacement, colliderSizeScale))
       {
-        data.other = collisionData.other;
+        data.other = collisionData.weakOther;
         return true;
       }
     }
@@ -987,5 +1041,5 @@ bool PhysicsSystem::DetectColliderCastCollisions(vector<shared_ptr<Collider>> co
     return false;
   };
 
-  return CheckForStructure(dynamicColliderStructure) || CheckForStructure(staticColliderStructure);
+  return CheckForStructure(dynamicColliderStructure) || CheckForStructure(kinematicColliderStructure) || CheckForStructure(staticColliderStructure);
 }

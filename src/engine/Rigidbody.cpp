@@ -21,7 +21,7 @@ Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float ela
 
 float Rigidbody::GetMass() const
 {
-  if (type == RigidbodyType::Static)
+  if (IsStatic() || IsKinematic())
     return numeric_limits<float>::max();
 
   return mass;
@@ -29,7 +29,7 @@ float Rigidbody::GetMass() const
 
 float Rigidbody::GetInverseMass() const
 {
-  if (type == RigidbodyType::Static)
+  if (IsStatic() || IsKinematic())
     return 0;
 
   return inverseMass;
@@ -37,14 +37,11 @@ float Rigidbody::GetInverseMass() const
 
 void Rigidbody::PhysicsUpdate(float deltaTime)
 {
-  if (type == RigidbodyType::Dynamic)
+  if (IsDynamic())
     DynamicBodyUpdate(deltaTime);
 
-  // Update collision sets
-  oldCollidingBodies = collidingBodies;
-  collidingBodies.clear();
-  oldCollidingTriggerBodies = collidingTriggerBodies;
-  collidingTriggerBodies.clear();
+  else if (IsKinematic())
+    KinematicBodyUpdate(deltaTime);
 }
 
 void Rigidbody::DynamicBodyUpdate(float deltaTime)
@@ -58,11 +55,16 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
   // Update the last position variable
   lastPosition = gameObject.GetPosition();
 
-  // Move according to velocity
-  gameObject.Translate(velocity * deltaTime);
-
   // Set this frame's possibly calculated trajectory as outdated
   frameTrajectoryOutdated = true;
+
+  KinematicBodyUpdate(deltaTime);
+}
+
+void Rigidbody::KinematicBodyUpdate(float deltaTime)
+{
+  // Move according to velocity
+  gameObject.Translate(velocity * deltaTime);
 }
 
 void Rigidbody::UseAutoMass(bool value)
@@ -105,49 +107,25 @@ void Rigidbody::DeriveMassFromColliders()
 // Gets the list of colliders associated with this body
 vector<shared_ptr<Collider>> Rigidbody::GetColliders() const
 {
-  return GetState()->physicsSystem.ValidateColliders(gameObject.id);
+  auto &physicsSystem = GetState()->physicsSystem;
+
+  PhysicsSystem::WeakColliders weakColliders;
+  if (IsStatic())
+    weakColliders = physicsSystem.staticColliderStructure[gameObject.id];
+  else if (IsKinematic())
+    weakColliders = physicsSystem.kinematicColliderStructure[gameObject.id];
+  else
+    weakColliders = physicsSystem.dynamicColliderStructure[gameObject.id];
+
+  return physicsSystem.ValidateColliders(gameObject.id, weakColliders);
 }
 
 void Rigidbody::ApplyImpulse(Vector2 impulse)
 {
-  if (type == RigidbodyType::Static)
+  if (IsStatic() || IsKinematic())
     return;
 
   velocity += impulse * inverseMass;
-}
-
-bool Rigidbody::IsCollidingWith(int id)
-{
-  return collidingBodies.count(id) > 0;
-}
-
-bool Rigidbody::WasCollidingWith(int id)
-{
-  return oldCollidingBodies.count(id) > 0;
-}
-
-bool Rigidbody::IsCollidingTriggerWith(int id)
-{
-  return collidingTriggerBodies.count(id) > 0;
-}
-
-bool Rigidbody::WasCollidingTriggerWith(int id)
-{
-  return oldCollidingTriggerBodies.count(id) > 0;
-}
-
-void Rigidbody::OnCollision(Collision::CollisionData collisionData)
-{
-  if (collisionData.other.expired())
-    return;
-
-  // Add to collision set
-  collidingBodies.insert(collisionData.other.lock()->gameObject.id);
-}
-
-void Rigidbody::OnTriggerCollision(GameObject &other)
-{
-  collidingTriggerBodies.insert(other.id);
 }
 
 void Rigidbody::CalculateSmallestColliderDimension()
@@ -309,3 +287,9 @@ bool Rigidbody::ColliderCast(float angle, float maxDistance, float scaleCollider
   RaycastCollisionData discardedData;
   return ColliderCast(angle, maxDistance, discardedData, scaleColliders);
 }
+
+bool Rigidbody::IsStatic() const { return type == RigidbodyType::Static; }
+
+bool Rigidbody::IsKinematic() const { return type == RigidbodyType::Kinematic; }
+
+bool Rigidbody::IsDynamic() const { return type == RigidbodyType::Dynamic; }

@@ -71,6 +71,12 @@ void Collider::RegisterToState()
     inspectingObject = inspectingObject->GetParent();
   }
 
+  // IF_LOCK(rigidbodyWeak, body)
+  // {
+  //   cout << "Collider " << gameObject.GetName() << " has body in " << body->gameObject.GetName() << endl;
+  // }
+  // else cout << "Collider " << gameObject.GetName() << " has no body" << endl;
+
   // Subscribe, if managed to find a valid id
   if (ownerId >= 0)
     GetState()->physicsSystem.RegisterCollider(dynamic_pointer_cast<Collider>(GetShared()), ownerId);

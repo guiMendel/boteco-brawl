@@ -5,13 +5,13 @@
 #include "Component.h"
 #include "Rigidbody.h"
 
-class CharacterSlideCollision : public Component
+class CharacterRepelCollision : public Component
 {
 public:
-  CharacterSlideCollision(GameObject &associatedObject, std::shared_ptr<Rigidbody> body);
-  virtual ~CharacterSlideCollision() {}
+  CharacterRepelCollision(GameObject &associatedObject, std::shared_ptr<Rigidbody> body);
+  virtual ~CharacterRepelCollision() {}
 
-  void OnTriggerCollision(GameObject &) override;
+  void OnTriggerCollision(TriggerCollisionData triggerData) override;
 
 private:
   // Max acceleration for sliding away, units/s/s
@@ -20,7 +20,7 @@ private:
   // How much acceleration decays as distance between bodies increases, in units/s/s/unit
   static const float slideAccelerationDecay;
 
-  // Adds velocity to slide away from the given body
+  // Adds velocity away from the given body
   void SlideAwayFrom(std::shared_ptr<Rigidbody> otherBody);
 
   // Reference to character's body

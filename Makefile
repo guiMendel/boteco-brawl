@@ -69,13 +69,13 @@ COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(ENGINE_INCLUDE_DIRECTORY) -
 # FOR ENGINE
 
 # Header files
-_ENGINE_DEPS = Game.h GameState.h SpriteRenderer.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h Animator.h SatCollision.h Collider.h Text.h Color.h Timer.h Rigidbody.h PhysicsSystem.h Sprite.h Animation.h AnimationFrame.h ParticleEmitter.h Circle.h Particle.h ParticleSystem.h PhysicsLayerHandler.h PlatformEffector.h
+_ENGINE_DEPS = Game.h GameState.h SpriteRenderer.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h Animator.h Collision.h Collider.h Text.h Color.h Timer.h Rigidbody.h PhysicsSystem.h Sprite.h Animation.h AnimationFrame.h ParticleEmitter.h Circle.h Particle.h ParticleSystem.h PhysicsLayerHandler.h PlatformEffector.h TriggerCollisionData.h
 
 # Generate header filepaths
 ENGINE_DEPS = $(patsubst %,$(ENGINE_INCLUDE_DIRECTORY)\\%,$(_ENGINE_DEPS))
 
 # Object files
-_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o Animator.o Collider.o Text.o Rigidbody.o PhysicsSystem.o Sprite.o Animation.o AnimationFrame.o SpriteRenderer.o ParticleEmitter.o Particle.o ParticleSystem.o Circle.o Vector2.o Rectangle.o Color.o PhysicsLayerHandler.o PlatformEffector.o
+_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o Animator.o Collider.o Text.o Rigidbody.o PhysicsSystem.o Sprite.o Animation.o AnimationFrame.o SpriteRenderer.o ParticleEmitter.o Particle.o ParticleSystem.o Circle.o Vector2.o Rectangle.o Color.o PhysicsLayerHandler.o PlatformEffector.o TriggerCollisionData.o Collision.o Helper.o
 
 # Generate object filepaths
 ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
@@ -97,13 +97,13 @@ INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATIO
 # FOR GAME
 
 # Header files
-_GAME_DEPS = MainState.h Movement.h PlayerInput.h Action.h Character.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h Player.h PlayerManager.h ControllerDevice.h ParticleFX.h Projectile.h CharacterSlideCollision.h PlatformDrop.h
+_GAME_DEPS = MainState.h Movement.h PlayerInput.h Action.h Character.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h Player.h PlayerManager.h ControllerDevice.h ParticleFX.h Projectile.h CharacterRepelCollision.h PlatformDrop.h
 
 # Generate header filepaths
 GAME_DEPS = $(patsubst %,$(GAME_INCLUDE_DIRECTORY)\\%,$(_GAME_DEPS))
 
 # Object files
-_GAME_OBJS = MainState.o Movement.o PlayerInput.o Character.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o Player.o PlayerManager.o ControllerDevice.o ParticleFX.o Projectile.o CharacterSlideCollision.o PlatformDrop.o
+_GAME_OBJS = MainState.o Movement.o PlayerInput.o Character.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o Player.o PlayerManager.o ControllerDevice.o ParticleFX.o Projectile.o CharacterRepelCollision.o PlatformDrop.o
 
 # Generate object filepaths
 GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))

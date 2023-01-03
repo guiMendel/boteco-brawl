@@ -31,17 +31,21 @@ void PlatformDrop::WhitelistPlatforms()
   }
 }
 
-void PlatformDrop::OnTriggerCollisionEnter(GameObject &platformObject)
+void PlatformDrop::OnTriggerCollisionEnter(TriggerCollisionData triggerData)
 {
+  LOCK(triggerData.weakOther, other);
+
   // Register this platform as in range
-  auto platform = platformObject.RequireComponent<PlatformEffector>();
+  auto platform = other->gameObject.RequireComponent<PlatformEffector>();
   platformsInRange[platform->id] = platform;
 }
 
-void PlatformDrop::OnTriggerCollisionExit(GameObject &platformObject)
+void PlatformDrop::OnTriggerCollisionExit(TriggerCollisionData triggerData)
 {
+  LOCK(triggerData.weakOther, other);
+
   // Get platform
-  auto platform = platformObject.RequireComponent<PlatformEffector>();
+  auto platform = other->gameObject.RequireComponent<PlatformEffector>();
 
   // Get body
   LOCK(weakBody, body);

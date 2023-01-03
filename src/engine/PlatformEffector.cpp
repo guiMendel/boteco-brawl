@@ -7,7 +7,7 @@ const pair<float, float> PlatformEffector::defaultPassThroughArc{-0.1f, -M_PI + 
 PlatformEffector::PlatformEffector(GameObject &associatedObject, pair<float, float> passThroughArc)
     : Component(associatedObject), passThroughArc(passThroughArc) {}
 
-void PlatformEffector::Update(float)
+void PlatformEffector::PhysicsUpdate(float)
 {
   // Update last frame's variable
   lastAllowedIds = allowedIds;
@@ -29,6 +29,21 @@ void PlatformEffector::WhitelistRemove(shared_ptr<Rigidbody> body)
 // Whether the given body should or not be allowed to not collide with this platform at this frame
 bool PlatformEffector::AllowThrough(shared_ptr<Rigidbody> body)
 {
+  // if (whitelistedIds.count(body->id) > 0)
+  //   cout << "Allowed by whitelist" << endl;
+
+  // else if (allowedIds.count(body->id) > 0)
+  //   cout << "Already allowed this frame" << endl;
+
+  // else if (lastAllowedIds.count(body->id) > 0)
+  //   cout << "Allowed by sequence" << endl;
+
+  // else if (IsBodyInArc(body))
+  //   cout << "Allowed by velocity arc" << endl;
+
+  // else
+  //   cout << "NOT allowed" << endl;
+
   // Allow if body is whitelisted, or was allowed this or the very last frame, or is within the arc
   if (whitelistedIds.count(body->id) > 0 ||
       allowedIds.count(body->id) > 0 ||
@@ -44,6 +59,10 @@ bool PlatformEffector::AllowThrough(shared_ptr<Rigidbody> body)
 
 bool PlatformEffector::IsBodyInArc(shared_ptr<Rigidbody> body)
 {
+  // Ignore irrelevant speeds
+  if (body->velocity.SqrMagnitude() < 0.001f)
+    return false;
+
   float velocityAngle = body->velocity.Angle();
 
   return (passThroughArc.first <= velocityAngle && velocityAngle <= passThroughArc.second) ||

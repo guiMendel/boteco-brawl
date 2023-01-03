@@ -17,7 +17,7 @@
 #include "ParticleEmitter.h"
 #include "PlayerManager.h"
 #include "Projectile.h"
-#include "CharacterSlideCollision.h"
+#include "CharacterRepelCollision.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
@@ -130,7 +130,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     auto repelBox = character->CreateChild(CHARACTER_SLIDE_BOX_OBJECT)->AddComponent<Collider>(collider, true);
 
     // Make it a different layer so that they collide
-    repelBox->gameObject.AddComponent<CharacterSlideCollision>(body);
+    repelBox->gameObject.AddComponent<CharacterRepelCollision>(body);
     repelBox->gameObject.SetPhysicsLayer(PhysicsLayer::CharacterRepelBox);
 
     // === PLATFORM DETECTOR FOR DROPPING
@@ -151,16 +151,19 @@ auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(s
 {
   return [size, withEffector](shared_ptr<GameObject> platform)
   {
-    platform->AddComponent<Rigidbody>(RigidbodyType::Static);
     platform->AddComponent<Collider>(Rectangle(0, 0, size.x, size.y), false, ColliderDensity::Ground);
 
     if (withEffector)
     {
       platform->AddComponent<PlatformEffector>();
       platform->SetPhysicsLayer(PhysicsLayer::Platform);
+      platform->AddComponent<Rigidbody>(RigidbodyType::Kinematic);
     }
     else
+    {
       platform->SetPhysicsLayer(PhysicsLayer::Scenario);
+      platform->AddComponent<Rigidbody>(RigidbodyType::Static);
+    }
   };
 }
 

@@ -17,7 +17,7 @@ public:
 
   virtual ~PlatformEffector() {}
 
-  void Update(float) override;
+  void PhysicsUpdate(float) override;
 
   // Whether the given body should or not be allowed to not collide with this platform at this frame
   bool AllowThrough(std::shared_ptr<Rigidbody> body);
