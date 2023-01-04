@@ -1,6 +1,7 @@
 #include "Color.h"
 
 using namespace std;
+using namespace Helper;
 
 // With each channel
 Color::Color(int red, int green, int blue, int alpha) : red(red), green(green), blue(blue), alpha(alpha) {}
@@ -21,6 +22,12 @@ Color::Color(const SDL_Color &other) : Color(other.r, other.g, other.b, other.a)
 bool Color::IsValid() const
 {
   return red >= 0 && red < 255 && green >= 0 && green < 255 && blue >= 0 && blue < 255 && alpha >= 0 && alpha < 255;
+}
+
+float Color::ClampValid(float value) { return Clamp(value, 0.0f, 255.0f); }
+Color Color::ClampValid(Color value)
+{
+  return Color(ClampValid(value.red), ClampValid(value.green), ClampValid(value.blue), ClampValid(value.alpha));
 }
 
 Color &Color::operator=(const Color &other)

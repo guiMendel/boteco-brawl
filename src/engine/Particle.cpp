@@ -15,6 +15,10 @@ void Particle::PhysicsUpdate(float deltaTime)
 {
   const static auto &physicsSystem = particleSystem.gameState.physicsSystem;
 
+  // Apply behavior
+  if (behavior)
+    behavior(*this, deltaTime);
+
   // Update velocity
   velocity += physicsSystem.gravity * gravityModifier * deltaTime;
 

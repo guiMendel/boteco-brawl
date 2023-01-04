@@ -49,6 +49,8 @@ void FallOffDeath::Die()
 {
   LOCK(weakArena, arena);
 
+  OnDeath.Invoke();
+
   // Disable character
   SetCharacterActive(false);
 
@@ -85,9 +87,15 @@ void FallOffDeath::Die()
   fireParams.gravityModifier = {Vector2::One() / 8, -Vector2::One() / 8};
   fireParams.lifetime = {0.01, 0.3};
   fireParams.speed = {10, 40};
+  // Make it turn to smoke slowly
+  fireParams.behavior = [](Particle &particle, float deltaTime)
+  {
+    particle.color = Color::ClampValid(particle.color - Color(900, 900, 900, 0) * deltaTime);
+  };
 
   // Smoke effect params
-  ParticleEmissionParameters smokeParams{fireParams};
+  ParticleEmissionParameters smokeParams;
+  smokeParams.angle = fireParams.angle;
   smokeParams.color = {Color::Black(), Color::Gray()};
   smokeParams.frequency = {0.0001, 0.005};
   smokeParams.gravityModifier = {-Vector2::One() / 10, -Vector2::One() / 5};

@@ -95,7 +95,7 @@ void ParticleEmitter::Emit()
 
   // Create particle
   auto particle = GetSystem().CreateParticle(
-      position, lifetime, Vector2::Angled(angle, speed), color, gravityModifier);
+      position, lifetime, Vector2::Angled(angle, speed), color, gravityModifier, currentParams.behavior);
 
   // Attachment
   if (attachToEmitter)

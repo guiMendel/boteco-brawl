@@ -14,6 +14,8 @@ class Particle
   friend class ParticleSystem;
 
 public:
+  using behavior_callback = std::function<void(Particle&, float)>;
+
   Particle(
       ParticleSystem &particleSystem, int id, Vector2 position,
       float lifetime, Vector2 velocity, Vector2 gravityModifier, Color color);
@@ -34,7 +36,7 @@ public:
   Color color;
   float lifetime;
 
-  // std::function<void(Particle&, float)>
+  behavior_callback behavior;
 
 private:
   ParticleSystem &particleSystem;

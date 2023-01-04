@@ -37,6 +37,10 @@ struct Color
   // Tells whether this color has valid values for all it's fields
   bool IsValid() const;
 
+  // Clamps a value to a valid color value
+  static float ClampValid(float value);
+  static Color ClampValid(Color value);
+
   // === OPERATORS
 
   Color &operator=(const Color &other);

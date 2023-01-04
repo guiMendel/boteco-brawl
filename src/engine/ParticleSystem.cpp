@@ -5,9 +5,11 @@ using namespace std;
 ParticleSystem::ParticleSystem(GameState &gameState) : gameState(gameState) {}
 
 shared_ptr<Particle> ParticleSystem::CreateParticle(
-    Vector2 position, float lifetime, Vector2 velocity, Color color, Vector2 gravityModifier)
+    Vector2 position, float lifetime, Vector2 velocity,
+    Color color, Vector2 gravityModifier, Particle::behavior_callback behavior)
 {
   auto particle = make_shared<Particle>(*this, nextId++, position, lifetime, velocity, gravityModifier, color);
+  particle->behavior = behavior;
 
   // Register it
   particles[particle->id] = particle;

@@ -89,12 +89,6 @@ bool PlatformEffectorCheck(Collider &collider1, Collider &collider2)
   bool check1 = CheckFor(collider1.rigidbodyWeak.lock(), collider2);
   bool check2 = CheckFor(collider2.rigidbodyWeak.lock(), collider1);
 
-  if (check1)
-    cout << "^" << collider1 << endl;
-
-  if (check2)
-    cout << "^" << collider2 << endl;
-
   return check1 || check2;
 }
 

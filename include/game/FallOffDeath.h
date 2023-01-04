@@ -14,6 +14,9 @@ public:
   // Seconds a character takes to respawn
   static const float respawnDelay;
 
+  // Triggered on death
+  Event OnDeath;
+
   FallOffDeath(GameObject &associatedObject);
   virtual ~FallOffDeath() {}
 

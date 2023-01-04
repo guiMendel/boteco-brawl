@@ -6,11 +6,11 @@
 #include "Circle.h"
 #include "Color.h"
 #include "ParticleSystem.h"
+#include "Particle.h"
 #include <utility>
 #include <functional>
 #include <list>
 
-class Particle;
 
 struct ParticleEmissionParameters
 {
@@ -34,6 +34,9 @@ struct ParticleEmissionParameters
 
   // Modifier applied to particle's gravity
   range<Vector2> gravityModifier;
+
+  // Allows changing particle's properties over time
+  Particle::behavior_callback behavior;
 
   ParticleEmissionParameters();
 };
@@ -73,9 +76,6 @@ public:
 
   // Initial parameters at each cycle
   ParticleEmissionParameters emission;
-
-  // Frame behavior to attach to emitted particles
-  std::function<void(Particle &)> particleBehavior{nullptr};
 
   // Permits altering the emission params over an emission cycle
   // Called each frame
