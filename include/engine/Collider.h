@@ -59,13 +59,10 @@ public:
   std::shared_ptr<Shape> shape;
 
 protected:
-  // Create a trivial shape of this collider's inherited type
-  virtual std::shared_ptr<Shape> CreateEmptyShape() const = 0;
+  // Create a copy of this shape, for the collider's inherited type. The shared ptr must have a separate counter
+  virtual std::shared_ptr<Shape> CopyShape() const = 0;
 
 private:
-  // Generates a copy of the given shape with a brand new shared pointer to it
-  std::shared_ptr<Shape> CopyShape(std::shared_ptr<Shape> shape, Vector2 scale = Vector2::One()) const;
-
   // Id of the owner gameObject
   int ownerId;
 };

@@ -47,13 +47,6 @@ void Collider::RegisterToState()
     GetState()->physicsSystem.RegisterCollider(dynamic_pointer_cast<Collider>(GetShared()), ownerId);
   else
     cout << "WARNING: Object " << gameObject.GetName() << " has a non-trigger collider, but has no Rigidbody attached" << endl;
-
-  cout << "For object " << gameObject << endl;
-  cout << "rect: " << *dynamic_pointer_cast<Rectangle>(shape) << endl;
-  for (auto vertex : dynamic_pointer_cast<Rectangle>(shape)->Vertices())
-  {
-    cout << vertex << endl;
-  }
 }
 
 float Collider::GetDensity() const
@@ -77,7 +70,7 @@ shared_ptr<Rigidbody> Collider::RequireRigidbody() const
 shared_ptr<Shape> Collider::DeriveShape() const
 {
   // Get a new shared ptr and shape
-  auto shapeCopy = CopyShape(shape);
+  auto shapeCopy = CopyShape();
 
   // Get scale
   Vector2 scale = gameObject.GetScale();
@@ -117,16 +110,3 @@ shared_ptr<Shape> Collider::DeriveShape() const
 }
 
 int Collider::GetOwnerId() const { return ownerId; }
-
-shared_ptr<Shape> Collider::CopyShape(shared_ptr<Shape> shape, Vector2 scale) const
-{
-  auto newShape = CreateEmptyShape();
-
-  Assert(typeid(*newShape) == typeid(*shape), "Collider of shape " + string(typeid(*newShape).name()) + " can't copy a shape of type " + string(typeid(*shape).name()));
-
-  *newShape = *shape;
-
-  newShape->Scale(scale);
-
-  return newShape;
-}

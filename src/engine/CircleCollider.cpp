@@ -10,7 +10,7 @@ Circle CircleCollider::GetCircle() const { return *dynamic_pointer_cast<Circle>(
 
 void CircleCollider::SetCircle(const Circle &circle) { shape = make_shared<Circle>(circle); }
 
-shared_ptr<Shape> CircleCollider::CreateEmptyShape() const { return make_shared<Circle>(); }
+shared_ptr<Shape> CircleCollider::CopyShape() const { return make_shared<Circle>(GetCircle()); }
 
 // Allows for debug rendering
 void CircleCollider::Render()

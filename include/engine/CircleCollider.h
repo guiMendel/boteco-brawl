@@ -26,7 +26,7 @@ public:
 
 protected:
   // Create empty circle
-  std::shared_ptr<Shape> CreateEmptyShape() const override;
+  std::shared_ptr<Shape> CopyShape() const override;
 };
 
 #endif
