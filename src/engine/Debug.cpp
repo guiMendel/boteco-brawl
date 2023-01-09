@@ -64,7 +64,7 @@ void Debug::DrawCircle(Circle circle, Color color)
   }
 }
 
-void Debug::DrawBox(Rectangle box, float rotation, Color color)
+void Debug::DrawBox(Rectangle box, Color color)
 {
   auto camera = Camera::GetMain();
 
@@ -72,11 +72,11 @@ void Debug::DrawBox(Rectangle box, float rotation, Color color)
   SDL_Point vertices[5];
 
   // Starting and final points are top left
-  vertices[0] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
-  vertices[1] = (SDL_Point)camera->WorldToScreen(box.BottomLeft(rotation));
-  vertices[2] = (SDL_Point)camera->WorldToScreen(box.BottomRight(rotation));
-  vertices[3] = (SDL_Point)camera->WorldToScreen(box.TopRight(rotation));
-  vertices[4] = (SDL_Point)camera->WorldToScreen(box.TopLeft(rotation));
+  vertices[0] = (SDL_Point)camera->WorldToScreen(box.TopLeft());
+  vertices[1] = (SDL_Point)camera->WorldToScreen(box.BottomLeft());
+  vertices[2] = (SDL_Point)camera->WorldToScreen(box.BottomRight());
+  vertices[3] = (SDL_Point)camera->WorldToScreen(box.TopRight());
+  vertices[4] = (SDL_Point)camera->WorldToScreen(box.TopLeft());
 
   // Get renderer
   auto renderer = Game::GetInstance().GetRenderer();

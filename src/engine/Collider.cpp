@@ -7,48 +7,13 @@
 
 using namespace std;
 
-Rectangle RectangleFromAnimator(Animator &animator, Vector2 scale)
-{
-  Animation &defaultAnimation = animator.GetAnimation(animator.defaultAnimation);
-  return Rectangle(
-      0,
-      0,
-      defaultAnimation[0].GetSprite()->GetWidth() * scale.x,
-      defaultAnimation[0].GetSprite()->GetHeight() * scale.y);
-}
-
-// Explicitly initialize box
-Collider::Collider(GameObject &associatedObject, Rectangle box, bool isTrigger, ColliderDensity density) : Component(associatedObject), isTrigger(isTrigger), density(density)
-{
-  SetBox(box);
-}
-
-// Use spriteRenderer's box
-Collider::Collider(GameObject &associatedObject, shared_ptr<SpriteRenderer> spriteRenderer, bool isTrigger, ColliderDensity density, Vector2 scale)
-    : Collider(associatedObject,
-               Rectangle(0, 0, spriteRenderer->sprite->GetWidth() * scale.x, spriteRenderer->sprite->GetHeight() * scale.y), isTrigger, density) {}
-
-// Use spriteRenderer's box
-Collider::Collider(GameObject &associatedObject, shared_ptr<Animator> animator, bool isTrigger, ColliderDensity density, Vector2 scale)
-    : Collider(associatedObject,
-               RectangleFromAnimator(*animator, scale), isTrigger, density) {}
-
-Collider::Collider(GameObject &associatedObject, shared_ptr<Collider> other, bool isTrigger, ColliderDensity density, Vector2 scale)
-    : Collider(associatedObject, Rectangle({0, 0}, other->GetBox().width * scale.x, other->GetBox().height * scale.y), isTrigger, density) {}
-
-void Collider::SetBox(const Rectangle &newBox)
-{
-  box = newBox;
-
-  maxVertexDistance = sqrt(box.width * box.width + box.height * box.height) / 2;
-}
-
-Rectangle Collider::GetBox() const { return box + gameObject.GetPosition(); }
+Collider::Collider(GameObject &associatedObject, shared_ptr<Shape> shape, bool isTrigger, ColliderDensity density)
+    : Component(associatedObject), isTrigger(isTrigger), density(density), shape(shape) {}
 
 void Collider::RegisterToState()
 {
   // Id of gameObject on which to subscribe this collider
-  int ownerId = isTrigger ? gameObject.id : -1;
+  ownerId = isTrigger ? gameObject.id : -1;
 
   // Object to inspect for a rigidbody
   shared_ptr<GameObject> inspectingObject = gameObject.GetShared();
@@ -82,21 +47,23 @@ void Collider::RegisterToState()
     GetState()->physicsSystem.RegisterCollider(dynamic_pointer_cast<Collider>(GetShared()), ownerId);
   else
     cout << "WARNING: Object " << gameObject.GetName() << " has a non-trigger collider, but has no Rigidbody attached" << endl;
-}
 
-void Collider::Render()
-{
-  Debug::DrawBox(GetBox(), gameObject.GetRotation());
-}
-
-float Collider::GetArea() const
-{
-  return box.width * box.height;
+  cout << "For object " << gameObject << endl;
+  cout << "rect: " << *dynamic_pointer_cast<Rectangle>(shape) << endl;
+  for (auto vertex : dynamic_pointer_cast<Rectangle>(shape)->Vertices())
+  {
+    cout << vertex << endl;
+  }
 }
 
 float Collider::GetDensity() const
 {
   return static_cast<int>(density);
+}
+
+float Collider::GetMass() const
+{
+  return GetDensity() * shape->GetArea();
 }
 
 shared_ptr<Rigidbody> Collider::RequireRigidbody() const
@@ -105,4 +72,61 @@ shared_ptr<Rigidbody> Collider::RequireRigidbody() const
     throw runtime_error("Collider required a rigidbody but didn't have one");
 
   return rigidbodyWeak.lock();
+}
+
+shared_ptr<Shape> Collider::DeriveShape() const
+{
+  // Get a new shared ptr and shape
+  auto shapeCopy = CopyShape(shape);
+
+  // Get scale
+  Vector2 scale = gameObject.GetScale();
+
+  // Apply scale
+  shapeCopy->Scale(scale.GetAbsolute());
+
+  // Handle negative scales
+  if (scale.x < 0)
+  {
+    // Invert position offset
+    shapeCopy->center.x = -shapeCopy->center.x;
+
+    // Rotate to mirror around y-axis
+    float mirrorAngle = M_PI / 2 * (sin(shapeCopy->rotation) < 0 ? -1 : 1);
+    shapeCopy->Rotate(2 * (mirrorAngle - shapeCopy->rotation));
+  }
+
+  if (scale.y < 0)
+  {
+    // Invert position offset
+    shapeCopy->center.y = -shapeCopy->center.y;
+
+    // Rotate to mirror around x-axis
+    float mirrorAngle = cos(shapeCopy->rotation) < 0 ? -M_PI : 0;
+    shapeCopy->Rotate(2 * (mirrorAngle - shapeCopy->rotation));
+  }
+
+  // Pivot around gameObject according to it's rotation
+  shapeCopy->center = gameObject.GetPosition().Pivot(shapeCopy->center, gameObject.GetRotation());
+
+  // Apply position & rotation offsets with gameObject's values
+  shapeCopy->Rotate(gameObject.GetRotation());
+  shapeCopy->Displace(gameObject.GetPosition());
+
+  return shapeCopy;
+}
+
+int Collider::GetOwnerId() const { return ownerId; }
+
+shared_ptr<Shape> Collider::CopyShape(shared_ptr<Shape> shape, Vector2 scale) const
+{
+  auto newShape = CreateEmptyShape();
+
+  Assert(typeid(*newShape) == typeid(*shape), "Collider of shape " + string(typeid(*newShape).name()) + " can't copy a shape of type " + string(typeid(*shape).name()));
+
+  *newShape = *shape;
+
+  newShape->Scale(scale);
+
+  return newShape;
 }

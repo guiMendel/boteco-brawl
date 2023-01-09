@@ -20,6 +20,7 @@
 #include "PlayerManager.h"
 #include "Projectile.h"
 #include "CharacterRepelCollision.h"
+#include "BoxCollider.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
@@ -86,7 +87,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // Give it collision
     auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0, 0);
-    auto collider = character->AddComponent<Collider>(animator, false, ColliderDensity::Character);
+    auto collider = character->AddComponent<BoxCollider>(animator, false, ColliderDensity::Character);
 
     // Turn on continuous collision
     body->continuousCollisions = true;
@@ -130,7 +131,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     // === CHARACTER REPELLING
 
     // Give it a repel box trigger collider, to allow for making 2 characters slide away from each other when overlapping
-    auto repelBox = character->CreateChild(CHARACTER_SLIDE_BOX_OBJECT)->AddComponent<Collider>(collider, true);
+    auto repelBox = character->CreateChild(CHARACTER_SLIDE_BOX_OBJECT)->AddComponent<BoxCollider>(collider, true);
 
     // Make it a different layer so that they collide
     repelBox->gameObject.AddComponent<CharacterRepelCollision>(body);
@@ -143,7 +144,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     platformDropDetector->AddComponent<PlatformDrop>(body);
 
     // Rectangle for it's collider: a bit bigger than the regular collider
-    platformDropDetector->AddComponent<Collider>(collider, true, ColliderDensity::Ground, Vector2::One() * 1.2);
+    platformDropDetector->AddComponent<BoxCollider>(collider, true, ColliderDensity::Ground, Vector2::One() * 1.2);
 
     // Make it a different layer so that they collide only with platforms
     platformDropDetector->SetPhysicsLayer(PhysicsLayer::CharacterPlatformDrop);
@@ -154,7 +155,7 @@ auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(s
 {
   return [size, withEffector](shared_ptr<GameObject> platform)
   {
-    platform->AddComponent<Collider>(Rectangle(0, 0, size.x, size.y), false, ColliderDensity::Ground);
+    platform->AddComponent<BoxCollider>(Rectangle({0, 0}, size.x, size.y), false, ColliderDensity::Ground);
 
     if (withEffector)
     {
@@ -179,7 +180,7 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> p
     IF_NOT_LOCK(weakParent, parent) { return; }
 
     auto body = projectile->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
-    auto collider = projectile->AddComponent<Collider>(Rectangle({0, 0}, 0.2, 0.2), true, ColliderDensity::Wood);
+    auto collider = projectile->AddComponent<BoxCollider>(Rectangle({0, 0}, 0.2, 0.2), true, ColliderDensity::Wood);
     projectile->AddComponent<::Projectile>(parent);
 
     body->velocity = initialVelocity;

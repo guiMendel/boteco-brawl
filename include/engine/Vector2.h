@@ -71,14 +71,14 @@ public:
 
   float SqrMagnitude() const;
 
-  float Magnitude() const;
+  float Magnitude();
 
   void SetMagnitude(float magnitude);
 
   // Sets the magnitude to either it's current value or the given value, in case the current one is greater
   Vector2 CapMagnitude(float value);
 
-  Vector2 Normalized() const;
+  Vector2 Normalized();
 
   float Angle() const;
 
@@ -86,6 +86,9 @@ public:
 
   // Returns a vector rotated by the given angle, in radians
   Vector2 Rotated(float angle) const;
+
+  // Returns this vector with absolute values for it's coordinates
+  Vector2 GetAbsolute() const;
 
   explicit operator bool() const;
 
@@ -115,6 +118,13 @@ public:
   static Vector2 Angled(float angle, float magnitude = 1);
 
   explicit operator SDL_Point() const;
+
+private:
+  // Last result of SqrMagnitude
+  float lastSqrMagnitude{-1};
+
+  // Last result of magnitude
+  float lastMagnitude;
 };
 
 Vector2 operator*(float value, const Vector2 &vector);

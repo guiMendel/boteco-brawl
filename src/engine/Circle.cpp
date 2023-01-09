@@ -1,8 +1,9 @@
 #include "Circle.h"
 
 using namespace std;
+using namespace Helper;
 
-Circle::Circle(Vector2 center, float radius) : center(center), radius(radius) {}
+Circle::Circle(Vector2 center, float radius) : Shape(center), radius(radius) {}
 
 Circle::Circle(float radius) : Circle(Vector2::Zero(), radius) {}
 
@@ -41,20 +42,30 @@ Circle Circle::operator+=(const Vector2 &vector) { return *this = *this + vector
 
 Circle Circle::operator-=(const Vector2 &vector) { return *this = *this - vector; }
 
-// Indicates if a given coordinate is contained by the Circle
-bool Circle::Contains(const Vector2 &vector) const
+bool Circle::Contains(const Vector2 &point) const
 {
-  return Vector2::Distance(center, vector) <= radius;
+  return Vector2::SqrDistance(point, center) <= radius * radius;
 }
 
-Circle::operator Vector2() const { return Vector2{center}; }
+float Circle::GetArea() const { return M_PI * radius * radius; }
 
 Circle::operator string() const
 {
   return "{ x: " + to_string(center.x) + ", y: " + to_string(center.y) + ", r: " + to_string(radius) + " }";
 }
 
-ostream &operator<<(ostream &stream, const Circle &circle) { return stream << (string)circle; }
-
 Circle operator*(float value, const Circle &circle) { return circle * value; }
 Circle operator/(float value, const Circle &circle) { return Circle(value / circle.center, value / circle.radius); }
+
+float Circle::GetMaxDimension() { return radius * 2; }
+float Circle::GetMinDimension() { return radius * 2; }
+
+void Circle::Scale(Vector2 scale)
+{
+  // Get absolute values
+  scale = scale.GetAbsolute();
+
+  Assert(scale.x == scale.y, "Scale for a circle must have the same absolute values for both x and y coordinates");
+
+  radius *= scale.x;
+}

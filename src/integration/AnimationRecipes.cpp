@@ -2,6 +2,7 @@
 #include "Movement.h"
 #include "Animator.h"
 #include "ParticleFX.h"
+#include "BoxCollider.h"
 #include "ObjectRecipes.h"
 
 using namespace std;
@@ -48,7 +49,7 @@ auto AnimationRecipes::Jump(Animator &animator) -> shared_ptr<Animation>
                                        return;
 
                                      // Get emission position
-                                     auto colliderBox = object.RequireComponent<Collider>()->GetBox();
+                                     auto colliderBox = object.RequireComponent<BoxCollider>()->GetBox();
                                      auto offset = Vector2(-colliderBox.width / 4, colliderBox.height / 2);
 
                                      // Particles

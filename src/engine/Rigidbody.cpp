@@ -14,8 +14,6 @@ const float trajectoryThicknessModifier{0.8f};
 // Slack to give beginning of trajectory
 const float trajectorySlack{0.8f};
 
-float CollidersProjectionSize(Rigidbody &body, Vector2 normal);
-
 Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity, float friction)
     : Component(associatedObject), elasticity(elasticity), friction(friction), type(type), lastPosition(gameObject.GetPosition()) {}
 
@@ -54,9 +52,6 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
 
   // Update the last position variable
   lastPosition = gameObject.GetPosition();
-
-  // Set this frame's possibly calculated trajectory as outdated
-  frameTrajectoryOutdated = true;
 
   KinematicBodyUpdate(deltaTime);
 }
@@ -128,24 +123,6 @@ void Rigidbody::ApplyImpulse(Vector2 impulse)
   velocity += impulse * inverseMass;
 }
 
-void Rigidbody::CalculateSmallestColliderDimension()
-{
-  smallestDimension = numeric_limits<float>::max();
-
-  // For each collider
-  for (auto collider : GetColliders())
-  {
-    auto colliderBox = collider->GetBox();
-
-    // Compare
-    smallestDimension = min(colliderBox.width, smallestDimension);
-    smallestDimension = min(colliderBox.height, smallestDimension);
-  }
-
-  // Square it
-  sqrSmallestDimension = smallestDimension * smallestDimension;
-}
-
 bool Rigidbody::ShouldUseContinuousDetection() const
 {
   // Cut short if disabled
@@ -155,93 +132,18 @@ bool Rigidbody::ShouldUseContinuousDetection() const
   // Check that it's moved at least as much as it's smallest dimension
   auto sqrDistance = (gameObject.GetPosition() - lastPosition).SqrMagnitude();
 
+  float dimension = GetMinDimension();
+
   // Only use continuous if it's moved more than this
-  return sqrDistance > sqrSmallestDimension;
+  return sqrDistance > dimension * dimension;
 }
 
-pair<Rectangle, float> Rigidbody::GetFrameTrajectory()
+Vector2 Rigidbody::GetFrameTrajectory()
 {
-  if (frameTrajectoryOutdated == false)
-    return frameTrajectory;
-
-  // Get displacement
-  Vector2 displacement = gameObject.GetPosition() - lastPosition;
-
-  // Get displacement normal
-  Vector2 normal = displacement.Normalized().Rotated(M_PI / 2.0f);
-
-  // Get colliders projection size on normal
-  float projectionSize = CollidersProjectionSize(*this, normal) * trajectoryThicknessModifier;
-
-  displacement.SetMagnitude(displacement.Magnitude() - trajectorySlack);
-
-  // Store result
-  // Place rectangle so that it's left face sits where the gameObject was
-  frameTrajectory = make_pair(
-      Rectangle(lastPosition + Vector2::Angled(displacement.Angle(), trajectorySlack) + displacement / 2,
-                displacement.Magnitude(), projectionSize),
-      displacement.Angle());
-
-  frameTrajectoryOutdated = false;
-
-  return frameTrajectory;
+  return gameObject.GetPosition() - lastPosition;
 }
 
-float CollidersProjectionSize(Rigidbody &body, Vector2 normal)
-{
-  // The biggest projection found
-  float biggestProjection{numeric_limits<float>::lowest()};
-
-  // The smallest projection found
-  float smallestProjection{numeric_limits<float>::max()};
-
-  // The bodies rotation
-  float rotation = body.gameObject.GetRotation();
-
-  // For each of it's colliders
-  for (auto collider : body.GetColliders())
-  {
-    // Get collider's center
-    Vector2 center = collider->GetBox().center;
-
-    // For each of the collider's vertices
-    for (auto vertex : collider->GetBox().Vertices(rotation))
-    {
-      // Get projection of vector from center to vertex
-      float projectionSize = Vector2::Dot(vertex - center, normal);
-
-      // Compare it
-      biggestProjection = max(biggestProjection, projectionSize);
-      smallestProjection = min(smallestProjection, projectionSize);
-    }
-  }
-
-  // Return the the distance between each projection
-  return biggestProjection - smallestProjection;
-}
-
-void Rigidbody::Render()
-{
-  auto [box, rotation] = frameTrajectory;
-
-  Debug::DrawBox(box, rotation, Color::Blue());
-
-  auto renderer = Game::GetInstance().GetRenderer();
-  auto camera = Camera::GetMain();
-
-  for (auto line : printLines)
-  {
-    SDL_SetRenderDrawColor(renderer, 255, 0, 255, SDL_ALPHA_OPAQUE);
-    SDL_Point v[2]{(SDL_Point)camera->WorldToScreen(line.first), (SDL_Point)camera->WorldToScreen(line.second)};
-    SDL_RenderDrawLines(renderer, v, 2);
-  }
-
-  if (printIntersectionPoint)
-  {
-    for (auto inter : intersectionPoints)
-      Debug::DrawCircle(Circle{inter, 0.3});
-  }
-}
+void Rigidbody::Render() {}
 
 RigidbodyType Rigidbody::GetType() const { return type; }
 
@@ -258,7 +160,7 @@ void Rigidbody::SetType(RigidbodyType newType)
     GetState()->physicsSystem.RegisterCollider(collider, gameObject.id);
 }
 
-bool Rigidbody::Raycast(float angle, float maxDistance, RaycastCollisionData &data)
+bool Rigidbody::Raycast(float angle, float maxDistance, RaycastData &data)
 {
   // Create a filter of this own object
   CollisionFilter filter;
@@ -269,11 +171,11 @@ bool Rigidbody::Raycast(float angle, float maxDistance, RaycastCollisionData &da
 
 bool Rigidbody::Raycast(float angle, float maxDistance)
 {
-  RaycastCollisionData discardedData;
+  RaycastData discardedData;
   return Raycast(angle, maxDistance, discardedData);
 }
 
-bool Rigidbody::ColliderCast(float angle, float maxDistance, RaycastCollisionData &data, float scaleColliders)
+bool Rigidbody::ColliderCast(float angle, float maxDistance, ColliderCastData &data, float scaleColliders)
 {
   // Create a filter of this own object
   CollisionFilter filter;
@@ -284,7 +186,7 @@ bool Rigidbody::ColliderCast(float angle, float maxDistance, RaycastCollisionDat
 
 bool Rigidbody::ColliderCast(float angle, float maxDistance, float scaleColliders)
 {
-  RaycastCollisionData discardedData;
+  ColliderCastData discardedData;
   return ColliderCast(angle, maxDistance, discardedData, scaleColliders);
 }
 
@@ -293,3 +195,15 @@ bool Rigidbody::IsStatic() const { return type == RigidbodyType::Static; }
 bool Rigidbody::IsKinematic() const { return type == RigidbodyType::Kinematic; }
 
 bool Rigidbody::IsDynamic() const { return type == RigidbodyType::Dynamic; }
+
+float Rigidbody::GetMinDimension() const
+{
+  float smallestDimension = numeric_limits<float>::max();
+
+  // For each collider
+  for (auto collider : GetColliders())
+    // Compare
+    smallestDimension = min(collider->DeriveShape()->GetMinDimension(), smallestDimension);
+
+  return smallestDimension;
+}

@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "Component.h"
 #include "Vector2.h"
-#include "Rectangle.h"
+#include "Shape.h"
 #include "Rigidbody.h"
 #include "ColliderDensity.h"
 
@@ -14,38 +14,37 @@ class Animator;
 class Collider : public Component
 {
 public:
-  // Explicitly initialize box
-  Collider(GameObject &associatedObject, Rectangle box, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default);
-
-  // Use sprite's box
-  Collider(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> sprite, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
-
-  // Use sprite animator's initial animation sprite size
-  Collider(GameObject &associatedObject, std::shared_ptr<Animator> animator, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
-
-  // Use other collider's box
-  Collider(GameObject &associatedObject, std::shared_ptr<Collider> other, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
+  // Explicitly initialize shape
+  Collider(
+      GameObject &associatedObject,
+      std::shared_ptr<Shape> shape,
+      bool isTrigger = false,
+      ColliderDensity density = ColliderDensity::Default);
 
   virtual ~Collider() {}
 
-  void RegisterToState() override;
-  void Render() override;
-
-  // Get the box, with it's x & y coordinates corresponding to it's actual position in game
-  Rectangle GetBox() const;
-  // Set the box, assuming x & y coordinates correspond to an offset from the gameObject's position
-  void SetBox(const Rectangle &box);
-
-  float GetMaxVertexDistance() const { return maxVertexDistance; }
-
   RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
-  float GetArea() const;
+  // Registers this collider in the physics collider structure
+  void RegisterToState() override;
+
+  // Allows for debug rendering
+  virtual void Render() override {}
+
+  // Get density value
   float GetDensity() const;
-  float GetMass() const { return GetArea() * GetDensity(); }
+
+  // Calculate's mass from density and shape area
+  float GetMass() const;
 
   // Tries to lock it's rigidbody component, and throws if it's expired
   std::shared_ptr<Rigidbody> RequireRigidbody() const;
+
+  // Id of object under which this collider is registered
+  int GetOwnerId() const;
+
+  // Get the associated shape, already rotated, scaled and displaced to this gameObject's scale, rotation and position
+  std::shared_ptr<Shape> DeriveShape() const;
 
   // Whether this collider actually participates in physical collisions
   const bool isTrigger;
@@ -56,12 +55,19 @@ public:
   // Rigidbody associated to this collider (null if trigger)
   std::weak_ptr<Rigidbody> rigidbodyWeak;
 
-private:
-  // Collision detection area (x & y coordinates dictate the offset of the box from the object's position)
-  Rectangle box;
+  // Collision detection area (coordinates & rotation are an offset from the object's)
+  std::shared_ptr<Shape> shape;
 
-  // Maximum distance of a vertex from the rectangle's center
-  float maxVertexDistance;
+protected:
+  // Create a trivial shape of this collider's inherited type
+  virtual std::shared_ptr<Shape> CreateEmptyShape() const = 0;
+
+private:
+  // Generates a copy of the given shape with a brand new shared pointer to it
+  std::shared_ptr<Shape> CopyShape(std::shared_ptr<Shape> shape, Vector2 scale = Vector2::One()) const;
+
+  // Id of the owner gameObject
+  int ownerId;
 };
 
 #include "SpriteRenderer.h"

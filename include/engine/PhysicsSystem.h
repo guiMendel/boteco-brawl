@@ -9,19 +9,33 @@
 #include <functional>
 #include "Collision.h"
 #include "PhysicsLayerHandler.h"
+#include "TriggerCollisionData.h"
 
 class GameState;
 class Rigidbody;
 class Collider;
 
 // Stores data on a raycast collision
-struct RaycastCollisionData
+struct RaycastData
 {
   // How long the ray was able to travel before collision
   float elapsedDistance;
 
   // The collider with which collision happened
   std::weak_ptr<Collider> other;
+};
+
+// Stores data on a collider cast collision
+struct ColliderCastData
+{
+  // How long the collider structure was able to travel before collision
+  float elapsedDistance;
+
+  // Data on collision
+  Collision::Data collision;
+
+  // All detected trigger collisions
+  std::vector<TriggerCollisionData> triggerCollisions;
 };
 
 // Stores data on how to filter a collision detection
@@ -59,13 +73,13 @@ public:
   // Returns whether a particle collides with any body when cast from the given position in some direction, over a fixed distance
   // Populates the raycast collision struct if a collision is detected
   // Allows filtering collisions with a CollisionFilter
-  bool Raycast(Vector2 origin, float angle, float maxDistance, RaycastCollisionData &data, CollisionFilter filter = CollisionFilter());
+  bool Raycast(Vector2 origin, float angle, float maxDistance, RaycastData &data, CollisionFilter filter = CollisionFilter());
   bool Raycast(Vector2 origin, float angle, float maxDistance, CollisionFilter filter = CollisionFilter());
 
   // Returns whether a group of colliders collides with any body when cast from the given position in some direction, over a fixed distance
   // Populates the raycast collision struct if a collision is detected
   // Allows filtering collisions with a CollisionFilter
-  bool ColliderCast(std::vector<std::shared_ptr<Collider>> colliders, Vector2 origin, float angle, float maxDistance, RaycastCollisionData &data, CollisionFilter filter = CollisionFilter(), float colliderSizeScale = 1);
+  bool ColliderCast(std::vector<std::shared_ptr<Collider>> colliders, Vector2 origin, float angle, float maxDistance, ColliderCastData &data, CollisionFilter filter = CollisionFilter(), float colliderSizeScale = 1);
   bool ColliderCast(std::vector<std::shared_ptr<Collider>> colliders, Vector2 origin, float angle, float maxDistance, CollisionFilter filter = CollisionFilter(), float colliderSizeScale = 1);
 
   // Current gravity of the system
@@ -88,13 +102,13 @@ private:
   void DetectCollisions(ValidatedCollidersMap::iterator objectIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &staticColliders);
 
   // Continuous collision detection for an object
-  void DetectBetweenFramesCollision(ValidatedCollidersMap::iterator objectIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &staticColliders);
+  void DetectBetweenFramesCollision(ValidatedCollidersMap::iterator objectIterator);
 
   // Returns whether detected a collision between the given particle and any bodies
-  bool DetectRaycastCollisions(Vector2 particle, RaycastCollisionData &data, CollisionFilter filter);
+  bool DetectRaycastCollisions(Vector2 particle, RaycastData &data, CollisionFilter filter);
 
   // Returns whether detected a collision between the given colliders and any bodies
-  bool DetectColliderCastCollisions(std::vector<std::shared_ptr<Collider>> colliders, Vector2 position, RaycastCollisionData &data, CollisionFilter filter, float colliderSizeScale);
+  bool DetectColliderCastCollisions(std::vector<std::shared_ptr<Collider>> colliders, Vector2 position, ColliderCastData &data, CollisionFilter filter, float colliderSizeScale);
 
   // Applies impulse, checks if collision is entering & announces regular collision
   void ResolveCollision(Collision::Data collisionData);
@@ -104,11 +118,11 @@ private:
 
   // Pass each object through ValidateColliders and collect the results in a map
   ValidatedCollidersMap ValidateAllColliders(std::unordered_map<int, WeakColliders> &);
-  
+
   std::unordered_map<int, std::shared_ptr<Collider>> ValidateAllColliders(std::unordered_map<int, std::weak_ptr<Collider>> &);
 
   // For a specific object, removes any expired colliders from structure & returns the remaining ones as shared
-  ValidatedColliders ValidateColliders(int id, WeakColliders& colliders);
+  ValidatedColliders ValidateColliders(int id, WeakColliders &colliders);
 
   // Finds the collider (if any) whose intersection with the trajectory rect is closest to the trajectory start
   // Returns a vector of the found colliders, the distance where this collision happened, and a callback to be executed if this collision is selected to be resolved

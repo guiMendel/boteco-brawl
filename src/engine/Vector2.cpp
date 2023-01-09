@@ -63,7 +63,18 @@ Vector2 operator/(float value, const Vector2 &vector) { return Vector2(value / v
 
 float Vector2::SqrMagnitude() const { return x * x + y * y; }
 
-float Vector2::Magnitude() const { return sqrt(SqrMagnitude()); }
+float Vector2::Magnitude()
+{
+  float sqrMagnitude = SqrMagnitude();
+
+  if (lastSqrMagnitude != sqrMagnitude)
+  {
+    lastSqrMagnitude = sqrMagnitude;
+    lastMagnitude = sqrt(lastSqrMagnitude);
+  }
+
+  return lastMagnitude;
+}
 
 void Vector2::SetMagnitude(float magnitude)
 {
@@ -85,7 +96,7 @@ Vector2 Vector2::CapMagnitude(float value)
   return *this;
 }
 
-Vector2 Vector2::Normalized() const
+Vector2 Vector2::Normalized()
 {
   float magnitude = Magnitude();
 
@@ -104,6 +115,8 @@ Vector2 Vector2::Rotated(float angle) const
 {
   return Vector2(x * cos(angle) - y * sin(angle), x * sin(angle) + y * cos(angle));
 }
+
+Vector2 Vector2::GetAbsolute() const { return {abs(x), abs(y)}; }
 
 Vector2::operator bool() const { return x != 0 || y != 0; }
 

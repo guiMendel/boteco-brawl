@@ -1,7 +1,44 @@
 #include "Collision.h"
 #include "Collider.h"
+#include "Rectangle.h"
+#include "Circle.h"
+
+#define CAST_SHAPE(oldVar, newVar, NewType)            \
+  auto newVar = dynamic_pointer_cast<NewType>(oldVar); \
+  Assert(newVar != nullptr, "Failed to get " #NewType " pointer " #newVar " in distance finder call");
+
+#define SHAPE_ID(shape) string(typeid(shape).name())
+#define SHAPE_CLASS_ID(Shape) SHAPE_ID(*make_shared<Shape>())
 
 using namespace std;
+
+// === LINE SEGMENT MATH
+
+// Line segment defined by it's 2 extremities
+using LineSegment = pair<Vector2, Vector2>;
+
+// Get the point which is the given point's projection on a line segment
+Vector2 ProjectPoint(Vector2 point, LineSegment segment);
+
+// === COLLISION IMPLEMENTATION SIGNATURES
+
+// Sat Collision for 2 rectangles
+pair<float, Vector2> RectanglesDistance(shared_ptr<Shape> rect1, shared_ptr<Shape> rect2);
+pair<float, Vector2> RectanglesDistanceCast(shared_ptr<Rectangle> rect1, shared_ptr<Rectangle> rect2);
+
+// Collision for 2 circles
+pair<float, Vector2> CirclesDistance(shared_ptr<Shape> circle1, shared_ptr<Shape> circle2);
+
+// Collision for rectangle and circle
+pair<float, Vector2> RectangleCircleDistance(shared_ptr<Shape> rect, shared_ptr<Shape> circle);
+
+// Associate the above implementations to the map
+const Collision::distance_finder_map Collision::distanceFinder{
+    {SHAPE_CLASS_ID(Rectangle) + SHAPE_CLASS_ID(Rectangle), RectanglesDistance},
+    {SHAPE_CLASS_ID(Circle) + SHAPE_CLASS_ID(Circle), CirclesDistance},
+    {SHAPE_CLASS_ID(Rectangle) + SHAPE_CLASS_ID(Circle), RectangleCircleDistance}};
+
+// === COLLISION DATA
 
 size_t Collision::Data::GetHash() const
 {
@@ -13,8 +50,58 @@ size_t Collision::Data::GetHash() const
   return Helper::HashTwo(source->id, other->id);
 }
 
-pair<float, Vector2> Collision::FindMinDistanceSingleSided(
-    Rectangle rect1, Rectangle rect2, float rotation1, float rotation2)
+// === COLLISION METHODS
+
+pair<float, Vector2> Collision::FindMinDistance(shared_ptr<Shape> shape1, shared_ptr<Shape> shape2)
+{
+  string shapeId1 = SHAPE_ID(*shape1);
+  string shapeId2 = SHAPE_ID(*shape2);
+
+  // Find the associated distance finder
+  if (distanceFinder.count(shapeId1 + shapeId2) > 0)
+    return distanceFinder.at(shapeId1 + shapeId2)(shape1, shape2);
+
+  // If that order isn't there, the other order must be
+  Assert(distanceFinder.count(shapeId2 + shapeId1) > 0,
+         "No distance finder was registered for shapes " + shapeId1 + " and " + shapeId2);
+
+  return distanceFinder.at(shapeId2 + shapeId1)(shape2, shape1);
+}
+
+// === LOCAL FUNCTION DEFINITIONS
+
+Vector2 ProjectPoint(Vector2 point, LineSegment segment)
+{
+  // Get segment vector direction
+  auto segmentDirection = (segment.second - segment.first).Normalized();
+
+  // Get vector from segment start to point
+  auto pointDistance = point - segment.first;
+
+  // Project point vector on segment vector
+  float projectionMagnitude = Vector2::Dot(pointDistance, segmentDirection);
+
+  // Clamp magnitude to abide within line segment's limits
+  projectionMagnitude = Clamp(projectionMagnitude, 0.0f, (segment.second - segment.first).Magnitude());
+
+  // Get projection point by displacing segment start by the magnitude
+  return segment.first + segmentDirection * projectionMagnitude;
+}
+
+pair<float, Vector2> RectanglesDistance(shared_ptr<Shape> rect1Shape, shared_ptr<Shape> rect2Shape)
+{
+  // Get the rectangles
+  CAST_SHAPE(rect1Shape, rect1, Rectangle);
+  CAST_SHAPE(rect2Shape, rect2, Rectangle);
+
+  // Check from both perspectives
+  auto distance1 = RectanglesDistanceCast(rect1, rect2);
+  auto distance2 = RectanglesDistanceCast(rect2, rect1);
+
+  return distance1.first >= distance2.first ? distance1 : distance2;
+}
+
+pair<float, Vector2> RectanglesDistanceCast(shared_ptr<Rectangle> rect1, shared_ptr<Rectangle> rect2)
 {
   // Will keep track of the best distance found
   float bestDistance = numeric_limits<float>::lowest();
@@ -23,25 +110,23 @@ pair<float, Vector2> Collision::FindMinDistanceSingleSided(
   Vector2 bestNormal;
 
   // Normal to be used in each iteration
-  Vector2 normal = Vector2::Angled(rotation1);
+  Vector2 normal = Vector2::Angled(rect1->rotation);
 
   // Loop rect1 vertices
-  for (Vector2 vertex1 : rect1.Vertices(rotation1))
+  for (Vector2 vertex1 : rect1->Vertices())
   {
     // This vertex's minimum distance to rect2
-    float minDistance = numeric_limits<float>::max();
+    float vertexMinDistance = numeric_limits<float>::max();
 
     // Loop rect2 vertices
-    for (Vector2 vertex2 : rect2.Vertices(rotation2))
-    {
+    for (Vector2 vertex2 : rect2->Vertices())
       // Check if this distance is smaller (project vertices distance on normal)
-      minDistance = min(minDistance, Vector2::Dot(vertex2 - vertex1, normal));
-    }
+      vertexMinDistance = min(vertexMinDistance, Vector2::Dot(vertex2 - vertex1, normal));
 
     // Check if we got a better distance
-    if (minDistance > bestDistance)
+    if (vertexMinDistance > bestDistance)
     {
-      bestDistance = minDistance;
+      bestDistance = vertexMinDistance;
       bestNormal = normal;
     }
 
@@ -52,43 +137,64 @@ pair<float, Vector2> Collision::FindMinDistanceSingleSided(
   return make_pair(bestDistance, bestNormal);
 }
 
-pair<float, Vector2> Collision::FindMinDistance(
-    Rectangle rect1, Rectangle rect2, float rotation1, float rotation2)
+pair<float, Vector2> CirclesDistance(shared_ptr<Shape> circle1Shape, shared_ptr<Shape> circle2Shape)
 {
-  auto distance1 = FindMinDistanceSingleSided(rect1, rect2, rotation1, rotation2);
-  auto distance2 = FindMinDistanceSingleSided(rect2, rect1, rotation2, rotation1);
+  // Get the circles
+  CAST_SHAPE(circle1Shape, circle1, Circle);
+  CAST_SHAPE(circle2Shape, circle2, Circle);
 
-  return distance1.first >= distance2.first ? distance1 : distance2;
+  // Get distance between circe's centers
+  Vector2 centerDistance = circle2->center - circle1->center;
+
+  // Get circle's distance
+  float distance = centerDistance.Magnitude() - (circle2->radius + circle1->radius);
+
+  return make_pair(distance, centerDistance.Normalized());
 }
 
-bool Collision::DetectIntersection(Rectangle rect, Vector2 point, float rotation)
+pair<float, Vector2> RectangleCircleDistance(shared_ptr<Shape> rectShape, shared_ptr<Shape> circleShape)
 {
-  // Detects if point is inside projection of rectangle on a given axis
-  auto DetectForAxis = [rect, rotation, point](Vector2 axis)
+  // Get the shapes
+  CAST_SHAPE(rectShape, rect, Rectangle);
+  CAST_SHAPE(circleShape, circle, Circle);
+
+  // Find rect's edge closest to circle center
+  LineSegment bestEdge;
+  Vector2 bestEdgeProjection;
+  float bestEdgeSqrDistance = numeric_limits<float>::max();
+
+  auto vertices = rect->Vertices();
+  auto edgeStartIterator = vertices.end() - 1;
+  for (auto edgeEndIterator = vertices.begin();
+       edgeEndIterator != vertices.end();
+       edgeStartIterator = edgeEndIterator++)
   {
-    // Store lowest projection
-    float lowestProjection = numeric_limits<float>::max();
+    // Get the edge line segment
+    LineSegment edge{*edgeStartIterator, *edgeEndIterator};
 
-    // Store biggest projection
-    float biggestProjection = numeric_limits<float>::lowest();
+    // Project the circle's center on it
+    auto circleProjection = ProjectPoint(circle->center, edge);
+    float sqrDistance = Vector2::SqrDistance(circleProjection, circle->center);
 
-    // Project each vertex
-    for (auto vertex : rect.Vertices())
+    if (sqrDistance < bestEdgeSqrDistance)
     {
-      float projection = Vector2::Dot(vertex, axis);
-      lowestProjection = min(lowestProjection, projection);
-      biggestProjection = max(biggestProjection, projection);
+      bestEdgeSqrDistance = sqrDistance;
+      bestEdge = edge;
+      bestEdgeProjection = circleProjection;
     }
+  }
 
-    // Get the own point's projection
-    float pointProjection = Vector2::Dot(point, axis);
+  auto projectionDistance = circle->center - bestEdgeProjection;
 
-    // It's inside if it's between the lowest & biggest projections
-    return lowestProjection <= pointProjection && pointProjection <= biggestProjection;
-  };
+  // Case 1: circle center in rectangle
+  if (rect->Contains(circle->center))
+    // Distance is from projection all the way to circle's opposite edge, so we sum the radius
+    return make_pair(projectionDistance.Magnitude() + circle->radius, projectionDistance.Normalized());
 
-  // First normal to be used
-  Vector2 normal = Vector2::Angled(rotation);
+  // Case 2: rectangle's edge crossing circle
+  if (circle->Contains(bestEdgeProjection))
+    return make_pair(circle->radius - projectionDistance.Magnitude(), projectionDistance.Normalized());
 
-  return DetectForAxis(normal) && DetectForAxis(normal.Rotated(M_PI / 2.0));
+  // When no intersection is detected
+  return make_pair(projectionDistance.Magnitude() - circle->radius, projectionDistance.Normalized());
 }

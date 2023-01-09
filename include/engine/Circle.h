@@ -1,14 +1,11 @@
-#ifndef __CIRCLE__
-#define __CIRCLE__
+#ifndef __ELLIPSE__
+#define __ELLIPSE__
 
-#include "Vector2.h"
+#include "Shape.h"
 
-class Circle
+class Circle : public Shape
 {
 public:
-  // Centers coords
-  Vector2 center;
-
   // Radius
   float radius;
 
@@ -37,17 +34,26 @@ public:
   Circle operator-=(const Vector2 &vector);
 
   // Indicates if a given coordinate is contained by the Circle
-  bool Contains(const Vector2 &vector) const;
+  bool Contains(const Vector2 &vector) const override;
 
-  explicit operator Vector2() const;
+  float GetArea() const override;
 
-  explicit operator std::string() const;
+  // It's the diameter
+  float GetMaxDimension() override;
+  
+  // It's the diameter
+  float GetMinDimension() override;
+
+  // Scale circle's dimensions by the given amount
+  // The scale must have the same absolute value for both axes, otherwise an error will be raised
+  void Scale(Vector2 scale) override;
+
+  explicit operator std::string() const override;
 };
 
-Circle operator*(float value, const Circle &circle);
-Circle operator/(float value, const Circle &circle);
-Circle operator+(const Vector2 &vector, const Circle &circle);
-Circle operator-(const Vector2 &vector, const Circle &circle);
-std::ostream &operator<<(std::ostream &stream, const Vector2 &vector);
+Circle operator*(float value, const Circle &Circle);
+Circle operator/(float value, const Circle &Circle);
+Circle operator+(const Vector2 &vector, const Circle &Circle);
+Circle operator-(const Vector2 &vector, const Circle &Circle);
 
 #endif

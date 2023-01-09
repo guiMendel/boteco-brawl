@@ -52,25 +52,28 @@ public:
   // Tells whether should use continuous detection in this frame
   bool ShouldUseContinuousDetection() const;
 
-  // For bodies with continuous collision check, gets info for a rectangle that spans along it's trajectory since the last frame; as well as the trajectory angle
-  std::pair<Rectangle, float> GetFrameTrajectory();
+  // For bodies with continuous collision check, gets trajectory from last frame to this frame
+  Vector2 GetFrameTrajectory();
 
   RigidbodyType GetType() const;
   void SetType(RigidbodyType newType);
 
   // Returns whether a particle collides with any other body when cast from this object's position in some direction, over a fixed distance
   // Populates the raycast collision struct if a collision is detected
-  bool Raycast(float angle, float maxDistance, RaycastCollisionData &data);
+  bool Raycast(float angle, float maxDistance, RaycastData &data);
   bool Raycast(float angle, float maxDistance);
 
   // Returns whether this body's colliders collide with any other body when cast from this object's position in some direction, over a fixed distance
   // Populates the raycast collision struct if a collision is detected
-  bool ColliderCast(float angle, float maxDistance, RaycastCollisionData &data, float scaleColliders = 1);
+  bool ColliderCast(float angle, float maxDistance, ColliderCastData &data, float scaleColliders = 1);
   bool ColliderCast(float angle, float maxDistance, float scaleColliders = 1);
 
   bool IsStatic() const;
   bool IsKinematic() const;
   bool IsDynamic() const;
+
+  // Get min dimension of all colliders
+  float GetMinDimension() const;
 
   // Velocity for each axis
   Vector2 velocity{0, 0};
@@ -90,20 +93,11 @@ public:
   // Friction applied on each frame. Is a modifier applied to speed per second
   float airFriction{defaultAirFriction};
 
-  bool printIntersectionPoint{false};
-
-  std::vector<Vector2> intersectionPoints;
-
-  std::vector<std::pair<Vector2, Vector2>> printLines;
-
 private:
   // Calculates mass based on colliders volumes & densities
   void DeriveMassFromColliders();
 
   void InternalSetMass(float newMass);
-
-  // Calculates the value of the smallest dimension of it's colliders
-  void CalculateSmallestColliderDimension();
 
   // What the type of this body is
   RigidbodyType type{RigidbodyType::Static};
@@ -120,17 +114,7 @@ private:
   // Stores the last position of the body
   Vector2 lastPosition;
 
-  // Smallest dimension of this body's colliders
-  float smallestDimension{0};
-  float sqrSmallestDimension{0};
-
   bool printDebug{false};
-
-  // Store this frame's result of the call to GetFrameTrajectory()
-  std::pair<Rectangle, float> frameTrajectory;
-
-  // Whether frameTrajectory is now outdated
-  bool frameTrajectoryOutdated{true};
 };
 
 #endif

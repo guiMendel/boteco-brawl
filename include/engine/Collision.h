@@ -6,13 +6,16 @@
 #include <iostream>
 #include <utility>
 #include <memory>
+#include <unordered_map>
+#include <functional>
 
 class Collider;
 
 // Implementation of SAT collision, limited to rectangle polygons
 // Based on this guide: https://youtu.be/-EsWKT7Doww
-namespace Collision
+class Collision
 {
+public:
   struct Data
   {
     // Direction through which contact was initiated
@@ -31,18 +34,16 @@ namespace Collision
     size_t GetHash() const;
   };
 
-  // Finds the minimum distance between both rectangle's edges
+  // Finds the minimum distance between both shape's edges
   // Negative values indicate penetration
-  // Rotations are in radians
-  std::pair<float, Vector2> FindMinDistanceSingleSided(
-      Rectangle rect1, Rectangle rect2, float rotation1 = 0.0f, float rotation2 = 0.0f);
+  static std::pair<float, Vector2> FindMinDistance(std::shared_ptr<Shape> shape1, std::shared_ptr<Shape> shape2);
 
-  std::pair<float, Vector2> FindMinDistance(
-      Rectangle rect1, Rectangle rect2, float rotation1 = 0.0f, float rotation2 = 0.0f);
+private:
+  using distance_finder_map = std::unordered_map<
+      std::string,
+      std::function<std::pair<float, Vector2>(std::shared_ptr<Shape>, std::shared_ptr<Shape>)>>;
 
-  // Indicates whether point is inside the perimeter of the rectangle
-  // Rotation in radians
-  bool DetectIntersection(Rectangle rect, Vector2 point, float rotation = 0);
-}
+  static const distance_finder_map distanceFinder;
+};
 
 #endif

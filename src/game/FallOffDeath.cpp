@@ -58,7 +58,7 @@ void FallOffDeath::Die()
   gameObject.timer.Start(RESPAWN_TIMER);
 
   // Get radius
-  auto radius = gameObject.RequireComponent<Collider>()->GetBox().width / 2;
+  auto radius = gameObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
 
   // Get effect position
   Vector2 effectPosition{
@@ -126,7 +126,7 @@ void FallOffDeath::Respawn()
   gameObject.timer.Reset(RESPAWN_TIMER, 0, false);
 
   // Get height
-  auto height = gameObject.RequireComponent<Collider>()->GetBox().height;
+  auto height = gameObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
 
   // Set new position
   gameObject.SetPosition({0, -arena->height / 2 - height / 2});
