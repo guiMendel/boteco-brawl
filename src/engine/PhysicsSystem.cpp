@@ -229,12 +229,24 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
 
   // Check if a collision should have happened
   ColliderCastData castData;
-  if (ColliderCast(
-          collidersEntryIterator->second,
-          objectBody->lastPosition,
-          trajectory.Angle(),
-          trajectory.Magnitude(),
-          castData) == false)
+
+  bool collisionFound = ColliderCast(
+      collidersEntryIterator->second,
+      objectBody->lastPosition,
+      trajectory.Angle(),
+      trajectory.Magnitude(),
+      castData);
+
+  // Trigger any found triggers
+  for (auto triggerData : castData.triggerCollisions)
+  {
+    LOCK(triggerData.weakSource, source);
+    LOCK(triggerData.weakOther, other);
+    ResolveTriggerCollision(source, other);
+  }
+
+  // If no collision, stop
+  if (collisionFound == false)
     return;
 
   LOCK(castData.collision.weakOther, otherCollider);
