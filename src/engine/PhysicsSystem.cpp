@@ -154,6 +154,11 @@ void PhysicsSystem::HandleCollisions()
     // Check against all dynamic objects
     for (auto [objectId, colliders] : dynamicColliders)
     {
+      if (GameObject::SameLineage(
+              *gameState.GetObject(triggerCollider->GetOwnerId()),
+              *gameState.GetObject(objectId)))
+        continue;
+
       if (CheckForCollision(colliders, {triggerCollider}, collisionData))
         ResolveTriggerCollision(collisionData.weakSource.lock(), collisionData.weakOther.lock());
     }
@@ -162,6 +167,11 @@ void PhysicsSystem::HandleCollisions()
     auto nonDynamicTargets = isStatic ? kinematicColliders : nonDynamicColliders;
     for (auto [objectId, colliders] : nonDynamicTargets)
     {
+      if (GameObject::SameLineage(
+              *gameState.GetObject(triggerCollider->GetOwnerId()),
+              *gameState.GetObject(objectId)))
+        continue;
+
       if (CheckForCollision(colliders, {triggerCollider}, collisionData))
         ResolveTriggerCollision(collisionData.weakSource.lock(), collisionData.weakOther.lock());
     }
@@ -175,6 +185,11 @@ void PhysicsSystem::HandleCollisions()
       // Get it's data
       auto [otherTriggerId, otherTriggerCollider] = *otherTriggerEntryIterator;
       auto otherTriggerBody = otherTriggerCollider->rigidbodyWeak.lock();
+
+      if (GameObject::SameLineage(
+              *gameState.GetObject(triggerCollider->GetOwnerId()),
+              *gameState.GetObject(otherTriggerCollider->GetOwnerId())))
+        continue;
 
       // Ignore it if both are static
       if (isStatic && (otherTriggerBody == nullptr || otherTriggerBody->IsStatic()))
@@ -358,9 +373,6 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 {
   if (!collider)
     return;
-
-  if (collider->gameObject.GetName() == "Platform")
-    cout << "Registering collider for " << collider->gameObject.GetName() << endl;
 
   // Register triggers
   if (collider->isTrigger)

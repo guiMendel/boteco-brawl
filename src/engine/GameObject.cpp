@@ -570,7 +570,7 @@ shared_ptr<GameState> GameObject::GetState()
   return currentState;
 }
 
-bool GameObject::IsDescendantOf(GameObject &other)
+bool GameObject::IsDescendantOf(const GameObject &other) const
 {
   if (id == other.id)
     return true;
@@ -579,6 +579,11 @@ bool GameObject::IsDescendantOf(GameObject &other)
     return false;
 
   return GetParent()->IsDescendantOf(other);
+}
+
+bool GameObject::SameLineage(const GameObject &first, const GameObject &second)
+{
+  return first.IsDescendantOf(second) || second.IsDescendantOf(first);
 }
 
 void GameObject::SetPhysicsLayer(PhysicsLayer newLayer)

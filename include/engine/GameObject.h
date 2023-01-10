@@ -293,7 +293,10 @@ public:
   void SetParent(std::shared_ptr<GameObject> newParent);
 
   // Check if this gameObject is in the descendant lineage of the other object
-  bool IsDescendantOf(GameObject &other);
+  bool IsDescendantOf(const GameObject &other) const;
+
+  // Check if either object is a descendent of each other
+  static bool SameLineage(const GameObject &first, const GameObject &second);
 
 private:
   // Whether this is the root object

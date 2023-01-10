@@ -21,6 +21,8 @@
 #include "Projectile.h"
 #include "CharacterRepelCollision.h"
 #include "BoxCollider.h"
+#include "CircleCollider.h"
+#include "Circle.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
@@ -180,7 +182,8 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> p
     IF_NOT_LOCK(weakParent, parent) { return; }
 
     auto body = projectile->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
-    auto collider = projectile->AddComponent<BoxCollider>(Rectangle({0, 0}, 0.2, 0.2), true, ColliderDensity::Wood);
+    // auto collider = projectile->AddComponent<BoxCollider>(Rectangle({0, 0}, 0.2, 0.2), true, ColliderDensity::Wood);
+    auto collider = projectile->AddComponent<CircleCollider>(Circle({0, 0}, 0.2), true, ColliderDensity::Wood);
     projectile->AddComponent<::Projectile>(parent);
 
     body->velocity = initialVelocity;

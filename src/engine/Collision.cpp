@@ -189,12 +189,9 @@ pair<float, Vector2> RectangleCircleDistance(shared_ptr<Shape> rectShape, shared
   // Case 1: circle center in rectangle
   if (rect->Contains(circle->center))
     // Distance is from projection all the way to circle's opposite edge, so we sum the radius
-    return make_pair(projectionDistance.Magnitude() + circle->radius, projectionDistance.Normalized());
+    return make_pair(-(projectionDistance.Magnitude() + circle->radius), projectionDistance.Normalized());
 
   // Case 2: rectangle's edge crossing circle
-  if (circle->Contains(bestEdgeProjection))
-    return make_pair(circle->radius - projectionDistance.Magnitude(), projectionDistance.Normalized());
-
-  // When no intersection is detected
+  // Case 2 returns the exact same calculation as when no intersection is detected
   return make_pair(projectionDistance.Magnitude() - circle->radius, projectionDistance.Normalized());
 }
