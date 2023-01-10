@@ -12,9 +12,6 @@
 #include "GameState.h"
 #include "MainState.h"
 
-// #define PRINT_FRAME_DURATION
-// #define PRINT_PHYSICS_FRAME_DURATION
-
 using namespace std;
 using namespace Helper;
 
@@ -23,6 +20,19 @@ class no_state_error : runtime_error
 public:
   no_state_error(string message) : runtime_error(message) {}
 };
+
+// === EXTERNAL FIELDS
+
+#ifdef DISPLAY_REAL_FPS
+// How many frames have been rendered in the last second
+static int framesThisSecond{0};
+
+// How many physics frames have been processed in the last second
+static int physicsFramesThisSecond{0};
+
+// Counter (in ms) for counting how many frames are being rendered per second
+static int secondCounter{0};
+#endif
 
 // === EXTERNAL METHODS =================================
 
@@ -110,6 +120,9 @@ void ExitSDL(SDL_Window *window, SDL_Renderer *renderer)
 // Game instance
 unique_ptr<Game> Game::gameInstance = nullptr;
 
+// Path to engine's default font
+const string Game::defaultFontPath{"assets/engine/fonts/PixelOperator.ttf"};
+
 // === PRIVATE METHODS =======================================
 
 Game::Game(string title, int width, int height)
@@ -158,6 +171,71 @@ void Game::CalculateDeltaTime(int &start, float &deltaTime)
   start = newStart;
 }
 
+#ifdef DISPLAY_REAL_FPS
+void Game::CountElapsedFrames(int elapsedMilliseconds)
+{
+  secondCounter += elapsedMilliseconds;
+
+  if (secondCounter >= 1000)
+  {
+    // Reset counter
+    secondCounter = 0;
+
+    framesInLastSecond = framesThisSecond;
+    physicsFramesInLastSecond = physicsFramesThisSecond;
+    framesThisSecond = 0;
+    physicsFramesThisSecond = 0;
+  }
+}
+
+void Game::DisplayRealFps()
+{
+  // Get text
+  string text = to_string(framesInLastSecond) + "fps, " + to_string(physicsFramesInLastSecond) + "pfps";
+
+  // Get font
+  auto font = Resources::GetFont(defaultFontPath, 25);
+
+  // Get texture
+
+  // Will hold the generated surface
+  static auto_unique_ptr<SDL_Surface> surface(nullptr, SDL_FreeSurface);
+
+  // Use the appropriate method to load this
+  surface.reset(TTF_RenderText_Solid(font.get(), text.c_str(), Color::Yellow()));
+
+  // Ensure it's loaded
+  Assert(surface != nullptr, "Failed to generate surface for frame counter font");
+
+  // Convert to texture
+  static auto_unique_ptr<SDL_Texture> texture(nullptr, SDL_DestroyTexture);
+
+  texture.reset(SDL_CreateTextureFromSurface(GetRenderer(), surface.get()));
+
+  // Get position
+  static const int padding{10};
+  static const Vector2 rawPosition{float(screenWidth) - padding, padding};
+  // Offset coordinates to right align texture
+  Vector2 position = rawPosition - Vector2{float(surface->w), 0};
+
+  // Get the destination rect
+  SDL_Rect destinationRect{int(position.x), int(position.y), surface->w, surface->h};
+
+  // Get clip rectangle
+  SDL_Rect clipRect{0, 0, surface->w, surface->h};
+
+  // Put the texture in the renderer
+  SDL_RenderCopyEx(
+      GetRenderer(),
+      texture.get(),
+      &clipRect,
+      &destinationRect,
+      0,
+      nullptr,
+      SDL_FLIP_NONE);
+}
+#endif
+
 // === PUBLIC METHODS =================================
 
 Game &Game::GetInstance()
@@ -204,11 +282,17 @@ void Game::GameLoop()
   // Milliseconds until next physics frame
   int nextPhysicsFrameIn{0};
 
+  // Calculate how long each loop will take to execute
+  int executionStart = SDL_GetTicks();
+
   // Loop while exit not requested
   while (GetState()->QuitRequested() == false)
   {
-    // Calculate how long this loop will take to execute
-    int executionStart = SDL_GetTicks();
+#ifdef DISPLAY_REAL_FPS
+    CountElapsedFrames(SDL_GetTicks() - executionStart);
+#endif
+
+    executionStart = SDL_GetTicks();
 
     try
     {
@@ -264,6 +348,10 @@ void Game::Frame()
   float startMs = SDL_GetTicks();
 #endif
 
+#ifdef DISPLAY_REAL_FPS
+  // Count this frame
+  framesThisSecond++;
+#endif
   // Objects to add to state
   vector<shared_ptr<GameObject>> objectsToAdd;
 
@@ -305,6 +393,11 @@ void Game::Frame()
   // Render the state
   state.Render();
 
+#ifdef DISPLAY_REAL_FPS
+  // Render frame count
+  DisplayRealFps();
+#endif
+
   // WARNING: DO NOT USE state FROM HERE UNTIL END OF LOOP
 
   // Render the window
@@ -317,8 +410,13 @@ void Game::Frame()
 
 void Game::PhysicsFrame()
 {
-#ifdef PRINT_PHYSICS_FRAME_DURATION
+#ifdef PRINT_FRAME_DURATION
   float startMs = SDL_GetTicks();
+#endif
+
+#ifdef DISPLAY_REAL_FPS
+  // Count this frame
+  physicsFramesThisSecond++;
 #endif
 
   // Calculate physics frame's delta time
@@ -329,7 +427,7 @@ void Game::PhysicsFrame()
   // Update the state
   GetState()->PhysicsUpdate(physicsDeltaTime);
 
-#ifdef PRINT_PHYSICS_FRAME_DURATION
+#ifdef PRINT_FRAME_DURATION
   cout << "Physics took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
 #endif
 }
@@ -341,7 +439,7 @@ shared_ptr<GameState> Game::GetState()
   return loadedStates.top();
 }
 
-void Game::PushState(std::shared_ptr<GameState> &&state)
+void Game::PushState(shared_ptr<GameState> &&state)
 {
   // Alert if next is overridden
   if (nextState != nullptr)

@@ -42,6 +42,8 @@ public:
     ClearTable(musicTable);
     ClearTable(textureTable);
     ClearTable(soundTable);
+    ClearTable(spriteTable);
+    ClearTable(fontTable);
   }
 
 private:

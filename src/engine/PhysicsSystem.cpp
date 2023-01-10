@@ -237,11 +237,12 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
           castData) == false)
     return;
 
-  // cout << "Detected between frames collision with " << collisionTargets.at(0)->gameObject.GetName() << endl;
+  LOCK(castData.collision.weakOther, otherCollider);
+  cout << "Detected between frames collision with " << otherCollider->gameObject.GetName() << endl;
 
   // Move the body to where collision happened
   objectBody->gameObject.SetPosition(
-      objectBody->lastPosition + Vector2::Angled(trajectory.Angle(), trajectory.Magnitude()));
+      objectBody->lastPosition + Vector2::Angled(trajectory.Angle(), castData.elapsedDistance));
 
   // Resolve the encountered collision
   ResolveCollision(castData.collision);
@@ -653,13 +654,18 @@ bool PhysicsSystem::ColliderCast(vector<shared_ptr<Collider>> colliders, Vector2
   // Vector to displace from colliders' current position to the origin parameter
   Vector2 originDisplacement = origin - colliders[0]->gameObject.GetPosition();
 
+  // Get the min collider dimension
+  float minColliderDimension{numeric_limits<float>::max()};
+  for (auto collider : colliders)
+    minColliderDimension = min(minColliderDimension, collider->DeriveShape()->GetMinDimension());
+
   // How much the colliders have already been displaced
   float displacement{0};
 
   while (displacement < maxDistance)
   {
     // Displace them
-    displacement = min(displacement + raycastGranularity, maxDistance);
+    displacement = min(displacement + minColliderDimension / 4.0f, maxDistance);
 
     // Check for collision
     if (DetectColliderCastCollisions(colliders, originDisplacement + Vector2::Angled(angle, displacement), data, filter, colliderSizeScale))

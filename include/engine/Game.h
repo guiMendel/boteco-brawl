@@ -6,9 +6,9 @@
 #include <stack>
 #include "Helper.h"
 #include "InputManager.h"
+#include "BuildConfigurations.h"
 
 class GameState;
-// class InputManager;
 
 // Class with the main game logic
 class Game
@@ -22,10 +22,10 @@ public:
   // Defines the maximum physics frames per second
   static const int physicsFrameRate;
 
-  // Defines the resolution width
+  // Defines the resolution width, in pixels
   static const int screenWidth;
 
-  // Defines the resolution height
+  // Defines the resolution height, in pixels
   static const int screenHeight;
 
   // Default pixels per unit
@@ -62,6 +62,9 @@ public:
   // Explicit destructor
   ~Game();
 
+  // Path to engine's default font
+  static const std::string defaultFontPath;
+
 private:
   // Singleton constructor
   Game(std::string title, int width, int height);
@@ -84,6 +87,14 @@ private:
   // Behavior of a physics frame
   void PhysicsFrame();
 
+#ifdef DISPLAY_REAL_FPS
+  // Counts elapsed frames this second
+  void CountElapsedFrames(int elapsedMilliseconds);
+
+  // Displays actual fps on top left corner of screen
+  void DisplayRealFps();
+#endif
+
   // Game instance
   static std::unique_ptr<Game> gameInstance;
 
@@ -104,6 +115,14 @@ private:
 
   // Whether game has started
   bool started{false};
+
+#ifdef DISPLAY_REAL_FPS
+  // How many frames have actually rendered last second
+  int framesInLastSecond{0};
+
+  // How many physics frames have actually rendered last second
+  int physicsFramesInLastSecond{0};
+#endif
 
   // Input manager instance
   InputManager inputManager;

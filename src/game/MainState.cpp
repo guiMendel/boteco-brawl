@@ -29,10 +29,10 @@ void MainState::InitializeObjects()
   CreateObject("ParticleFX", ObjectRecipes::SingleComponent<ParticleFX>());
 
   // Add an arena
-  CreateObject("Arena", ObjectRecipes::Arena("./assets/image/boteco.jpg"));
+  CreateObject("Arena", ObjectRecipes::Arena("./assets/images/boteco.jpg"));
 
   // Add player
-  // auto character1 = CreateObject("Character", ObjectRecipes::Character(playerManager->GetMainPlayer()), Vector2(-3.5, -10))->GetComponent<Rigidbody>();
+  auto character1 = CreateObject("Character", ObjectRecipes::Character(playerManager->GetMainPlayer()), Vector2(-3.5, -20))->GetComponent<Rigidbody>();
 
   // auto character2 = CreateObject("Character2", ObjectRecipes::Character(player2), Vector2(3.5, -10))->GetComponent<Rigidbody>();
 

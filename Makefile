@@ -83,7 +83,7 @@ ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
 # FOR INTEGRATION
 
 # Header files
-_INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h Tag.h AnimationRecipes.h PhysicsLayer.h
+_INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h Tag.h AnimationRecipes.h PhysicsLayer.h BuildConfigurations.h
 
 # Generate header filepaths
 INTEGRATION_DEPS = $(patsubst %,$(INTEGRATION_INCLUDE_DIRECTORY)\\%,$(_INTEGRATION_DEPS))

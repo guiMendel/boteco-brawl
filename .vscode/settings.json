@@ -16,6 +16,7 @@
     "LEFTX",
     "MOUSEBUTTONDOWN",
     "MOUSEBUTTONUP",
+    "pfps",
     "RIGHTSHOULDER",
     "RIGHTX",
     "SDLK",

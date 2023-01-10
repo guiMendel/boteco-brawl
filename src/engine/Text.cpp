@@ -20,7 +20,8 @@ void Text::Render()
   Vector2 position = gameObject.GetPosition() - Vector2((float)width, (float)height) / 2;
 
   // Get the real position
-  SDL_Rect destinationRect = (SDL_Rect)Rectangle(Camera::GetMain()->WorldToScreen(position), width, height);
+  auto realPosition{Camera::GetMain()->WorldToScreen(position)};
+  SDL_Rect destinationRect{int(realPosition.x), int(realPosition.y), width, height};
 
   // Get clip rectangle
   SDL_Rect clipRect{0, 0, width, height};
