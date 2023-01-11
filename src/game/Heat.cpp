@@ -45,6 +45,9 @@ void Heat::TakeDamage(const Damage &damage)
   LOCK(weakBody, body);
   LOCK(weakMovement, movement);
 
+  // Cancel any previous speed
+  body->velocity = Vector2::Zero();
+
   // Get impulse multiplier from heat, a value from 1 to 100
   float heatMultiplier = 99 * heat * inverseMaxHeat + 1;
 

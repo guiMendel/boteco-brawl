@@ -100,7 +100,7 @@ void Animation::Update(float deltaTime)
   SetFrame(nextFrame);
 }
 
-vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetClipInfo clipInfo, float frameDuration, SpriteConfig config)
+vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetClipInfo clipInfo, float frameDuration, Vector2 virtualPixelOffset, SpriteConfig config)
 {
   // Get sprite
   auto sprite = Resources::GetSprite(filename);
@@ -140,11 +140,21 @@ vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetC
     {
       // Get this frame's clip
       SDL_Rect clip{column * (clipInfo.width + clipInfo.horizontalGap) + clipInfo.paddingLeft,
-                     row * (clipInfo.height + clipInfo.verticalGap) + clipInfo.paddingTop,
-                     clipInfo.width,
-                     clipInfo.height};
+                    row * (clipInfo.height + clipInfo.verticalGap) + clipInfo.paddingTop,
+                    clipInfo.width,
+                    clipInfo.height};
 
-      frames.push_back(AnimationFrame(Resources::GetSprite(filename, config, clip), frameDuration));
+      // Get sprite for this frame
+      auto sprite = Resources::GetSprite(filename, config, clip);
+
+      // Build the frame
+      auto frame = AnimationFrame(sprite, frameDuration);
+
+      // Apply the offset
+      if (virtualPixelOffset)
+        frame.spriteOffset = virtualPixelOffset / Game::defaultVirtualPixelsPerUnit;
+
+      frames.push_back(frame);
     }
   }
 

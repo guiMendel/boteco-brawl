@@ -49,8 +49,9 @@ public:
   AnimationFrame operator[](int index) const { return frames[index]; }
 
   // Automatically generates the frame vector for a spritesheet animation
+  // Allows offsetting the frame's by some virtual pixels
   static std::vector<AnimationFrame> SliceSpritesheet(
-      std::string filename, SpritesheetClipInfo clipInfo, float frameDuration, SpriteConfig config = SpriteConfig());
+      std::string filename, SpritesheetClipInfo clipInfo, float frameDuration, Vector2 virtualPixelOffset = Vector2::Zero(), SpriteConfig config = SpriteConfig());
 
   // Raised when the last frame finishes, even if is looping
   Event OnCycleEnd;

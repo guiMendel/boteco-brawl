@@ -49,9 +49,6 @@ struct AnimationAction : public Action
   // Requires a name for an animation
   virtual std::string GetAnimation() const = 0;
 
-  // Function to apply to sequence index before appending it to the animation name
-  virtual int TransformIndex() const;
-
   virtual ~AnimationAction() {}
 };
 

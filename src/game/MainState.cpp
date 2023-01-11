@@ -32,7 +32,7 @@ void MainState::InitializeObjects()
   CreateObject("Arena", ObjectRecipes::Arena("./assets/images/boteco.jpg"));
 
   // Add player
-  auto character1 = CreateObject("CharacterStateManager", ObjectRecipes::CharacterStateManager(playerManager->GetMainPlayer()), Vector2(-3.5, -10))->GetComponent<Rigidbody>();
+  auto character1 = CreateObject("Character", ObjectRecipes::CharacterStateManager(playerManager->GetMainPlayer()), Vector2(-3.5, -10))->GetComponent<Rigidbody>();
 
   auto character2 = CreateObject("Character2", ObjectRecipes::CharacterStateManager(player2), Vector2(3.5, -10))->GetComponent<Rigidbody>();
 

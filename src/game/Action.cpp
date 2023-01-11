@@ -2,6 +2,7 @@
 #include "GameObject.h"
 #include "Animator.h"
 #include "CharacterStateManager.h"
+#include "Character.h"
 
 using namespace std;
 
@@ -15,15 +16,18 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
   auto animator = target.RequireComponent<Animator>();
 
   // Get animation name to use
-  string animation;
+  string animation{GetAnimation()};
 
-  // If the bare animation name is present, use it always
-  if (animator->HasAnimation(GetAnimation()))
-    animation = GetAnimation();
-
+  // If the bare animation name is present, use it always, ignoring sequence index
   // Otherwise, append transformed sequence index
-  else
-    animation = GetAnimation() + to_string(TransformIndex());
+  if (animator->HasAnimation(animation) == false)
+  {
+    // Get character
+    auto character = target.RequireComponent<Character>();
+
+    // Append it, but first convert from 0-based to 1-based
+    animation += to_string(character->TransformSequenceIndexFor(animation, sequenceIndex) + 1);
+  }
 
   // Start this animation
   // When animation is over, make sure this action's state is no longer active
@@ -31,9 +35,6 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
                  { IF_LOCK(weakStateManager, stateManager)
                                               stateManager->RemoveState(stateId); });
 }
-
-// Default implementation does no transformation
-int AnimationAction::TransformIndex() const { return sequenceIndex; }
 
 int AttackAction::GetPriority() const { return 1; }
 

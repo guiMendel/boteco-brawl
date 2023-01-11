@@ -40,12 +40,16 @@ public:
   // Set the dimensions of the image to be displayed (in game units, NOT pixels)
   void SetTargetDimension(int width, int height = -1);
 
+  // Get width of the sprite's image, in real pixels
   int GetUnscaledWidth() const { return clipRect.w; }
 
+  // Get height of the sprite's image, in real pixels
   int GetUnscaledHeight() const { return clipRect.h; }
 
+  // Get width of sprite scaled by gameObject's scale, in units
   float GetWidth(float scale = 1) const;
 
+  // Get height of sprite scaled by gameObject's scale, in units
   float GetHeight(float scale = 1) const;
 
   void SetConfig(SpriteConfig config);
@@ -59,7 +63,7 @@ private:
   // The loaded texture
   std::shared_ptr<SDL_Texture> texture;
 
-  // Dimensions of the texture
+  // Dimensions of the texture, in real pixels
   int width, height;
 
   // The clipped rectangle of the image to be rendered

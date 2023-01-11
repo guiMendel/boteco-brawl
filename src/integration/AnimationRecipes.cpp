@@ -109,11 +109,18 @@ auto AnimationRecipes::Brake(Animator &animator) -> shared_ptr<Animation>
                                 Animation::SliceSpritesheet("./assets/sprites/carry.png", clipInfo, 0.1), true);
 }
 
-auto AnimationRecipes::Punch(Animator &animator) -> shared_ptr<Animation>
+auto AnimationRecipes::Neutral1(Animator &animator) -> shared_ptr<Animation>
 {
-  return make_shared<Animation>("punch",
+  return make_shared<Animation>("neutral1",
                                 animator,
-                                Animation::SliceSpritesheet("./assets/sprites/throw.png", SpritesheetClipInfo(8, 8), 0.1));
+                                Animation::SliceSpritesheet("./assets/sprites/punch.png", SpritesheetClipInfo(16, 8), 0.1, {4, 0}));
+}
+
+auto AnimationRecipes::Neutral2(Animator &animator) -> shared_ptr<Animation>
+{
+  return make_shared<Animation>("neutral2",
+                                animator,
+                                Animation::SliceSpritesheet("./assets/sprites/kick.png", SpritesheetClipInfo(16, 8), 0.1, {4, 0}));
 }
 
 auto AnimationRecipes::Dash(Animator &animator) -> shared_ptr<Animation>
@@ -126,9 +133,9 @@ auto AnimationRecipes::Dash(Animator &animator) -> shared_ptr<Animation>
                                 Animation::SliceSpritesheet("./assets/sprites/carry.png", clipInfo, 0.1));
 }
 
-auto AnimationRecipes::Special(Animator &animator) -> shared_ptr<Animation>
+auto AnimationRecipes::SpecialNeutral(Animator &animator) -> shared_ptr<Animation>
 {
-  auto animation = make_shared<Animation>("special",
+  auto animation = make_shared<Animation>("specialNeutral",
                                           animator,
                                           Animation::SliceSpritesheet("./assets/sprites/throw.png", SpritesheetClipInfo(8, 8), 0.1));
 

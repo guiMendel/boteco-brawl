@@ -18,9 +18,15 @@ SpriteRenderer::SpriteRenderer(GameObject &associatedObject, const std::string f
   sprite = Resources::GetSprite(fileName);
 }
 
+void SpriteRenderer::Render() { Render(gameObject.GetPosition()); }
+
 void SpriteRenderer::Render(Vector2 position)
 {
-  auto [width, height] = make_pair(sprite->GetWidth(abs(gameObject.GetScale().x)), sprite->GetHeight(gameObject.GetScale().y));
+  position += offset * gameObject.GetScale();
+
+  auto scale = gameObject.GetScale().GetAbsolute();
+
+  auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
 
   // cout << gameObject.GetName() << " size:" << width << ", " << height << endl;
 

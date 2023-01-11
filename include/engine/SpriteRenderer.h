@@ -23,7 +23,7 @@ public:
   virtual ~SpriteRenderer() {}
 
   // Renders the sprite using the associated object's position
-  void Render() override { Render(gameObject.GetPosition() + offset); }
+  void Render() override;
 
   // Renders the sprite to the provided position, ignoring the associated object's position
   void Render(Vector2 position);
@@ -38,7 +38,7 @@ public:
   std::shared_ptr<Sprite> sprite;
 
   // Offset when rendering based on game object's position
-  Vector2 offset{0, 0};
+  Vector2 offset;
 
   // Whether to center the sprite on the render coordinates
   bool centered;

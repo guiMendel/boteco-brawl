@@ -2,6 +2,7 @@
 #include "Arena.h"
 #include "FallOffDeath.h"
 #include "PlatformEffector.h"
+#include "TestCharacter.h"
 #include "PlatformDrop.h"
 #include "CameraFollower.h"
 #include "Animator.h"
@@ -81,15 +82,16 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
     animator->AddAnimation(AnimationRecipes::Fall);
     animator->AddAnimation(AnimationRecipes::Land);
     animator->AddAnimation(AnimationRecipes::Brake);
-    animator->AddAnimation(AnimationRecipes::Punch);
     animator->AddAnimation(AnimationRecipes::Dash);
-    animator->AddAnimation(AnimationRecipes::Special);
+    animator->AddAnimation(AnimationRecipes::Neutral1);
+    animator->AddAnimation(AnimationRecipes::Neutral2);
+    animator->AddAnimation(AnimationRecipes::SpecialNeutral);
 
     // === COLLISION
 
     // Give it collision
     auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0, 0);
-    auto collider = character->AddComponent<BoxCollider>(animator, false, ColliderDensity::CharacterStateManager);
+    auto collider = character->AddComponent<BoxCollider>(animator, false, ColliderDensity::Character);
 
     // Turn on continuous collision
     body->continuousCollisions = true;
@@ -155,6 +157,9 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
 
     // Add a hitbox child object to hold any hitboxes and Attacks
     character->CreateChild(HITBOX_OBJECT);
+
+    // GIve it a character to differentiate which animations to play for each attack
+    character->AddComponent<TestCharacter>();
   };
 }
 

@@ -47,7 +47,13 @@ void AnimationFrame::Trigger(GameObject &gameObject) const
     callback(gameObject);
 
   // Check if there is a sprite to set
-  if (sprite != nullptr)
+  if (sprite != nullptr) {
     // Then the object must have a sprite renderer
-    gameObject.RequireComponent<SpriteRenderer>()->sprite = sprite;
+    auto spriteRenderer = gameObject.RequireComponent<SpriteRenderer>();
+    
+    spriteRenderer->sprite = sprite;
+
+    // Apply offset
+    spriteRenderer->offset = spriteOffset;
+  }
 }

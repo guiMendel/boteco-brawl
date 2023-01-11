@@ -101,10 +101,10 @@ void CharacterController::Start()
 
     // Attacks
     input->OnNeutralAttack.AddListener("character-controller", [this]()
-                                       { Dispatch<Actions::Punch>(); });
+                                       { Dispatch<Actions::Neutral>(); });
 
     input->OnNeutralSpecial.AddListener("character-controller", [this]()
-                                        { Dispatch<Actions::Special>(); });
+                                        { Dispatch<Actions::SpecialNeutral>(); });
 
     //  Dash
     input->OnDash.AddListener("character-controller", [this](Vector2 direction)

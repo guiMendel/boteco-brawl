@@ -36,6 +36,9 @@ public:
   // Get this frame's default duration
   float GetDuration() const;
 
+  // An offset to apply to the sprite renderer for this frame
+  Vector2 spriteOffset;
+
 private:
   // All the callbacks triggered by this frame
   std::vector<std::function<void(GameObject &)>> callbacks;

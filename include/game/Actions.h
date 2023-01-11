@@ -84,9 +84,9 @@ namespace Actions
     }
   };
 
-  ATTACK(Punch, "punch");
+  ATTACK(Neutral, "neutral");
   
-  ATTACK(Special, "special");
+  ATTACK(SpecialNeutral, "specialNeutral");
 
 }
 
