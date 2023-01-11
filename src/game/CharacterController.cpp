@@ -5,6 +5,9 @@
 #include "PlayerInput.h"
 #include <iostream>
 
+// Min speed that trigger landing animation on land
+const static float minLandAnimationSpeed{1};
+
 using namespace std;
 
 const float CharacterController::totalDashCooldown{1};
@@ -113,8 +116,10 @@ void CharacterController::OnLand()
 {
   airDashAvailable = true;
 
-  // Perform land action
-  DispatchNonDelayable<Actions::Land>();
+  // Perform land action if velocity is big enough
+  static const float sqrMinSpeed = minLandAnimationSpeed * minLandAnimationSpeed;
+  if (rigidbody.velocity.SqrMagnitude() >= sqrMinSpeed)
+    DispatchNonDelayable<Actions::Land>();
 }
 
 void CharacterController::DispatchDash(Vector2 direction)

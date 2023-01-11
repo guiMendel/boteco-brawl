@@ -97,6 +97,8 @@ void Rigidbody::DeriveMassFromColliders()
   }
 
   InternalSetMass(totalMass);
+
+  cout << gameObject << " calculated mass is " << totalMass << endl;
 }
 
 // Gets the list of colliders associated with this body

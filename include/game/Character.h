@@ -13,7 +13,7 @@
 class Character : public Component
 {
 public:
-  Character(GameObject &associatedObject);
+  Character(GameObject &associatedObject, float baseDamage);
   virtual ~Character() {}
 
   // Triggered when a state exits normally (times out)
@@ -51,6 +51,9 @@ public:
   void SetControl(bool value);
 
   void Update(float) override;
+
+  // Base damage of this character
+  float baseDamage;
 
 private:
   void AddState(std::shared_ptr<CharacterState> newState);

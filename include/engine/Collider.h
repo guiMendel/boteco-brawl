@@ -46,6 +46,9 @@ public:
   // Get the associated shape, already rotated, scaled and displaced to this gameObject's scale, rotation and position
   std::shared_ptr<Shape> DeriveShape() const;
 
+  // Get the owner game object
+  std::shared_ptr<GameObject> GetOwner() const;
+
   // Whether this collider actually participates in physical collisions
   const bool isTrigger;
 

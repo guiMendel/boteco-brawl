@@ -31,6 +31,10 @@ void CharacterRepelCollision::SlideAwayFrom(std::shared_ptr<Rigidbody> otherBody
   // Get acceleration to apply
   float acceleration = max(maxSlideAcceleration - slideAccelerationDecay * distanceVector.Magnitude(), 0.0f);
 
+  // Apply masses
+  if (body->GetMass() != otherBody->GetMass())
+    acceleration *= 2 * otherBody->GetMass() / (body->GetMass() + otherBody->GetMass());
+
   // Apply it
   body->velocity += distanceVector.Normalized() * acceleration;
 }

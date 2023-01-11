@@ -110,3 +110,8 @@ shared_ptr<Shape> Collider::DeriveShape() const
 }
 
 int Collider::GetOwnerId() const { return ownerId; }
+
+shared_ptr<GameObject> Collider::GetOwner() const
+{
+  return GetState()->GetObject(GetOwnerId());
+}

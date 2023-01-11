@@ -114,7 +114,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     // === MOVEMENT CONTROL
 
     // Give it movement
-    character->AddComponent<::Character>();
+    character->AddComponent<::Character>(10);
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
 
     // Give it input
@@ -150,6 +150,11 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // Make it a different layer so that they collide only with platforms
     platformDropDetector->SetPhysicsLayer(PhysicsLayer::CharacterPlatformDrop);
+
+    // === ATTACKING
+
+    // Add a hitbox child object to hold any hitboxes and Attacks
+    character->CreateChild(HITBOX_OBJECT);
   };
 }
 
