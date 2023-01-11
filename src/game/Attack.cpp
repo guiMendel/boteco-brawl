@@ -8,7 +8,7 @@ Attack::Attack(GameObject &associatedObject, float damageModifier, Vector2 impul
 
 void Attack::Awake()
 {
-  weakCharacter = gameObject.RequireComponent<Character>();
+  weakStateManager = gameObject.RequireComponent<CharacterStateManager>();
 }
 
 void Attack::Land(shared_ptr<Heat> targetHeat)
@@ -36,7 +36,7 @@ void Attack::OnTriggerCollisionEnter(TriggerCollisionData trigger)
 
 Damage Attack::GetDamage() const
 {
-  LOCK(weakCharacter, character);
+  LOCK(weakStateManager, character);
 
   return Damage{character->baseDamage * damageModifier, impulse};
 }

@@ -14,7 +14,7 @@ const float CharacterController::totalDashCooldown{1};
 
 CharacterController::CharacterController(GameObject &associatedObject)
     : Component(associatedObject),
-      character(*gameObject.RequireComponent<Character>()),
+      character(*gameObject.RequireComponent<CharacterStateManager>()),
       movement(*gameObject.RequireComponent<Movement>()),
       rigidbody(*gameObject.RequireComponent<Rigidbody>()),
       animator(*gameObject.RequireComponent<Animator>()) {}
@@ -69,7 +69,7 @@ void CharacterController::Start()
   // For now, there must be player input. In the future there may be an AIInput instead
   auto inputs = gameObject.GetComponents<PlayerInput>();
 
-  Assert(inputs.empty() == false, "Character had no input methods");
+  Assert(inputs.empty() == false, "CharacterStateManager had no input methods");
 
   for (auto input : inputs)
   {
@@ -120,6 +120,8 @@ void CharacterController::OnLand()
   static const float sqrMinSpeed = minLandAnimationSpeed * minLandAnimationSpeed;
   if (rigidbody.velocity.SqrMagnitude() >= sqrMinSpeed)
     DispatchNonDelayable<Actions::Land>();
+  else if (character.GetStates().size() == 0)
+    animator.Play("idle");
 }
 
 void CharacterController::DispatchDash(Vector2 direction)

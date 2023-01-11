@@ -47,7 +47,11 @@ public:
   // If the current animation is this, stops it
   void Stop(std::string animation);
 
+  // Gets animation by name
   Animation &GetAnimation(std::string name);
+
+  // Checks if the animation is present
+  bool HasAnimation(std::string name) const;
 
   std::string GetCurrentAnimation() const;
 

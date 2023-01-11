@@ -1,5 +1,5 @@
-#ifndef __CHARACTER__
-#define __CHARACTER__
+#ifndef __CHARACTER_STATE_MANAGER__
+#define __CHARACTER_STATE_MANAGER__
 
 #include "GameObject.h"
 #include "Component.h"
@@ -10,11 +10,11 @@
 #include <unordered_set>
 
 // An arena character that have multiple states, such as moving and jumping
-class Character : public Component
+class CharacterStateManager : public Component
 {
 public:
-  Character(GameObject &associatedObject, float baseDamage);
-  virtual ~Character() {}
+  CharacterStateManager(GameObject &associatedObject, float baseDamage);
+  virtual ~CharacterStateManager() {}
 
   // Triggered when a state exits normally (times out)
   EventI<std::shared_ptr<CharacterState>> OnCompleteState;

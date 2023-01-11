@@ -15,7 +15,7 @@
 #include "ControllerInput.h"
 #include "AnimationRecipes.h"
 #include "CharacterController.h"
-#include "Character.h"
+#include "CharacterStateManager.h"
 #include "ParticleEmitter.h"
 #include "PlayerManager.h"
 #include "Projectile.h"
@@ -56,7 +56,7 @@ auto ObjectRecipes::Arena(string imagePath) -> function<void(shared_ptr<GameObje
   };
 }
 
-auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function<void(shared_ptr<GameObject>)>
 {
   auto weakPlayer{weak_ptr(player)};
   return [weakPlayer](shared_ptr<GameObject> character)
@@ -89,7 +89,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // Give it collision
     auto body = character->AddComponent<Rigidbody>(RigidbodyType::Dynamic, 0, 0);
-    auto collider = character->AddComponent<BoxCollider>(animator, false, ColliderDensity::Character);
+    auto collider = character->AddComponent<BoxCollider>(animator, false, ColliderDensity::CharacterStateManager);
 
     // Turn on continuous collision
     body->continuousCollisions = true;
@@ -114,7 +114,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     // === MOVEMENT CONTROL
 
     // Give it movement
-    character->AddComponent<::Character>(10);
+    character->AddComponent<::CharacterStateManager>(10);
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
 
     // Give it input

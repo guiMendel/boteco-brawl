@@ -91,8 +91,14 @@ void Animator::Play(string animation, function<void()> stopCallback)
   Play(animation, {}, stopCallback);
 }
 
+bool Animator::HasAnimation(std::string name) const
+{
+  return animations.count(name) > 0;
+}
+
 Animation &Animator::GetAnimation(string name)
 {
+  Assert(HasAnimation(name), "Animator had no animation named " + name);
   return *animations[name];
 }
 

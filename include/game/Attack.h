@@ -3,7 +3,7 @@
 
 #include "Component.h"
 #include "Damage.h"
-#include "Character.h"
+#include "CharacterStateManager.h"
 
 class Heat;
 
@@ -33,7 +33,7 @@ private:
   std::unordered_set<int> struckHeatIds;
 
   // Reference to character
-  std::weak_ptr<Character> weakCharacter;
+  std::weak_ptr<CharacterStateManager> weakStateManager;
 };
 
 #endif

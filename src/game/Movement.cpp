@@ -1,7 +1,7 @@
 #include "Movement.h"
 #include "FallOffDeath.h"
 #include "ObjectRecipes.h"
-#include "Character.h"
+#include "CharacterStateManager.h"
 #include "Rigidbody.h"
 
 using namespace std;
@@ -25,7 +25,7 @@ Movement::Movement(GameObject &associatedObject, float acceleration, float defau
       fastFallAcceleration(45),
       jumpGravityModifier(15),
       rigidbody(*gameObject.RequireComponent<Rigidbody>()),
-      character(*gameObject.RequireComponent<Character>())
+      character(*gameObject.RequireComponent<CharacterStateManager>())
 {
   SetGravityModifierDecayTime(0.2f);
 }

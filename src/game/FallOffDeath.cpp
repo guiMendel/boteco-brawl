@@ -3,7 +3,7 @@
 #include "Movement.h"
 #include "PlayerInput.h"
 #include "CharacterController.h"
-#include "Character.h"
+#include "CharacterStateManager.h"
 #include "ParticleFX.h"
 
 #define RESPAWN_TIMER "respawn"
@@ -143,6 +143,6 @@ void FallOffDeath::SetCharacterActive(bool active)
   gameObject.RequireComponent<Collider>()->SetEnabled(active);
   gameObject.RequireComponent<Movement>()->SetEnabled(active);
   gameObject.RequireComponent<PlayerInput>()->SetEnabled(active);
-  gameObject.RequireComponent<Character>()->SetEnabled(active);
+  gameObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
   gameObject.RequireComponent<CharacterController>()->SetEnabled(active);
 }

@@ -1,7 +1,7 @@
 #include "Actions.h"
 #include "Movement.h"
 #include "Rigidbody.h"
-#include "Character.h"
+#include "CharacterStateManager.h"
 #include "ParticleEmitter.h"
 #include "ObjectRecipes.h"
 
@@ -28,7 +28,7 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
 {
   // Get the rigidbody
   auto rigidbody = target.GetComponent<Rigidbody>();
-  auto character = target.GetComponent<Character>();
+  auto character = target.GetComponent<CharacterStateManager>();
 
   // Ignore gravity throughout dash
   rigidbody->gravityScale = Vector2(0, 0.01);
@@ -56,14 +56,14 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   // Add a callback to the animation to switch to recovering state
   // Animator::frame_callbacks dashCallbacks = {};
   auto weakState{weak_ptr(dashState)};
-  auto weakCharacter{weak_ptr(character)};
+  auto weakStateManager{weak_ptr(character)};
   auto weakRecoveringState{weak_ptr(recoveringState)};
 
   Animator::frame_callbacks dashCallbacks = {
-      {2, [weakState, weakCharacter, weakRecoveringState, this]()
+      {2, [weakState, weakStateManager, weakRecoveringState, this]()
        {
          IF_LOCK(weakState, dashState)
-         IF_LOCK(weakCharacter, character) IF_LOCK(weakRecoveringState, recoveringState)
+         IF_LOCK(weakStateManager, character) IF_LOCK(weakRecoveringState, recoveringState)
          {
            dashState->parentAction = nullptr;
            character->SetState(recoveringState, GetFriendStates());
@@ -72,8 +72,8 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
 
   // Start this animation
   // When animation is over, make sure this action's states are disabled
-  target.RequireComponent<Animator>()->Play("dash", dashCallbacks, [dashStateId, recoveringStateId, weakCharacter]()
-                                            { IF_LOCK(weakCharacter, character) {
+  target.RequireComponent<Animator>()->Play("dash", dashCallbacks, [dashStateId, recoveringStateId, weakStateManager]()
+                                            { IF_LOCK(weakStateManager, character) {
                                               character->RemoveState(dashStateId);
                                               character->RemoveState(recoveringStateId);
                                             } });
@@ -93,7 +93,7 @@ void Dash::StopHook(GameObject &target)
   // Restore original values
   rigidbody->gravityScale = Vector2::One();
   rigidbody->airFriction = 0;
-  target.GetComponent<Character>()->SetControl(true);
+  target.GetComponent<CharacterStateManager>()->SetControl(true);
 
   // Stop particles
   target.GetChild(DASH_PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>()->Stop();

@@ -4,7 +4,7 @@
 #include "GameObject.h"
 #include "Component.h"
 #include "Movement.h"
-#include "Character.h"
+#include "CharacterStateManager.h"
 #include "Action.h"
 #include <unordered_set>
 
@@ -46,7 +46,7 @@ private:
   // How long (seconds) character must wait between successive dashes
   static const float totalDashCooldown;
 
-  Character &character;
+  CharacterStateManager &character;
   Movement &movement;
   Rigidbody &rigidbody;
   Animator &animator;

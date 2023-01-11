@@ -1,15 +1,15 @@
-#include "Character.h"
+#include "CharacterStateManager.h"
 #include "Action.h"
 #include <algorithm>
 #include <typeinfo>
 
 using namespace std;
-const float Character::maxActionDelay{1};
+const float CharacterStateManager::maxActionDelay{1};
 
-Character::Character(GameObject &associatedObject, float baseDamage)
+CharacterStateManager::CharacterStateManager(GameObject &associatedObject, float baseDamage)
     : Component(associatedObject), baseDamage(baseDamage) {}
 
-void Character::Update(float deltaTime)
+void CharacterStateManager::Update(float deltaTime)
 {
   // cout << "States: ";
   // for (auto state : states)
@@ -35,8 +35,8 @@ void Character::Update(float deltaTime)
     queuedAction = nullptr;
 }
 
-const list<shared_ptr<CharacterState>> Character::GetStates() const { return states; }
-void Character::SetState(shared_ptr<CharacterState> newState, unordered_set<string> keepStates)
+const list<shared_ptr<CharacterState>> CharacterStateManager::GetStates() const { return states; }
+void CharacterStateManager::SetState(shared_ptr<CharacterState> newState, unordered_set<string> keepStates)
 {
   // Add it
   AddState(newState);
@@ -48,7 +48,7 @@ void Character::SetState(shared_ptr<CharacterState> newState, unordered_set<stri
   RemoveStatesNotIn(keepStates, true);
 }
 
-void Character::RemoveStatesNotIn(std::unordered_set<std::string> keepStates, bool interruption)
+void CharacterStateManager::RemoveStatesNotIn(std::unordered_set<std::string> keepStates, bool interruption)
 {
   auto stateIterator = states.begin();
   while (stateIterator != states.end())
@@ -65,7 +65,7 @@ void Character::RemoveStatesNotIn(std::unordered_set<std::string> keepStates, bo
   }
 }
 
-void Character::QueueAction(std::shared_ptr<Action> action)
+void CharacterStateManager::QueueAction(std::shared_ptr<Action> action)
 {
   queuedAction = action;
 
@@ -73,14 +73,14 @@ void Character::QueueAction(std::shared_ptr<Action> action)
   queuedActionTTL = maxActionDelay;
 }
 
-bool Character::CanPerform(std::shared_ptr<Action> action)
+bool CharacterStateManager::CanPerform(std::shared_ptr<Action> action)
 {
   // Check if this action has lower priority than a state which IS NOT in it's friends list
   return !any_of(states.begin(), states.end(), [action](shared_ptr<CharacterState> state)
                  { return state->priority > action->GetPriority() && !action->IsFriend(state); });
 }
 
-void Character::SetSequenceIndex(shared_ptr<Action> action)
+void CharacterStateManager::SetSequenceIndex(shared_ptr<Action> action)
 {
   // For each state
   for (auto state : states)
@@ -95,7 +95,7 @@ void Character::SetSequenceIndex(shared_ptr<Action> action)
   }
 }
 
-void Character::Perform(shared_ptr<Action> action, bool canDelay)
+void CharacterStateManager::Perform(shared_ptr<Action> action, bool canDelay)
 {
   // Set incoming action's sequence index
   SetSequenceIndex(action);
@@ -123,7 +123,7 @@ void Character::Perform(shared_ptr<Action> action, bool canDelay)
   action->Trigger(gameObject, newState);
 }
 
-void Character::RemoveState(unsigned id, bool interruption)
+void CharacterStateManager::RemoveState(unsigned id, bool interruption)
 {
   // Find this state
   auto stateIterator = find_if(states.begin(), states.end(), [id](shared_ptr<CharacterState> state)
@@ -137,7 +137,7 @@ void Character::RemoveState(unsigned id, bool interruption)
   RemoveState(stateIterator, interruption);
 }
 
-auto Character::RemoveState(decltype(states)::iterator stateIterator, bool interruption, bool ignoreIdleEvent) -> decltype(states)::iterator
+auto CharacterStateManager::RemoveState(decltype(states)::iterator stateIterator, bool interruption, bool ignoreIdleEvent) -> decltype(states)::iterator
 {
   auto state = *stateIterator;
 
@@ -159,7 +159,7 @@ auto Character::RemoveState(decltype(states)::iterator stateIterator, bool inter
   return newIterator;
 }
 
-void Character::AddState(std::shared_ptr<CharacterState> newState)
+void CharacterStateManager::AddState(std::shared_ptr<CharacterState> newState)
 {
   // If it's already there, remove it first
   auto stateIterator = find_if(states.begin(), states.end(), [newState](shared_ptr<CharacterState> state)
@@ -172,7 +172,7 @@ void Character::AddState(std::shared_ptr<CharacterState> newState)
   states.push_back(newState);
 }
 
-void Character::SetControl(bool value)
+void CharacterStateManager::SetControl(bool value)
 {
   if (hasControl == value)
     return;

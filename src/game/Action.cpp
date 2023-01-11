@@ -1,22 +1,39 @@
 #include "Action.h"
 #include "GameObject.h"
 #include "Animator.h"
-#include "Character.h"
+#include "CharacterStateManager.h"
 
 using namespace std;
 
 void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
 {
   // Store these info
-  auto weakCharacter = weak_ptr(target.RequireComponent<Character>());
+  auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());
   int stateId = actionState->id;
+
+  // Get animator
+  auto animator = target.RequireComponent<Animator>();
+
+  // Get animation name to use
+  string animation;
+
+  // If the bare animation name is present, use it always
+  if (animator->HasAnimation(GetAnimation()))
+    animation = GetAnimation();
+
+  // Otherwise, append transformed sequence index
+  else
+    animation = GetAnimation() + to_string(TransformIndex());
 
   // Start this animation
   // When animation is over, make sure this action's state is no longer active
-  target.RequireComponent<Animator>()->Play(GetAnimation(), [stateId, weakCharacter]()
-                                            { IF_LOCK(weakCharacter, character)
-                                              character->RemoveState(stateId); });
+  animator->Play(animation, [stateId, weakStateManager]()
+                 { IF_LOCK(weakStateManager, stateManager)
+                                              stateManager->RemoveState(stateId); });
 }
+
+// Default implementation does no transformation
+int AnimationAction::TransformIndex() const { return sequenceIndex; }
 
 int AttackAction::GetPriority() const { return 1; }
 
