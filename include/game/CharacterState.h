@@ -24,6 +24,9 @@ struct CharacterState
   // The action that resulted in this state (if any)
   std::shared_ptr<Action> parentAction;
 
+  // Whether this state can be interrupted by an action of the same type of parent regardless of priority
+  bool openToSequence{false};
+
   CharacterState(std::string name, int priority, std::shared_ptr<Action> parentAction = nullptr)
       : name(name), priority(priority), parentAction(parentAction) {}
 };

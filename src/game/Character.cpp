@@ -2,8 +2,8 @@
 
 using namespace std;
 
-Character::Character(GameObject &associatedObject, float baseDamage)
-    : Component(associatedObject), baseDamage(baseDamage) {}
+Character::Character(GameObject &associatedObject)
+    : Component(associatedObject) {}
 
 int Character::TransformSequenceIndexFor(string animation, int index) const
 {

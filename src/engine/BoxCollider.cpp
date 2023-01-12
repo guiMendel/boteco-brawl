@@ -52,9 +52,3 @@ Rectangle BoxCollider::GetBox() const
 void BoxCollider::SetBox(const Rectangle &box) { shape = make_shared<Rectangle>(box); }
 
 shared_ptr<Shape> BoxCollider::CopyShape() const { return make_shared<Rectangle>(GetBox()); }
-
-// Allows for debug rendering
-void BoxCollider::Render()
-{
-  Debug::DrawBox(*dynamic_pointer_cast<Rectangle>(DeriveShape()));
-}

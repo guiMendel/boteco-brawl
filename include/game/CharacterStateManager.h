@@ -58,6 +58,8 @@ private:
   // Puts an action in the queue
   void QueueAction(std::shared_ptr<Action> action);
 
+  void ResetQueue();
+
   // Checks if character is able to perform this action this frame
   bool CanPerform(std::shared_ptr<Action> action);
 

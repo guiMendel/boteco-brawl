@@ -51,6 +51,10 @@ void Heat::TakeDamage(const Damage &damage)
   // Get impulse multiplier from heat, a value from 1 to 100
   float heatMultiplier = 99 * heat * inverseMaxHeat + 1;
 
+  cout << gameObject << " taking damage: " << damage.heatDamage << " heatDamage, " << Vector2(damage.impulse).Magnitude() << " impulse." << endl;
+  cout << "Inverse Armor: " << inverseArmor << ", Heat multiplier: " << heatMultiplier << endl;
+  cout << "Resulting damage: " << inverseArmor * damage.heatDamage << ", Resulting velocity add: " << (damage.impulse * heatMultiplier * body->GetInverseMass()).Magnitude() << endl;
+
   // When grounded
   if (movement->IsGrounded())
     // Instantly lift target a little bit from the floor

@@ -38,5 +38,5 @@ Damage Attack::GetDamage() const
 {
   LOCK(weakCharacter, character);
 
-  return Damage{character->baseDamage * damageModifier, impulse};
+  return Damage{character->GetBaseDamage() * damageModifier, impulse};
 }

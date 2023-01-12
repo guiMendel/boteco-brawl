@@ -57,11 +57,16 @@ void AnimationRecipes::SetHitbox(shared_ptr<GameObject> attackObject, vector<Cir
   // Get sprite renderer
   auto spriteRenderer = attackObject->GetParent()->RequireComponent<SpriteRenderer>();
 
-  // Position of sprite's top-left pixel, in units
+  // Global position of sprite's top-left pixel, in units
   Vector2 topLeftPosition = spriteRenderer->RenderPositionFor(attackObject->GetParent()->GetPosition(), frame.GetSprite());
 
   // Displacement to apply to attackObject's position to get to this pixel's position
   Vector2 spriteOrigin = topLeftPosition - attackObject->GetPosition();
+
+  // When mirrored, we want to displace with reference to top-right pixel, so sum the sprite's width
+  // But also keep this offset positive so as to not double-mirror it on render
+  if (GetSign(attackObject->GetScale().x) < 0)
+    spriteOrigin.x = -(spriteOrigin.x + frame.GetSprite()->GetWidth());
 
   // Now, add each provided area as a collider
   for (auto circle : hitboxAreas)
@@ -190,7 +195,7 @@ auto AnimationRecipes::Neutral1(Animator &animator) -> shared_ptr<Animation>
   auto animation = make_shared<Animation>("neutral1", animator, frames);
 
   // Setup attack params
-  AttackSetup(animation->frames[0], animator.gameObject, 1.5, Vector2::Angled(DegreesToRadians(10), 10));
+  AttackSetup(animation->frames[0], animator.gameObject, 1, Vector2::Angled(DegreesToRadians(10), 2));
 
   // Add hitboxes
   ResetHitbox(animation->frames[2], animator.gameObject, {Circle({7.5, 3.5}, 2), Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
@@ -204,9 +209,20 @@ auto AnimationRecipes::Neutral1(Animator &animator) -> shared_ptr<Animation>
 
 auto AnimationRecipes::Neutral2(Animator &animator) -> shared_ptr<Animation>
 {
-  return make_shared<Animation>("neutral2",
-                                animator,
-                                Animation::SliceSpritesheet("./assets/sprites/kick.png", SpritesheetClipInfo(16, 8), 0.1, {4, 0}));
+  auto frames = Animation::SliceSpritesheet("./assets/sprites/kick.png", SpritesheetClipInfo(16, 8), 0.1, {4, 0});
+  auto animation = make_shared<Animation>("neutral2", animator, frames);
+
+  // Setup attack params
+  AttackSetup(animation->frames[0], animator.gameObject, 1.2, Vector2::Angled(DegreesToRadians(10), 5));
+
+  // Add hitboxes
+  ResetHitbox(animation->frames[2], animator.gameObject, {Circle({8, 4}, 2.5), Circle({12, 4}, 2.5)});
+  ResetHitbox(animation->frames[3], animator.gameObject, {Circle({8, 4}, 2.5), Circle({12, 4}, 2.5)});
+  ResetHitbox(animation->frames[4], animator.gameObject);
+
+  // animation->frames[2].SetDuration(10);
+
+  return animation;
 }
 
 auto AnimationRecipes::Dash(Animator &animator) -> shared_ptr<Animation>

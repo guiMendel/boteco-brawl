@@ -9,14 +9,14 @@ public:
   using indexTransformer = std::function<int(int)>;
   using transformerMap = std::unordered_map<std::string, indexTransformer>;
 
-  Character(GameObject &associatedObject, float baseDamage);
+  Character(GameObject &associatedObject);
   virtual ~Character() {}
 
   // Transforms a sequence index for a given attack animation name
   int TransformSequenceIndexFor(std::string animation, int index) const;
 
   // Base damage of this character
-  float baseDamage;
+  virtual float GetBaseDamage() const = 0;
 
 protected:
   // Maps each attack animation name to a sequence index transformer function, which decides how to provide the sequence index number to the animator

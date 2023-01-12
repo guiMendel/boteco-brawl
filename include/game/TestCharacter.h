@@ -6,8 +6,10 @@
 class TestCharacter : public Character
 {
 public:
-  TestCharacter(GameObject &associatedObject, float baseDamage);
+  TestCharacter(GameObject &associatedObject);
   virtual ~TestCharacter() {}
+
+  float GetBaseDamage() const override;
 
 protected:
   const transformerMap &GetSequenceIndexTransformer() const override;

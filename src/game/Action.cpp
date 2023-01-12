@@ -7,6 +7,13 @@
 
 using namespace std;
 
+bool Action::operator==(const Action &other) { return typeid(*this) == typeid(other); }
+bool Action::operator!=(const Action &other) { return !(*this == other); }
+
+int AnimationAction::CancelFrame() const { return -1; }
+
+int AnimationAction::OpenSequenceFrame() const { return -1; }
+
 void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
 {
   // Store these info

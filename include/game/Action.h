@@ -36,6 +36,10 @@ struct Action
 
   virtual ~Action() {}
 
+  // Simply compares if both actions have the same type
+  bool operator==(const Action &other);
+  bool operator!=(const Action &other);
+
   // How many time this action has been executed in succession prior to this execution
   int sequenceIndex{0};
 };
@@ -43,6 +47,14 @@ struct Action
 // A specialization which simply plays an animation on trigger
 struct AnimationAction : public Action
 {
+  // At which frame this action's state is removed
+  // A negative value means only when animation stops (default implementation)
+  virtual int CancelFrame() const;
+
+  // At which frame this action's state becomes open to sequences
+  // A negative value means never (default implementation)
+  virtual int OpenSequenceFrame() const;
+
   // Takes over responsibility for this
   void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) final override;
 

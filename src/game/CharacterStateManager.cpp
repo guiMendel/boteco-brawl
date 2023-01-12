@@ -16,7 +16,6 @@ void CharacterStateManager::Update(float deltaTime)
   //   cout << state->name << " ";
   // cout << endl;
 
-  // Discount queue time
   if (queuedActionTTL <= 0)
     return;
 
@@ -24,15 +23,16 @@ void CharacterStateManager::Update(float deltaTime)
   if (queuedAction != nullptr && CanPerform(queuedAction))
   {
     Perform(queuedAction);
-    queuedAction = nullptr;
-    queuedActionTTL = 0;
+    ResetQueue();
     return;
   }
 
+  // Discount queue time
   queuedActionTTL -= deltaTime;
 
+  // If it timed out, discard it
   if (queuedActionTTL <= 0)
-    queuedAction = nullptr;
+    ResetQueue();
 }
 
 const list<shared_ptr<CharacterState>> CharacterStateManager::GetStates() const { return states; }
@@ -65,6 +65,12 @@ void CharacterStateManager::RemoveStatesNotIn(std::unordered_set<std::string> ke
   }
 }
 
+void CharacterStateManager::ResetQueue()
+{
+  queuedAction = nullptr;
+  queuedActionTTL = 0;
+}
+
 void CharacterStateManager::QueueAction(std::shared_ptr<Action> action)
 {
   queuedAction = action;
@@ -75,9 +81,20 @@ void CharacterStateManager::QueueAction(std::shared_ptr<Action> action)
 
 bool CharacterStateManager::CanPerform(std::shared_ptr<Action> action)
 {
-  // Check if this action has lower priority than a state which IS NOT in it's friends list
-  return !any_of(states.begin(), states.end(), [action](shared_ptr<CharacterState> state)
-                 { return state->priority > action->GetPriority() && !action->IsFriend(state); });
+  // Check if this state blocks the incoming action
+  auto stateBlocksAction = [action](shared_ptr<CharacterState> state)
+  {
+    return (
+        // It must have higher priority
+        state->priority > action->GetPriority() &&
+        // And not be a friend of the action
+        !action->IsFriend(state) &&
+        // And either it's parent action is different from it, or the state is not yet open to sequence
+        (*state->parentAction != *action || state->openToSequence == false));
+  };
+
+  // If none of the states blocks this action, it can be performed
+  return any_of(states.begin(), states.end(), stateBlocksAction) == false;
 }
 
 void CharacterStateManager::SetSequenceIndex(shared_ptr<Action> action)
@@ -86,8 +103,8 @@ void CharacterStateManager::SetSequenceIndex(shared_ptr<Action> action)
   for (auto state : states)
   {
     // Check if this state's parent action is the same
-    // cout << "Comparing actions " << typeid(*state->parentAction).name() << " and " << typeid(*action).name() << endl;
-    if (typeid(*state->parentAction) == typeid(*action))
+    cout << "Comparing actions " << typeid(*state->parentAction).name() << " and " << typeid(*action).name() << ": " << (*state->parentAction == *action) << endl;
+    if (*state->parentAction == *action)
     {
       // Check if the sequence index for this action will be higher than the current one
       action->sequenceIndex = max(action->sequenceIndex, state->parentAction->sequenceIndex + 1);
@@ -105,6 +122,11 @@ void CharacterStateManager::Perform(shared_ptr<Action> action, bool canDelay)
     // Push to queue if possible
     if (canDelay)
       QueueAction(action);
+
+    // Otherwise, empty queue
+    else
+      ResetQueue();
+
     return;
   }
 

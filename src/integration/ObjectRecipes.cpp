@@ -157,7 +157,7 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
     // === ATTACKING
 
     // Give it a character to differentiate which animations to play for each attack
-    character->AddComponent<TestCharacter>(10);
+    character->AddComponent<TestCharacter>();
 
     // Make it vulnerable
     character->AddComponent<Heat>(1);
