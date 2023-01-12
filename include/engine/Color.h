@@ -31,6 +31,7 @@ struct Color
   static Color Green() { return Color(0, 255, 0); }
   static Color Blue() { return Color(0, 255, 255); }
   static Color Yellow() { return Color(255, 240, 18); }
+  static Color Pink() { return Color(255, 0, 224); }
 
   // === GENERAL METHODS
 

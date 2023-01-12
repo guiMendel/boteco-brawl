@@ -6,8 +6,8 @@
 using namespace std;
 const float CharacterStateManager::maxActionDelay{1};
 
-CharacterStateManager::CharacterStateManager(GameObject &associatedObject, float baseDamage)
-    : Component(associatedObject), baseDamage(baseDamage) {}
+CharacterStateManager::CharacterStateManager(GameObject &associatedObject)
+    : Component(associatedObject) {}
 
 void CharacterStateManager::Update(float deltaTime)
 {

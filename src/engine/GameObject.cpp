@@ -46,7 +46,7 @@ GameObject::~GameObject()
   cout << "In destructor of " << GetName() << endl;
 
   // Detect leaked components
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     if (component.use_count() != 2)
       cout << "WARNING: Component " << typeid(*component).name() << " has " << component.use_count() - 2 << " leaked references" << endl;
 }
@@ -58,7 +58,7 @@ void GameObject::Start()
 
   started = true;
 
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->SafeStart();
 }
 
@@ -69,7 +69,7 @@ void GameObject::Awake()
 
   awoke = true;
 
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->Awake();
 }
 
@@ -83,7 +83,7 @@ void GameObject::RegisterToState()
 
   lastStateRegisteredTo = currentState;
 
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->RegisterToStateWithLayer();
 }
 
@@ -95,7 +95,7 @@ void GameObject::Update(float deltaTime)
   if (enabled == false)
     return;
 
-  for (const auto &component : components)
+  for (auto [componentId, component] : components)
   {
     if (component->IsEnabled())
       component->Update(deltaTime);
@@ -110,7 +110,7 @@ void GameObject::PhysicsUpdate(float deltaTime)
   // Check for collision & trigger exit
   DetectCollisionExits();
 
-  for (const auto &component : components)
+  for (auto [componentId, component] : components)
   {
     if (component->IsEnabled())
       component->PhysicsUpdate(deltaTime);
@@ -152,34 +152,29 @@ void GameObject::DetectCollisionExits()
 
 void GameObject::OnStatePause()
 {
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->OnStatePause();
 }
 
 void GameObject::OnStateResume()
 {
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->OnStateResume();
 }
 
-void GameObject::RemoveComponent(shared_ptr<Component> component)
+decltype(GameObject::components)::iterator GameObject::RemoveComponent(shared_ptr<Component> component)
 {
-  // Find it's position
-  auto componentPosition = find_if(
-      components.begin(), components.end(), [component](shared_ptr<Component> otherComponent)
-      { return otherComponent == component; });
-
-  // Detect if not present
-  if (componentPosition == components.end())
-    return;
+  // Detect not present
+  if (components.count(component->id) == 0)
+    return components.end();
 
   HandleColliderDestruction(component);
 
   // Wrap it up
-  (*componentPosition)->OnBeforeDestroy();
+  component->OnBeforeDestroy();
 
   // Remove it
-  components.erase(componentPosition);
+  return components.erase(components.find(component->id));
 }
 
 void GameObject::HandleColliderDestruction(shared_ptr<Component> component)
@@ -273,15 +268,10 @@ shared_ptr<GameObject> GameObject::GetShared()
 
 auto GameObject::GetComponent(const Component *componentPointer) -> shared_ptr<Component>
 {
-  auto componentIterator = find_if(
-      components.begin(), components.end(),
-      [componentPointer](shared_ptr<Component> component)
-      { return component.get() == componentPointer; });
+  if (components.count(componentPointer->id) == 0)
+    return nullptr;
 
-  if (componentIterator == components.end())
-    return shared_ptr<Component>();
-
-  return *componentIterator;
+  return components[componentPointer->id];
 }
 
 auto GameObject::RequireComponent(const Component *componentPointer) -> shared_ptr<Component>
@@ -435,6 +425,24 @@ vector<shared_ptr<GameObject>> GameObject::GetChildren()
   return verifiedChildren;
 }
 
+shared_ptr<GameObject> GameObject::RequireChild(int id)
+{
+  auto child = GetChild(id);
+
+  Assert(child != nullptr, "Required child of id" + to_string(id) + " was not found in object " + string(*this));
+
+  return child;
+}
+
+shared_ptr<GameObject> GameObject::RequireChild(string name)
+{
+  auto child = GetChild(name);
+
+  Assert(child != nullptr, "Required child of name \"" + name + "\" was not found in object " + string(*this));
+
+  return child;
+}
+
 shared_ptr<GameObject> GameObject::GetChild(int id)
 {
   if (children.count(id) == 0)
@@ -478,8 +486,11 @@ shared_ptr<GameObject> GameObject::GetChild(string name)
 void GameObject::InternalDestroy()
 {
   // Wrap all components up
-  for (auto &component : components)
-    RemoveComponent(component);
+  for (
+      auto componentIterator = components.begin();
+      componentIterator != components.end();
+      componentIterator = RemoveComponent(componentIterator->second))
+    ;
 
   // Get pointer to self
   auto shared = GetShared();
@@ -508,21 +519,21 @@ void GameObject::OnCollision(Collision::Data collisionData)
   frameCollisions[collisionData.GetHash()] = collisionData;
 
   // Alert all components
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->OnCollision(collisionData);
 }
 
 void GameObject::OnCollisionEnter(Collision::Data collisionData)
 {
   // Alert all components
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->OnCollisionEnter(collisionData);
 }
 
 void GameObject::OnCollisionExit(Collision::Data collisionData)
 {
   // Alert all components
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->OnCollisionExit(collisionData);
 }
 
@@ -532,21 +543,21 @@ void GameObject::OnTriggerCollision(TriggerCollisionData triggerData)
   frameTriggers[triggerData.GetHash()] = triggerData;
 
   // Alert all components
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->OnTriggerCollision(triggerData);
 }
 
 void GameObject::OnTriggerCollisionEnter(TriggerCollisionData triggerData)
 {
   // Alert all components
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->OnTriggerCollisionEnter(triggerData);
 }
 
 void GameObject::OnTriggerCollisionExit(TriggerCollisionData triggerData)
 {
   // Alert all components
-  for (auto component : components)
+  for (auto [componentId, component] : components)
     component->OnTriggerCollisionExit(triggerData);
 }
 

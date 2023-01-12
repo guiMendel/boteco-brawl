@@ -1,9 +1,12 @@
 #ifndef __ATTACK__
 #define __ATTACK__
 
+// Name of gameObject which will contain this component
+#define ATTACK_OBJECT "Hitbox"
+
 #include "Component.h"
 #include "Damage.h"
-#include "CharacterStateManager.h"
+#include "Character.h"
 
 class Heat;
 
@@ -33,7 +36,7 @@ private:
   std::unordered_set<int> struckHeatIds;
 
   // Reference to character
-  std::weak_ptr<CharacterStateManager> weakStateManager;
+  std::weak_ptr<Character> weakCharacter;
 };
 
 #endif

@@ -149,10 +149,12 @@ void GameState::Start()
   // Create the initial objects
   InitializeObjects();
 
-  started = true;
+  awoke = true;
 
   // Wake objects
   CASCADE_OBJECTS(Awake, );
+
+  started = true;
 
   // Register components to state
   CASCADE_OBJECTS(RegisterToState, );
@@ -185,6 +187,9 @@ shared_ptr<GameObject> GameState::RegisterObject(shared_ptr<GameObject> gameObje
 {
   gameObjects[gameObject->id] = gameObject;
   gameObject->gameStateId = id;
+
+  if (awoke)
+    gameObject->Awake();
 
   if (started)
   {

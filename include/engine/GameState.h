@@ -157,6 +157,7 @@ private:
 
   // Whether the state has executed the start method
   bool started{false};
+  bool awoke{false};
 
   // Stores it's cameras
   std::list<std::weak_ptr<Camera>> camerasWeak;

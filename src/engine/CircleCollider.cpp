@@ -15,5 +15,13 @@ shared_ptr<Shape> CircleCollider::CopyShape() const { return make_shared<Circle>
 // Allows for debug rendering
 void CircleCollider::Render()
 {
-    Debug::DrawCircle(*dynamic_pointer_cast<Circle>(DeriveShape()));
+  if (gameObject.GetName() == "Hitbox")
+  {
+    auto circle = *dynamic_pointer_cast<Circle>(DeriveShape());
+    Debug::DrawCircle(circle, Color::Pink());
+    Debug::DrawPoint(circle.center, Color::Pink());
+    return;
+  }
+
+  Debug::DrawCircle(*dynamic_pointer_cast<Circle>(DeriveShape()));
 }

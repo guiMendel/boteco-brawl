@@ -16,4 +16,8 @@ void PhysicsLayerHandler::InitializeCollisionMatrix()
   // Platform detectors only collide with platforms
   DisableAll(PhysicsLayer::CharacterPlatformDrop);
   Enable(PhysicsLayer::CharacterPlatformDrop, PhysicsLayer::Platform);
+
+  // Hitboxes can only hit characters
+  DisableAll(PhysicsLayer::Hitbox);
+  Enable(PhysicsLayer::Hitbox, PhysicsLayer::Character);
 }

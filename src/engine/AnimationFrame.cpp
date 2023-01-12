@@ -30,7 +30,7 @@ void AnimationFrame::SetSprite(shared_ptr<Sprite> sprite)
   this->sprite = sprite;
 }
 
-shared_ptr<Sprite> AnimationFrame::GetSprite()
+shared_ptr<Sprite> AnimationFrame::GetSprite() const
 {
   return sprite;
 }
@@ -40,6 +40,8 @@ float AnimationFrame::GetDuration() const
   return duration;
 }
 
+void AnimationFrame::SetDuration(float value) { duration = value; }
+
 void AnimationFrame::Trigger(GameObject &gameObject) const
 {
   // Trigger the callbacks
@@ -47,10 +49,11 @@ void AnimationFrame::Trigger(GameObject &gameObject) const
     callback(gameObject);
 
   // Check if there is a sprite to set
-  if (sprite != nullptr) {
+  if (sprite != nullptr)
+  {
     // Then the object must have a sprite renderer
     auto spriteRenderer = gameObject.RequireComponent<SpriteRenderer>();
-    
+
     spriteRenderer->sprite = sprite;
 
     // Apply offset

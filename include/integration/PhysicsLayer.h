@@ -14,6 +14,7 @@ enum class PhysicsLayer
   Character,
   CharacterRepelBox,
   CharacterPlatformDrop,
+  Hitbox,
   Scenario,
   Platform,
   Hazard,
@@ -25,6 +26,7 @@ enum class PhysicsLayer
   PRINTABLE(Character)             \
   PRINTABLE(CharacterRepelBox)     \
   PRINTABLE(CharacterPlatformDrop) \
+  PRINTABLE(Hitbox)                \
   PRINTABLE(Scenario)              \
   PRINTABLE(Platform)              \
   PRINTABLE(Hazard)                \

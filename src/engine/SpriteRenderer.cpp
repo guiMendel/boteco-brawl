@@ -20,19 +20,31 @@ SpriteRenderer::SpriteRenderer(GameObject &associatedObject, const std::string f
 
 void SpriteRenderer::Render() { Render(gameObject.GetPosition()); }
 
+Vector2 SpriteRenderer::RenderPositionFor(Vector2 position, shared_ptr<Sprite> referenceSprite) const
+{
+  // Apply offset
+  position += offset * gameObject.GetScale();
+
+  // Offset coordinates if centered
+  if (centered == false)
+    return position;
+
+  auto scale = gameObject.GetScale().GetAbsolute();
+  auto sprite = referenceSprite == nullptr ? this->sprite : referenceSprite;
+
+  // Get sprite's dimensions
+  auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
+
+  return position - Vector2(width / 2, height / 2);
+}
+
 void SpriteRenderer::Render(Vector2 position)
 {
-  position += offset * gameObject.GetScale();
+  position = RenderPositionFor(position);
 
   auto scale = gameObject.GetScale().GetAbsolute();
 
   auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
-
-  // cout << gameObject.GetName() << " size:" << width << ", " << height << endl;
-
-  // Offset coordinates if centered
-  if (centered)
-    position -= Vector2(width / 2, height / 2);
 
   // Get the real position box
   SDL_Rect destinationRect = (SDL_Rect)Camera::GetMain()->WorldToScreen(

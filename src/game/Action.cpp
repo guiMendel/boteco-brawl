@@ -3,6 +3,7 @@
 #include "Animator.h"
 #include "CharacterStateManager.h"
 #include "Character.h"
+#include "Attack.h"
 
 using namespace std;
 
@@ -10,6 +11,7 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
 {
   // Store these info
   auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());
+  auto weakObject = weak_ptr(target.GetShared());
   int stateId = actionState->id;
 
   // Get animator
@@ -29,11 +31,25 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
     animation += to_string(character->TransformSequenceIndexFor(animation, sequenceIndex) + 1);
   }
 
+  auto stopCallback = [stateId, weakStateManager, weakObject]()
+  {
+    // When animation is over, make sure this action's state is no longer active
+    IF_LOCK(weakStateManager, stateManager)
+    {
+      stateManager->RemoveState(stateId);
+    }
+
+    // Also make sure any attack child objects are destroyed
+    IF_LOCK(weakObject, object)
+    {
+      shared_ptr<GameObject> attack;
+      if ((attack = object->GetChild(ATTACK_OBJECT)) != nullptr)
+        attack->RequestDestroy();
+    }
+  };
+
   // Start this animation
-  // When animation is over, make sure this action's state is no longer active
-  animator->Play(animation, [stateId, weakStateManager]()
-                 { IF_LOCK(weakStateManager, stateManager)
-                                              stateManager->RemoveState(stateId); });
+  animator->Play(animation, stopCallback);
 }
 
 int AttackAction::GetPriority() const { return 1; }

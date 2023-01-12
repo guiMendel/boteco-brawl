@@ -1,4 +1,6 @@
 #include "AnimationRecipes.h"
+#include "Attack.h"
+#include "CircleCollider.h"
 #include "Movement.h"
 #include "Animator.h"
 #include "ParticleFX.h"
@@ -7,6 +9,79 @@
 
 using namespace std;
 using namespace Helper;
+
+void AttackSetup(AnimationFrame &frame, GameObject &parent, float damageModifier, Vector2 impulse)
+{
+  auto weakParent = weak_ptr(parent.GetShared());
+
+  auto callback = [weakParent, damageModifier, impulse](GameObject &)
+  {
+    LOCK(weakParent, parent);
+    AnimationRecipes::SetupAttack(parent, damageModifier, impulse);
+  };
+
+  frame.AddCallback(callback);
+}
+
+void ResetHitbox(AnimationFrame &frame, GameObject &parent, vector<Circle> hitboxAreas = {})
+{
+  auto weakParent = weak_ptr(parent.GetShared());
+
+  auto callback = [weakParent, hitboxAreas, frame](GameObject &)
+  {
+    LOCK(weakParent, parent);
+    auto attackObject = parent->RequireChild(ATTACK_OBJECT);
+    AnimationRecipes::SetHitbox(attackObject, hitboxAreas, frame);
+  };
+
+  frame.AddCallback(callback);
+}
+
+shared_ptr<GameObject> AnimationRecipes::SetupAttack(shared_ptr<GameObject> object, float damageModifier, Vector2 impulse)
+{
+  // Create child
+  auto attackObject = object->CreateChild(ATTACK_OBJECT);
+  attackObject->SetPhysicsLayer(PhysicsLayer::Hitbox);
+
+  // Give it the attack component
+  attackObject->AddComponent<Attack>(damageModifier, impulse);
+
+  return attackObject;
+}
+
+void AnimationRecipes::SetHitbox(shared_ptr<GameObject> attackObject, vector<Circle> hitboxAreas, const AnimationFrame &frame)
+{
+  // First, remove all colliders already there
+  RemoveHitbox(attackObject);
+
+  // Get sprite renderer
+  auto spriteRenderer = attackObject->GetParent()->RequireComponent<SpriteRenderer>();
+
+  // Position of sprite's top-left pixel, in units
+  Vector2 topLeftPosition = spriteRenderer->RenderPositionFor(attackObject->GetParent()->GetPosition(), frame.GetSprite());
+
+  // Displacement to apply to attackObject's position to get to this pixel's position
+  Vector2 spriteOrigin = topLeftPosition - attackObject->GetPosition();
+
+  // Now, add each provided area as a collider
+  for (auto circle : hitboxAreas)
+  {
+    // Convert circle's virtual pixels to units, and also make it relative to the center of the top left pixel
+    circle = Circle(
+        spriteOrigin + (circle.center + Vector2{0.5, 0.5}) / float(Game::defaultVirtualPixelsPerUnit),
+        circle.radius / float(Game::defaultVirtualPixelsPerUnit));
+
+    attackObject->AddComponent<CircleCollider>(circle, true);
+  }
+}
+
+void AnimationRecipes::RemoveHitbox(shared_ptr<GameObject> attackObject)
+{
+  auto colliders = attackObject->GetComponents<Collider>();
+
+  for (auto collider : colliders)
+    attackObject->RemoveComponent(collider);
+}
 
 auto AnimationRecipes::Run(Animator &animator) -> shared_ptr<Animation>
 {
@@ -111,9 +186,20 @@ auto AnimationRecipes::Brake(Animator &animator) -> shared_ptr<Animation>
 
 auto AnimationRecipes::Neutral1(Animator &animator) -> shared_ptr<Animation>
 {
-  return make_shared<Animation>("neutral1",
-                                animator,
-                                Animation::SliceSpritesheet("./assets/sprites/punch.png", SpritesheetClipInfo(16, 8), 0.1, {4, 0}));
+  auto frames = Animation::SliceSpritesheet("./assets/sprites/punch.png", SpritesheetClipInfo(16, 8), 0.1, {4, 0});
+  auto animation = make_shared<Animation>("neutral1", animator, frames);
+
+  // Setup attack params
+  AttackSetup(animation->frames[0], animator.gameObject, 1.5, Vector2::Angled(DegreesToRadians(10), 10));
+
+  // Add hitboxes
+  ResetHitbox(animation->frames[2], animator.gameObject, {Circle({7.5, 3.5}, 2), Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
+  ResetHitbox(animation->frames[3], animator.gameObject, {Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
+  ResetHitbox(animation->frames[4], animator.gameObject);
+
+  // animation->frames[2].SetDuration(10);
+
+  return animation;
 }
 
 auto AnimationRecipes::Neutral2(Animator &animator) -> shared_ptr<Animation>

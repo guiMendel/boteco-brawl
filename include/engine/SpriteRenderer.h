@@ -25,6 +25,9 @@ public:
   // Renders the sprite using the associated object's position
   void Render() override;
 
+  // Given a render position, returns the position where the top-left pixel will be rendered
+  Vector2 RenderPositionFor(Vector2 position, std::shared_ptr<Sprite> referenceSprite = nullptr) const;
+
   // Renders the sprite to the provided position, ignoring the associated object's position
   void Render(Vector2 position);
 
@@ -44,7 +47,6 @@ public:
   bool centered;
 
 private:
-
   // The sprite's layer
   RenderLayer renderLayer{RenderLayer::Default};
 

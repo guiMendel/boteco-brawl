@@ -9,7 +9,6 @@
 #define DASH_PARTICLES_OBJECT "DashParticles"
 #define CHARACTER_SLIDE_BOX_OBJECT "RepelBox"
 #define CHARACTER_PLATFORM_DROP_OBJECT "PlatformDropDetector"
-#define HITBOX_OBJECT "Hitbox"
 
 class ObjectRecipes
 {

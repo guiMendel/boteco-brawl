@@ -28,13 +28,14 @@ public:
   void SetSprite(std::shared_ptr<Sprite> sprite);
 
   // Get the frames's sprite
-  std::shared_ptr<Sprite> GetSprite();
+  std::shared_ptr<Sprite> GetSprite() const;
 
   // Triggers all of this frame's behaviors
   void Trigger(GameObject &gameObject) const;
 
   // Get this frame's default duration
   float GetDuration() const;
+  void SetDuration(float);
 
   // An offset to apply to the sprite renderer for this frame
   Vector2 spriteOffset;

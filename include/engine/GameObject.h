@@ -88,6 +88,10 @@ private:
   // =================================
   // COMPONENT HANDLING
   // =================================
+private:
+  // Map with all components of this object, indexed by the component's ids
+  std::unordered_map<int, std::shared_ptr<Component>> components;
+
 public:
   // Adds a new component
   template <class T, typename... Args>
@@ -95,7 +99,10 @@ public:
   {
     auto component = std::make_shared<T>(*this, std::forward<Args>(args)...);
 
-    components.push_back(component);
+    components.insert({component->id, component});
+
+    if (awoke)
+      component->Awake();
 
     // Start it
     if (started)
@@ -108,7 +115,7 @@ public:
   }
 
   // Removes an existing component
-  void RemoveComponent(std::shared_ptr<Component> component);
+  decltype(components)::iterator RemoveComponent(std::shared_ptr<Component> component);
 
   // Gets pointer to a component of the given type
   // Needs to be in header file so the compiler knows how to build the necessary methods
@@ -117,14 +124,14 @@ public:
   {
     // Find the position of the component that is of the requested type
     auto componentIterator = std::find_if(
-        components.begin(), components.end(), [](std::shared_ptr<Component> component)
-        { return dynamic_cast<T *>(component.get()) != nullptr; });
+        components.begin(), components.end(), [](std::pair<int, std::shared_ptr<Component>> componentEntry)
+        { return dynamic_cast<T *>(componentEntry.second.get()) != nullptr; });
 
     // Detect if not present
     if (componentIterator == components.end())
       return nullptr;
 
-    return std::dynamic_pointer_cast<T>(*componentIterator);
+    return std::dynamic_pointer_cast<T>(componentIterator->second);
   }
 
   // Gets pointer to a component of the given type
@@ -134,7 +141,7 @@ public:
   {
     std::vector<std::shared_ptr<T>> foundComponents;
 
-    for (auto component : components)
+    for (auto [componentId, component] : components)
     {
       if (dynamic_cast<T *>(component.get()) != nullptr)
         foundComponents.push_back(std::dynamic_pointer_cast<T>(component));
@@ -222,9 +229,6 @@ private:
     return foundComponents;
   }
 
-  // Vector with all components of this object
-  std::vector<std::shared_ptr<Component>> components;
-
   // =================================
   // OBJECT PROPERTIES
   // =================================
@@ -285,6 +289,8 @@ public:
   std::vector<std::shared_ptr<GameObject>> GetChildren();
   std::shared_ptr<GameObject> GetChild(std::string name);
   std::shared_ptr<GameObject> GetChild(int id);
+  std::shared_ptr<GameObject> RequireChild(std::string name);
+  std::shared_ptr<GameObject> RequireChild(int id);
 
   // Get's pointer to parent, and ensures it's valid, unless this is the root object. If the parent is the root object, returns nullptr
   std::shared_ptr<GameObject> GetParent() const;

@@ -24,6 +24,7 @@
 #include "BoxCollider.h"
 #include "CircleCollider.h"
 #include "Circle.h"
+#include "Heat.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
@@ -116,7 +117,7 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
     // === MOVEMENT CONTROL
 
     // Give it movement
-    character->AddComponent<::CharacterStateManager>(10);
+    character->AddComponent<::CharacterStateManager>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
 
     // Give it input
@@ -155,11 +156,11 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
 
     // === ATTACKING
 
-    // Add a hitbox child object to hold any hitboxes and Attacks
-    character->CreateChild(HITBOX_OBJECT);
+    // Give it a character to differentiate which animations to play for each attack
+    character->AddComponent<TestCharacter>(10);
 
-    // GIve it a character to differentiate which animations to play for each attack
-    character->AddComponent<TestCharacter>();
+    // Make it vulnerable
+    character->AddComponent<Heat>(1);
   };
 }
 

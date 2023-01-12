@@ -13,7 +13,7 @@
 class CharacterStateManager : public Component
 {
 public:
-  CharacterStateManager(GameObject &associatedObject, float baseDamage);
+  CharacterStateManager(GameObject &associatedObject);
   virtual ~CharacterStateManager() {}
 
   // Triggered when a state exits normally (times out)
@@ -51,9 +51,6 @@ public:
   void SetControl(bool value);
 
   void Update(float) override;
-
-  // Base damage of this character
-  float baseDamage;
 
 private:
   void AddState(std::shared_ptr<CharacterState> newState);
