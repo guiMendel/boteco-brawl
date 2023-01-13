@@ -8,7 +8,7 @@
 using namespace std;
 
 // Initial gravity
-const Vector2 PhysicsSystem::initialGravity{0, 14};
+const Vector2 PhysicsSystem::initialGravity{0, 16};
 
 void PhysicsLayerHandler::InitializeCollisionMatrix()
 {

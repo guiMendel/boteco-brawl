@@ -31,9 +31,14 @@ public:
   // Respawns character at the top of the screen
   void Respawn();
 
+  // Whether character is currently dead
+  bool IsDead() const;
+
 private:
   // Arena reference
   std::weak_ptr<Arena> weakArena;
+
+  bool dead{false};
 };
 
 #endif

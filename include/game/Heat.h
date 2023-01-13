@@ -35,7 +35,7 @@ private:
   static const float inverseMaxHeat;
 
   // Current level of heat
-  float heat;
+  float heat{0};
 
   // Modifier applied to any incoming heat damage
   float armor, inverseArmor;

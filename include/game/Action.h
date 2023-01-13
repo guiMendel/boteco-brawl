@@ -48,7 +48,7 @@ struct Action
 struct AnimationAction : public Action
 {
   // Takes over responsibility for this
-  void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) final override;
+  void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
 
   // Requires a name for an animation
   virtual std::string GetAnimationName() const = 0;
@@ -61,6 +61,9 @@ struct AttackAction : public AnimationAction
 {
   // Fixed priority
   int GetPriority() const override;
+
+  // Add some functionality
+  void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
 
   // Fixed next state
   std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override;

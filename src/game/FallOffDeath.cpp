@@ -23,10 +23,12 @@ void FallOffDeath::Update(float)
 {
   LOCK(weakArena, arena);
 
-  // If a respawn timer is up, respawn
-  if (gameObject.timer.Get(RESPAWN_TIMER) >= respawnDelay)
+  if (IsDead())
   {
-    Respawn();
+    // If respawn timer is up, respawn
+    if (gameObject.timer.Get(RESPAWN_TIMER) >= respawnDelay)
+      Respawn();
+
     return;
   }
 
@@ -48,6 +50,8 @@ void FallOffDeath::Update(float)
 void FallOffDeath::Die()
 {
   LOCK(weakArena, arena);
+
+  dead = true;
 
   OnDeath.Invoke();
 
@@ -122,6 +126,8 @@ void FallOffDeath::Respawn()
 {
   LOCK(weakArena, arena);
 
+  dead = false;
+
   // Reset timer
   gameObject.timer.Reset(RESPAWN_TIMER, 0, false);
 
@@ -146,3 +152,5 @@ void FallOffDeath::SetCharacterActive(bool active)
   gameObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
   gameObject.RequireComponent<CharacterController>()->SetEnabled(active);
 }
+
+bool FallOffDeath::IsDead() const { return dead; }

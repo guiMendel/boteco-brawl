@@ -207,3 +207,5 @@ void Movement::WasteDoubleJump()
 
   doubleJumpAvailable = false;
 }
+
+float Movement::GetTargetSpeed() const { return targetSpeed; }

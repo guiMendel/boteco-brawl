@@ -52,7 +52,7 @@ void Heat::TakeDamage(const Damage &damage)
   float heatMultiplier = 99 * heat * inverseMaxHeat + 1;
 
   cout << gameObject << " taking damage: " << damage.heatDamage << " heatDamage, " << Vector2(damage.impulse).Magnitude() << " impulse." << endl;
-  cout << "Inverse Armor: " << inverseArmor << ", Heat multiplier: " << heatMultiplier << endl;
+  cout << "Inverse Armor: " << inverseArmor << ", Heat: " << heat << ", Inverse Max Heat: " << inverseMaxHeat << ", Heat multiplier: " << heatMultiplier << endl;
   cout << "Resulting damage: " << inverseArmor * damage.heatDamage << ", Resulting velocity add: " << (damage.impulse * heatMultiplier * body->GetInverseMass()).Magnitude() << endl;
 
   // When grounded

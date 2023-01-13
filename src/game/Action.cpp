@@ -4,6 +4,7 @@
 #include "StatefulAnimation.h"
 #include "CharacterStateManager.h"
 #include "Character.h"
+#include "PlayerInput.h"
 #include "Attack.h"
 
 using namespace std;
@@ -63,4 +64,17 @@ int AttackAction::GetPriority() const { return 1; }
 shared_ptr<CharacterState> AttackAction::NextState(shared_ptr<Action> sharedAction)
 {
   return CharacterStateRecipes::Attacking(sharedAction);
+}
+
+void AttackAction::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
+{
+  // Ensure character orientation is set to PlayerInput direction
+  auto playerInput = target.RequireComponent<PlayerInput>();
+
+  cout << "target: " << (playerInput->GetCurrentMoveDirection()) << ", actual: " << target.localScale.x << endl;
+
+  target.localScale.x = GetSign(playerInput->GetCurrentMoveDirection());
+
+  // Default behavior
+  AnimationAction::Trigger(target, actionState);
 }
