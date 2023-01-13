@@ -87,3 +87,28 @@ void Debug::DrawBox(Rectangle box, Color color)
   // Paint collider edges
   SDL_RenderDrawLines(renderer, vertices, 5);
 }
+
+void Debug::DrawLine(Vector2 start, Vector2 end, Color color)
+{
+  start = Camera::GetMain()->WorldToScreen(start);
+  end = Camera::GetMain()->WorldToScreen(end);
+
+  auto renderer = Game::GetInstance().GetRenderer();
+
+  SDL_SetRenderDrawColor(renderer, color.red, color.green, color.blue, color.alpha);
+
+  SDL_RenderDrawLineF(renderer, start.x, start.y, end.x, end.y);
+}
+
+void Debug::DrawArrow(Vector2 start, Vector2 end, Color color, float headSize, float headArcAngle)
+{
+  // First draw arrow line
+  DrawLine(start, end, color);
+
+  // Get vector of head size
+  auto headVector = (start - end).Normalized() * headSize;
+
+  // Draw head sides
+  DrawLine(end, end + headVector.Rotated(headArcAngle / 2), color);
+  DrawLine(end, end + headVector.Rotated(-headArcAngle / 2), color);
+}

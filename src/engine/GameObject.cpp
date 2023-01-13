@@ -429,9 +429,9 @@ shared_ptr<GameObject> GameObject::RequireChild(int id)
 {
   auto child = GetChild(id);
 
-  cout << "Children:" << endl;
-  for (auto child : children)
-    cout << *child.second.lock() << endl;
+  // cout << "Children:" << endl;
+  // for (auto child : children)
+  //   cout << *child.second.lock() << endl;
 
   Assert(child != nullptr, "Required child of id " + to_string(id) + " was not found in object " + string(*this));
 

@@ -1,6 +1,21 @@
 #ifndef __ANIMATION_RECIPES__
 #define __ANIMATION_RECIPES__
 
+#include <memory>
+#include "StatefulAnimation.h"
+#include "Circle.h"
+
+#define CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, Parent)  \
+  ClassName(std::shared_ptr<Animator> animator) : Parent(animator) \
+  {                                                                \
+  }                                                                \
+  virtual ~ClassName()                                             \
+  {                                                                \
+  }
+
+#define CONSTRUCTOR_AND_DESTRUCTOR(ClassName) CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, StatefulAnimation)
+#define ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(ClassName) CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, AttackAnimation)
+
 #define FIELD(Type, Name, initialValue) \
   Type &Name() override                 \
   {                                     \
@@ -20,18 +35,33 @@
 
 #define DECLARE(Type, Name) Type &Name() override;
 
-#include <memory>
-#include "Animation.h"
-#include "Circle.h"
+#define SET_DAMAGE(damage, impulse)                              \
+  std::pair<float, Vector2> GetAttackProperties() const override \
+  {                                                              \
+    return {damage, impulse};                                    \
+  }
+
+#define ATTACK_SEQUENCE(frame)           \
+  int OpenSequenceFrame() const override \
+  {                                      \
+    return frame;                        \
+  }
+
+#define ATTACK_CANCEL(frame)       \
+  int CancelFrame() const override \
+  {                                \
+    return frame;                  \
+  }
 
 class Animator;
 
 namespace GeneralAnimations
 {
-  class AttackAnimation : public Animation
+  class AttackAnimation : public StatefulAnimation
   {
   public:
-    AttackAnimation(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    AttackAnimation(std::shared_ptr<Animator> animator) : StatefulAnimation(animator) {}
+    virtual ~AttackAnimation() {}
 
     // Get damage & impulse for this attack
     // Default is is 0 for both
@@ -59,10 +89,10 @@ namespace GeneralAnimations
     int attackObjectId{-1};
   };
 
-  class Run : public Animation
+  class Run : public StatefulAnimation
   {
   public:
-    Run(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    CONSTRUCTOR_AND_DESTRUCTOR(Run)
 
     DEF_NAME("run")
     DEF_FRAMES(SliceSpritesheet("./assets/sprites/Run.png", SpritesheetClipInfo(8, 8, 10), 0.1))
@@ -70,10 +100,10 @@ namespace GeneralAnimations
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 
-  class Idle : public Animation
+  class Idle : public StatefulAnimation
   {
   public:
-    Idle(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    CONSTRUCTOR_AND_DESTRUCTOR(Idle)
 
     DEF_NAME("idle")
     DEF_FRAMES(SliceSpritesheet("./assets/sprites/idle.png", SpritesheetClipInfo(8, 8), 0.1))
@@ -81,19 +111,19 @@ namespace GeneralAnimations
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 
-  class Jump : public Animation
+  class Jump : public StatefulAnimation
   {
   public:
-    Jump(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    CONSTRUCTOR_AND_DESTRUCTOR(Jump)
 
     DEF_NAME("jump")
     DELCARE_FRAMES
   };
 
-  class Rise : public Animation
+  class Rise : public StatefulAnimation
   {
   public:
-    Rise(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    CONSTRUCTOR_AND_DESTRUCTOR(Rise)
 
     DEF_NAME("rise")
     DEF_FRAMES(SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 1, 2), 0.1))
@@ -101,10 +131,10 @@ namespace GeneralAnimations
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 
-  class Fall : public Animation
+  class Fall : public StatefulAnimation
   {
   public:
-    Fall(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    CONSTRUCTOR_AND_DESTRUCTOR(Fall)
 
     DEF_NAME("fall")
     DEF_FRAMES(SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 1, 3), 0.1))
@@ -112,19 +142,19 @@ namespace GeneralAnimations
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 
-  class Land : public Animation
+  class Land : public StatefulAnimation
   {
   public:
-    Land(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    CONSTRUCTOR_AND_DESTRUCTOR(Land)
 
     DEF_NAME("land")
     DEF_FRAMES(SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 1, 4), 0.1))
   };
 
-  class Brake : public Animation
+  class Brake : public StatefulAnimation
   {
   public:
-    Brake(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    CONSTRUCTOR_AND_DESTRUCTOR(Brake)
 
     DEF_NAME("brake")
     DEF_FRAMES(SliceSpritesheet("./assets/sprites/carry.png", SpritesheetClipInfo(8, 8, 1, 1), 0.1))
@@ -132,10 +162,10 @@ namespace GeneralAnimations
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 
-  class Dash : public Animation
+  class Dash : public StatefulAnimation
   {
   public:
-    Dash(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    CONSTRUCTOR_AND_DESTRUCTOR(Dash)
 
     DEF_NAME("dash")
     DEF_FRAMES(SliceSpritesheet("./assets/sprites/carry.png", SpritesheetClipInfo(8, 8, 3, 5), 0.1))
@@ -144,25 +174,34 @@ namespace GeneralAnimations
   class Neutral1 : public AttackAnimation
   {
   public:
-    Neutral1(std::shared_ptr<Animator> animator) : AttackAnimation(animator) {}
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Neutral1)
 
     DEF_NAME("neutral1")
     DELCARE_FRAMES
+
+    SET_DAMAGE(1, Vector2::Angled(Helper::DegreesToRadians(-5), 2))
+
+    ATTACK_SEQUENCE(4)
+    ATTACK_CANCEL(5)
   };
 
   class Neutral2 : public AttackAnimation
   {
   public:
-    Neutral2(std::shared_ptr<Animator> animator) : AttackAnimation(animator) {}
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Neutral2)
 
     DEF_NAME("neutral2")
     DELCARE_FRAMES
+
+    SET_DAMAGE(1.2, Vector2::Angled(Helper::DegreesToRadians(-5), 4))
+
+    ATTACK_CANCEL(6)
   };
 
-  class SpecialNeutral : public Animation
+  class SpecialNeutral : public StatefulAnimation
   {
   public:
-    SpecialNeutral(std::shared_ptr<Animator> animator) : Animation(animator) {}
+    CONSTRUCTOR_AND_DESTRUCTOR(SpecialNeutral)
 
     DEF_NAME("specialNeutral")
     DELCARE_FRAMES

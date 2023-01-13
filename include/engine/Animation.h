@@ -62,6 +62,7 @@ public:
 
   // Instances need their animator
   Animation(std::shared_ptr<Animator> animator);
+  virtual ~Animation() {}
 
   // Access the animation name
   virtual std::string &Name() = 0;

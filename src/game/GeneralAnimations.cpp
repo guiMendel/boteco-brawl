@@ -150,9 +150,6 @@ void AttackAnimation::SetHitbox(const AnimationFrame &frame, vector<Circle> hitb
 {
   LOCK(weakAnimator, animator);
 
-  cout << *animator << endl;
-  cout << animator->gameObject << endl;
-
   auto attackObject = animator->gameObject.RequireChild(attackObjectId);
 
   // First, remove all colliders already there

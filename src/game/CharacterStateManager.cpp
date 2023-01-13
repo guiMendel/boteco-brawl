@@ -11,11 +11,6 @@ CharacterStateManager::CharacterStateManager(GameObject &associatedObject)
 
 void CharacterStateManager::Update(float deltaTime)
 {
-  // cout << "States: ";
-  // for (auto state : states)
-  //   cout << state->name << " ";
-  // cout << endl;
-
   if (queuedActionTTL <= 0)
     return;
 
@@ -103,7 +98,7 @@ void CharacterStateManager::SetSequenceIndex(shared_ptr<Action> action)
   for (auto state : states)
   {
     // Check if this state's parent action is the same
-    cout << "Comparing actions " << typeid(*state->parentAction).name() << " and " << typeid(*action).name() << ": " << (*state->parentAction == *action) << endl;
+    // cout << "Comparing actions " << typeid(*state->parentAction).name() << " and " << typeid(*action).name() << ": " << (*state->parentAction == *action) << endl;
     if (*state->parentAction == *action)
     {
       // Check if the sequence index for this action will be higher than the current one
@@ -114,6 +109,11 @@ void CharacterStateManager::SetSequenceIndex(shared_ptr<Action> action)
 
 void CharacterStateManager::Perform(shared_ptr<Action> action, bool canDelay)
 {
+  cout << "States: ";
+  for (auto state : states)
+    cout << state->name << " ";
+  cout << endl;
+
   // Set incoming action's sequence index
   SetSequenceIndex(action);
 

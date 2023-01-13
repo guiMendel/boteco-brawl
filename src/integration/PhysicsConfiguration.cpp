@@ -2,6 +2,7 @@
 #include "PhysicsLayerHandler.h"
 #include "BoxCollider.h"
 #include "CircleCollider.h"
+#include "Attack.h"
 #include "Debug.h"
 
 using namespace std;
@@ -39,8 +40,16 @@ void CircleCollider::Render()
   if (gameObject.GetName() == "Hitbox")
   {
     auto circle = *dynamic_pointer_cast<Circle>(DeriveShape());
+    auto attack = gameObject.RequireComponent<Attack>();
+
+    float direction = GetSign(attack->gameObject.GetScale().x);
+
     Debug::DrawCircle(circle, Color::Pink());
     Debug::DrawPoint(circle.center, Color::Pink());
+    Debug::DrawArrow(circle.center,
+                     circle.center + attack->impulse.Normalized() * circle.radius * Vector2(direction, 1),
+                     Color::Cyan(),
+                     circle.radius / 2);
     return;
   }
 

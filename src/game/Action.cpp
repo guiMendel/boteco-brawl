@@ -1,7 +1,7 @@
 #include "Action.h"
 #include "GameObject.h"
 #include "Animator.h"
-#include "Animation.h"
+#include "StatefulAnimation.h"
 #include "CharacterStateManager.h"
 #include "Character.h"
 #include "Attack.h"
@@ -11,15 +11,12 @@ using namespace std;
 bool Action::operator==(const Action &other) { return typeid(*this) == typeid(other); }
 bool Action::operator!=(const Action &other) { return !(*this == other); }
 
-int AnimationAction::CancelFrame() const { return -1; }
-
-int AnimationAction::OpenSequenceFrame() const { return -1; }
-
 void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
 {
   // Store these info
   auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());
   auto weakObject = weak_ptr(target.GetShared());
+  auto weakActionState = weak_ptr(actionState);
   int stateId = actionState->id;
 
   // Get animator
@@ -39,11 +36,15 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
     animationName += to_string(character->TransformSequenceIndexFor(animationName, sequenceIndex) + 1);
   }
 
-  // Get the animation
-  auto animation = animator->BuildAnimation(animationName);
+  // Get the animation and convert it to stateful
+  auto animation = dynamic_pointer_cast<StatefulAnimation>(animator->BuildAnimation(animationName));
+  Assert(animation != nullptr, "Action generated an animation which wasn't stateful");
+
+  // Register the action's state to the animation
+  animation->RegisterState(actionState);
 
   // Give it a stop callback
-  auto stopCallback = [stateId, weakStateManager, weakObject]()
+  auto removeStateCallback = [stateId, weakStateManager, weakObject]()
   {
     // When animation is over, make sure this action's state is no longer active
     IF_LOCK(weakStateManager, stateManager)
@@ -51,8 +52,7 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
       stateManager->RemoveState(stateId);
     }
   };
-
-  animation->OnStop.AddListener("parent-action-cleanup", stopCallback);
+  animation->OnStop.AddListener("parent-action-cleanup", removeStateCallback);
 
   // Start this animation
   animator->Play(animation);

@@ -38,5 +38,7 @@ Damage Attack::GetDamage() const
 {
   LOCK(weakCharacter, character);
 
-  return Damage{character->GetBaseDamage() * damageModifier, impulse};
+  float direction = GetSign(gameObject.GetScale().x);
+
+  return Damage{character->GetBaseDamage() * damageModifier, impulse * Vector2(direction, 1)};
 }
