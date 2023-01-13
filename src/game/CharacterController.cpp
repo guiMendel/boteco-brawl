@@ -2,6 +2,7 @@
 #include "CharacterStateRecipes.h"
 #include "Action.h"
 #include "Actions.h"
+#include "Animation.h"
 #include "PlayerInput.h"
 #include <iostream>
 
@@ -51,7 +52,7 @@ void CharacterController::HandleMovementAnimation()
     }
 
     // Otherwise, stop run animation if it's playing
-    else if (animator.GetCurrentAnimation() == "run" || animator.GetCurrentAnimation() == "brake")
+    else if (animator.GetCurrentAnimation()->Name() == "run" || animator.GetCurrentAnimation()->Name() == "brake")
       // else if (animator.GetCurrentAnimation() == "run")
       animator.Play("idle");
   }
@@ -144,7 +145,7 @@ void CharacterController::DispatchDash(Vector2 direction)
 
   // If not airborne, forbid vertical dashes
   // UNLESS in jump animation!
-  else if (animator.GetCurrentAnimation() != "jump")
+  else if (animator.GetCurrentAnimation()->Name() != "jump")
     direction.y = 0;
 
   // If no direction, use object's facing direction

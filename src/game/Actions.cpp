@@ -1,5 +1,6 @@
 #include "Actions.h"
 #include "Movement.h"
+#include "Animation.h"
 #include "Rigidbody.h"
 #include "CharacterStateManager.h"
 #include "ParticleEmitter.h"
@@ -59,24 +60,38 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   auto weakStateManager{weak_ptr(character)};
   auto weakRecoveringState{weak_ptr(recoveringState)};
 
-  Animator::frame_callbacks dashCallbacks = {
-      {2, [weakState, weakStateManager, weakRecoveringState, this]()
-       {
-         IF_LOCK(weakState, dashState)
-         IF_LOCK(weakStateManager, character) IF_LOCK(weakRecoveringState, recoveringState)
-         {
-           dashState->parentAction = nullptr;
-           character->SetState(recoveringState, GetFriendStates());
-         }
-       }}};
+  // Get animator
+  auto animator = target.RequireComponent<Animator>();
+
+  // Build animation
+  auto animation = animator->BuildAnimation("dash");
+
+  // Switch from invulnerable state to recovering state mid-animation
+  auto stateSwitchCallback = [weakState, weakStateManager, weakRecoveringState, this](GameObject &)
+  {
+    IF_LOCK(weakState, dashState)
+    IF_LOCK(weakStateManager, stateManager)
+    IF_LOCK(weakRecoveringState, recoveringState)
+    {
+      dashState->parentAction = nullptr;
+      stateManager->SetState(recoveringState, GetFriendStates());
+    }
+  };
+  animation->GetFrame(2).AddCallback(stateSwitchCallback);
+
+  // On stop, ensure both states have been removed
+  auto stopCallback = [dashStateId, recoveringStateId, weakStateManager]()
+  {
+    IF_LOCK(weakStateManager, stateManager)
+    {
+      stateManager->RemoveState(dashStateId);
+      stateManager->RemoveState(recoveringStateId);
+    }
+  };
+  animation->OnStop.AddListener("action-cleanup", stopCallback);
 
   // Start this animation
-  // When animation is over, make sure this action's states are disabled
-  target.RequireComponent<Animator>()->Play("dash", dashCallbacks, [dashStateId, recoveringStateId, weakStateManager]()
-                                            { IF_LOCK(weakStateManager, character) {
-                                              character->RemoveState(dashStateId);
-                                              character->RemoveState(recoveringStateId);
-                                            } });
+  animator->Play(animation);
 
   // Play particles
   auto particleObject = target.GetChild(DASH_PARTICLES_OBJECT);

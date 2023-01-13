@@ -5,59 +5,90 @@
 
 using namespace std;
 
-Animation::Animation(string name, Animator &animator, vector<AnimationFrame> frames, bool loop)
-    : name(name), frames(frames), loop(loop), animator(animator)
+Animation::Animation(shared_ptr<Animator> animator) : weakAnimator(animator)
 {
-  Assert(name != "", "Invalid animation name: it can't be empty");
+  // Link it's event types to this animation's
+  OnCycleEnd.AddListener("animator-propagation", [this]()
+                         { LOCK(weakAnimator, animator); animator->OnCycleEnd.Invoke(); });
+
+  OnStop.AddListener("animator-propagation", [this]()
+                     { LOCK(weakAnimator, animator); animator->OnAnimationStop.Invoke(); });
 }
 
-Animation::Animation(string name, Animator &animator, initializer_list<AnimationFrame> frames, bool loop)
-    : Animation(name, animator, vector(frames), loop) {}
+vector<AnimationFrame> &Animation::Frames()
+{
+  if (frames.empty())
+    frames = InitializeFrames();
+
+  return frames;
+}
+
+Animation::CycleEndBehavior &Animation::EndBehavior()
+{
+  static CycleEndBehavior defaultBehavior{CycleEndBehavior::PlayDefault};
+  return defaultBehavior;
+}
+
+float &Animation::SpeedModifier()
+{
+  static float defaultSpeed{1};
+  return defaultSpeed;
+}
+
+shared_ptr<Animation> Animation::GetNext() const { return nullptr; }
+
+AnimationFrame &Animation::operator[](int index) { return GetFrame(index); }
 
 void Animation::Start()
 {
   // Safecheck
-  if (frames.empty())
-  {
-    cout << "WARNING: Tried playing animation with no frames!" << endl;
-    return;
-  }
+  Assert(Frames().empty() == false, "Tried playing animation with no frames");
+
+  InternalOnStart();
 
   // Start with first frame
-  SetFrame(0);
+  TriggerFrame(0);
 }
 
 void Animation::Stop()
 {
+  InternalOnStop();
   OnStop.Invoke();
   currentFrame = 0;
 }
 
-void Animation::SetFrame(int frame)
+AnimationFrame &Animation::GetFrame(int frame)
 {
-  Assert((int)frames.size() > frame && frame >= 0, "Couldn't set animation frame: it was an invalid index");
+  Assert(frame >= 0 && frame < int(Frames().size()), "Invalid frame index");
 
-  // Trigger it
-  frames[frame].Trigger(animator.gameObject);
-
-  // Get next frame time
-  secondsToNextFrame = frames[frame].GetDuration() * speedModifier;
-
-  currentFrame = frame;
-
-  // Tell animator
-  animator.IndicateCurrentFrame(frame);
+  return Frames()[frame];
 }
 
-bool Animation::IsPlaying() const
+void Animation::TriggerFrame(int frame)
 {
-  return animator.currentAnimation == name;
+  LOCK(weakAnimator, animator);
+
+  // Trigger it
+  GetFrame(frame).Trigger(animator->gameObject);
+
+  // Get next frame time
+  secondsToNextFrame = GetFrame(frame).GetDuration() * speedModifier;
+
+  currentFrame = frame;
+}
+
+bool Animation::IsPlaying()
+{
+  LOCK(weakAnimator, animator);
+  return animator->GetCurrentAnimation()->Name() == Name();
 }
 
 void Animation::Update(float deltaTime)
 {
   if (IsPlaying() == false)
     return;
+
+  LOCK(weakAnimator, animator);
 
   // Discount time
   secondsToNextFrame -= deltaTime;
@@ -67,7 +98,7 @@ void Animation::Update(float deltaTime)
     return;
 
   // Get next frame
-  int nextFrame = (currentFrame + 1) % frames.size();
+  int nextFrame = (currentFrame + 1) % Frames().size();
 
   // If finished cycle
   if (nextFrame == 0)
@@ -75,29 +106,31 @@ void Animation::Update(float deltaTime)
     // Announce
     OnCycleEnd.Invoke();
 
-    // If has next
-    if (auto nextAnimation = next.lock(); nextAnimation)
+    // If loops, simply carry on
+    if (EndBehavior() != CycleEndBehavior::Loop)
     {
-      animator.Play(nextAnimation->name);
-      return;
-    }
+      // If has next
+      if (EndBehavior() == CycleEndBehavior::PlayNext)
+      {
+        animator->Play(GetNext());
+        return;
+      }
 
-    // If not looping
-    if (loop == false)
-    {
-      // Transition to default
-      if (transitionToDefault)
-        animator.Play(animator.defaultAnimation);
+      // If transitions to default
+      if (EndBehavior() == CycleEndBehavior::PlayDefault)
+      {
+        animator->Play(animator->defaultAnimation);
+        return;
+      }
 
-      // Stop
-      else
-        animator.Stop();
+      // Otherwise, it's Nothing, so stop
+      animator->Stop();
       return;
     }
   }
 
   // Carry on to next frame
-  SetFrame(nextFrame);
+  TriggerFrame(nextFrame);
 }
 
 vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetClipInfo clipInfo, float frameDuration, Vector2 virtualPixelOffset, SpriteConfig config)
@@ -159,9 +192,4 @@ vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetC
   }
 
   return frames;
-}
-
-void Animation::SetNext(weak_ptr<Animation> next)
-{
-  this->next = next;
 }

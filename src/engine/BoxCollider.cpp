@@ -5,13 +5,6 @@
 
 using namespace std;
 
-Rectangle RectangleFromAnimator(Animator &animator, Vector2 scale)
-{
-  Animation &defaultAnimation = animator.GetAnimation(animator.defaultAnimation);
-  auto sprite = defaultAnimation[0].GetSprite();
-
-  return Rectangle({0, 0}, sprite->GetWidth() * scale.x, sprite->GetHeight() * scale.y);
-}
 // Explicitly initialize box
 BoxCollider::BoxCollider(GameObject &associatedObject, Rectangle box, bool isTrigger, ColliderDensity density)
     : Collider(associatedObject, make_shared<Rectangle>(box), isTrigger, density) {}
@@ -30,7 +23,7 @@ BoxCollider::BoxCollider(
     GameObject &associatedObject, shared_ptr<Animator> animator, bool isTrigger, ColliderDensity density, Vector2 scale)
     : BoxCollider(
           associatedObject,
-          animator->GetAnimation(animator->defaultAnimation)[0].GetSprite(),
+          animator->BuildAnimation(animator->defaultAnimation)->GetFrame(0).GetSprite(),
           isTrigger,
           density,
           scale) {}

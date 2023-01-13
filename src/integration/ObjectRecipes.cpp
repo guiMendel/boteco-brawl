@@ -14,7 +14,7 @@
 #include "Movement.h"
 #include "KeyboardInput.h"
 #include "ControllerInput.h"
-#include "AnimationRecipes.h"
+#include "GeneralAnimations.h"
 #include "CharacterController.h"
 #include "CharacterStateManager.h"
 #include "ParticleEmitter.h"
@@ -76,17 +76,17 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
     auto animator = character->AddComponent<Animator>();
 
     // Add animations
-    animator->AddAnimation(AnimationRecipes::Idle);
-    animator->AddAnimation(AnimationRecipes::Run);
-    animator->AddAnimation(AnimationRecipes::Jump);
-    animator->AddAnimation(AnimationRecipes::Rise);
-    animator->AddAnimation(AnimationRecipes::Fall);
-    animator->AddAnimation(AnimationRecipes::Land);
-    animator->AddAnimation(AnimationRecipes::Brake);
-    animator->AddAnimation(AnimationRecipes::Dash);
-    animator->AddAnimation(AnimationRecipes::Neutral1);
-    animator->AddAnimation(AnimationRecipes::Neutral2);
-    animator->AddAnimation(AnimationRecipes::SpecialNeutral);
+    animator->RegisterAnimation<GeneralAnimations::Idle>();
+    animator->RegisterAnimation<GeneralAnimations::Run>();
+    animator->RegisterAnimation<GeneralAnimations::Jump>();
+    animator->RegisterAnimation<GeneralAnimations::Rise>();
+    animator->RegisterAnimation<GeneralAnimations::Fall>();
+    animator->RegisterAnimation<GeneralAnimations::Land>();
+    animator->RegisterAnimation<GeneralAnimations::Brake>();
+    animator->RegisterAnimation<GeneralAnimations::Dash>();
+    animator->RegisterAnimation<GeneralAnimations::Neutral1>();
+    animator->RegisterAnimation<GeneralAnimations::Neutral2>();
+    animator->RegisterAnimation<GeneralAnimations::SpecialNeutral>();
 
     // === COLLISION
 

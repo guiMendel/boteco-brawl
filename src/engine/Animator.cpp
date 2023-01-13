@@ -15,59 +15,57 @@ void Animator::Start()
 void Animator::Update(float deltaTime)
 {
   // Update the animation being played
-  if (currentAnimation == "")
+  if (currentAnimation == nullptr)
     return;
 
-  animations[currentAnimation]->Update(deltaTime);
-}
-
-void Animator::AddAnimation(shared_ptr<Animation> animation, bool makeInitial)
-{
-  // Check for unique name
-  Assert(animations.find(animation->name) == animations.end(), "Tried to add two animations with the same name");
-
-  animations[animation->name] = animation;
-
-  if (makeInitial || defaultAnimation == "")
-    defaultAnimation = animation->name;
-}
-
-void Animator::AddAnimation(function<shared_ptr<Animation>(Animator &)> recipe, bool makeInitial)
-{
-  AddAnimation(recipe(*this), makeInitial);
+  currentAnimation->Update(deltaTime);
 }
 
 void Animator::Stop()
 {
-  if (currentAnimation == "")
+  if (currentAnimation == nullptr)
     return;
 
-  auto stoppedAnimation = currentAnimation;
+  // Stop it
+  currentAnimation->Stop();
 
   // Forget it
-  currentAnimation = "";
-
-  // Stop it
-  animations[stoppedAnimation]->Stop();
-
-  // Erase all callbacks
-  currentAnimationCallbacks.clear();
+  currentAnimation = nullptr;
 }
 
 void Animator::Stop(string animation)
 {
-  if (currentAnimation == animation)
+  if (currentAnimation != nullptr && currentAnimation->Name() == animation)
     Stop();
 }
 
-void Animator::Play(string animation, frame_callbacks callbacks, function<void()> stopCallback)
+shared_ptr<Animation> Animator::BuildAnimation(string name)
+{
+  // Validate name
+  Assert(HasAnimation(name), "Animator didn't have name \"" + name + "\" registered to build");
+
+  // Call it's builder
+  return animations[name]();
+}
+
+void Animator::Play(string animationName)
 {
   // Skip if already playing this
-  if (animation == currentAnimation)
+  if (currentAnimation != nullptr && currentAnimation->Name() == animationName)
     return;
 
-  // Validate name
-  Assert(animations.find(animation) != animations.end(), "Animator couldn't find animation with name \"" + animation + "\"");
+  // Build it and play it
+  Play(BuildAnimation(animationName));
+}
+
+void Animator::Play(shared_ptr<Animation> animation)
+{
+  // Skip if already playing this
+  if (currentAnimation != nullptr && currentAnimation->Name() == animation->Name())
+    return;
+
+  // Ensure it's type has been previously registered
+  Assert(HasAnimation(animation->Name()), "Animator is forbidden to play an animation whose type hasn't been registered yet. Animation name: " + animation->Name());
 
   // Stop current animation
   Stop();
@@ -76,37 +74,12 @@ void Animator::Play(string animation, frame_callbacks callbacks, function<void()
   currentAnimation = animation;
 
   // Start it
-  animations[animation]->Start();
-
-  // Add it's stop callback
-  if (stopCallback)
-    animations[animation]->OnStop.AddOneShotListener("play-callback", stopCallback);
-
-  // Add it's frame callbacks
-  currentAnimationCallbacks = callbacks;
+  animation->Start();
 }
 
-void Animator::Play(string animation, function<void()> stopCallback)
-{
-  Play(animation, {}, stopCallback);
-}
-
-bool Animator::HasAnimation(std::string name) const
+bool Animator::HasAnimation(string name) const
 {
   return animations.count(name) > 0;
 }
 
-Animation &Animator::GetAnimation(string name)
-{
-  Assert(HasAnimation(name), "Animator had no animation named " + name);
-  return *animations[name];
-}
-
-string Animator::GetCurrentAnimation() const { return currentAnimation; }
-
-void Animator::IndicateCurrentFrame(int frame)
-{
-  // Trigger this frames callback if it's there
-  if (currentAnimationCallbacks.count(frame) > 0)
-    currentAnimationCallbacks[frame]();
-}
+shared_ptr<Animation> Animator::GetCurrentAnimation() const { return currentAnimation; }

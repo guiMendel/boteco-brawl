@@ -16,7 +16,7 @@ struct SpritesheetClipInfo
   int height;
 
   // First frame index to be included in the slice
-  int startingFrame{0};
+  int startingFrame;
 
   // How many frames to be included in the slice
   // -1 means all through to the end
@@ -28,8 +28,8 @@ struct SpritesheetClipInfo
   // Gap between frames, in pixels
   int horizontalGap{0}, verticalGap{0};
 
-  SpritesheetClipInfo(int width, int height, int totalFrames = -1)
-      : width(width), height(height), totalFrames(totalFrames) {}
+  SpritesheetClipInfo(int width, int height, int totalFrames = -1, int startingFrame = 0)
+      : width(width), height(height), startingFrame(startingFrame), totalFrames(totalFrames) {}
 };
 
 class Animation
@@ -37,21 +37,20 @@ class Animation
   friend class Animator;
 
 public:
-  // Initialize manually
-  Animation(std::string name, Animator &animator, std::initializer_list<AnimationFrame> frames, bool loop = false);
+  // Defines kinds of behavior allowed when cycle ends
+  enum class CycleEndBehavior
+  {
+    // Repeat cycle
+    Loop,
+    // Play another animation
+    PlayNext,
+    // Play animator default animation
+    PlayDefault,
+    // Leaves animator with no animation
+    Nothing
+  };
 
-  // Initialize with frame vector
-  Animation(std::string name, Animator &animator, std::vector<AnimationFrame> frames, bool loop = false);
-
-  void SetNext(std::weak_ptr<Animation> next);
-
-  AnimationFrame &operator[](int index) { return frames[index]; }
-  AnimationFrame operator[](int index) const { return frames[index]; }
-
-  // Automatically generates the frame vector for a spritesheet animation
-  // Allows offsetting the frame's by some virtual pixels
-  static std::vector<AnimationFrame> SliceSpritesheet(
-      std::string filename, SpritesheetClipInfo clipInfo, float frameDuration, Vector2 virtualPixelOffset = Vector2::Zero(), SpriteConfig config = SpriteConfig());
+  // === EVENTS
 
   // Raised when the last frame finishes, even if is looping
   Event OnCycleEnd;
@@ -59,35 +58,72 @@ public:
   // Raised when this animation stops playing (either interrupted or finished)
   Event OnStop;
 
-  // It's name
-  const std::string name;
+  // === ANIMATION SPECIFICITIES
 
-  // Each and every animation frame, to be played sequentially
-  std::vector<AnimationFrame> frames;
+  // Instances need their animator
+  Animation(std::shared_ptr<Animator> animator);
+
+  // Access the animation name
+  virtual std::string &Name() = 0;
+
+  // Behavior on cycle end
+  virtual CycleEndBehavior &EndBehavior();
+
+  // Get animation to play after this one ends (ignored if end behavior is not PlayNext)
+  virtual std::shared_ptr<Animation> GetNext() const;
 
   // Playback speed modifier
-  float speedModifier{1};
+  virtual float &SpeedModifier();
 
-  // Whether to loop
-  bool loop{false};
+protected:
+  // Provides an initial value to the frames
+  virtual std::vector<AnimationFrame> InitializeFrames() = 0;
 
-  // Whether to transition to animator default animation after finish (ignored if looping)
-  bool transitionToDefault{true};
+  // === FRAMES
+public:
+  // Each and every animation frame, to be played sequentially
+  std::vector<AnimationFrame> &Frames();
+
+  // Gets a specific frame
+  AnimationFrame &GetFrame(int frame);
+
+private:
+  std::vector<AnimationFrame> frames;
+
+  // === HELPERS
+public:
+  // Access frames directly
+  AnimationFrame &operator[](int index);
+
+  // Automatically generates the frame vector for a spritesheet animation
+  // Allows offsetting the frames by some virtual pixels
+  static std::vector<AnimationFrame> SliceSpritesheet(
+      std::string filename, SpritesheetClipInfo clipInfo, float frameDuration, Vector2 virtualPixelOffset = Vector2::Zero(), SpriteConfig config = SpriteConfig());
 
 protected:
   // Starts playing each frame sequentially, according to their duration and the playback speed
   void Start();
 
+  // Stop animation
   void Stop();
+
+  virtual void InternalOnStart() {}
+  virtual void InternalOnStop() {}
 
   // Checks (and resolves) whether need to advance a frame
   void Update(float deltaTime);
 
   // Sets the current frame
-  void SetFrame(int frame);
+  void TriggerFrame(int frame);
 
   // Whether is currently playing
-  bool IsPlaying() const;
+  bool IsPlaying();
+
+  // Default implementation
+  CycleEndBehavior endBehavior{CycleEndBehavior::PlayDefault};
+
+  // Default implementation
+  float speedModifier{1};
 
   // How many seconds left to advance frame
   float secondsToNextFrame;
@@ -96,10 +132,7 @@ protected:
   int currentFrame{0};
 
   // Reference to it's animator
-  Animator &animator;
-
-  // Animation to play on this one`s end (overrules looping)
-  std::weak_ptr<Animation> next;
+  std::weak_ptr<Animator> weakAnimator;
 };
 
 #endif

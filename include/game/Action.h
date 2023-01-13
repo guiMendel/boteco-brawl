@@ -59,7 +59,7 @@ struct AnimationAction : public Action
   void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) final override;
 
   // Requires a name for an animation
-  virtual std::string GetAnimation() const = 0;
+  virtual std::string GetAnimationName() const = 0;
 
   virtual ~AnimationAction() {}
 };

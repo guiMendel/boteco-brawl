@@ -12,13 +12,13 @@
 #define LAND_PRIORITY 2
 
 // Shorthand for attack actions
-#define ATTACK(actionName, animationName)     \
-  struct actionName : public AttackAction     \
-  {                                           \
-    std::string GetAnimation() const override \
-    {                                         \
-      return animationName;                   \
-    }                                         \
+#define ATTACK(actionName, animationName)         \
+  struct actionName : public AttackAction         \
+  {                                               \
+    std::string GetAnimationName() const override \
+    {                                             \
+      return animationName;                       \
+    }                                             \
   }
 
 namespace Actions
@@ -62,7 +62,7 @@ namespace Actions
 
   struct Jump : public AnimationAction
   {
-    std::string GetAnimation() const override { return "jump"; }
+    std::string GetAnimationName() const override { return "jump"; }
     int GetPriority() const override { return JUMP_PRIORITY; }
     std::unordered_set<std::string> GetFriendStates() const override { return {MOVING_STATE}; }
 
@@ -74,7 +74,7 @@ namespace Actions
 
   struct Land : public AnimationAction
   {
-    std::string GetAnimation() const override { return "land"; }
+    std::string GetAnimationName() const override { return "land"; }
     int GetPriority() const override { return LAND_PRIORITY; }
     std::unordered_set<std::string> GetFriendStates() const override { return {MOVING_STATE}; }
 
@@ -85,7 +85,7 @@ namespace Actions
   };
 
   ATTACK(Neutral, "neutral");
-  
+
   ATTACK(SpecialNeutral, "specialNeutral");
 
 }

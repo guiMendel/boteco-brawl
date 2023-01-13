@@ -18,8 +18,9 @@ class Animator : public Component
   friend class Animation;
 
 public:
-  typedef std::unordered_map<std::string, std::shared_ptr<Animation>> animation_map;
-  typedef std::unordered_map<int, std::function<void()>> frame_callbacks;
+  // Type of function that returns an animation shared pointer
+  typedef std::function<std::shared_ptr<Animation>()> animation_builder;
+  typedef std::unordered_map<std::string, animation_builder> animation_map;
 
   Animator(GameObject &associatedObject);
 
@@ -28,32 +29,53 @@ public:
   void Start() override;
   void Update(float deltaTime) override;
 
-  // Adds an animation to the map
-  // By convention, the first animation to be added is set as the initial animation
-  void AddAnimation(std::shared_ptr<Animation> animation, bool makeInitial = false);
+  // Registers an animation to this animator
+  template <class T>
+  void RegisterAnimation(bool makeDefault = false)
+  {
+    // Get shared
+    std::shared_ptr<Animator> shared = std::dynamic_pointer_cast<Animator>(GetShared());
+    auto weakShared{std::weak_ptr<Animator>(shared)};
 
-  // This one takes a recipe for an animation
-  void AddAnimation(std::function<std::shared_ptr<Animation>(Animator &)> recipe, bool makeInitial = false);
+    // Get the animation name
+    std::string name = T(shared).Name();
+
+    // Check for unique name
+    Helper::Assert(animations.count(name) == 0, "Tried to add two animations type with the same name");
+
+    // Add it's builder
+    animations[name] = [this, weakShared]()
+    {
+      LOCK(weakShared, shared);
+      return std::make_shared<T>(shared);
+    };
+
+    if (makeDefault || defaultAnimation == "")
+      defaultAnimation = name;
+  }
 
   // Stops current animation and starts the given one
-  void Play(std::string animation, std::function<void()> stopCallback = nullptr);
+  // This animation's type must have been previously registered to the animator
+  void Play(std::shared_ptr<Animation> animation);
 
   // Stops current animation and starts the given one
-  void Play(std::string animation, frame_callbacks callbacks, std::function<void()> stopCallback = nullptr);
+  // Receives the animation name, and it must be the name of a previously registered animation type
+  void Play(std::string animation);
 
   // Stops any animation
   void Stop();
 
-  // If the current animation is this, stops it
+  // If the current animation has this name, stops it
   void Stop(std::string animation);
 
-  // Gets animation by name
-  Animation &GetAnimation(std::string name);
+  // Builds a new animation of this type's name
+  std::shared_ptr<Animation> BuildAnimation(std::string name);
 
-  // Checks if the animation is present
+  // Checks if the animation's name is present
   bool HasAnimation(std::string name) const;
 
-  std::string GetCurrentAnimation() const;
+  // Get the currently active animation
+  std::shared_ptr<Animation> GetCurrentAnimation() const;
 
   // Triggered on animation cycle end
   Event OnCycleEnd;
@@ -61,21 +83,15 @@ public:
   // Triggered when an animation has stopped
   Event OnAnimationStop;
 
-  // Which animation to play on Start
+  // Which animation to play on Start and when an animation transitions to default
   std::string defaultAnimation;
 
 private:
-  // Indicates to the animator which frame the playing animation is currently on
-  void IndicateCurrentFrame(int frame);
-
-  // Store animations
+  // Store registered animation types
   animation_map animations;
 
   // Which animation is currently playing
-  std::string currentAnimation{""};
-
-  // Frame callbacks for current animation
-  frame_callbacks currentAnimationCallbacks;
+  std::shared_ptr<Animation> currentAnimation;
 };
 
 #endif

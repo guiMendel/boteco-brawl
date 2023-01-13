@@ -19,12 +19,12 @@
 
 #define LOCK(weak, shared)   \
   auto shared = weak.lock(); \
-  Assert(shared != nullptr,  \
+  Helper::Assert(shared != nullptr,  \
          "Unexpectedly failed to lock shared pointer at " __FILE__ ":" + std::to_string(__LINE__) + " ");
 
 #define LOCK_MESSAGE(weak, shared, message) \
   auto shared = weak.lock();                \
-  Assert(shared != nullptr, message);
+  Helper::Assert(shared != nullptr, message);
 
 class GameObject;
 class GameState;

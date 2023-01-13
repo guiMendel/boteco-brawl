@@ -1,6 +1,7 @@
 #include "Action.h"
 #include "GameObject.h"
 #include "Animator.h"
+#include "Animation.h"
 #include "CharacterStateManager.h"
 #include "Character.h"
 #include "Attack.h"
@@ -25,19 +26,23 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
   auto animator = target.RequireComponent<Animator>();
 
   // Get animation name to use
-  string animation{GetAnimation()};
+  string animationName{GetAnimationName()};
 
   // If the bare animation name is present, use it always, ignoring sequence index
   // Otherwise, append transformed sequence index
-  if (animator->HasAnimation(animation) == false)
+  if (animator->HasAnimation(animationName) == false)
   {
     // Get character
     auto character = target.RequireComponent<Character>();
 
     // Append it, but first convert from 0-based to 1-based
-    animation += to_string(character->TransformSequenceIndexFor(animation, sequenceIndex) + 1);
+    animationName += to_string(character->TransformSequenceIndexFor(animationName, sequenceIndex) + 1);
   }
 
+  // Get the animation
+  auto animation = animator->BuildAnimation(animationName);
+
+  // Give it a stop callback
   auto stopCallback = [stateId, weakStateManager, weakObject]()
   {
     // When animation is over, make sure this action's state is no longer active
@@ -45,20 +50,17 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
     {
       stateManager->RemoveState(stateId);
     }
-
-    // Also make sure any attack child objects are destroyed
-    IF_LOCK(weakObject, object)
-    {
-      shared_ptr<GameObject> attack;
-      if ((attack = object->GetChild(ATTACK_OBJECT)) != nullptr)
-        attack->RequestDestroy();
-    }
   };
 
+  animation->OnStop.AddListener("parent-action-cleanup", stopCallback);
+
   // Start this animation
-  animator->Play(animation, stopCallback);
+  animator->Play(animation);
 }
 
 int AttackAction::GetPriority() const { return 1; }
 
-shared_ptr<CharacterState> AttackAction::NextState(shared_ptr<Action> sharedAction) { return CharacterStateRecipes::Attacking(sharedAction); }
+shared_ptr<CharacterState> AttackAction::NextState(shared_ptr<Action> sharedAction)
+{
+  return CharacterStateRecipes::Attacking(sharedAction);
+}

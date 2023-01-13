@@ -83,13 +83,13 @@ ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
 # FOR INTEGRATION
 
 # Header files
-_INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h Tag.h AnimationRecipes.h PhysicsLayer.h BuildConfigurations.h
+_INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h Tag.h PhysicsLayer.h BuildConfigurations.h
 
 # Generate header filepaths
 INTEGRATION_DEPS = $(patsubst %,$(INTEGRATION_INCLUDE_DIRECTORY)\\%,$(_INTEGRATION_DEPS))
 
 # Object files
-_INTEGRATION_OBJS = ObjectRecipes.o InitialState.o AnimationRecipes.o GameConfiguration.o PhysicsConfiguration.o
+_INTEGRATION_OBJS = ObjectRecipes.o InitialState.o GameConfiguration.o PhysicsConfiguration.o
 
 # Generate object filepaths
 INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATION_OBJS))
@@ -97,13 +97,13 @@ INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATIO
 # FOR GAME
 
 # Header files
-_GAME_DEPS = MainState.h Movement.h PlayerInput.h Action.h CharacterStateManager.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h Player.h PlayerManager.h ControllerDevice.h ParticleFX.h Projectile.h CharacterRepelCollision.h PlatformDrop.h FallOffDeath.h Arena.h Heat.h Damage.h Attack.h Character.h TestCharacter.h
+_GAME_DEPS = MainState.h Movement.h PlayerInput.h Action.h CharacterStateManager.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h Player.h PlayerManager.h ControllerDevice.h ParticleFX.h Projectile.h CharacterRepelCollision.h PlatformDrop.h FallOffDeath.h Arena.h Heat.h Damage.h Attack.h Character.h TestCharacter.h GeneralAnimations.h
 
 # Generate header filepaths
 GAME_DEPS = $(patsubst %,$(GAME_INCLUDE_DIRECTORY)\\%,$(_GAME_DEPS))
 
 # Object files
-_GAME_OBJS = MainState.o Movement.o PlayerInput.o CharacterStateManager.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o Player.o PlayerManager.o ControllerDevice.o ParticleFX.o Projectile.o CharacterRepelCollision.o PlatformDrop.o FallOffDeath.o Arena.o Heat.o Attack.o Character.o TestCharacter.o
+_GAME_OBJS = MainState.o Movement.o PlayerInput.o CharacterStateManager.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o Player.o PlayerManager.o ControllerDevice.o ParticleFX.o Projectile.o CharacterRepelCollision.o PlatformDrop.o FallOffDeath.o Arena.o Heat.o Attack.o Character.o TestCharacter.o GeneralAnimations.o
 
 # Generate object filepaths
 GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))
