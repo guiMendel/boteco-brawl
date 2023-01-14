@@ -159,5 +159,5 @@ void CharacterController::DispatchDash(Vector2 direction)
 
 void CharacterController::TakeHit(Damage damage)
 {
-  Dispatch<Actions::TakeDamage>(damage);
+  DispatchNonDelayable<Actions::TakeDamage>(damage);
 }

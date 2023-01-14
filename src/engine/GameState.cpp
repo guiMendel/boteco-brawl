@@ -233,16 +233,22 @@ void GameState::RegisterLayerRenderer(shared_ptr<Component> component)
   // Add it's entry
   layer.emplace_back(component);
 
-  // Sort it
-  sort(layer.begin(), layer.end(), [](weak_ptr<Component> comp1Weak, weak_ptr<Component> comp2Weak)
-       { 
-        auto comp1 = comp1Weak.lock();
-        auto comp2 = comp2Weak.lock();
+  // Component comparer
+  // Must return true iff first parameter comes before second parameter
+  auto comparer = [](weak_ptr<Component> comp1Weak, weak_ptr<Component> comp2Weak)
+  {
+    auto comp1 = comp1Weak.lock();
+    auto comp2 = comp2Weak.lock();
 
-        // Leave as is if any of them has been erased
-        if (comp1 == nullptr || comp2 == nullptr) return true;
-        
-        return comp1->GetRenderOrder() < comp2->GetRenderOrder(); });
+    // Treat them as equal if any of them is null
+    if (comp1 == nullptr || comp2 == nullptr)
+      return false;
+
+    return comp1->GetRenderOrder() < comp2->GetRenderOrder();
+  };
+
+  // Sort it
+  sort(layer.begin(), layer.end(), comparer);
 }
 
 shared_ptr<GameObject> GameState::GetObject(int id)
