@@ -32,7 +32,7 @@ struct Action
 
   // Executed when this action' state stops (either completes or is interrupted)
   // Ignored if this action yields no state
-  virtual void StopHook(GameObject &) {}
+  virtual void StopHook(GameObject &, std::shared_ptr<CharacterState>) {}
 
   virtual ~Action() {}
 

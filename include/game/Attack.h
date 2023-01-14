@@ -8,19 +8,19 @@
 #include "Damage.h"
 #include "Character.h"
 
-class Heat;
+class CharacterController;
 
 struct Attack : public Component
 {
 public:
-  Attack(GameObject &associatedObject, float damageModifier, Vector2 impulse);
+  Attack(GameObject &associatedObject, float damageModifier, Vector2 impulse, float stunTime);
   virtual ~Attack() {}
 
   void Awake() override;
   void OnTriggerCollisionEnter(TriggerCollisionData) override;
 
-  // Apply attack to a given character's heat
-  void Land(std::shared_ptr<Heat> targetHeat);
+  // Apply attack to a given character's controller
+  void Land(std::shared_ptr<CharacterController> targetController);
 
   // Attack damage modifier
   float damageModifier;
@@ -28,12 +28,15 @@ public:
   // Attack impulse
   Vector2 impulse;
 
+  // Time for which target is left without control
+  float stunTime;
+
 private:
   // Gets the damage struct for this attack
   Damage GetDamage() const;
 
-  // Ids of heats which were already attacked
-  std::unordered_set<int> struckHeatIds;
+  // Ids of controllers which were already attacked
+  std::unordered_set<int> struckControllerIds;
 
   // Reference to character
   std::weak_ptr<Character> weakCharacter;

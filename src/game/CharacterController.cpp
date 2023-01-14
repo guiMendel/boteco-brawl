@@ -156,3 +156,8 @@ void CharacterController::DispatchDash(Vector2 direction)
 
   Dispatch<Actions::Dash>(direction);
 }
+
+void CharacterController::TakeHit(Damage damage)
+{
+  Dispatch<Actions::TakeDamage>(damage);
+}

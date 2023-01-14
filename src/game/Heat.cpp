@@ -58,10 +58,17 @@ void Heat::TakeDamage(const Damage &damage)
   // When grounded
   if (movement->IsGrounded())
     // Instantly lift target a little bit from the floor
-    gameObject.Translate({0, -0.2});
+    gameObject.Translate({0, -0.15});
 
   // Apply impulse
   body->ApplyImpulse(damage.impulse * heatMultiplier);
+
+  // Get impulse x direction
+  float impulseDirection = GetSign(damage.impulse.x, 0);
+
+  // Face inverse direction of impulse
+  if (impulseDirection != 0)
+    body->gameObject.localScale.x = -impulseDirection;
 
   // Add heat
   heat += inverseArmor * damage.heatDamage;

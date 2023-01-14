@@ -5,6 +5,7 @@
 #include "CharacterStateManager.h"
 #include "ParticleEmitter.h"
 #include "ObjectRecipes.h"
+#include "Heat.h"
 
 using namespace std;
 using namespace Actions;
@@ -15,7 +16,7 @@ void Move::Trigger(GameObject &target, shared_ptr<CharacterState>)
 {
   target.RequireComponent<Movement>()->SetDirection(direction);
 }
-void Move::StopHook(GameObject &target)
+void Move::StopHook(GameObject &target, std::shared_ptr<CharacterState>)
 {
   target.RequireComponent<Movement>()->SetDirection(0);
 }
@@ -41,8 +42,7 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   rigidbody->velocity = direction * dashSpeed;
 
   // Align facing direction to dash direction
-  if (direction.x != 0)
-    target.localScale.x = Helper::GetSign(direction.x);
+  target.localScale.x = Helper::GetSign(direction.x, target.localScale.x);
 
   // Disable character control
   character->SetControl(false);
@@ -101,7 +101,7 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   particleObject->RequireComponent<ParticleEmitter>()->StartEmission();
 }
 
-void Dash::StopHook(GameObject &target)
+void Dash::StopHook(GameObject &target, std::shared_ptr<CharacterState>)
 {
   auto rigidbody = target.GetComponent<Rigidbody>();
 
@@ -112,4 +112,44 @@ void Dash::StopHook(GameObject &target)
 
   // Stop particles
   target.GetChild(DASH_PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>()->Stop();
+}
+
+// ============================= TAKE DAMAGE =============================
+
+void TakeDamage::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
+{
+  // Get target's heat
+  auto heat = target.RequireComponent<Heat>();
+
+  // Apply the damage to it
+  heat->TakeDamage(damage);
+
+  // If it has stun time
+  if (damage.stunTime > 0)
+  {
+    // Pick an ouch animation
+    ouchAnimation = "ouch" + to_string(RandomRange(1, 3));
+
+    // Play it
+    target.RequireComponent<Animator>()->Play(ouchAnimation);
+    // Store these
+    int actionStateId = actionState->id;
+    auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());
+
+    // Remove state after stun time
+    auto removeState = [actionStateId, weakStateManager]()
+    {
+      IF_LOCK(weakStateManager, stateManager)
+      {
+        stateManager->RemoveState(actionStateId);
+      }
+    };
+
+    target.DelayFunction(removeState, damage.stunTime);
+  }
+}
+
+void TakeDamage::StopHook(GameObject &target, std::shared_ptr<CharacterState>)
+{
+  target.RequireComponent<Animator>()->Stop(ouchAnimation);
 }

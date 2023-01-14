@@ -83,6 +83,8 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
     animator->RegisterAnimation<GeneralAnimations::Fall>();
     animator->RegisterAnimation<GeneralAnimations::Land>();
     animator->RegisterAnimation<GeneralAnimations::Brake>();
+    animator->RegisterAnimation<GeneralAnimations::Ouch1>();
+    animator->RegisterAnimation<GeneralAnimations::Ouch2>();
     animator->RegisterAnimation<GeneralAnimations::Dash>();
     animator->RegisterAnimation<GeneralAnimations::Neutral1>();
     animator->RegisterAnimation<GeneralAnimations::Neutral2>();
@@ -114,6 +116,10 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
       params.frequency = {params.frequency.first + reduction,
                           params.frequency.second + reduction}; };
 
+    // === DYING FROM FALLING OFF
+
+    character->AddComponent<FallOffDeath>();
+
     // === MOVEMENT CONTROL
 
     // Give it movement
@@ -128,10 +134,6 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
 
     // Give it control
     character->AddComponent<CharacterController>();
-
-    // === DYING FROM FALLING OFF
-
-    character->AddComponent<FallOffDeath>();
 
     // === CHARACTER REPELLING
 

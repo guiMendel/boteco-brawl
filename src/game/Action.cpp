@@ -56,7 +56,7 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
   animation->OnStop.AddListener("parent-action-cleanup", removeStateCallback);
 
   // Start this animation
-  animator->Play(animation);
+  animator->Play(animation, true);
 }
 
 int AttackAction::GetPriority() const { return 1; }
@@ -71,9 +71,8 @@ void AttackAction::Trigger(GameObject &target, shared_ptr<CharacterState> action
   // Ensure character orientation is set to PlayerInput direction
   auto playerInput = target.RequireComponent<PlayerInput>();
 
-  cout << "target: " << (playerInput->GetCurrentMoveDirection()) << ", actual: " << target.localScale.x << endl;
-
-  target.localScale.x = GetSign(playerInput->GetCurrentMoveDirection());
+  if (abs(playerInput->GetCurrentMoveDirection()) > 0.1)
+    target.localScale.x = GetSign(playerInput->GetCurrentMoveDirection());
 
   // Default behavior
   AnimationAction::Trigger(target, actionState);

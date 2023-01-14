@@ -35,10 +35,10 @@
 
 #define DECLARE(Type, Name) Type &Name() override;
 
-#define SET_DAMAGE(damage, impulse)                              \
-  std::pair<float, Vector2> GetAttackProperties() const override \
-  {                                                              \
-    return {damage, impulse};                                    \
+#define SET_DAMAGE(damage, impulse, stunTime)                            \
+  std::tuple<float, Vector2, float> GetAttackProperties() const override \
+  {                                                                      \
+    return {damage, impulse, stunTime};                                  \
   }
 
 #define ATTACK_SEQUENCE(frame)           \
@@ -65,7 +65,7 @@ namespace GeneralAnimations
 
     // Get damage & impulse for this attack
     // Default is is 0 for both
-    virtual std::pair<float, Vector2> GetAttackProperties() const;
+    virtual std::tuple<float, Vector2, float> GetAttackProperties() const;
 
   protected:
     // Sets hitbox for a given frame
@@ -162,6 +162,28 @@ namespace GeneralAnimations
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 
+  class Ouch1 : public StatefulAnimation
+  {
+  public:
+    CONSTRUCTOR_AND_DESTRUCTOR(Ouch1)
+
+    DEF_NAME("ouch1")
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/ouch.png", SpritesheetClipInfo(8, 8, 1), 0.1))
+
+    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
+  };
+
+  class Ouch2 : public StatefulAnimation
+  {
+  public:
+    CONSTRUCTOR_AND_DESTRUCTOR(Ouch2)
+
+    DEF_NAME("ouch2")
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/ouch.png", SpritesheetClipInfo(8, 8, 1, 1), 0.1))
+
+    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
+  };
+
   class Dash : public StatefulAnimation
   {
   public:
@@ -179,7 +201,7 @@ namespace GeneralAnimations
     DEF_NAME("neutral1")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1, Vector2::Angled(Helper::DegreesToRadians(-5), 2))
+    SET_DAMAGE(1, Vector2::Angled(Helper::DegreesToRadians(-5), 0.5), 0.2)
 
     ATTACK_SEQUENCE(4)
     ATTACK_CANCEL(5)
@@ -193,7 +215,7 @@ namespace GeneralAnimations
     DEF_NAME("neutral2")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1.2, Vector2::Angled(Helper::DegreesToRadians(-5), 4))
+    SET_DAMAGE(1.2, Vector2::Angled(Helper::DegreesToRadians(-5), 4), 0.3)
 
     ATTACK_CANCEL(6)
   };

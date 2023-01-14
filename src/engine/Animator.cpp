@@ -31,6 +31,9 @@ void Animator::Stop()
 
   // Forget it
   currentAnimation = nullptr;
+
+  // Transition to default
+  Play(defaultAnimation);
 }
 
 void Animator::Stop(string animation)
@@ -48,20 +51,20 @@ shared_ptr<Animation> Animator::BuildAnimation(string name)
   return animations[name]();
 }
 
-void Animator::Play(string animationName)
+void Animator::Play(string animationName, bool forceReset)
 {
   // Skip if already playing this
   if (currentAnimation != nullptr && currentAnimation->Name() == animationName)
     return;
 
   // Build it and play it
-  Play(BuildAnimation(animationName));
+  Play(BuildAnimation(animationName), forceReset);
 }
 
-void Animator::Play(shared_ptr<Animation> animation)
+void Animator::Play(shared_ptr<Animation> animation, bool forceReset)
 {
   // Skip if already playing this
-  if (currentAnimation != nullptr && currentAnimation->Name() == animation->Name())
+  if (forceReset == false && currentAnimation != nullptr && currentAnimation->Name() == animation->Name())
     return;
 
   // Ensure it's type has been previously registered

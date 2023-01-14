@@ -56,11 +56,12 @@ public:
 
   // Stops current animation and starts the given one
   // This animation's type must have been previously registered to the animator
-  void Play(std::shared_ptr<Animation> animation);
+  // forceReset makes it so that the animation will start even if another animation of the same type is already playing
+  void Play(std::shared_ptr<Animation> animation, bool forceReset = false);
 
   // Stops current animation and starts the given one
   // Receives the animation name, and it must be the name of a previously registered animation type
-  void Play(std::string animation);
+  void Play(std::string animation, bool forceReset = false);
 
   // Stops any animation
   void Stop();

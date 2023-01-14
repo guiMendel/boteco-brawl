@@ -92,6 +92,31 @@ void GameObject::Update(float deltaTime)
   // Update timers
   timer.Update(deltaTime);
 
+  // Trigger delayed functions
+  auto delayedFunctionEntryIterator = delayedFunctions.begin();
+  while (delayedFunctionEntryIterator != delayedFunctions.end())
+  {
+    auto tokenId = to_string(delayedFunctionEntryIterator->first);
+
+    // Check if delay is up
+    if (timer.Get(tokenId) >= 0)
+    {
+      auto &delayedFunction = delayedFunctionEntryIterator->second;
+
+      // Scrap timer
+      timer.Scrap(tokenId);
+
+      // Trigger function
+      delayedFunction();
+
+      // Forget entry
+      delayedFunctionEntryIterator = delayedFunctions.erase(delayedFunctionEntryIterator);
+    }
+
+    else
+      delayedFunctionEntryIterator++;
+  }
+
   if (enabled == false)
     return;
 
@@ -679,7 +704,7 @@ bool GameObject::TriggerCollisionDealtWithLastFrame(TriggerCollisionData trigger
 
 bool GameObject::operator==(const GameObject &other) const { return other.id == id; }
 
-GameObject::operator std::string() const
+GameObject::operator string() const
 {
   return "[" + GetName() + "::" + to_string(id) + "]";
 }
@@ -699,4 +724,22 @@ bool GameObject::IsEnabled() const
     return true;
 
   return InternalGetParent()->IsEnabled();
+}
+
+int GameObject::DelayFunction(function<void()> procedure, float seconds)
+{
+  // Get token id
+  int tokenId = RandomRange(0, 1000000);
+
+  // Store function
+  delayedFunctions[tokenId] = procedure;
+
+  // Start timer
+  timer.Reset(to_string(tokenId), -seconds);
+}
+
+void GameObject::CancelDelayedFunction(int tokenId)
+{
+  delayedFunctions.erase(tokenId);
+  timer.Scrap(to_string(tokenId));
 }

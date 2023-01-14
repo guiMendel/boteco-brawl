@@ -323,12 +323,21 @@ private:
 public:
   std::shared_ptr<GameState> GetState();
 
+  // Allows for delaying a function execution
+  // Returns a token id that can be used to cancel execution
+  int DelayFunction(std::function<void()> procedure, float seconds);
+
+  void CancelDelayedFunction(int tokenId);
+
   // A timer helper
   Timer timer;
 
 private:
   // State reference id
   int gameStateId;
+
+  // Functions currently waiting to be executed
+  std::unordered_map<int, std::function<void()>> delayedFunctions;
 
   // =================================
   // PHYSICS

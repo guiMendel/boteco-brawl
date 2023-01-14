@@ -165,7 +165,7 @@ auto CharacterStateManager::RemoveState(decltype(states)::iterator stateIterator
 
   // Call it's stop callback if necessary
   if (state->parentAction != nullptr)
-    state->parentAction->StopHook(gameObject);
+    state->parentAction->StopHook(gameObject, state);
 
   // Announce interruption
   if (interruption)

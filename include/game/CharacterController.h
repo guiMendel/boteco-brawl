@@ -6,6 +6,7 @@
 #include "Movement.h"
 #include "CharacterStateManager.h"
 #include "Action.h"
+#include "Damage.h"
 #include <unordered_set>
 
 // Maps input from some source (player or AI) to the the creation and dispatch of the corresponding actions
@@ -14,6 +15,9 @@ class CharacterController : public Component
 public:
   CharacterController(GameObject &associatedObject);
   virtual ~CharacterController() {}
+
+  // Dispatches a take damage action
+  void TakeHit(Damage damage);
 
 private:
   void Start() override;

@@ -13,9 +13,12 @@ void Helper::Assert(bool condition, string message)
   Assert(condition, message, SDL_GetError());
 }
 
-float Helper::GetSign(float value)
+float Helper::GetSign(float value, float caseZeroValue)
 {
-  return value >= 0 ? 1 : -1;
+  if (value == 0)
+    return caseZeroValue;
+
+  return value > 0 ? 1 : -1;
 }
 
 auto Helper::SplitString(string text, string delimiter) -> vector<string>

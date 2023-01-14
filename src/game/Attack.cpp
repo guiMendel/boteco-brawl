@@ -1,25 +1,25 @@
 #include "Attack.h"
-#include "Heat.h"
+#include "CharacterController.h"
 
 using namespace std;
 
-Attack::Attack(GameObject &associatedObject, float damageModifier, Vector2 impulse)
-    : Component(associatedObject), damageModifier(damageModifier), impulse(impulse) {}
+Attack::Attack(GameObject &associatedObject, float damageModifier, Vector2 impulse, float stunTime)
+    : Component(associatedObject), damageModifier(damageModifier), impulse(impulse), stunTime(stunTime) {}
 
 void Attack::Awake()
 {
   weakCharacter = gameObject.GetParent()->RequireComponent<Character>();
 }
 
-void Attack::Land(shared_ptr<Heat> targetHeat)
+void Attack::Land(shared_ptr<CharacterController> targetController)
 {
   // Ignore if already hit this target
-  if (struckHeatIds.count(targetHeat->id) > 0)
+  if (struckControllerIds.count(targetController->id) > 0)
     return;
 
-  targetHeat->TakeDamage(GetDamage());
+  targetController->TakeHit(GetDamage());
 
-  struckHeatIds.insert(targetHeat->id);
+  struckControllerIds.insert(targetController->id);
 }
 
 void Attack::OnTriggerCollisionEnter(TriggerCollisionData trigger)
@@ -27,11 +27,11 @@ void Attack::OnTriggerCollisionEnter(TriggerCollisionData trigger)
   LOCK(trigger.weakOther, other);
 
   // If other has a heat
-  auto heat = other->GetOwner()->GetComponent<Heat>();
+  auto controller = other->GetOwner()->GetComponent<CharacterController>();
 
   // Land an attack
-  if (heat != nullptr)
-    Land(heat);
+  if (controller != nullptr)
+    Land(controller);
 }
 
 Damage Attack::GetDamage() const
@@ -40,5 +40,5 @@ Damage Attack::GetDamage() const
 
   float direction = GetSign(gameObject.GetScale().x);
 
-  return Damage{character->GetBaseDamage() * damageModifier, impulse * Vector2(direction, 1)};
+  return Damage{character->GetBaseDamage() * damageModifier, impulse * Vector2(direction, 1), stunTime};
 }

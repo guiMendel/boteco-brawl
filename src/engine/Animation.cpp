@@ -116,15 +116,8 @@ void Animation::Update(float deltaTime)
         return;
       }
 
-      // If transitions to default
-      if (EndBehavior() == CycleEndBehavior::PlayDefault)
-      {
-        animator->Play(animator->defaultAnimation);
-        return;
-      }
-
-      // Otherwise, it's Nothing, so stop
-      animator->Stop();
+      // Otherwise, transitions to default
+      animator->Play(animator->defaultAnimation);
       return;
     }
   }

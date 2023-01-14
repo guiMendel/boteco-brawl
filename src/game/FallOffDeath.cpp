@@ -11,7 +11,7 @@
 using namespace std;
 
 const float FallOffDeath::deathMargin{3};
-const float FallOffDeath::respawnDelay{0.1};
+const float FallOffDeath::respawnDelay{2};
 
 FallOffDeath::FallOffDeath(GameObject &associatedObject)
     : Component(associatedObject), weakArena(GetState()->FindObjectOfType<Arena>())
@@ -54,6 +54,12 @@ void FallOffDeath::Die()
   dead = true;
 
   OnDeath.Invoke();
+
+  // Reset speed
+  gameObject.RequireComponent<Rigidbody>()->velocity = Vector2::Zero();
+
+  // Reset states
+  gameObject.RequireComponent<CharacterStateManager>()->RemoveStatesNotIn({});
 
   // Disable character
   SetCharacterActive(false);

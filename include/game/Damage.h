@@ -10,6 +10,9 @@ struct Damage
 
   // How much impulse to apply, along with direction
   Vector2 impulse;
+
+  // How much time to leave target stunned, unable to move
+  float stunTime;
 };
 
 #endif

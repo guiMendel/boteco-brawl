@@ -103,9 +103,9 @@ vector<AnimationFrame> SpecialNeutral::InitializeFrames()
 
 // === HELPER FUNCTIONS DEFINITIONS
 
-pair<float, Vector2> AttackAnimation::GetAttackProperties() const
+tuple<float, Vector2, float> AttackAnimation::GetAttackProperties() const
 {
-  return {0, Vector2{0, 0}};
+  return {0, Vector2{0, 0}, 0};
 }
 
 void AttackAnimation::InternalOnStart() { SetupAttack(); }
@@ -127,10 +127,10 @@ void AttackAnimation::SetupAttack()
 
   attackObjectId = attackObject->id;
 
-  auto [damageModifier, impulse] = GetAttackProperties();
+  auto [damageModifier, impulse, stunTime] = GetAttackProperties();
 
   // Give it the attack component
-  attackObject->AddComponent<Attack>(damageModifier, impulse);
+  attackObject->AddComponent<Attack>(damageModifier, impulse, stunTime);
 }
 
 void AttackAnimation::FrameHitbox(AnimationFrame &frame, vector<Circle> hitboxAreas)

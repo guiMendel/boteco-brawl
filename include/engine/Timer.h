@@ -4,6 +4,7 @@
 #include <unordered_map>
 #include <string>
 
+// Allows storing timers in seconds
 class Timer
 {
   struct Entry
@@ -24,6 +25,7 @@ public:
   float Get(std::string name) { return timers[name].value; }
   void Start(std::string name) { timers[name].enabled = true; }
   void Stop(std::string name) { timers[name].enabled = false; }
+  void Scrap(std::string name) { timers.erase(name); }
   void Update(float deltaTime)
   {
     for (auto &entry : timers)

@@ -29,8 +29,8 @@ namespace Helper
   template <class T>
   T Clamp(T value, T minValue, T maxValue) { return std::max(std::min(value, maxValue), minValue); }
 
-  // Returns -1 if value is negative, 1 otherwise
-  float GetSign(float value);
+  // Returns -1 if value is negative, 1 if positive, and the second parameter otherwise
+  float GetSign(float value, float caseZeroValue = 1);
 
   // Splits the given string into an array of strings, using the given delimiter as the separator token
   auto SplitString(std::string text, std::string delimiter) -> std::vector<std::string>;

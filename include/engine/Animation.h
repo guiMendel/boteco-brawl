@@ -46,8 +46,6 @@ public:
     PlayNext,
     // Play animator default animation
     PlayDefault,
-    // Leaves animator with no animation
-    Nothing
   };
 
   // === EVENTS
