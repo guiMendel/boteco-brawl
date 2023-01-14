@@ -203,8 +203,8 @@ namespace GeneralAnimations
 
     SET_DAMAGE(1, Vector2::Angled(Helper::DegreesToRadians(-5), 0.5), 0.2)
 
-    ATTACK_SEQUENCE(4)
-    ATTACK_CANCEL(5)
+    ATTACK_SEQUENCE(3)
+    ATTACK_CANCEL(4)
   };
 
   class Neutral2 : public AttackAnimation
@@ -217,7 +217,7 @@ namespace GeneralAnimations
 
     SET_DAMAGE(1.2, Vector2::Angled(Helper::DegreesToRadians(-5), 4), 0.3)
 
-    ATTACK_CANCEL(6)
+    ATTACK_CANCEL(5)
   };
 
   class SpecialNeutral : public StatefulAnimation

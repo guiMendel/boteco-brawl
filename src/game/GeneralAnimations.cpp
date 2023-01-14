@@ -60,9 +60,9 @@ vector<AnimationFrame> Neutral1::InitializeFrames()
   auto frames{Animation::SliceSpritesheet("./assets/sprites/punch.png", SpritesheetClipInfo(16, 8), 0.1, {4, 0})};
 
   // Add hitboxes
-  FrameHitbox(frames[2], {Circle({7.5, 3.5}, 2), Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
-  FrameHitbox(frames[3], {Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
-  FrameHitbox(frames[4]);
+  FrameHitbox(frames[1], {Circle({7.5, 3.5}, 2), Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
+  FrameHitbox(frames[2], {Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
+  FrameHitbox(frames[3]);
 
   return frames;
 }
@@ -72,9 +72,9 @@ vector<AnimationFrame> Neutral2::InitializeFrames()
   auto frames{Animation::SliceSpritesheet("./assets/sprites/kick.png", SpritesheetClipInfo(16, 8), 0.1, {4, 0})};
 
   // Add hitboxes
+  FrameHitbox(frames[1], {Circle({8, 4}, 2.5), Circle({12, 4}, 2.5)});
   FrameHitbox(frames[2], {Circle({8, 4}, 2.5), Circle({12, 4}, 2.5)});
-  FrameHitbox(frames[3], {Circle({8, 4}, 2.5), Circle({12, 4}, 2.5)});
-  FrameHitbox(frames[4]);
+  FrameHitbox(frames[3]);
 
   return frames;
 }
