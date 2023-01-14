@@ -63,3 +63,9 @@ float Helper::RandomRange(float min, float max)
 }
 
 size_t Helper::HashTwo(size_t a, size_t b) { return a >= b ? a * a + a + b : a + b * b; }
+
+bool Helper::ThrowCoin(float chance)
+{
+  Assert(chance >= 0 && chance <= 1, "Chance must be a value in range [0, 1]");
+  return RandomRange(0.0f, 1.0f) < chance;
+}

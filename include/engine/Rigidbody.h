@@ -113,8 +113,6 @@ private:
 
   // Stores the last position of the body
   Vector2 lastPosition;
-
-  bool printDebug{false};
 };
 
 #endif

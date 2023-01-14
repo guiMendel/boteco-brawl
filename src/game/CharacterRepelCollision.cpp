@@ -2,7 +2,7 @@
 
 using namespace std;
 
-const float CharacterRepelCollision::maxSlideAcceleration{0.2};
+const float CharacterRepelCollision::maxSlideAcceleration{0.15};
 const float CharacterRepelCollision::slideAccelerationDecay{0.05};
 
 CharacterRepelCollision::CharacterRepelCollision(GameObject &associatedObject, shared_ptr<Rigidbody> body)

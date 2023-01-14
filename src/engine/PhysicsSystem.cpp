@@ -5,6 +5,9 @@
 #include "GameState.h"
 #include <functional>
 #include <tuple>
+#include <algorithm>
+#include <random>
+#include <chrono>
 
 using namespace std;
 
@@ -52,8 +55,11 @@ bool PlatformEffectorCheck(Collider &collider1, Collider &collider2)
 // Returns whether the two collider lists have some pair of colliders which are intersecting
 // If there is, also populates the collision data struct
 bool PhysicsSystem::CheckForCollision(
-    vector<shared_ptr<Collider>> colliders1, vector<shared_ptr<Collider>> colliders2,
-    Collision::Data &collisionData, Vector2 displaceColliders1, float scaleColliders1)
+    vector<shared_ptr<Collider>> colliders1,
+    vector<shared_ptr<Collider>> colliders2,
+    Collision::Data &collisionData,
+    Vector2 displaceColliders1,
+    float scaleColliders1)
 {
   for (auto collider1 : colliders1)
   {
@@ -103,35 +109,28 @@ void PhysicsSystem::HandleCollisions()
 
   // Merge static with kinematic
   auto nonDynamicColliders = ValidateAllColliders(staticColliderStructure);
-  nonDynamicColliders.insert(kinematicColliders.begin(), kinematicColliders.end());
+  nonDynamicColliders.insert(nonDynamicColliders.end(), kinematicColliders.begin(), kinematicColliders.end());
 
   // Check collisions for each dynamic object
   for (
-      auto collidersEntryIterator = dynamicColliders.begin();
-      collidersEntryIterator != dynamicColliders.end();
-      collidersEntryIterator++)
+      auto collidersIterator = dynamicColliders.begin();
+      collidersIterator != dynamicColliders.end();
+      collidersIterator++)
   {
-    Assert(collidersEntryIterator->second.empty() == false, "Collider entry was unexpectedly empty");
+    Assert(collidersIterator->empty() == false, "Collider entry was unexpectedly empty");
 
     // Check for continuous detection
-    auto objectBody = collidersEntryIterator->second.at(0)->RequireRigidbody();
+    auto objectBody = collidersIterator->at(0)->RequireRigidbody();
 
     // Check for disable
     if (objectBody->IsEnabled() == false)
       continue;
 
     if (objectBody->ShouldUseContinuousDetection())
-    {
-      objectBody->printDebug = true;
-      DetectBetweenFramesCollision(collidersEntryIterator);
-    }
+      DetectObjectBetweenFramesCollision(collidersIterator);
 
     else
-    {
-      objectBody->printDebug = false;
-
-      DetectCollisions(collidersEntryIterator, dynamicColliders.end(), nonDynamicColliders);
-    }
+      DetectObjectCollisions(collidersIterator, dynamicColliders.end(), nonDynamicColliders);
   }
 
   // Get triggers
@@ -139,12 +138,12 @@ void PhysicsSystem::HandleCollisions()
 
   // Check trigger collisions for each trigger
   for (
-      auto triggerEntryIterator = triggerColliders.begin();
-      triggerEntryIterator != triggerColliders.end();
-      triggerEntryIterator++)
+      auto triggerIterator = triggerColliders.begin();
+      triggerIterator != triggerColliders.end();
+      triggerIterator++)
   {
     // Get trigger data
-    auto [triggerId, triggerCollider] = *triggerEntryIterator;
+    auto triggerCollider = *triggerIterator;
     auto triggerBody = triggerCollider->rigidbodyWeak.lock();
     bool isStatic = triggerBody == nullptr || triggerBody->IsStatic();
 
@@ -152,11 +151,11 @@ void PhysicsSystem::HandleCollisions()
     static Collision::Collision::Data collisionData;
 
     // Check against all dynamic objects
-    for (auto [objectId, colliders] : dynamicColliders)
+    for (auto colliders : dynamicColliders)
     {
       if (GameObject::SameLineage(
               *gameState.GetObject(triggerCollider->GetOwnerId()),
-              *gameState.GetObject(objectId)))
+              *gameState.GetObject(colliders.at(0)->GetOwnerId())))
         continue;
 
       if (CheckForCollision(colliders, {triggerCollider}, collisionData))
@@ -165,11 +164,11 @@ void PhysicsSystem::HandleCollisions()
 
     // Check against other statics only if not static
     auto nonDynamicTargets = isStatic ? kinematicColliders : nonDynamicColliders;
-    for (auto [objectId, colliders] : nonDynamicTargets)
+    for (auto colliders : nonDynamicTargets)
     {
       if (GameObject::SameLineage(
               *gameState.GetObject(triggerCollider->GetOwnerId()),
-              *gameState.GetObject(objectId)))
+              *gameState.GetObject(colliders.at(0)->GetOwnerId())))
         continue;
 
       if (CheckForCollision(colliders, {triggerCollider}, collisionData))
@@ -178,12 +177,12 @@ void PhysicsSystem::HandleCollisions()
 
     // Check against each other trigger collider
     for (
-        auto otherTriggerEntryIterator = triggerEntryIterator;
-        otherTriggerEntryIterator != triggerColliders.end();
-        otherTriggerEntryIterator++)
+        auto otherTriggerIterator = triggerIterator;
+        otherTriggerIterator != triggerColliders.end();
+        otherTriggerIterator++)
     {
       // Get it's data
-      auto [otherTriggerId, otherTriggerCollider] = *otherTriggerEntryIterator;
+      auto otherTriggerCollider = *otherTriggerIterator;
       auto otherTriggerBody = otherTriggerCollider->rigidbodyWeak.lock();
 
       if (GameObject::SameLineage(
@@ -201,41 +200,44 @@ void PhysicsSystem::HandleCollisions()
   }
 }
 
-void PhysicsSystem::DetectCollisions(ValidatedCollidersMap::iterator collidersEntryIterator, ValidatedCollidersMap::iterator endIterator, ValidatedCollidersMap &nonDynamicColliders)
+void PhysicsSystem::DetectObjectCollisions(
+    vector<ValidatedColliders>::iterator collidersIterator,
+    vector<ValidatedColliders>::iterator endIterator,
+    vector<ValidatedColliders> &nonDynamicColliders)
 {
   // Will hold any collision data
   static Collision::Data collisionData;
 
   // Body of this object
-  auto body = collidersEntryIterator->second.at(0)->RequireRigidbody();
+  auto body = collidersIterator->at(0)->RequireRigidbody();
 
   // Test, for each OTHER dynamic object in the list (excluding the ones before this one)
-  auto otherCollidersEntryIterator{collidersEntryIterator};
+  auto otherCollidersIterator{collidersIterator};
 
-  for (otherCollidersEntryIterator++; otherCollidersEntryIterator != endIterator; otherCollidersEntryIterator++)
+  for (otherCollidersIterator++; otherCollidersIterator != endIterator; otherCollidersIterator++)
   {
     // Check if they are colliding
-    if (CheckForCollision(collidersEntryIterator->second, otherCollidersEntryIterator->second, collisionData))
+    if (CheckForCollision(*collidersIterator, *otherCollidersIterator, collisionData))
       // Resolve collision (apply impulses)
       ResolveCollision(collisionData);
   }
 
   // Test for all non dynamic objects
-  for (auto [otherObjectId, otherColliders] : nonDynamicColliders)
+  for (auto otherColliders : nonDynamicColliders)
   {
-    // cout << "Checking for object " << body->gameObject.GetName() << " with " << collidersEntryIterator->second.size() << " colliders against " << otherColliders.at(0)->gameObject.GetName() << " with " << otherColliders.size() << " colliders" << endl;
+    // cout << "Checking for object " << body->gameObject.GetName() << " with " << collidersIterator->second.size() << " colliders against " << otherColliders.at(0)->gameObject.GetName() << " with " << otherColliders.size() << " colliders" << endl;
     // Check if they are colliding
     // Other object's layer
-    if (CheckForCollision(collidersEntryIterator->second, otherColliders, collisionData))
+    if (CheckForCollision(*collidersIterator, otherColliders, collisionData))
       // Resolve collision (apply impulses)
       ResolveCollision(collisionData);
   }
 }
 
-void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator collidersEntryIterator)
+void PhysicsSystem::DetectObjectBetweenFramesCollision(vector<ValidatedColliders>::iterator collidersIterator)
 {
   // Get object body
-  auto objectBody = collidersEntryIterator->second.at(0)->RequireRigidbody();
+  auto objectBody = collidersIterator->at(0)->RequireRigidbody();
 
   cout << "Using continuous detection for " << objectBody->gameObject.GetName() << endl;
 
@@ -246,7 +248,7 @@ void PhysicsSystem::DetectBetweenFramesCollision(ValidatedCollidersMap::iterator
   ColliderCastData castData;
 
   bool collisionFound = ColliderCast(
-      collidersEntryIterator->second,
+      *collidersIterator,
       objectBody->lastPosition,
       trajectory.Angle(),
       trajectory.Magnitude(),
@@ -320,9 +322,10 @@ vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id, WeakCollid
   return verifiedColliders;
 }
 
-unordered_map<int, shared_ptr<Collider>> PhysicsSystem::ValidateAllColliders(std::unordered_map<int, std::weak_ptr<Collider>> &weakColliders)
+auto PhysicsSystem::ValidateAllColliders(unordered_map<int, weak_ptr<Collider>> &weakColliders)
+    -> vector<shared_ptr<Collider>>
 {
-  unordered_map<int, shared_ptr<Collider>> colliders;
+  vector<shared_ptr<Collider>> colliders;
 
   // For each object entry
   auto collidersEntryIterator = weakColliders.begin();
@@ -337,34 +340,47 @@ unordered_map<int, shared_ptr<Collider>> PhysicsSystem::ValidateAllColliders(std
       continue;
     }
 
-    colliders[objectId] = weakCollider.lock();
+    colliders.push_back(weakCollider.lock());
     collidersEntryIterator++;
   }
+
+  // Obtain a time-based seed
+  unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+
+  // Shuffle colliders
+  shuffle(colliders.begin(), colliders.end(), default_random_engine(seed));
 
   return colliders;
 }
 
-unordered_map<int, vector<shared_ptr<Collider>>> PhysicsSystem::ValidateAllColliders(unordered_map<int, WeakColliders> &weakColliders)
+auto PhysicsSystem::ValidateAllColliders(unordered_map<int, WeakColliders> &weakColliders)
+    -> vector<ValidatedColliders>
 {
-  unordered_map<int, vector<shared_ptr<Collider>>> verifiedCollidersStructure;
+  vector<ValidatedColliders> verifiedCollidersStructure;
 
   // For each object entry
   auto collidersEntryIterator = weakColliders.begin();
   while (collidersEntryIterator != weakColliders.end())
   {
     int objectId = collidersEntryIterator->first;
-    verifiedCollidersStructure[objectId] = ValidateColliders(objectId, collidersEntryIterator->second);
+    auto objectColliders = ValidateColliders(objectId, collidersEntryIterator->second);
 
     // If it's empty, remove it from the map
-    if (verifiedCollidersStructure[objectId].empty())
+    if (objectColliders.empty())
     {
       collidersEntryIterator = weakColliders.erase(collidersEntryIterator);
-      verifiedCollidersStructure.erase(objectId);
       continue;
     }
 
+    verifiedCollidersStructure.push_back(objectColliders);
     collidersEntryIterator++;
   }
+
+  // Obtain a time-based seed
+  unsigned seed = chrono::system_clock::now().time_since_epoch().count();
+
+  // Shuffle colliders
+  shuffle(verifiedCollidersStructure.begin(), verifiedCollidersStructure.end(), default_random_engine(seed));
 
   return verifiedCollidersStructure;
 }
@@ -426,7 +442,7 @@ void PhysicsSystem::ResolveCollision(Collision::Data collisionData1)
 
   // Build another collision data, and switch it's reference
   auto collisionData2{collisionData1};
-  std::swap(collisionData2.weakSource, collisionData2.weakOther);
+  swap(collisionData2.weakSource, collisionData2.weakOther);
 
   // Get bodies
   auto body1 = collider1->rigidbodyWeak.lock();
@@ -630,8 +646,10 @@ bool PhysicsSystem::DetectRaycastCollisions(Vector2 particle, RaycastData &data,
   // For a given collider structure, performs the check
   auto CheckForStructure = [&](unordered_map<int, PhysicsSystem::WeakColliders> structure)
   {
-    for (auto [bodyId, bodyColliders] : ValidateAllColliders(structure))
+    for (auto bodyColliders : ValidateAllColliders(structure))
     {
+      auto bodyId = bodyColliders.at(0)->GetOwnerId();
+
       // Skip filtered bodies
       if (filter.ignoredObjects.count(bodyId) > 0)
         continue;
@@ -715,8 +733,10 @@ bool PhysicsSystem::DetectColliderCastCollisions(vector<shared_ptr<Collider>> co
   // For a given collider structure, performs the check
   auto CheckForStructure = [&](unordered_map<int, PhysicsSystem::WeakColliders> &structure)
   {
-    for (auto [otherId, otherColliders] : ValidateAllColliders(structure))
+    for (auto otherColliders : ValidateAllColliders(structure))
     {
+      auto otherId = otherColliders.at(0)->GetOwnerId();
+
       // Skip filtered bodies & these colliders's owners
       if (filter.ignoredObjects.count(otherId) > 0 || collidersIds.count(otherId) > 0)
         continue;
@@ -730,8 +750,10 @@ bool PhysicsSystem::DetectColliderCastCollisions(vector<shared_ptr<Collider>> co
   };
 
   // Detect triggers
-  for (auto [otherId, otherCollider] : ValidateAllColliders(weakTriggerColliders))
+  for (auto otherCollider : ValidateAllColliders(weakTriggerColliders))
   {
+    auto otherId = otherCollider->GetOwnerId();
+
     // Skip filtered bodies & these colliders's owners
     if (filter.ignoredObjects.count(otherId) > 0 || collidersIds.count(otherId) > 0)
       continue;

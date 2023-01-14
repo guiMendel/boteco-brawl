@@ -48,6 +48,10 @@ namespace Helper
   // Converts degrees to radians
   float DegreesToRadians(int degrees);
 
+  // Returns true with probability equal to parameter.
+  // Parameter must be a number between 0 and 1, where 0 is no chance and 1 is 100% chance
+  bool ThrowCoin(float chance);
+
   // Gets a random number in the range [min, max[
   int RandomRange(int min, int max);
   // Gets a random number in the range [min, max[
