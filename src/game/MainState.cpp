@@ -4,6 +4,7 @@
 #include "PlayerManager.h"
 #include "ParticleFX.h"
 #include "Camera.h"
+#include "TimeScaleManager.h"
 
 using namespace std;
 
@@ -27,6 +28,9 @@ void MainState::InitializeObjects()
 
   // Add particle fx
   CreateObject("ParticleFX", ObjectRecipes::SingleComponent<ParticleFX>());
+
+  // Add time scale manager
+  CreateObject("TimeScaleManager", ObjectRecipes::SingleComponent<TimeScaleManager>());
 
   // Add an arena
   CreateObject("Arena", ObjectRecipes::Arena("./assets/images/boteco.jpg"));

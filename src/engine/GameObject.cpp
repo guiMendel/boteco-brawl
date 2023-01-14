@@ -89,6 +89,9 @@ void GameObject::RegisterToState()
 
 void GameObject::Update(float deltaTime)
 {
+  // Apply timescale
+  deltaTime *= timeScale;
+
   // Update timers
   timer.Update(deltaTime);
 
@@ -131,6 +134,8 @@ void GameObject::PhysicsUpdate(float deltaTime)
 {
   if (enabled == false)
     return;
+
+  deltaTime *= timeScale;
 
   // Check for collision & trigger exit
   DetectCollisionExits();
@@ -743,3 +748,10 @@ void GameObject::CancelDelayedFunction(int tokenId)
   delayedFunctions.erase(tokenId);
   timer.Scrap(to_string(tokenId));
 }
+
+void GameObject::SetTimeScale(float newScale)
+{
+  timeScale = newScale;
+}
+
+float GameObject::GetTimeScale() const { return timeScale; }

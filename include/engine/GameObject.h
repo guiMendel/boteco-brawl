@@ -398,6 +398,21 @@ private:
   decltype(frameTriggers) lastFrameTriggers;
 
   // =================================
+  // MODIFIERS
+  // =================================
+public:
+  // Sets the delta time modifier for this object
+  // It will be applied to delta times before they are passed down to components and children
+  void SetTimeScale(float newScale);
+
+  // What the current time scale is
+  float GetTimeScale() const;
+
+private:
+  // Current value of time scale
+  float timeScale{1};
+
+  // =================================
   // OPERATORS
   // =================================
 public:

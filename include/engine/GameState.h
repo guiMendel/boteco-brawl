@@ -79,7 +79,7 @@ public:
   std::shared_ptr<GameObject> GetPointer(const GameObject *gameObject);
 
   std::shared_ptr<GameObject> GetObject(int id);
-  
+
   // Throws if this object doesn't exist
   std::shared_ptr<GameObject> RequireObject(int id);
 
@@ -98,6 +98,16 @@ public:
     }
 
     return nullptr;
+  }
+
+  template <class T>
+  auto RequireObjectOfType() -> std::shared_ptr<T>
+  {
+    auto object = FindObjectOfType<T>();
+
+    Helper::Assert(object != nullptr, "Required object type was not present in game state");
+
+    return object;
   }
 
   std::shared_ptr<GameObject> FindObject(std::string name);

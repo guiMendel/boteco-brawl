@@ -8,6 +8,7 @@
 #include <memory>
 #include <vector>
 
+// Handles human players connected to the game
 class PlayerManager : public Component
 {
 public:

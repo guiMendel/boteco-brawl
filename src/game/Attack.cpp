@@ -40,5 +40,13 @@ Damage Attack::GetDamage() const
 
   float direction = GetSign(gameObject.GetScale().x);
 
-  return Damage{character->GetBaseDamage() * damageModifier, impulse * Vector2(direction, 1), stunTime};
+  return Damage{
+      // Total damage
+      character->GetBaseDamage() * damageModifier,
+      // Impulse
+      impulse * Vector2(direction, 1),
+      // Stun time
+      stunTime,
+      // Attack author
+      gameObject.GetParent()};
 }

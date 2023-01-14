@@ -5,6 +5,7 @@
 #include "Damage.h"
 #include "Rigidbody.h"
 #include "Movement.h"
+#include "TimeScaleManager.h"
 
 struct Heat : public Component
 {
@@ -19,7 +20,7 @@ public:
   void Start() override;
 
   // Applies the given damage to the current heat level and applies it's impulse to the body
-  void TakeDamage(const Damage &damage);
+  void TakeDamage(Damage damage);
 
   // Gets current level of heat
   float GetHeat() const;
@@ -32,6 +33,9 @@ public:
   void SetArmor(float value);
 
 private:
+  // Triggers a hit stop for the current damage
+  void TriggerHitStop(Damage damage);
+
   static const float inverseMaxHeat;
 
   // Current level of heat
@@ -43,6 +47,7 @@ private:
   // Reference to body
   std::weak_ptr<Rigidbody> weakBody;
   std::weak_ptr<Movement> weakMovement;
+  std::weak_ptr<TimeScaleManager> weakTimeScaleManager;
 };
 
 #endif

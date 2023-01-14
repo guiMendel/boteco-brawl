@@ -2,6 +2,9 @@
 #define __DAMAGE__
 
 #include "Vector2.h"
+#include <memory>
+
+class GameObject;
 
 struct Damage
 {
@@ -13,6 +16,9 @@ struct Damage
 
   // How much time to leave target stunned, unable to move
   float stunTime;
+
+  // Reference to object dealing this damage
+  std::weak_ptr<GameObject> weakAuthor;
 };
 
 #endif
