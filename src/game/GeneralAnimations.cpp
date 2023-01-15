@@ -1,4 +1,5 @@
 #include "GeneralAnimations.h"
+#include "GunParry.h"
 #include "ParticleFX.h"
 #include "Movement.h"
 #include "BoxCollider.h"
@@ -8,6 +9,21 @@
 
 using namespace std;
 using namespace GeneralAnimations;
+
+// Takes the last frame of a sequence, replicates it n - 1 times, and sets all of it's instances duration
+void SplitLastFrame(vector<AnimationFrame> &frames, int numberOfInstances, float newDuration)
+{
+  Assert(frames.size() > 0, "Can't replicate frames of empty sequence");
+  Assert(numberOfInstances > 0, "Can't remove frame");
+
+  auto &lastFrame = frames[frames.size() - 1];
+
+  // Set new duration
+  lastFrame.SetDuration(newDuration);
+
+  // Replicate it
+  frames.insert(frames.end(), numberOfInstances - 1, lastFrame);
+}
 
 vector<AnimationFrame> Jump::InitializeFrames()
 {
@@ -79,31 +95,70 @@ vector<AnimationFrame> Neutral2::InitializeFrames()
   return frames;
 }
 
+vector<AnimationFrame> Horizontal::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/horizontal.png", SpritesheetClipInfo(24, 8), 0.2)};
+
+  // Add hitboxes
+  FrameHitbox(frames[1], {Circle({16, 3}, 3.5), Circle({21, 3}, 3.5)});
+  FrameHitbox(frames[2]);
+
+  // Replicate last frame
+  SplitLastFrame(frames, 2, 0.1);
+
+  return frames;
+}
 vector<AnimationFrame> SpecialNeutral::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/throw.png", SpritesheetClipInfo(8, 8), 0.1)};
+  auto frames{SliceSpritesheet("./assets/sprites/special.png", SpritesheetClipInfo(16, 8, 1), 0.2, {4, 0})};
 
-  auto callback = [](GameObject &object)
+  // Add a recovery frame
+  frames.push_back(frames[0]);
+
+  // Ready parry
+  auto startParry = [](GameObject &object)
   {
-    Vector2 initialVelocity{5, -1};
+    auto parry = object.RequireComponent<GunParry>();
 
-    if (object.localScale.x < 0)
-      initialVelocity.x *= -1;
-
-    object.GetState()->CreateObject(
-        "Projectile",
-        ObjectRecipes::Projectile(initialVelocity, object.GetShared()),
-        object.GetPosition());
+    parry->ready = true;
   };
 
-  frames[2].AddCallback(callback);
+  auto stopParry = [](GameObject &object)
+  {
+    auto parry = object.RequireComponent<GunParry>();
+
+    parry->ready = false;
+  };
+
+  frames[0].AddCallback(startParry);
+  frames[1].AddCallback(stopParry);
+
+  return frames;
+}
+
+void SpecialNeutral::InternalOnStop()
+{
+  LOCK(weakAnimator, animator);
+
+  auto parry = animator->gameObject.RequireComponent<GunParry>();
+
+  parry->ready = false;
+}
+
+vector<AnimationFrame> Riposte::InitializeFrames()
+{
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/special.png", SpritesheetClipInfo(16, 8, 2, 1), 0.2, {4, 0})};
+
+  // Add hitboxes
+  FrameHitbox(frames[0], {Circle({8.5, 4.5}, 7), Circle({14.5, 4.5}, 7)});
+  FrameHitbox(frames[1]);
 
   return frames;
 }
 
 // === HELPER FUNCTIONS DEFINITIONS
 
-tuple<float, Vector2, float> AttackAnimation::GetAttackProperties() const
+DamageParameters AttackAnimation::GetAttackProperties() const
 {
   return {0, Vector2{0, 0}, 0};
 }
@@ -127,10 +182,10 @@ void AttackAnimation::SetupAttack()
 
   attackObjectId = attackObject->id;
 
-  auto [damageModifier, impulse, stunTime] = GetAttackProperties();
+  auto damageParams = GetAttackProperties();
 
   // Give it the attack component
-  attackObject->AddComponent<Attack>(damageModifier, impulse, stunTime);
+  attackObject->AddComponent<Attack>(damageParams);
 }
 
 void AttackAnimation::FrameHitbox(AnimationFrame &frame, vector<Circle> hitboxAreas)

@@ -9,16 +9,24 @@ Vector2 KeyboardInput::GetInputDirection() const
   Vector2 inputDirection = Vector2::Zero();
 
   if (inputManager.IsKeyDown(SDLK_a))
-    inputDirection.x -= 1;
+    inputDirection.x = -1;
 
   if (inputManager.IsKeyDown(SDLK_d))
-    inputDirection.x += 1;
+  {
+    // If left is also pressed, give it preference if it's newer
+    if (inputDirection.x != -1 || inputManager.KeyStateLength(SDLK_a) >= inputManager.KeyStateLength(SDLK_d))
+      inputDirection.x = 1;
+  }
 
   if (inputManager.IsKeyDown(SDLK_w))
-    inputDirection.y -= 1;
+    inputDirection.y = -1;
 
   if (inputManager.IsKeyDown(SDLK_s))
-    inputDirection.y += 1;
+  {
+    // If up is also pressed, give it preference if it's newer
+    if (inputDirection.y != -1 || inputManager.KeyStateLength(SDLK_w) >= inputManager.KeyStateLength(SDLK_s))
+      inputDirection.y = 1;
+  }
 
   return inputDirection.Normalized();
 }
@@ -26,52 +34,21 @@ Vector2 KeyboardInput::GetInputDirection() const
 void KeyboardInput::Update(float)
 {
   // Get this frame's input direction
-  Vector2 inputDirection = GetInputDirection();
-
-  // Detect idle
-  if (inputManager.KeyRelease(SDLK_d))
-  {
-    if (inputManager.IsKeyDown(SDLK_a))
-      SetDirection(-1);
-    else
-      CancelDirection(1);
-  }
-
-  if (inputManager.KeyRelease(SDLK_a))
-  {
-    if (inputManager.IsKeyDown(SDLK_d))
-      SetDirection(1);
-    else
-      CancelDirection(-1);
-  }
-
-  // Detect keyboard movement keys
-  if (inputManager.KeyPress(SDLK_d))
-    SetDirection(1);
-
-  else if (inputManager.KeyPress(SDLK_a))
-    SetDirection(-1);
+  SetDirection(GetInputDirection());
 
   // Detect jump
   if (inputManager.KeyPress(SDLK_SPACE))
     OnJump.Invoke();
 
-  // Detect fall acceleration
-  if (inputManager.KeyPress(SDLK_s))
-    OnFastFall.Invoke();
-
-  else if (inputManager.KeyRelease(SDLK_s))
-    OnFastFallStop.Invoke();
+  // Detect dash input
+  if (inputManager.KeyPress(SDLK_k))
+    OnDash.Invoke(currentDirection);
 
   // Detect attack
   if (inputManager.KeyPress(SDLK_j))
-    OnNeutralAttack.Invoke();
+    Attack();
 
   // Detect special
   if (inputManager.KeyPress(SDLK_l))
-    OnNeutralSpecial.Invoke();
-
-  // Detect dash input
-  if (inputManager.KeyPress(SDLK_k))
-    OnDash.Invoke(inputDirection);
+    Special();
 }

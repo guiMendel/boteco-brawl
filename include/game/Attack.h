@@ -13,7 +13,7 @@ class CharacterController;
 struct Attack : public Component
 {
 public:
-  Attack(GameObject &associatedObject, float damageModifier, Vector2 impulse, float stunTime);
+  Attack(GameObject &associatedObject, DamageParameters damage);
   virtual ~Attack() {}
 
   void Awake() override;
@@ -22,14 +22,8 @@ public:
   // Apply attack to a given character's controller
   void Land(std::shared_ptr<CharacterController> targetController);
 
-  // Attack damage modifier
-  float damageModifier;
-
-  // Attack impulse
-  Vector2 impulse;
-
-  // Time for which target is left without control
-  float stunTime;
+  // Damage params
+  DamageParameters damage;
 
 private:
   // Gets the damage struct for this attack

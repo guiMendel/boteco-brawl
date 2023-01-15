@@ -40,6 +40,9 @@ public:
   // When the key does not exist, a new element is constructed with the default constructor and inserted (in this case, it gets the false value)
   bool IsKeyDown(int key) { return keyState[key]; }
 
+  // Get how many frames this key has been in it's state for
+  int KeyStateLength(int key) const;
+
   bool MousePress(int button) { return mouseState[button] == true && mouseUpdate[button] == updateCounter; }
   bool MouseRelease(int button)
   {

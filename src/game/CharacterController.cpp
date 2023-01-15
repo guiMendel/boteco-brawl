@@ -1,4 +1,5 @@
 #include "CharacterController.h"
+#include "Parry.h"
 #include "CharacterStateRecipes.h"
 #include "Action.h"
 #include "Actions.h"
@@ -70,7 +71,7 @@ void CharacterController::Start()
   // For now, there must be player input. In the future there may be an AIInput instead
   auto inputs = gameObject.GetComponents<PlayerInput>();
 
-  Assert(inputs.empty() == false, "CharacterStateManager had no input methods");
+  Assert(inputs.empty() == false, "Character object had no input methods");
 
   for (auto input : inputs)
   {
@@ -100,16 +101,31 @@ void CharacterController::Start()
     movement.OnLand.AddListener("character-controller", [this]()
                                 { OnLand(); });
 
-    // Attacks
-    input->OnNeutralAttack.AddListener("character-controller", [this]()
-                                       { Dispatch<Actions::Neutral>(); });
-
-    input->OnNeutralSpecial.AddListener("character-controller", [this]()
-                                        { Dispatch<Actions::SpecialNeutral>(); });
-
     //  Dash
     input->OnDash.AddListener("character-controller", [this](Vector2 direction)
                               { DispatchDash(direction); });
+
+    // Attacks
+    input->OnAttackNeutral.AddListener("character-controller", [this]()
+                                       { Dispatch<Actions::Neutral>(); });
+    input->OnAttackHorizontal.AddListener("character-controller", [this]()
+                                          { Dispatch<Actions::Horizontal>(); });
+    input->OnAttackUp.AddListener("character-controller", [this]()
+                                  { Dispatch<Actions::Up>(); });
+
+    // Air attacks
+    input->OnAirHorizontal.AddListener("character-controller", [this]()
+                                       { Dispatch<Actions::AirHorizontal>(); });
+    input->OnAirUp.AddListener("character-controller", [this]()
+                               { Dispatch<Actions::AirUp>(); });
+    input->OnAirDown.AddListener("character-controller", [this]()
+                                 { Dispatch<Actions::AirDown>(); });
+
+    // Specials
+    input->OnSpecialNeutral.AddListener("character-controller", [this]()
+                                        { Dispatch<Actions::SpecialNeutral>(); });
+    input->OnSpecialHorizontal.AddListener("character-controller", [this]()
+                                           { Dispatch<Actions::SpecialHorizontal>(); });
   }
 }
 
@@ -159,5 +175,14 @@ void CharacterController::DispatchDash(Vector2 direction)
 
 void CharacterController::TakeHit(Damage damage)
 {
-  DispatchNonDelayable<Actions::TakeDamage>(damage);
+  // Check if can parry
+  auto parry = gameObject.GetComponent<Parry>();
+
+  // If can parry, perform riposte
+  if (parry != nullptr && parry->CanParry(damage))
+    Dispatch<Actions::Riposte>(parry, damage);
+
+  // Otherwise, take damage
+  else
+    DispatchNonDelayable<Actions::TakeDamage>(damage);
 }

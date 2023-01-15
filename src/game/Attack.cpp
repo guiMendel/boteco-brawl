@@ -3,8 +3,8 @@
 
 using namespace std;
 
-Attack::Attack(GameObject &associatedObject, float damageModifier, Vector2 impulse, float stunTime)
-    : Component(associatedObject), damageModifier(damageModifier), impulse(impulse), stunTime(stunTime) {}
+Attack::Attack(GameObject &associatedObject, DamageParameters damage)
+    : Component(associatedObject), damage(damage) {}
 
 void Attack::Awake()
 {
@@ -38,15 +38,5 @@ Damage Attack::GetDamage() const
 {
   LOCK(weakCharacter, character);
 
-  float direction = GetSign(gameObject.GetScale().x);
-
-  return Damage{
-      // Total damage
-      character->GetBaseDamage() * damageModifier,
-      // Impulse
-      impulse * Vector2(direction, 1),
-      // Stun time
-      stunTime,
-      // Attack author
-      gameObject.GetParent()};
+  return damage.DeriveDamage(character->GetBaseDamage(), gameObject.GetParent());
 }

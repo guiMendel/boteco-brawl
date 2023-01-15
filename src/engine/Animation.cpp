@@ -184,5 +184,7 @@ vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetC
     }
   }
 
+  Assert(frames.empty() == false, "Failed to slice spritesheet");
+
   return frames;
 }

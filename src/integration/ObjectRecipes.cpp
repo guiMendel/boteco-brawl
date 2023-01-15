@@ -25,6 +25,7 @@
 #include "CircleCollider.h"
 #include "Circle.h"
 #include "Heat.h"
+#include "GunParry.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
@@ -88,7 +89,9 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
     animator->RegisterAnimation<GeneralAnimations::Dash>();
     animator->RegisterAnimation<GeneralAnimations::Neutral1>();
     animator->RegisterAnimation<GeneralAnimations::Neutral2>();
+    animator->RegisterAnimation<GeneralAnimations::Horizontal>();
     animator->RegisterAnimation<GeneralAnimations::SpecialNeutral>();
+    animator->RegisterAnimation<GeneralAnimations::Riposte>();
 
     // === COLLISION
 
@@ -163,6 +166,9 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
 
     // Make it vulnerable
     character->AddComponent<Heat>(1);
+
+    // Give it parry capacity
+    character->AddComponent<GunParry>();
   };
 }
 

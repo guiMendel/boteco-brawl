@@ -4,6 +4,7 @@
 #include <memory>
 #include "StatefulAnimation.h"
 #include "Circle.h"
+#include "Damage.h"
 
 #define CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, Parent)  \
   ClassName(std::shared_ptr<Animator> animator) : Parent(animator) \
@@ -35,10 +36,10 @@
 
 #define DECLARE(Type, Name) Type &Name() override;
 
-#define SET_DAMAGE(damage, impulse, stunTime)                            \
-  std::tuple<float, Vector2, float> GetAttackProperties() const override \
-  {                                                                      \
-    return {damage, impulse, stunTime};                                  \
+#define SET_DAMAGE(damage, impulse, stunTime)           \
+  DamageParameters GetAttackProperties() const override \
+  {                                                     \
+    return {damage, impulse, stunTime};                 \
   }
 
 #define ATTACK_SEQUENCE(frame)           \
@@ -65,7 +66,7 @@ namespace GeneralAnimations
 
     // Get damage & impulse for this attack
     // Default is is 0 for both
-    virtual std::tuple<float, Vector2, float> GetAttackProperties() const;
+    virtual DamageParameters GetAttackProperties() const;
 
   protected:
     // Sets hitbox for a given frame
@@ -220,15 +221,56 @@ namespace GeneralAnimations
     ATTACK_CANCEL(5)
   };
 
+  class Horizontal : public AttackAnimation
+  {
+  public:
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Horizontal)
+
+    DEF_NAME("horizontal")
+    DELCARE_FRAMES
+
+    SET_DAMAGE(3, Vector2::Angled(Helper::DegreesToRadians(-5), 8), 0.9)
+
+    ATTACK_CANCEL(4)
+  };
+
+  // class Up : public AttackAnimation
+  // {
+  // public:
+  //   ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Up)
+
+  //   DEF_NAME("up")
+  //   DELCARE_FRAMES
+
+  //   SET_DAMAGE(2, Vector2::Angled(Helper::DegreesToRadians(-90), 1), 0.2)
+
+  //   ATTACK_CANCEL(4)
+  // };
+
   class SpecialNeutral : public StatefulAnimation
   {
   public:
     CONSTRUCTOR_AND_DESTRUCTOR(SpecialNeutral)
 
+    void InternalOnStop() override;
+
     DEF_NAME("specialNeutral")
     DELCARE_FRAMES
   };
 
+  class Riposte : public AttackAnimation
+  {
+  public:
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Riposte)
+
+    DEF_NAME("riposte")
+    DELCARE_FRAMES
+
+    DamageParameters GetAttackProperties() const override { return damage; }
+
+    // Damage properties vary according to the parry
+    DamageParameters damage;
+  };
 }
 
 #endif

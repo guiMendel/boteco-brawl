@@ -47,7 +47,7 @@ void CircleCollider::Render()
     Debug::DrawCircle(circle, Color::Pink());
     Debug::DrawPoint(circle.center, Color::Pink());
     Debug::DrawArrow(circle.center,
-                     circle.center + attack->impulse.Normalized() * circle.radius * Vector2(direction, 1),
+                     circle.center + attack->damage.impulse.Normalized() * circle.radius * Vector2(direction, 1),
                      Color::Cyan(),
                      circle.radius / 2);
     return;

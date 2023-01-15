@@ -59,7 +59,7 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
   animator->Play(animation, true);
 }
 
-int AttackAction::GetPriority() const { return 1; }
+int AttackAction::GetPriority() const { return ATTACK_PRIORITY; }
 
 shared_ptr<CharacterState> AttackAction::NextState(shared_ptr<Action> sharedAction)
 {

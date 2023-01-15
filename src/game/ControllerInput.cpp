@@ -18,25 +18,7 @@ ControllerInput::ControllerInput(GameObject &associatedObject, std::shared_ptr<P
 void ControllerInput::HandleAnalogMovement(Vector2 newDirection)
 {
   // Normalize direction
-  newDirection = newDirection.Normalized();
-
-  if (newDirection == analogDirection)
-    return;
-
-  // Move on X axis
-  if (newDirection.x != analogDirection.x)
-    SetDirection(newDirection.x);
-
-  // Fast fall start
-  if (newDirection.y > 0 && analogDirection.y <= 0)
-    OnFastFall.Invoke();
-
-  // Fast fall stop
-  if (newDirection.y <= 0 && analogDirection.y > 0)
-    OnFastFallStop.Invoke();
-
-  // Store this direction
-  analogDirection = newDirection;
+  SetDirection(newDirection.Normalized());
 }
 
 void ControllerInput::HandleAnalogButton(SDL_GameControllerButton button)
@@ -49,13 +31,13 @@ void ControllerInput::HandleAnalogButton(SDL_GameControllerButton button)
   if (button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
     OnDash.Invoke(analogDirection);
 
-  // Detect neutral attack
+  // Detect attack
   if (button == SDL_CONTROLLER_BUTTON_X)
-    OnNeutralAttack.Invoke();
+    Attack();
 
   // Detect special
   if (button == SDL_CONTROLLER_BUTTON_Y)
-    OnNeutralSpecial.Invoke();
+    Special();
 }
 
 void ControllerInput::Start()

@@ -5,6 +5,7 @@
 #include "CharacterStateManager.h"
 #include "ParticleEmitter.h"
 #include "ObjectRecipes.h"
+#include "GeneralAnimations.h"
 #include "Heat.h"
 
 using namespace std;
@@ -16,7 +17,7 @@ void Move::Trigger(GameObject &target, shared_ptr<CharacterState>)
 {
   target.RequireComponent<Movement>()->SetDirection(direction);
 }
-void Move::StopHook(GameObject &target, std::shared_ptr<CharacterState>)
+void Move::StopHook(GameObject &target, shared_ptr<CharacterState>)
 {
   target.RequireComponent<Movement>()->SetDirection(0);
 }
@@ -101,7 +102,7 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   particleObject->RequireComponent<ParticleEmitter>()->StartEmission();
 }
 
-void Dash::StopHook(GameObject &target, std::shared_ptr<CharacterState>)
+void Dash::StopHook(GameObject &target, shared_ptr<CharacterState>)
 {
   auto rigidbody = target.GetComponent<Rigidbody>();
 
@@ -149,7 +150,50 @@ void TakeDamage::Trigger(GameObject &target, shared_ptr<CharacterState> actionSt
   }
 }
 
-void TakeDamage::StopHook(GameObject &target, std::shared_ptr<CharacterState>)
+void TakeDamage::StopHook(GameObject &target, shared_ptr<CharacterState>)
 {
   target.RequireComponent<Animator>()->Stop(ouchAnimation);
+}
+
+// ============================= RIPOSTE =============================
+
+void Riposte::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
+{
+  LOCK(weakParry, parry);
+
+  // Store these info
+  auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());
+  auto weakObject = weak_ptr(target.GetShared());
+  auto weakActionState = weak_ptr(actionState);
+  int stateId = actionState->id;
+
+  // Get animator
+  auto animator = target.RequireComponent<Animator>();
+
+  // Get riposte animation
+  auto animation = dynamic_pointer_cast<GeneralAnimations::Riposte>(animator->BuildAnimation("riposte"));
+  Assert(animation != nullptr, "Animator built a riposte animation which isn't of the Riposte animation type");
+
+  animation->damage = parry->Riposte(parriedDamage);
+
+  // Give it a stop callback
+  auto removeStateCallback = [stateId, weakStateManager]()
+  {
+    // When animation is over, make sure this action's state is no longer active
+    IF_LOCK(weakStateManager, stateManager)
+    {
+      stateManager->RemoveState(stateId);
+    }
+  };
+  animation->OnStop.AddListener("parent-action-cleanup", removeStateCallback);
+
+  // Start this animation
+  animator->Play(animation, true);
+
+  // Ensure character is facing direction of attacker
+  LOCK(parriedDamage.weakAuthor, author);
+
+  auto direction = GetSign(author->GetPosition().x - target.GetPosition().x);
+
+  target.localScale.x = direction;
 }

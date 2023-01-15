@@ -1,9 +1,9 @@
 #ifndef __PLAYER_CONTROLLER__
 #define __PLAYER_CONTROLLER__
 
-#include "GameObject.h"
 #include "Component.h"
 #include "Event.h"
+#include "Movement.h"
 
 class Movement;
 
@@ -28,22 +28,37 @@ public:
   // Raised on stop fast fall
   Event OnFastFallStop;
 
-  Event OnNeutralAttack;
-  
-  Event OnNeutralSpecial;
+  Event OnAttackNeutral;
+  Event OnAttackHorizontal;
+  Event OnAttackUp;
+
+  Event OnAirHorizontal;
+  Event OnAirUp;
+  Event OnAirDown;
+
+  Event OnSpecialNeutral;
+  Event OnSpecialHorizontal;
 
   float GetCurrentMoveDirection() const;
 
 protected:
   // Sets direction to 0, if current direction equals the provided one (both have the same sign)
-  void CancelDirection(float direction);
+  void CancelMoveDirection(float direction);
+
+  // When player hits the attack button
+  void Attack();
+
+  // When player hits the special button
+  void Special();
 
   // Issues new direction
-  void SetDirection(float direction);
+  void SetDirection(Vector2 direction);
 
-private:
-  // Last direction issued to Movement
-  float currentDirection{0};
+  // Last detected input direction
+  Vector2 currentDirection;
+
+  // Movement reference
+  std::weak_ptr<Movement> weakMovement;
 };
 
 #endif

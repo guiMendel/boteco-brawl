@@ -16,7 +16,7 @@ public:
   CharacterController(GameObject &associatedObject);
   virtual ~CharacterController() {}
 
-  // Dispatches a take damage action
+  // Dispatches either a take damage action or a riposte action
   void TakeHit(Damage damage);
 
 private:
@@ -38,6 +38,8 @@ private:
   void HandleMovementAnimation();
 
   void DispatchDash(Vector2 direction);
+
+  void DispatchRiposte(DamageParameters damageParams);
 
   void OnLand();
 

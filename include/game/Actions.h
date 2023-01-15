@@ -5,6 +5,7 @@
 #include "Vector2.h"
 #include "CharacterStateRecipes.h"
 #include "Damage.h"
+#include "Parry.h"
 
 // Action priorities
 #define MOVEMENT_PRIORITY 1
@@ -103,9 +104,36 @@ namespace Actions
     }
   };
 
+  // Ground attacks
   ATTACK(Neutral, "neutral");
+  ATTACK(Horizontal, "horizontal");
+  ATTACK(Up, "up");
 
+  // Air attacks
+  ATTACK(AirHorizontal, "airHorizontal");
+  ATTACK(AirUp, "airUp");
+  ATTACK(AirDown, "airDown");
+
+  // Specials
   ATTACK(SpecialNeutral, "specialNeutral");
+  ATTACK(SpecialHorizontal, "specialHorizontal");
+
+  struct Riposte : public Action
+  {
+    void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
+
+    int GetPriority() const override { return ATTACK_PRIORITY; }
+
+    std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override
+    {
+      return CharacterStateRecipes::Attacking(sharedAction);
+    }
+
+    Riposte(std::shared_ptr<Parry> parry, Damage parriedDamage) : weakParry(parry), parriedDamage(parriedDamage) {}
+
+    std::weak_ptr<Parry> weakParry;
+    Damage parriedDamage;
+  };
 
 }
 

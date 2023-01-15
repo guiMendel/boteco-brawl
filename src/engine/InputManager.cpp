@@ -221,3 +221,11 @@ std::shared_ptr<ControllerDevice> InputManager::GetController(int id)
 
   return controllers[id];
 }
+
+int InputManager::KeyStateLength(int key) const
+{
+  if (keyUpdate.count(key) == 0)
+    return updateCounter;
+
+  return updateCounter - keyUpdate.at(key);
+}
