@@ -116,6 +116,7 @@ public:
   static Vector2 Zero();
   static Vector2 One();
   static Vector2 Angled(float angle, float magnitude = 1);
+  static Vector2 AngledDegrees(float degrees, float magnitude = 1);
 
   explicit operator SDL_Point() const;
 

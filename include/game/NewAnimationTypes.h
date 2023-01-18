@@ -10,7 +10,7 @@
 class StatefulAnimation : public Animation
 {
 public:
-  StatefulAnimation(std::shared_ptr<Animator> animator);
+  StatefulAnimation(Animator& animator);
   virtual ~StatefulAnimation();
 
   // Register the state
@@ -41,7 +41,7 @@ protected:
 class AttackAnimation : public StatefulAnimation
 {
 public:
-  AttackAnimation(std::shared_ptr<Animator> animator) : StatefulAnimation(animator) {}
+  AttackAnimation(Animator& animator) : StatefulAnimation(animator) {}
   virtual ~AttackAnimation() {}
 
   virtual DamageParameters GetAttackProperties() const;
@@ -75,7 +75,7 @@ private:
 class InnerLoopAnimation : public AttackAnimation
 {
 public:
-  InnerLoopAnimation(std::shared_ptr<Animator> animator);
+  InnerLoopAnimation(Animator& animator);
   virtual ~InnerLoopAnimation() {}
 
   // Raised when either the whole sequence ends or is interrupted

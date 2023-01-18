@@ -33,14 +33,10 @@ public:
   template <class T>
   void RegisterAnimation(bool makeDefault = false)
   {
-    // Get weak
-    auto weakAnimator{std::weak_ptr<Animator>(std::dynamic_pointer_cast<Animator>(GetShared()))};
-
     // Create it's builder
-    auto builder = [weakAnimator]()
+    auto builder = [this]()
     {
-      LOCK(weakAnimator, animator);
-      return std::make_shared<T>(animator);
+      return std::make_shared<T>(*this);
     };
 
     RegisterAnimation(builder, makeDefault);

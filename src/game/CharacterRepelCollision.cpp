@@ -17,7 +17,9 @@ void CharacterRepelCollision::OnTriggerCollision(TriggerCollisionData triggerDat
   // Also ignore if is currently attacking or dashing
   LOCK(weakStateManager, stateManager);
 
-  if (stateManager->HasState(ATTACKING_STATE) || stateManager->HasState(DASHING_STATE))
+  if (stateManager->HasState(ATTACKING_STATE) ||
+      stateManager->HasState(DASHING_STATE) ||
+      stateManager->HasState(SPECIAL_ATTACKING_STATE))
     return;
 
   LOCK(triggerData.weakOther, other);

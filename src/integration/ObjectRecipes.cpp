@@ -91,6 +91,9 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
     animator->RegisterAnimation<GeneralAnimations::Neutral2>();
     animator->RegisterAnimation<GeneralAnimations::Horizontal>();
     animator->RegisterAnimation<GeneralAnimations::Up>();
+    animator->RegisterAnimation<GeneralAnimations::AirHorizontal>();
+    animator->RegisterAnimation<GeneralAnimations::AirUp>();
+    animator->RegisterAnimation<GeneralAnimations::AirDown>();
     animator->RegisterAnimation<GeneralAnimations::SpecialNeutral>();
     animator->RegisterAnimation<GeneralAnimations::Riposte>();
 

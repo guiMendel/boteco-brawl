@@ -25,7 +25,7 @@ Movement::Movement(GameObject &associatedObject, float acceleration, float defau
       fastFallAcceleration(45),
       jumpGravityModifier(15),
       rigidbody(*gameObject.RequireComponent<Rigidbody>()),
-      character(*gameObject.RequireComponent<CharacterStateManager>())
+      stateManager(*gameObject.RequireComponent<CharacterStateManager>())
 {
   SetGravityModifierDecayTime(0.2f);
 }
@@ -61,7 +61,7 @@ void Movement::PhysicsUpdate(float deltaTime)
   // Discount gravity modifier
   if (currentGravityModifier > 1)
   {
-    if (character.HasControl() == false)
+    if (stateManager.HasControl() == false)
       SetCurrentGravityModifier(1);
 
     else
@@ -69,7 +69,7 @@ void Movement::PhysicsUpdate(float deltaTime)
   }
 
   // Fast fall
-  if (fastFallActive && character.HasControl())
+  if (fastFallActive && stateManager.HasControl())
     rigidbody.velocity.y += fastFallAcceleration * deltaTime;
 }
 
@@ -91,7 +91,7 @@ void Movement::Update(float deltaTime)
 
 void Movement::Run(float deltaTime)
 {
-  if (targetSpeed == rigidbody.velocity.x || character.HasControl() == false)
+  if (targetSpeed == rigidbody.velocity.x || stateManager.HasControl() == false)
     return;
 
   // Use deceleration modifier
@@ -106,11 +106,23 @@ void Movement::Run(float deltaTime)
   // Accelerate
   rigidbody.velocity += accelerationVector;
 
-  // Set object orientation to target speed only if:
-  // A. Is airborne
-  // B. Is moving in the target direction
-  if (targetSpeed != 0 && (IsGrounded() == false || GetSign(targetSpeed) == GetSign(rigidbody.velocity.x)))
-    gameObject.localScale = Vector2(GetSign(targetSpeed), 1);
+  // === SET ORIENTATION
+
+  // When airborne
+  if (IsGrounded() == false)
+  {
+    // Only sets if not attacking
+    if (stateManager.HasState(AIR_ATTACKING_STATE) == false)
+      gameObject.localScale = Vector2(GetSign(targetSpeed), 1);
+  }
+
+  // When grounded
+  else
+  {
+    // Only set if moving in same direction as input
+    if (GetSign(targetSpeed) == GetSign(rigidbody.velocity.x, 0))
+      gameObject.localScale = Vector2(GetSign(targetSpeed), 1);
+  }
 }
 
 void Movement::SetCurrentGravityModifier(float value)

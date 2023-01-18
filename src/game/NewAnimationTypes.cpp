@@ -9,7 +9,7 @@ using namespace Helper;
 
 // === STATEFUL ANIMATIONS
 
-StatefulAnimation::StatefulAnimation(shared_ptr<Animator> animator) : Animation(animator) {}
+StatefulAnimation::StatefulAnimation(Animator &animator) : Animation(animator) {}
 
 void StatefulAnimation::RegisterState(shared_ptr<CharacterState> actionState)
 {
@@ -28,8 +28,7 @@ void StatefulAnimation::RegisterState(shared_ptr<CharacterState> actionState)
     {
       IF_LOCK(weakActionState, actionState)
       {
-        LOCK(weakAnimator, animator)
-        animator->gameObject.RequireComponent<CharacterStateManager>()->RemoveState(actionState->id);
+        animator.gameObject.RequireComponent<CharacterStateManager>()->RemoveState(actionState->id);
       }
     };
 
@@ -82,23 +81,19 @@ shared_ptr<StatefulAnimation> StatefulAnimation::GetNextStateful() { return null
 
 float AttackAnimation::GetHitCooldown() const { return -1; }
 
-DamageParameters AttackAnimation::GetAttackProperties() const { return {0, Vector2{0, 0}, 0}; }
+DamageParameters AttackAnimation::GetAttackProperties() const { return {0, AttackImpulse(Vector2::Zero(), 0), 0}; }
 
 void AttackAnimation::InternalOnStart() { SetupAttack(); }
 void AttackAnimation::InternalOnStop()
 {
-  LOCK(weakAnimator, animator);
-
   if (attackObjectId >= 0)
-    animator->gameObject.RequireChild(attackObjectId)->RequestDestroy();
+    animator.gameObject.RequireChild(attackObjectId)->RequestDestroy();
 }
 
 void AttackAnimation::SetupAttack()
 {
-  LOCK(weakAnimator, animator);
-
   // Create child
-  auto attackObject = animator->gameObject.CreateChild(ATTACK_OBJECT);
+  auto attackObject = animator.gameObject.CreateChild(ATTACK_OBJECT);
   attackObject->SetPhysicsLayer(PhysicsLayer::Hitbox);
 
   attackObjectId = attackObject->id;
@@ -122,9 +117,8 @@ void AttackAnimation::FrameHitbox(AnimationFrame &frame, vector<Circle> hitboxAr
 
 void AttackAnimation::SetHitbox(const AnimationFrame &frame, vector<Circle> hitboxAreas)
 {
-  LOCK(weakAnimator, animator);
 
-  auto attackObject = animator->gameObject.RequireChild(attackObjectId);
+  auto attackObject = animator.gameObject.RequireChild(attackObjectId);
 
   // First, remove all colliders already there
   RemoveHitbox();
@@ -157,9 +151,8 @@ void AttackAnimation::SetHitbox(const AnimationFrame &frame, vector<Circle> hitb
 
 void AttackAnimation::RemoveHitbox()
 {
-  LOCK(weakAnimator, animator);
 
-  auto attackObject = animator->gameObject.GetChild(attackObjectId);
+  auto attackObject = animator.gameObject.GetChild(attackObjectId);
 
   auto colliders = attackObject->GetComponents<Collider>();
 
@@ -169,9 +162,11 @@ void AttackAnimation::RemoveHitbox()
 
 // === INNER LOOP ANIMATIONS
 
-InnerLoopAnimation::InnerLoopAnimation(shared_ptr<Animator> animator) : AttackAnimation(animator)
+InnerLoopAnimation::InnerLoopAnimation(Animator& animator) : AttackAnimation(animator)
 {
-  auto maybeRaisedOnSequenceStop = [this]()
+  auto weakAnimator{weak_ptr(dynamic_pointer_cast<Animator>(animator.GetShared()))};
+
+  auto maybeRaisedOnSequenceStop = [this, weakAnimator]()
   {
     // If this is the last phase
     if (sequencePhase == SequencePhase::PostLoop)
@@ -179,9 +174,8 @@ InnerLoopAnimation::InnerLoopAnimation(shared_ptr<Animator> animator) : AttackAn
 
     else
     {
-      LOCK(weakAnimator, animator);
-
       // Or the next animation is NOT this animation's next phase
+      LOCK(weakAnimator, animator)
       auto incomingAnimation = dynamic_pointer_cast<InnerLoopAnimation>(animator->GetIncomingAnimation());
 
       if (incomingAnimation == nullptr || incomingAnimation->pastPhaseId != id)
@@ -234,10 +228,8 @@ shared_ptr<StatefulAnimation> InnerLoopAnimation::GetNextStateful()
   if (sequencePhase == SequencePhase::PostLoop)
     return nullptr;
 
-  LOCK(weakAnimator, animator);
-
   // Build an instance of the first phase animation
-  auto next = dynamic_pointer_cast<InnerLoopAnimation>(animator->BuildAnimation(Phase1Name()));
+  auto next = dynamic_pointer_cast<InnerLoopAnimation>(animator.BuildAnimation(Phase1Name()));
 
   // Give it our listeners
   next->OnCycleEnd.CopyListeners(OnCycleEnd);

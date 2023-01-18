@@ -13,5 +13,7 @@ bool GunParry::CanParry(Damage damage)
 
 DamageParameters GunParry::Riposte(Damage damage)
 {
-  return {damage.heatDamage * 3, damage.impulse * 3, damage.stunTime * 2};
+  damage.impulse.magnitude *= 3;
+
+  return {damage.heatDamage * 3, damage.impulse, damage.stunTime * 2};
 }

@@ -142,9 +142,7 @@ vector<AnimationFrame> SpecialNeutral::InitializeFrames()
 
 void SpecialNeutral::InternalOnStop()
 {
-  LOCK(weakAnimator, animator);
-
-  auto parry = animator->gameObject.RequireComponent<GunParry>();
+  auto parry = animator.gameObject.RequireComponent<GunParry>();
 
   parry->ready = false;
 }
@@ -188,6 +186,68 @@ vector<AnimationFrame> Up::InitializePostLoopFrames()
   return Animation::SliceSpritesheet("./assets/sprites/up.png",
                                      SpritesheetClipInfo(12, 16, 1, 4), 0.1, {1, -4});
 }
+
+// === AIR HORIZONTAL
+
+vector<AnimationFrame> AirHorizontal::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/air-horizontal.png",
+                               SpritesheetClipInfo(16, 8), 0.15, {4, 0})};
+
+  // Add hitboxes
+  FrameHitbox(frames[1], {Circle({7.5, 3.5}, 4)});
+  FrameHitbox(frames[2]);
+
+  // Replicate last frame
+  SplitLastFrame(frames, 2, 0.15 / 2);
+
+  return frames;
+}
+
+// === AIR UP
+
+vector<AnimationFrame> AirUp::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/air-up.png",
+                               SpritesheetClipInfo(12, 14), 0.15, {2, -3})};
+
+  // Add hitboxes
+  FrameHitbox(frames[1], {Circle({5.5, 5.5}, 5)});
+  FrameHitbox(frames[2]);
+
+  // Replicate last frame
+  SplitLastFrame(frames, 2, 0.15 / 2);
+
+  return frames;
+}
+
+
+// === AIR DOWN
+
+vector<AnimationFrame> AirDown::InitializePreLoopFrames()
+{
+  return Animation::SliceSpritesheet("./assets/sprites/air-down.png",
+                                     SpritesheetClipInfo(8, 20, 1), 0.2, {0, 2});
+}
+
+vector<AnimationFrame> AirDown::InitializeInLoopFrames()
+{
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/air-down.png",
+                                          SpritesheetClipInfo(8, 20, 1, 1), 0.1, {0, 2})};
+
+  // Add hitboxes
+  FrameHitbox(frames[0], {Circle({4, 14}, 3.5)});
+
+  return frames;
+}
+
+vector<AnimationFrame> AirDown::InitializePostLoopFrames()
+{
+  return Animation::SliceSpritesheet("./assets/sprites/air-down.png",
+                                     SpritesheetClipInfo(8, 20, 3, 2), 0.2, {0, 2});
+}
+
+
 
 // === HELPER FUNCTIONS DEFINITIONS
 

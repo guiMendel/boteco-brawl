@@ -70,7 +70,7 @@ public:
   // === ANIMATION SPECIFICITIES
 
   // Instances need their animator
-  Animation(std::shared_ptr<Animator> animator);
+  Animation(Animator& animator);
   virtual ~Animation() {}
 
   // Access the animation name
@@ -156,7 +156,7 @@ public:
       std::string filename, SpritesheetClipInfo clipInfo, float frameDuration, Vector2 virtualPixelOffset = Vector2::Zero(), SpriteConfig config = SpriteConfig());
 
   // Reference to it's animator
-  std::weak_ptr<Animator> weakAnimator;
+  Animator& animator;
 };
 
 #endif

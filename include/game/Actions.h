@@ -24,6 +24,23 @@
     }                                             \
   }
 
+#define AIR_ATTACK(actionName, animationName)                                                \
+  struct actionName : public AttackAction                                                    \
+  {                                                                                          \
+    std::string GetAnimationName() const override                                            \
+    {                                                                                        \
+      return animationName;                                                                  \
+    }                                                                                        \
+    std::unordered_set<std::string> GetFriendStates() const override                         \
+    {                                                                                        \
+      return {MOVING_STATE};                                                                 \
+    }                                                                                        \
+    std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override \
+    {                                                                                        \
+      return CharacterStateRecipes::AirAttacking(sharedAction);                              \
+    }                                                                                        \
+  }
+
 #define SPECIAL(actionName, animationName)        \
   struct actionName : public SpecialAction        \
   {                                               \
@@ -39,7 +56,7 @@ namespace Actions
   {
     void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
     void StopHook(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
-    std::unordered_set<std::string> GetFriendStates() const override { return {LANDING_STATE, JUMPING_STATE}; }
+    std::unordered_set<std::string> GetFriendStates() const override { return {LANDING_STATE, JUMPING_STATE, AIR_ATTACKING_STATE}; }
 
     int GetPriority() const override { return MOVEMENT_PRIORITY; }
 
@@ -119,9 +136,9 @@ namespace Actions
   ATTACK(Up, "up");
 
   // Air attacks
-  ATTACK(AirHorizontal, "airHorizontal");
-  ATTACK(AirUp, "airUp");
-  ATTACK(AirDown, "airDown");
+  AIR_ATTACK(AirHorizontal, "airHorizontal");
+  AIR_ATTACK(AirUp, "airUp");
+  AIR_ATTACK(AirDown, "airDown");
 
   // Specials
   SPECIAL(SpecialNeutral, "specialNeutral");

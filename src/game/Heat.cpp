@@ -53,23 +53,26 @@ void Heat::TakeDamage(Damage damage)
   // Get impulse multiplier from heat, a value from 1 to 100
   float heatMultiplier = 99 * heat * inverseMaxHeat + 1;
 
-  cout << gameObject << " taking damage: " << damage.heatDamage << " heatDamage, " << Vector2(damage.impulse).Magnitude() << " impulse." << endl;
+  // Apply multiplier
+  damage.impulse.magnitude *= heatMultiplier;
+
+  // Get base impulse
+  auto impulse = damage.impulse.DeriveImpulse(gameObject.GetShared());
+
+  cout << gameObject << " taking damage: " << damage.heatDamage << " heatDamage, " << impulse.Magnitude() << " impulse." << endl;
   cout << "Inverse Armor: " << inverseArmor << ", Heat: " << heat << ", Inverse Max Heat: " << inverseMaxHeat << ", Heat multiplier: " << heatMultiplier << endl;
-  cout << "Resulting damage: " << inverseArmor * damage.heatDamage << ", Resulting velocity add: " << (damage.impulse * heatMultiplier * body->GetInverseMass()).Magnitude() << endl;
+  cout << "Resulting damage: " << inverseArmor * damage.heatDamage << ", Resulting velocity add: " << (impulse * heatMultiplier * body->GetInverseMass()).Magnitude() << endl;
 
   // When grounded
   if (movement->IsGrounded())
     // Instantly lift target a little bit from the floor
     gameObject.Translate({0, -0.15});
 
-  // Update damage impulse
-  damage.impulse *= heatMultiplier;
-
   // Apply impulse
-  body->ApplyImpulse(damage.impulse);
+  body->ApplyImpulse(impulse);
 
   // Get impulse x direction
-  float impulseDirection = GetSign(damage.impulse.x, 0);
+  float impulseDirection = GetSign(impulse.x, 0);
 
   // Face inverse direction of impulse
   if (impulseDirection != 0)
@@ -97,7 +100,7 @@ void Heat::TriggerHitStop(Damage damage)
   LOCK(weakTimeScaleManager, timeScaleManager);
 
   // Calculate duration
-  float duration = min(impulseFactor * damage.impulse.Magnitude(), maxDuration);
+  float duration = min(impulseFactor * damage.impulse.magnitude, maxDuration);
 
   // Apply to self
   timeScaleManager->AlterTimeScale(gameObject.GetShared(), 0.00001, duration);

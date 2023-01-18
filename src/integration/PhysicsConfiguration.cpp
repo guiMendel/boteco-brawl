@@ -46,10 +46,26 @@ void CircleCollider::Render()
 
     Debug::DrawCircle(circle, Color::Pink());
     Debug::DrawPoint(circle.center, Color::Pink());
-    Debug::DrawArrow(circle.center,
-                     circle.center + attack->damage.impulse.Normalized() * circle.radius * Vector2(direction, 1),
-                     Color::Cyan(),
-                     circle.radius / 2);
+
+    if (attack->damage.impulse.type == AttackImpulse::Directed)
+    {
+      Debug::DrawArrow(circle.center,
+                       circle.center + attack->damage.impulse.direction * circle.radius * Vector2(direction, 1),
+                       Color::Cyan(),
+                       circle.radius / 2);
+    }
+
+    else
+    {
+      Debug::DrawLine(circle.center + Vector2::AngledDegrees(-45, circle.radius / 2),
+                      circle.center + Vector2::AngledDegrees(135, circle.radius / 2),
+                      Color::Cyan());
+
+      Debug::DrawLine(circle.center + Vector2::AngledDegrees(-135, circle.radius / 2),
+                      circle.center + Vector2::AngledDegrees(45, circle.radius / 2),
+                      Color::Cyan());
+    }
+
     return;
   }
 

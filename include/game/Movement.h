@@ -134,7 +134,7 @@ private:
 
   // Reference to rigidbody
   Rigidbody &rigidbody;
-  CharacterStateManager &character;
+  CharacterStateManager &stateManager;
 };
 
 #endif

@@ -29,6 +29,11 @@ shared_ptr<CharacterState> CharacterStateRecipes::Attacking(shared_ptr<Action> a
   return make_shared<CharacterState>(ATTACKING_STATE, 2, action);
 }
 
+shared_ptr<CharacterState> CharacterStateRecipes::AirAttacking(shared_ptr<Action> action)
+{
+  return make_shared<CharacterState>(AIR_ATTACKING_STATE, 2, action);
+}
+
 shared_ptr<CharacterState> CharacterStateRecipes::SpecialAttacking(shared_ptr<Action> action)
 {
   return make_shared<CharacterState>(SPECIAL_ATTACKING_STATE, 2, action);

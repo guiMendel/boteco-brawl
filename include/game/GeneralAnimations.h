@@ -3,13 +3,14 @@
 
 #include <memory>
 #include "NewAnimationTypes.h"
+#include "Animator.h"
 
-#define CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, Parent)  \
-  ClassName(std::shared_ptr<Animator> animator) : Parent(animator) \
-  {                                                                \
-  }                                                                \
-  virtual ~ClassName()                                             \
-  {                                                                \
+#define CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, Parent) \
+  ClassName(Animator &animator) : Parent(animator)                \
+  {                                                               \
+  }                                                               \
+  virtual ~ClassName()                                            \
+  {                                                               \
   }
 
 #define CONSTRUCTOR_AND_DESTRUCTOR(ClassName) CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, StatefulAnimation)
@@ -185,7 +186,7 @@ namespace GeneralAnimations
     DEF_NAME("neutral1")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1, Vector2::Angled(Helper::DegreesToRadians(-5), 0.5), 0.2)
+    SET_DAMAGE(1, AttackImpulse(Vector2::AngledDegrees(-5), 0.5), 0.2)
 
     ATTACK_SEQUENCE(3)
     ATTACK_CANCEL(4)
@@ -199,7 +200,7 @@ namespace GeneralAnimations
     DEF_NAME("neutral2")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1.2, Vector2::Angled(Helper::DegreesToRadians(-5), 4), 0.3)
+    SET_DAMAGE(1.2, AttackImpulse(Vector2::AngledDegrees(-5), 4), 0.3)
 
     ATTACK_CANCEL(5)
   };
@@ -212,7 +213,7 @@ namespace GeneralAnimations
     DEF_NAME("horizontal")
     DELCARE_FRAMES
 
-    SET_DAMAGE(3, Vector2::Angled(Helper::DegreesToRadians(-5), 8), 0.9)
+    SET_DAMAGE(3, AttackImpulse(Vector2::AngledDegrees(-5), 8), 0.6)
 
     ATTACK_CANCEL(4)
   };
@@ -228,8 +229,50 @@ namespace GeneralAnimations
     std::vector<AnimationFrame> InitializeInLoopFrames() override;
     std::vector<AnimationFrame> InitializePostLoopFrames() override;
 
-    SET_DAMAGE(2, Vector2::Angled(Helper::DegreesToRadians(-90), 1.5), 0.2)
+    SET_DAMAGE(2, AttackImpulse(Vector2::AngledDegrees(-90), 1.5), 0.2)
     SET_HIT_COOLDOWN(0.2)
+  };
+
+  class AirHorizontal : public AttackAnimation
+  {
+  public:
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(AirHorizontal)
+
+    DEF_NAME("airHorizontal")
+    DELCARE_FRAMES
+
+    SET_DAMAGE(1.5, AttackImpulse(Vector2::AngledDegrees(-5), 3), 0.3)
+
+    ATTACK_CANCEL(3)
+  };
+
+  class AirUp : public AttackAnimation
+  {
+  public:
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(AirUp)
+
+    DEF_NAME("airUp")
+    DELCARE_FRAMES
+
+    SET_DAMAGE(0.5, AttackImpulse(Vector2::AngledDegrees(-90), 9), 0.1)
+
+    ATTACK_CANCEL(3)
+  };
+
+  class AirDown : public InnerLoopAnimation
+  {
+  public:
+    LOOP_CONSTRUCTOR_AND_DESTRUCTOR(AirDown)
+
+    DEF_FIRST_NAME("airDown")
+
+    std::vector<AnimationFrame> InitializePreLoopFrames() override;
+    std::vector<AnimationFrame> InitializeInLoopFrames() override;
+    std::vector<AnimationFrame> InitializePostLoopFrames() override;
+
+    bool QuitLoopOnInputRelease() const override { return false; }
+
+    SET_DAMAGE(4.5, AttackImpulse(animator.gameObject.GetShared(), 6), 0.4)
   };
 
   class SpecialNeutral : public StatefulAnimation

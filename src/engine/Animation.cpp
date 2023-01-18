@@ -7,13 +7,15 @@ using namespace std;
 
 int Animation::idGenerator{0};
 
-Animation::Animation(shared_ptr<Animator> animator) : weakAnimator(animator)
+Animation::Animation(Animator &animator) : animator(animator)
 {
+  auto weakAnimator{weak_ptr(dynamic_pointer_cast<Animator>(animator.GetShared()))};
+  
   // Link it's event types to this animation's
-  OnCycleEnd.AddListener("animator-propagation", [this]()
+  OnCycleEnd.AddListener("animator-propagation", [this, weakAnimator]()
                          { LOCK(weakAnimator, animator); animator->OnCycleEnd.Invoke(); });
 
-  OnStop.AddListener("animator-propagation", [this]()
+  OnStop.AddListener("animator-propagation", [this, weakAnimator]()
                      { LOCK(weakAnimator, animator); animator->OnAnimationStop.Invoke(); });
 }
 
@@ -69,10 +71,9 @@ AnimationFrame &Animation::GetFrame(int frame)
 
 void Animation::TriggerFrame(int frame)
 {
-  LOCK(weakAnimator, animator);
 
   // Trigger it
-  GetFrame(frame).Trigger(animator->gameObject);
+  GetFrame(frame).Trigger(animator.gameObject);
 
   // Get next frame time
   secondsToNextFrame = GetFrame(frame).GetDuration() * speedModifier;
@@ -82,16 +83,14 @@ void Animation::TriggerFrame(int frame)
 
 bool Animation::IsPlaying()
 {
-  LOCK(weakAnimator, animator);
-  return animator->GetCurrentAnimation()->Name() == Name();
+
+  return animator.GetCurrentAnimation()->Name() == Name();
 }
 
 void Animation::Update(float deltaTime)
 {
   if (IsPlaying() == false)
     return;
-
-  LOCK(weakAnimator, animator);
 
   // Discount time
   secondsToNextFrame -= deltaTime;
@@ -181,7 +180,6 @@ int Animation::GetNextFrameIndex() { return (currentFrame + 1) % Frames().size()
 
 void Animation::Finish()
 {
-  LOCK(weakAnimator, animator);
 
   // Announce
   OnCycleEnd.Invoke();
@@ -195,11 +193,11 @@ void Animation::Finish()
 
   // Get next
   if (EndBehavior() == CycleEndBehavior::PlayNext)
-    animator->Play(GetNext());
+    animator.Play(GetNext());
 
   // Otherwise, transitions to default
   else
-    animator->Play(animator->defaultAnimation);
+    animator.Play(animator.defaultAnimation);
 }
 
 bool Animation::operator==(Animation &other)

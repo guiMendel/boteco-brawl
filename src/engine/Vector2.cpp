@@ -1,6 +1,8 @@
 #include "Vector2.h"
+#include "Helper.h"
 
 using namespace std;
+using namespace Helper;
 
 // Initialize constructor
 Vector2::Vector2(float x, float y) : x(x), y(y) {}
@@ -150,6 +152,7 @@ Vector2 Vector2::Right(float magnitude) { return Vector2(magnitude, 0); }
 Vector2 Vector2::Zero() { return Vector2(0, 0); }
 Vector2 Vector2::One() { return Vector2(1, 1); }
 Vector2 Vector2::Angled(float angle, float magnitude) { return Vector2::Right(magnitude).Rotated(angle); }
+Vector2 Vector2::AngledDegrees(float degrees, float magnitude) { return Vector2::Right(magnitude).Rotated(DegreesToRadians(degrees)); }
 
 Vector2::operator SDL_Point() const { return {(int)round(x), (int)round(y)}; }
 

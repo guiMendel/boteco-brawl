@@ -61,7 +61,7 @@ void PlayerInput::Attack()
     if (currentDirection.SqrMagnitude() < 0.1)
       OnAttackNeutral.Invoke();
 
-    else if (abs(currentDirection.x) >= abs(currentDirection.y))
+    else if (abs(currentDirection.x) > abs(currentDirection.y))
       OnAttackHorizontal.Invoke();
 
     else if (currentDirection.y < 0)
@@ -76,7 +76,7 @@ void PlayerInput::Attack()
       OnAirHorizontal.Invoke();
 
     // Check if vertical
-    else if (abs(currentDirection.x) < abs(currentDirection.y))
+    else if (abs(currentDirection.x) <= abs(currentDirection.y))
     {
       if (currentDirection.y < 0)
         OnAirUp.Invoke();
