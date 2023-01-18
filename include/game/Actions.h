@@ -24,6 +24,15 @@
     }                                             \
   }
 
+#define SPECIAL(actionName, animationName)        \
+  struct actionName : public SpecialAction        \
+  {                                               \
+    std::string GetAnimationName() const override \
+    {                                             \
+      return animationName;                       \
+    }                                             \
+  }
+
 namespace Actions
 {
   struct Move : public Action
@@ -115,8 +124,8 @@ namespace Actions
   ATTACK(AirDown, "airDown");
 
   // Specials
-  ATTACK(SpecialNeutral, "specialNeutral");
-  ATTACK(SpecialHorizontal, "specialHorizontal");
+  SPECIAL(SpecialNeutral, "specialNeutral");
+  SPECIAL(SpecialHorizontal, "specialHorizontal");
 
   struct Riposte : public Action
   {

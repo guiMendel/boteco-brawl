@@ -26,13 +26,13 @@ private:
   template <class ActionType, typename... Args>
   void Dispatch(Args &&...args)
   {
-    character.Perform(std::make_shared<ActionType>(std::forward<Args>(args)...), true);
+    stateManager.Perform(std::make_shared<ActionType>(std::forward<Args>(args)...), true);
   }
 
   template <class ActionType, typename... Args>
   void DispatchNonDelayable(Args &&...args)
   {
-    character.Perform(std::make_shared<ActionType>(std::forward<Args>(args)...), false);
+    stateManager.Perform(std::make_shared<ActionType>(std::forward<Args>(args)...), false);
   }
 
   void HandleMovementAnimation();
@@ -52,7 +52,7 @@ private:
   // How long (seconds) character must wait between successive dashes
   static const float totalDashCooldown;
 
-  CharacterStateManager &character;
+  CharacterStateManager &stateManager;
   Movement &movement;
   Rigidbody &rigidbody;
   Animator &animator;

@@ -89,6 +89,9 @@ void GameObject::RegisterToState()
 
 void GameObject::Update(float deltaTime)
 {
+  if (GetName() == "Character2")
+    cout << *this << " timescale is " << GetTimeScale() << endl;
+
   // Apply timescale
   deltaTime *= timeScale;
 
@@ -96,29 +99,7 @@ void GameObject::Update(float deltaTime)
   timer.Update(deltaTime);
 
   // Trigger delayed functions
-  auto delayedFunctionEntryIterator = delayedFunctions.begin();
-  while (delayedFunctionEntryIterator != delayedFunctions.end())
-  {
-    auto tokenId = to_string(delayedFunctionEntryIterator->first);
-
-    // Check if delay is up
-    if (timer.Get(tokenId) >= 0)
-    {
-      auto &delayedFunction = delayedFunctionEntryIterator->second;
-
-      // Scrap timer
-      timer.Scrap(tokenId);
-
-      // Trigger function
-      delayedFunction();
-
-      // Forget entry
-      delayedFunctionEntryIterator = delayedFunctions.erase(delayedFunctionEntryIterator);
-    }
-
-    else
-      delayedFunctionEntryIterator++;
-  }
+  TriggerDelayedFunctions();
 
   if (enabled == false)
     return;
@@ -731,22 +712,56 @@ bool GameObject::IsEnabled() const
   return InternalGetParent()->IsEnabled();
 }
 
+void GameObject::TriggerDelayedFunctions()
+{
+  auto delayedFunctionEntryIterator = delayedFunctions.begin();
+  while (delayedFunctionEntryIterator != delayedFunctions.end())
+  {
+    auto stringTokenId = to_string(delayedFunctionEntryIterator->first);
+
+    // Check if it was disabled
+    if (delayedFunctionEntryIterator->second.second == false)
+      // Remove it
+      delayedFunctionEntryIterator = delayedFunctions.erase(delayedFunctionEntryIterator);
+
+    // Check if delay is up
+    else if (timer.Get(stringTokenId) >= 0)
+    {
+      auto delayedFunction = delayedFunctionEntryIterator->second.first;
+
+      // Scrap timer
+      timer.Scrap(stringTokenId);
+
+      // Trigger function
+      delayedFunction();
+
+      // Forget entry
+      delayedFunctionEntryIterator = delayedFunctions.erase(delayedFunctionEntryIterator);
+    }
+
+    else
+      delayedFunctionEntryIterator++;
+  }
+}
+
 int GameObject::DelayFunction(function<void()> procedure, float seconds)
 {
   // Get token id
-  int tokenId = RandomRange(0, 1000000);
+  int tokenId = HashTwo(SDL_GetTicks(), RandomRange(0, 10000));
 
   // Store function
-  delayedFunctions[tokenId] = procedure;
+  delayedFunctions[tokenId] = {procedure, true};
 
   // Start timer
   timer.Reset(to_string(tokenId), -seconds);
+
+  return tokenId;
 }
 
 void GameObject::CancelDelayedFunction(int tokenId)
 {
-  delayedFunctions.erase(tokenId);
-  timer.Scrap(to_string(tokenId));
+  // Set it as not supposed to be called
+  delayedFunctions[tokenId].second = false;
 }
 
 void GameObject::SetTimeScale(float newScale)

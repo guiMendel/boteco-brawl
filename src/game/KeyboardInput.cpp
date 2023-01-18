@@ -48,7 +48,13 @@ void KeyboardInput::Update(float)
   if (inputManager.KeyPress(SDLK_j))
     Attack();
 
+  else if (inputManager.KeyRelease(SDLK_j))
+    OnReleaseAttack.Invoke();
+
   // Detect special
   if (inputManager.KeyPress(SDLK_l))
     Special();
+
+  else if (inputManager.KeyRelease(SDLK_l))
+    OnReleaseSpecial.Invoke();
 }

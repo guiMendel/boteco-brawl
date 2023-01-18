@@ -36,8 +36,12 @@ public:
   Event OnAirUp;
   Event OnAirDown;
 
+  Event OnReleaseAttack;
+
   Event OnSpecialNeutral;
   Event OnSpecialHorizontal;
+
+  Event OnReleaseSpecial;
 
   float GetCurrentMoveDirection() const;
 

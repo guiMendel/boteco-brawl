@@ -33,25 +33,17 @@ public:
   template <class T>
   void RegisterAnimation(bool makeDefault = false)
   {
-    // Get shared
-    std::shared_ptr<Animator> shared = std::dynamic_pointer_cast<Animator>(GetShared());
-    auto weakShared{std::weak_ptr<Animator>(shared)};
+    // Get weak
+    auto weakAnimator{std::weak_ptr<Animator>(std::dynamic_pointer_cast<Animator>(GetShared()))};
 
-    // Get the animation name
-    std::string name = T(shared).Name();
-
-    // Check for unique name
-    Helper::Assert(animations.count(name) == 0, "Tried to add two animations type with the same name");
-
-    // Add it's builder
-    animations[name] = [this, weakShared]()
+    // Create it's builder
+    auto builder = [weakAnimator]()
     {
-      LOCK(weakShared, shared);
-      return std::make_shared<T>(shared);
+      LOCK(weakAnimator, animator);
+      return std::make_shared<T>(animator);
     };
 
-    if (makeDefault || defaultAnimation == "")
-      defaultAnimation = name;
+    RegisterAnimation(builder, makeDefault);
   }
 
   // Stops current animation and starts the given one
@@ -78,6 +70,10 @@ public:
   // Get the currently active animation
   std::shared_ptr<Animation> GetCurrentAnimation() const;
 
+  // Get the animation which is about to be played
+  // Only non null during the small window between Start being called and the current animation being stopped
+  std::shared_ptr<Animation> GetIncomingAnimation() const;
+
   // Triggered on animation cycle end
   Event OnCycleEnd;
 
@@ -88,11 +84,16 @@ public:
   std::string defaultAnimation;
 
 private:
+  void RegisterAnimation(std::function<std::shared_ptr<Animation>()> animationBuilder, bool makeDefault);
+
   // Store registered animation types
   animation_map animations;
 
   // Which animation is currently playing
   std::shared_ptr<Animation> currentAnimation;
+
+  // Animation which is about to be played
+  std::shared_ptr<Animation> incomingAnimation;
 };
 
 #endif

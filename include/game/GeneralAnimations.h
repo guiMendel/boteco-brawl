@@ -2,9 +2,7 @@
 #define __ANIMATION_RECIPES__
 
 #include <memory>
-#include "StatefulAnimation.h"
-#include "Circle.h"
-#include "Damage.h"
+#include "NewAnimationTypes.h"
 
 #define CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, Parent)  \
   ClassName(std::shared_ptr<Animator> animator) : Parent(animator) \
@@ -16,6 +14,7 @@
 
 #define CONSTRUCTOR_AND_DESTRUCTOR(ClassName) CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, StatefulAnimation)
 #define ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(ClassName) CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, AttackAnimation)
+#define LOOP_CONSTRUCTOR_AND_DESTRUCTOR(ClassName) CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, InnerLoopAnimation)
 
 #define FIELD(Type, Name, initialValue) \
   Type &Name() override                 \
@@ -32,7 +31,17 @@
 
 #define DELCARE_FRAMES std::vector<AnimationFrame> InitializeFrames() override;
 
-#define DEF_NAME(name) FIELD(std::string, Name, name)
+#define DEF_NAME(name)        \
+  std::string Name() override \
+  {                           \
+    return name;              \
+  }
+
+#define DEF_FIRST_NAME(name)        \
+  std::string Phase1Name() override \
+  {                                 \
+    return name;                    \
+  }
 
 #define DECLARE(Type, Name) Type &Name() override;
 
@@ -58,38 +67,6 @@ class Animator;
 
 namespace GeneralAnimations
 {
-  class AttackAnimation : public StatefulAnimation
-  {
-  public:
-    AttackAnimation(std::shared_ptr<Animator> animator) : StatefulAnimation(animator) {}
-    virtual ~AttackAnimation() {}
-
-    // Get damage & impulse for this attack
-    // Default is is 0 for both
-    virtual DamageParameters GetAttackProperties() const;
-
-  protected:
-    // Sets hitbox for a given frame
-    void FrameHitbox(AnimationFrame &frame, std::vector<Circle> hitboxAreas = {});
-
-  private:
-    // Setup attack properties
-    void InternalOnStart() override;
-    void InternalOnStop() override;
-
-    // Create attack child
-    void SetupAttack();
-
-    // Give attack child a hitbox
-    void SetHitbox(const AnimationFrame &frame, std::vector<Circle> hitboxAreas);
-
-    // Remove hitbox from attack child
-    void RemoveHitbox();
-
-    // Id of attack object
-    int attackObjectId{-1};
-  };
-
   class Run : public StatefulAnimation
   {
   public:
@@ -234,18 +211,19 @@ namespace GeneralAnimations
     ATTACK_CANCEL(4)
   };
 
-  // class Up : public AttackAnimation
-  // {
-  // public:
-  //   ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Up)
+  class Up : public InnerLoopAnimation
+  {
+  public:
+    LOOP_CONSTRUCTOR_AND_DESTRUCTOR(Up)
 
-  //   DEF_NAME("up")
-  //   DELCARE_FRAMES
+    DEF_FIRST_NAME("up")
 
-  //   SET_DAMAGE(2, Vector2::Angled(Helper::DegreesToRadians(-90), 1), 0.2)
+    std::vector<AnimationFrame> InitializePreLoopFrames() override;
+    std::vector<AnimationFrame> InitializeInLoopFrames() override;
+    std::vector<AnimationFrame> InitializePostLoopFrames() override;
 
-  //   ATTACK_CANCEL(4)
-  // };
+    SET_DAMAGE(2, Vector2::Angled(Helper::DegreesToRadians(-90), 1), 0.2)
+  };
 
   class SpecialNeutral : public StatefulAnimation
   {

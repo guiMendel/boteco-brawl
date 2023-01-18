@@ -333,11 +333,14 @@ public:
   Timer timer;
 
 private:
+  // Trigger delayed functions whose timers are up
+  void TriggerDelayedFunctions();
+
   // State reference id
   int gameStateId;
 
-  // Functions currently waiting to be executed
-  std::unordered_map<int, std::function<void()>> delayedFunctions;
+  // Functions currently waiting to be executed (bool indicates if they are still supposed to be called)
+  std::unordered_map<int, std::pair<std::function<void()>, bool>> delayedFunctions;
 
   // =================================
   // PHYSICS

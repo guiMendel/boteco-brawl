@@ -3,12 +3,29 @@
 
 #include <string>
 #include <memory>
+#include "Event.h"
 
 class Action;
 
-struct CharacterState
+class CharacterState
 {
-  // Unique name pool
+public:
+  // Raises when button that triggered parent action is released
+  // Only raises for specific states: those originating from attacks & specials
+  Event OnActionInputRelease;
+
+  CharacterState(std::string name, int priority, std::shared_ptr<Action> parentAction = nullptr);
+
+  // Register action input as released
+  void ReleaseActionInput();
+
+  // Whether the button that triggered parent action was already released
+  bool ActionInputReleased() const;
+
+  bool operator==(const CharacterState &other) { return name == other.name; }
+  bool operator!=(const CharacterState &other) { return !(*this == other); }
+
+  // Unique id pool
   static unsigned idGenerator;
 
   // State unique identifier
@@ -27,8 +44,9 @@ struct CharacterState
   // Whether this state can be interrupted by an action of the same type of parent regardless of priority
   bool openToSequence{false};
 
-  CharacterState(std::string name, int priority, std::shared_ptr<Action> parentAction = nullptr)
-      : name(name), priority(priority), parentAction(parentAction) {}
+private:
+  // Whether the button that triggered parent action was already released
+  bool actionInputReleased{false};
 };
 
 #endif

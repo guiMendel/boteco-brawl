@@ -64,17 +64,21 @@ void Animator::Play(string animationName, bool forceReset)
 void Animator::Play(shared_ptr<Animation> animation, bool forceReset)
 {
   // Skip if already playing this
-  if (forceReset == false && currentAnimation != nullptr && currentAnimation->Name() == animation->Name())
+  if (forceReset == false && currentAnimation != nullptr && *currentAnimation == *animation)
     return;
 
   // Ensure it's type has been previously registered
   Assert(HasAnimation(animation->Name()), "Animator is forbidden to play an animation whose type hasn't been registered yet. Animation name: " + animation->Name());
+
+  // Set it as incoming
+  incomingAnimation = animation;
 
   // Stop current animation
   Stop();
 
   // Remember it
   currentAnimation = animation;
+  incomingAnimation = nullptr;
 
   // Start it
   animation->Start();
@@ -86,3 +90,29 @@ bool Animator::HasAnimation(string name) const
 }
 
 shared_ptr<Animation> Animator::GetCurrentAnimation() const { return currentAnimation; }
+
+shared_ptr<Animation> Animator::GetIncomingAnimation() const { return incomingAnimation; }
+
+void Animator::RegisterAnimation(function<shared_ptr<Animation>()> animationBuilder, bool makeDefault)
+{
+  // Build a sample
+  auto animation = animationBuilder();
+
+  // Check for unique name
+  Helper::Assert(animations.count(animation->Name()) == 0, "Tried to add two animations type with the same name");
+
+  // Add it's builder
+  animations[animation->Name()] = animationBuilder;
+
+  if (makeDefault || defaultAnimation == "")
+    defaultAnimation = animation->Name();
+
+  // Add it's next if it's there
+  if (auto next = animation->GetNext(); next != nullptr && animations.count(next->Name()) == 0)
+  {
+    auto nextBuilder = [animationBuilder]()
+    { return animationBuilder()->GetNext(); };
+
+    RegisterAnimation(nextBuilder, false);
+  }
+}

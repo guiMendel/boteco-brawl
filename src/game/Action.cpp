@@ -1,7 +1,7 @@
 #include "Action.h"
 #include "GameObject.h"
 #include "Animator.h"
-#include "StatefulAnimation.h"
+#include "NewAnimationTypes.h"
 #include "CharacterStateManager.h"
 #include "Character.h"
 #include "PlayerInput.h"
@@ -53,7 +53,15 @@ void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> act
       stateManager->RemoveState(stateId);
     }
   };
-  animation->OnStop.AddListener("parent-action-cleanup", removeStateCallback);
+
+  // In case this is an inner loop animation
+  if (auto innerLoopAnimation = dynamic_pointer_cast<InnerLoopAnimation>(animation); innerLoopAnimation != nullptr)
+    // Register the stop callback to sequence end
+    innerLoopAnimation->OnSequenceStop.AddListener("parent-action-cleanup", removeStateCallback);
+
+  // Otherwise, add it on animation stop
+  else
+    animation->OnStop.AddListener("parent-action-cleanup", removeStateCallback);
 
   // Start this animation
   animator->Play(animation, true);
@@ -76,4 +84,9 @@ void AttackAction::Trigger(GameObject &target, shared_ptr<CharacterState> action
 
   // Default behavior
   AnimationAction::Trigger(target, actionState);
+}
+
+std::shared_ptr<CharacterState> SpecialAction::NextState(std::shared_ptr<Action> sharedAction)
+{
+  return CharacterStateRecipes::SpecialAttacking(sharedAction);
 }

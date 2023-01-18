@@ -9,6 +9,9 @@ void TimeScaleManager::AlterTimeScale(shared_ptr<GameObject> target, float newSc
   // First reset it if it's already altered
   ResetTimeScale(target);
 
+  if (duration == 0)
+    return;
+
   // Alter it's timescale
   target->SetTimeScale(newScale);
 
@@ -21,7 +24,7 @@ void TimeScaleManager::AlterTimeScale(shared_ptr<GameObject> target, float newSc
     ResetTimeScale(targetId);
   };
 
-  int token = gameObject.DelayFunction(revert, duration);
+  auto token = gameObject.DelayFunction(revert, duration);
 
   // Remember it
   alteredObjects.insert({targetId, token});
@@ -40,6 +43,8 @@ void TimeScaleManager::ResetTimeScale(int targetId)
 
   // Reset the timescale
   GetState()->RequireObject(targetId)->SetTimeScale(1);
+
+  cout << *GetState()->RequireObject(targetId) << " timescale reset back to " << GetState()->RequireObject(targetId)->GetTimeScale() << endl;
 
   // Cancel reset if necessary
   gameObject.CancelDelayedFunction(alteredObjects[targetId]);

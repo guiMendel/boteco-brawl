@@ -16,7 +16,7 @@ const float CharacterController::totalDashCooldown{1};
 
 CharacterController::CharacterController(GameObject &associatedObject)
     : Component(associatedObject),
-      character(*gameObject.RequireComponent<CharacterStateManager>()),
+      stateManager(*gameObject.RequireComponent<CharacterStateManager>()),
       movement(*gameObject.RequireComponent<Movement>()),
       rigidbody(*gameObject.RequireComponent<Rigidbody>()),
       animator(*gameObject.RequireComponent<Animator>()) {}
@@ -33,7 +33,7 @@ void CharacterController::Update(float deltaTime)
 void CharacterController::HandleMovementAnimation()
 {
   // Moving animations
-  auto states = character.GetStates();
+  auto states = stateManager.GetStates();
 
   // Whether just moving
   bool justMoving = states.size() == 1 && states.front()->name == "moving";
@@ -82,8 +82,8 @@ void CharacterController::Start()
                                        { DispatchNonDelayable<Actions::Move>(direction); });
 
     // Make sure to dispatch another movement if movement key is being held when character becomes idle
-    character.OnEnterIdle.AddListener("check-if-moving", [this, weakInput]()
-                                      { if (auto input = weakInput.lock(); input && input->GetCurrentMoveDirection() != 0)
+    stateManager.OnEnterIdle.AddListener("check-if-moving", [this, weakInput]()
+                                         { if (auto input = weakInput.lock(); input && input->GetCurrentMoveDirection() != 0)
                                     DispatchNonDelayable<Actions::Move>(input->GetCurrentMoveDirection()); });
 
     // Subscribe to jumps
@@ -126,6 +126,22 @@ void CharacterController::Start()
                                         { Dispatch<Actions::SpecialNeutral>(); });
     input->OnSpecialHorizontal.AddListener("character-controller", [this]()
                                            { Dispatch<Actions::SpecialHorizontal>(); });
+
+    auto warnStates = [this](string targetStateName)
+    {
+      // For each state
+      for (auto state : stateManager.GetStates())
+      {
+        if (state->name == targetStateName)
+          state->ReleaseActionInput();
+      }
+    };
+
+    // Raise release events on states
+    input->OnReleaseAttack.AddListener("character-controller", [warnStates]()
+                                       { warnStates(ATTACKING_STATE); });
+    input->OnReleaseSpecial.AddListener("character-controller", [warnStates]()
+                                       { warnStates(SPECIAL_ATTACKING_STATE); });
   }
 }
 
@@ -137,7 +153,7 @@ void CharacterController::OnLand()
   static const float sqrMinSpeed = minLandAnimationSpeed * minLandAnimationSpeed;
   if (rigidbody.velocity.SqrMagnitude() >= sqrMinSpeed)
     DispatchNonDelayable<Actions::Land>();
-  else if (character.GetStates().size() == 0)
+  else if (stateManager.GetStates().size() == 0)
     animator.Play("idle");
 }
 

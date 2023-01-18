@@ -21,7 +21,7 @@ void ControllerInput::HandleAnalogMovement(Vector2 newDirection)
   SetDirection(newDirection.Normalized());
 }
 
-void ControllerInput::HandleAnalogButton(SDL_GameControllerButton button)
+void ControllerInput::HandleButtonPress(SDL_GameControllerButton button)
 {
   // Detect jump
   if (button == SDL_CONTROLLER_BUTTON_A || button == SDL_CONTROLLER_BUTTON_B)
@@ -40,6 +40,17 @@ void ControllerInput::HandleAnalogButton(SDL_GameControllerButton button)
     Special();
 }
 
+void ControllerInput::HandleButtonRelease(SDL_GameControllerButton button)
+{
+  // Detect attack
+  if (button == SDL_CONTROLLER_BUTTON_X)
+    OnReleaseAttack.Invoke();
+
+  // Detect special
+  if (button == SDL_CONTROLLER_BUTTON_Y)
+    OnReleaseSpecial.Invoke();
+}
+
 void ControllerInput::Start()
 {
   // This component callback identifier
@@ -51,7 +62,10 @@ void ControllerInput::Start()
 
   // Subscribe to analog buttons
   inputManager.OnControllerButtonPress.AddListener(callbackIdentifier, [this](SDL_GameControllerButton button, int targetId)
-                                                   { if (targetId == GetAssociatedControllerId()) HandleAnalogButton(button); });
+                                                   { if (targetId == GetAssociatedControllerId()) HandleButtonPress(button); });
+
+  inputManager.OnControllerButtonRelease.AddListener(callbackIdentifier, [this](SDL_GameControllerButton button, int targetId)
+                                                   { if (targetId == GetAssociatedControllerId()) HandleButtonRelease(button); });
 }
 
 // Get player associated to this controller input

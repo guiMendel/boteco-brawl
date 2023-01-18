@@ -23,7 +23,8 @@ private:
   // Handles analog movement
   void HandleAnalogMovement(Vector2 newDirection);
 
-  void HandleAnalogButton(SDL_GameControllerButton button);
+  void HandleButtonPress(SDL_GameControllerButton button);
+  void HandleButtonRelease(SDL_GameControllerButton button);
 
   // To which player this controller input is bound
   const std::weak_ptr<Player> weakPlayer;

@@ -12,6 +12,11 @@ class Event
 public:
   void AddListener(const std::string &id, functionType callback) { listeners[id] = callback; }
   void AddOneShotListener(const std::string &id, functionType callback) { listeners[id] = callback; }
+  void CopyListeners(const Event &other)
+  {
+    listeners.insert(other.listeners.begin(), other.listeners.end());
+    oneShotListeners.insert(other.oneShotListeners.begin(), other.oneShotListeners.end());
+  }
 
   void RemoveListener(const std::string &id) { listeners.erase(id); }
 

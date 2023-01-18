@@ -73,4 +73,13 @@ struct AttackAction : public AnimationAction
   virtual ~AttackAction() {}
 };
 
+// Specialization for special
+struct SpecialAction : public AttackAction
+{
+  // Fixed next state
+  std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override;
+
+  virtual ~SpecialAction() {}
+};
+
 #endif

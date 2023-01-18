@@ -5,6 +5,8 @@
 
 using namespace std;
 
+int Animation::idGenerator{0};
+
 Animation::Animation(shared_ptr<Animator> animator) : weakAnimator(animator)
 {
   // Link it's event types to this animation's
@@ -23,32 +25,33 @@ vector<AnimationFrame> &Animation::Frames()
   return frames;
 }
 
-Animation::CycleEndBehavior &Animation::EndBehavior()
-{
-  static CycleEndBehavior defaultBehavior{CycleEndBehavior::PlayDefault};
-  return defaultBehavior;
-}
+Animation::CycleEndBehavior &Animation::EndBehavior() { return endBehavior; }
 
-float &Animation::SpeedModifier()
-{
-  static float defaultSpeed{1};
-  return defaultSpeed;
-}
+float &Animation::SpeedModifier() { return speedModifier; }
 
-shared_ptr<Animation> Animation::GetNext() const { return nullptr; }
+shared_ptr<Animation> Animation::GetNext() { return nullptr; }
 
 AnimationFrame &Animation::operator[](int index) { return GetFrame(index); }
 
-void Animation::Start()
+void Animation::InternalStart(bool raise)
 {
-  // Safecheck
-  Assert(Frames().empty() == false, "Tried playing animation with no frames");
+  if (raise)
+    InternalOnStart();
 
-  InternalOnStart();
+  // Safecheck
+  if (Frames().empty())
+  {
+    Assert(EndBehavior() != CycleEndBehavior::Loop, "Empty looping animations are forbidden");
+
+    Finish();
+    return;
+  }
 
   // Start with first frame
   TriggerFrame(0);
 }
+
+void Animation::Start() { InternalStart(true); }
 
 void Animation::Stop()
 {
@@ -98,28 +101,13 @@ void Animation::Update(float deltaTime)
     return;
 
   // Get next frame
-  int nextFrame = (currentFrame + 1) % Frames().size();
+  int nextFrame{GetNextFrameIndex()};
 
   // If finished cycle
   if (nextFrame == 0)
   {
-    // Announce
-    OnCycleEnd.Invoke();
-
-    // If loops, simply carry on
-    if (EndBehavior() != CycleEndBehavior::Loop)
-    {
-      // If has next
-      if (EndBehavior() == CycleEndBehavior::PlayNext)
-      {
-        animator->Play(GetNext());
-        return;
-      }
-
-      // Otherwise, transitions to default
-      animator->Play(animator->defaultAnimation);
-      return;
-    }
+    Finish();
+    return;
   }
 
   // Carry on to next frame
@@ -188,3 +176,35 @@ vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetC
 
   return frames;
 }
+
+int Animation::GetNextFrameIndex() { return (currentFrame + 1) % Frames().size(); }
+
+void Animation::Finish()
+{
+  LOCK(weakAnimator, animator);
+
+  // Announce
+  OnCycleEnd.Invoke();
+
+  // If loops, simply carry on
+  if (EndBehavior() == CycleEndBehavior::Loop)
+  {
+    InternalStart(false);
+    return;
+  }
+
+  // Get next
+  if (EndBehavior() == CycleEndBehavior::PlayNext)
+    animator->Play(GetNext());
+
+  // Otherwise, transitions to default
+  else
+    animator->Play(animator->defaultAnimation);
+}
+
+bool Animation::operator==(Animation &other)
+{
+  return Name() == other.Name();
+}
+
+bool Animation::operator!=(Animation &other) { return !(*this == other); }
