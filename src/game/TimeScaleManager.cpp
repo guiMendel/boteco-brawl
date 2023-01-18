@@ -6,6 +6,8 @@ TimeScaleManager::TimeScaleManager(GameObject &associatedObject) : Component(ass
 
 void TimeScaleManager::AlterTimeScale(shared_ptr<GameObject> target, float newScale, float duration)
 {
+  Assert(newScale > 0, "Invalid new time scale: it must be a positive value");
+
   // First reset it if it's already altered
   ResetTimeScale(target);
 

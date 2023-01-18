@@ -100,12 +100,12 @@ void Heat::TriggerHitStop(Damage damage)
   float duration = min(impulseFactor * damage.impulse.Magnitude(), maxDuration);
 
   // Apply to self
-  timeScaleManager->AlterTimeScale(gameObject.GetShared(), 0, duration);
+  timeScaleManager->AlterTimeScale(gameObject.GetShared(), 0.00001, duration);
 
   // Apply to attack author
   IF_LOCK(damage.weakAuthor, author)
   {
-    timeScaleManager->AlterTimeScale(author, 0, duration);
+    timeScaleManager->AlterTimeScale(author, 0.00001, duration);
   }
 }
 

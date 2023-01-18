@@ -413,7 +413,7 @@ public:
 
 private:
   // Current value of time scale
-  float timeScale{1};
+  float localTimeScale{1};
 
   // =================================
   // OPERATORS

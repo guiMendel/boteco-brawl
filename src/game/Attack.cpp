@@ -3,8 +3,8 @@
 
 using namespace std;
 
-Attack::Attack(GameObject &associatedObject, DamageParameters damage)
-    : Component(associatedObject), damage(damage) {}
+Attack::Attack(GameObject &associatedObject, DamageParameters damage, float hitSecondsCooldown)
+    : Component(associatedObject), damage(damage), hitCooldown(hitSecondsCooldown * 1000) {}
 
 void Attack::Awake()
 {
@@ -13,13 +13,21 @@ void Attack::Awake()
 
 void Attack::Land(shared_ptr<CharacterController> targetController)
 {
-  // Ignore if already hit this target
-  if (struckControllerIds.count(targetController->id) > 0)
-    return;
+  // If already hit this target
+  if (struckTargetsTime.count(targetController->id) > 0)
+  {
+    auto elapsedTime = SDL_GetTicks() - struckTargetsTime[targetController->id];
 
+    // Check if cooldown is elapsed
+    if (hitCooldown < 0 || elapsedTime < hitCooldown)
+      return;
+  }
+
+  // Apply hit
   targetController->TakeHit(GetDamage());
 
-  struckControllerIds.insert(targetController->id);
+  // Register hit time
+  struckTargetsTime[targetController->id] = SDL_GetTicks();
 }
 
 void Attack::OnTriggerCollisionEnter(TriggerCollisionData trigger)

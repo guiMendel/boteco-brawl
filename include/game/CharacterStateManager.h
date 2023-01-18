@@ -34,6 +34,9 @@ public:
   // Add a new state to the list, and remove any states not in the keepList
   void SetState(std::shared_ptr<CharacterState> newState, std::unordered_set<std::string> keepStates = {});
 
+  // Whether a given state is present
+  bool HasState(std::string stateName);
+
   // Removes any states not in the list
   void RemoveStatesNotIn(std::unordered_set<std::string> keepStates, bool interruption = false);
 

@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include "Component.h"
 #include "Rigidbody.h"
+#include "CharacterStateManager.h"
 
 class CharacterRepelCollision : public Component
 {
@@ -25,6 +26,7 @@ private:
 
   // Reference to character's body
   std::weak_ptr<Rigidbody> weakBody;
+  std::weak_ptr<CharacterStateManager> weakStateManager;
 };
 
 #endif

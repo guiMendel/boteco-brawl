@@ -51,6 +51,12 @@
     return {damage, impulse, stunTime};                 \
   }
 
+#define SET_HIT_COOLDOWN(cooldown)      \
+  float GetHitCooldown() const override \
+  {                                     \
+    return cooldown;                    \
+  }
+
 #define ATTACK_SEQUENCE(frame)           \
   int OpenSequenceFrame() const override \
   {                                      \
@@ -222,7 +228,8 @@ namespace GeneralAnimations
     std::vector<AnimationFrame> InitializeInLoopFrames() override;
     std::vector<AnimationFrame> InitializePostLoopFrames() override;
 
-    SET_DAMAGE(2, Vector2::Angled(Helper::DegreesToRadians(-90), 1), 0.2)
+    SET_DAMAGE(2, Vector2::Angled(Helper::DegreesToRadians(-90), 1.5), 0.2)
+    SET_HIT_COOLDOWN(0.2)
   };
 
   class SpecialNeutral : public StatefulAnimation

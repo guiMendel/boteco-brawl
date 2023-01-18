@@ -89,11 +89,8 @@ void GameObject::RegisterToState()
 
 void GameObject::Update(float deltaTime)
 {
-  if (GetName() == "Character2")
-    cout << *this << " timescale is " << GetTimeScale() << endl;
-
   // Apply timescale
-  deltaTime *= timeScale;
+  deltaTime *= localTimeScale;
 
   // Update timers
   timer.Update(deltaTime);
@@ -116,7 +113,7 @@ void GameObject::PhysicsUpdate(float deltaTime)
   if (enabled == false)
     return;
 
-  deltaTime *= timeScale;
+  deltaTime *= localTimeScale;
 
   // Check for collision & trigger exit
   DetectCollisionExits();
@@ -363,6 +360,29 @@ void GameObject::SetPosition(const Vector2 newPosition)
 void GameObject::Translate(const Vector2 translation)
 {
   SetPosition(GetPosition() + translation);
+}
+
+// Absolute scale of the object
+float GameObject::GetTimeScale() const
+{
+  if (IsRoot())
+    return localTimeScale;
+    
+  return InternalGetParent()->GetTimeScale() * localTimeScale;
+}
+
+void GameObject::SetTimeScale(float newScale)
+{
+  Assert(newScale > 0, "Time must flow forward");
+
+  if (IsRoot())
+    localTimeScale = newScale;
+    
+  float parentTimeScale{InternalGetParent()->GetTimeScale()};
+    
+  Assert(parentTimeScale > 0, "Parent timeScale is invalid");
+
+  localTimeScale = newScale / parentTimeScale;
 }
 
 // Absolute scale of the object
@@ -763,10 +783,3 @@ void GameObject::CancelDelayedFunction(int tokenId)
   // Set it as not supposed to be called
   delayedFunctions[tokenId].second = false;
 }
-
-void GameObject::SetTimeScale(float newScale)
-{
-  timeScale = newScale;
-}
-
-float GameObject::GetTimeScale() const { return timeScale; }

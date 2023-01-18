@@ -1,4 +1,5 @@
 #include "FallOffDeath.h"
+#include "CharacterRepelCollision.h"
 #include "Animator.h"
 #include "Movement.h"
 #include "PlayerInput.h"
@@ -145,6 +146,13 @@ void FallOffDeath::Respawn()
 
   // Enable it
   SetCharacterActive(true);
+
+  auto body = gameObject.RequireComponent<Rigidbody>();
+  auto movement = gameObject.RequireComponent<Movement>();
+  auto input = gameObject.RequireComponent<PlayerInput>();
+  auto stateManager = gameObject.RequireComponent<CharacterStateManager>();
+
+  return;
 }
 
 void FallOffDeath::SetCharacterActive(bool active)
@@ -157,6 +165,7 @@ void FallOffDeath::SetCharacterActive(bool active)
   gameObject.RequireComponent<PlayerInput>()->SetEnabled(active);
   gameObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
   gameObject.RequireComponent<CharacterController>()->SetEnabled(active);
+  gameObject.RequireComponentInChildren<CharacterRepelCollision>()->SetEnabled(active);
 }
 
 bool FallOffDeath::IsDead() const { return dead; }

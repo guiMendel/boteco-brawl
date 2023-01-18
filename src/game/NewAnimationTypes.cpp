@@ -80,10 +80,9 @@ shared_ptr<StatefulAnimation> StatefulAnimation::GetNextStateful() { return null
 
 // === ATTACK ANIMATIONS
 
-DamageParameters AttackAnimation::GetAttackProperties() const
-{
-  return {0, Vector2{0, 0}, 0};
-}
+float AttackAnimation::GetHitCooldown() const { return -1; }
+
+DamageParameters AttackAnimation::GetAttackProperties() const { return {0, Vector2{0, 0}, 0}; }
 
 void AttackAnimation::InternalOnStart() { SetupAttack(); }
 void AttackAnimation::InternalOnStop()
@@ -104,10 +103,8 @@ void AttackAnimation::SetupAttack()
 
   attackObjectId = attackObject->id;
 
-  auto damageParams = GetAttackProperties();
-
   // Give it the attack component
-  attackObject->AddComponent<Attack>(damageParams);
+  attackObject->AddComponent<Attack>(GetAttackProperties(), GetHitCooldown());
 }
 
 void AttackAnimation::FrameHitbox(AnimationFrame &frame, vector<Circle> hitboxAreas)

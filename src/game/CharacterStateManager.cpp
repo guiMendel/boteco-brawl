@@ -203,3 +203,9 @@ void CharacterStateManager::SetControl(bool value)
 
   OnControlChange.Invoke(value);
 }
+
+bool CharacterStateManager::HasState(std::string stateName)
+{
+  return find_if(states.begin(), states.end(), [stateName](shared_ptr<CharacterState> state)
+                 { return state->name == stateName; }) != states.end();
+}

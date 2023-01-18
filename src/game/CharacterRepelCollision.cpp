@@ -1,4 +1,5 @@
 #include "CharacterRepelCollision.h"
+#include "CharacterStateRecipes.h"
 
 using namespace std;
 
@@ -6,10 +7,19 @@ const float CharacterRepelCollision::maxSlideAcceleration{0.15};
 const float CharacterRepelCollision::slideAccelerationDecay{0.05};
 
 CharacterRepelCollision::CharacterRepelCollision(GameObject &associatedObject, shared_ptr<Rigidbody> body)
-    : Component(associatedObject), weakBody(body) {}
+    : Component(associatedObject), weakBody(body), weakStateManager(body->gameObject.RequireComponent<CharacterStateManager>()) {}
 
 void CharacterRepelCollision::OnTriggerCollision(TriggerCollisionData triggerData)
 {
+  if (IsEnabled() == false)
+    return;
+
+  // Also ignore if is currently attacking or dashing
+  LOCK(weakStateManager, stateManager);
+
+  if (stateManager->HasState(ATTACKING_STATE) || stateManager->HasState(DASHING_STATE))
+    return;
+
   LOCK(triggerData.weakOther, other);
   LOCK(other->rigidbodyWeak, otherBody);
 

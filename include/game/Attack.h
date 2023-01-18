@@ -13,7 +13,8 @@ class CharacterController;
 struct Attack : public Component
 {
 public:
-  Attack(GameObject &associatedObject, DamageParameters damage);
+  // Initializes with the attack damage's parameters and an optional hit cooldown, which if set allows for multi-hits
+  Attack(GameObject &associatedObject, DamageParameters damage, float hitSecondsCooldown = -1);
   virtual ~Attack() {}
 
   void Awake() override;
@@ -29,8 +30,12 @@ private:
   // Gets the damage struct for this attack
   Damage GetDamage() const;
 
-  // Ids of controllers which were already attacked
-  std::unordered_set<int> struckControllerIds;
+  // Milliseconds that must pass before a same target can be hit by this attack again
+  // Negative values mean they can never be hit again
+  float hitCooldown;
+
+  // Ids of controllers which were already attacked, mapped to the time of the attack in ms
+  std::unordered_map<int, int> struckTargetsTime;
 
   // Reference to character
   std::weak_ptr<Character> weakCharacter;
