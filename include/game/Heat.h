@@ -6,6 +6,7 @@
 #include "Rigidbody.h"
 #include "Movement.h"
 #include "TimeScaleManager.h"
+#include "ShakeEffectManager.h"
 
 struct Heat : public Component
 {
@@ -34,7 +35,7 @@ public:
 
 private:
   // Triggers a hit stop for the current damage
-  void TriggerHitStop(Damage damage);
+  void TriggerHitEffect(Damage damage);
 
   static const float inverseMaxHeat;
 
@@ -48,6 +49,7 @@ private:
   std::weak_ptr<Rigidbody> weakBody;
   std::weak_ptr<Movement> weakMovement;
   std::weak_ptr<TimeScaleManager> weakTimeScaleManager;
+  std::weak_ptr<ShakeEffectManager> weakShakeManager;
 };
 
 #endif

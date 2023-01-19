@@ -18,6 +18,7 @@ void Heat::Awake()
   weakBody = gameObject.RequireComponent<Rigidbody>();
   weakMovement = gameObject.RequireComponent<Movement>();
   weakTimeScaleManager = GetState()->RequireObjectOfType<TimeScaleManager>();
+  weakShakeManager = GetState()->RequireObjectOfType<ShakeEffectManager>();
 }
 
 void Heat::Start()
@@ -85,19 +86,23 @@ void Heat::TakeDamage(Damage damage)
   heat += damage.heatDamage;
 
   // Hit stop effect with updated damage
-  TriggerHitStop(damage);
+  TriggerHitEffect(damage);
 
   // Particle effect
   PlayHitParticles(gameObject.GetPosition());
 }
 
-void Heat::TriggerHitStop(Damage damage)
+void Heat::TriggerHitEffect(Damage damage)
 {
+  if (damage.impulse.magnitude == 0)
+    return;
+
   // Multiplier to apply to impulse to get duration
   static const float impulseFactor{0.005};
   static const float maxDuration{1.5};
 
   LOCK(weakTimeScaleManager, timeScaleManager);
+  LOCK(weakShakeManager, shakeManager);
 
   // Calculate duration
   float duration = min(impulseFactor * damage.impulse.magnitude, maxDuration);
@@ -110,6 +115,17 @@ void Heat::TriggerHitStop(Damage damage)
   {
     timeScaleManager->AlterTimeScale(author, 0.00001, duration);
   }
+
+  auto impulse = damage.impulse.DeriveImpulse(gameObject.GetShared());
+
+  if (damage.impulse.magnitude > 11)
+    // Apply shaking
+    shakeManager->Shake(
+        gameObject.GetShared(),
+        impulse.Angle(),
+        {min(log10f(damage.impulse.magnitude - 10) / 2, 1.0f), 0},
+        {0.2, 0.01},
+        duration, 0);
 }
 
 void PlayHitParticles(Vector2 source)
