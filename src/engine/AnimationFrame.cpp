@@ -57,6 +57,6 @@ void AnimationFrame::Trigger(GameObject &gameObject) const
     spriteRenderer->sprite = sprite;
 
     // Apply offset
-    spriteRenderer->offset = spriteOffset;
+    spriteRenderer->SetOffset(spriteOffset);
   }
 }

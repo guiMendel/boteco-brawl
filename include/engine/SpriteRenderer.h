@@ -12,7 +12,8 @@
 class SpriteRenderer : public Component
 {
 public:
-  // Since we are using unique ptrs, no need to define destructor
+  // Raised whenever offset changes
+  EventI<Vector2> OnSetOffset;
 
   // Constructor with image file name
   SpriteRenderer(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0, bool centerObject = true);
@@ -37,11 +38,12 @@ public:
 
   int GetRenderOrder() override { return renderOrder; }
 
+  Vector2 GetOffset() const;
+
+  void SetOffset(Vector2 newOffset);
+
   // Which sprite is currently loaded
   std::shared_ptr<Sprite> sprite;
-
-  // Offset when rendering based on game object's position
-  Vector2 offset;
 
   // Whether to center the sprite on the render coordinates
   bool centered;
@@ -49,6 +51,9 @@ public:
 private:
   // The sprite's layer
   RenderLayer renderLayer{RenderLayer::Default};
+
+  // Offset when rendering based on game object's position
+  Vector2 offset;
 
   // The sprite's render order
   int renderOrder{0};

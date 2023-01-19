@@ -228,6 +228,4 @@ void LandingAttack::Trigger(GameObject &target, shared_ptr<CharacterState> actio
 
   // Start this animation
   animator->Play(animation, true);
-
-  cout << "Started land animation" << endl;
 }

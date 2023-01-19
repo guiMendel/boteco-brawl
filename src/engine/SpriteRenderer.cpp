@@ -67,3 +67,11 @@ void SpriteRenderer::Render(Vector2 position)
       nullptr,
       SDL_RendererFlip(horizontalFlip | verticalFlip));
 }
+
+Vector2 SpriteRenderer::GetOffset() const { return offset; }
+
+void SpriteRenderer::SetOffset(Vector2 newOffset)
+{
+  offset = newOffset;
+  OnSetOffset.Invoke(offset);
+}
