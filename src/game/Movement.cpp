@@ -108,6 +108,9 @@ void Movement::Run(float deltaTime)
 
   // === SET ORIENTATION
 
+  if (targetSpeed == 0)
+    return;
+
   // When airborne
   if (IsGrounded() == false)
   {

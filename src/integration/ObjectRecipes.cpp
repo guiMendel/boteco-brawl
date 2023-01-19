@@ -1,4 +1,5 @@
 #include "ObjectRecipes.h"
+#include "LandingAttackEffector.h"
 #include "Arena.h"
 #include "FallOffDeath.h"
 #include "PlatformEffector.h"
@@ -96,6 +97,7 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
     animator->RegisterAnimation<GeneralAnimations::AirDown>();
     animator->RegisterAnimation<GeneralAnimations::SpecialNeutral>();
     animator->RegisterAnimation<GeneralAnimations::Riposte>();
+    animator->RegisterAnimation<GeneralAnimations::LandingAttack>();
 
     // === COLLISION
 
@@ -173,6 +175,22 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
 
     // Give it parry capacity
     character->AddComponent<GunParry>();
+
+    // === LANDING ATTACKS
+
+    auto weakAnimator{weak_ptr(animator)};
+
+    // Decides whether the landing effector should trigger on land
+    auto effectorCondition = [weakAnimator]()
+    {
+      LOCK(weakAnimator, animator);
+
+      // Yes if the current animation is the shovel drop
+      return animator->GetCurrentAnimation()->Name() == AIR_DOWN_SHOVEL_LOOP;
+    };
+
+    // Give it the landing attack effector
+    character->AddComponent<LandingAttackEffector>(effectorCondition);
   };
 }
 

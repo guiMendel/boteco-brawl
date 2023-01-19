@@ -197,3 +197,37 @@ void Riposte::Trigger(GameObject &target, shared_ptr<CharacterState> actionState
 
   target.localScale.x = direction;
 }
+
+// ============================= LANDING ATTACK =============================
+
+void LandingAttack::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
+{
+  // Store these info
+  auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());
+  int stateId = actionState->id;
+
+  // Get animator
+  auto animator = target.RequireComponent<Animator>();
+
+  // Get landing attack animation
+  auto animation = dynamic_pointer_cast<GeneralAnimations::LandingAttack>(animator->BuildAnimation("landingAttack"));
+  Assert(animation != nullptr, "Animator built a landing attack animation which isn't of the LandingAttack animation type");
+
+  animation->landingSpeed = landingSpeed;
+
+  // Give it a stop callback
+  auto removeStateCallback = [stateId, weakStateManager]()
+  {
+    // When animation is over, make sure this action's state is no longer active
+    IF_LOCK(weakStateManager, stateManager)
+    {
+      stateManager->RemoveState(stateId);
+    }
+  };
+  animation->OnStop.AddListener("parent-action-cleanup", removeStateCallback);
+
+  // Start this animation
+  animator->Play(animation, true);
+
+  cout << "Started land animation" << endl;
+}

@@ -5,6 +5,12 @@
 #include "NewAnimationTypes.h"
 #include "Animator.h"
 
+// === ANIMATION DEFINES
+
+#define AIR_DOWN_SHOVEL_LOOP "airDownShovelLoop"
+
+// === HELPERS
+
 #define CONSTRUCTOR_AND_DESTRUCTOR_WITH_PARENT(ClassName, Parent) \
   ClassName(Animator &animator) : Parent(animator)                \
   {                                                               \
@@ -265,10 +271,10 @@ namespace GeneralAnimations
     LOOP_CONSTRUCTOR_AND_DESTRUCTOR(AirDown)
 
     DEF_FIRST_NAME("airDown")
+    std::string Phase2Name() override { return AIR_DOWN_SHOVEL_LOOP; }
 
     std::vector<AnimationFrame> InitializePreLoopFrames() override;
     std::vector<AnimationFrame> InitializeInLoopFrames() override;
-    std::vector<AnimationFrame> InitializePostLoopFrames() override;
 
     bool QuitLoopOnInputRelease() const override { return false; }
 
@@ -299,6 +305,19 @@ namespace GeneralAnimations
     // Damage properties vary according to the parry
     DamageParameters damage;
   };
+
+  class LandingAttack : public StatefulAnimation
+  {
+  public:
+    CONSTRUCTOR_AND_DESTRUCTOR(LandingAttack)
+
+    DEF_NAME("landingAttack")
+    DELCARE_FRAMES
+
+    // Speed at which ground was intercepted
+    float landingSpeed;
+  };
+
 }
 
 #endif

@@ -221,7 +221,6 @@ vector<AnimationFrame> AirUp::InitializeFrames()
   return frames;
 }
 
-
 // === AIR DOWN
 
 vector<AnimationFrame> AirDown::InitializePreLoopFrames()
@@ -241,13 +240,22 @@ vector<AnimationFrame> AirDown::InitializeInLoopFrames()
   return frames;
 }
 
-vector<AnimationFrame> AirDown::InitializePostLoopFrames()
+vector<AnimationFrame> LandingAttack::InitializeFrames()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/air-down.png",
-                                     SpritesheetClipInfo(8, 20, 3, 2), 0.2, {0, 2});
+  auto frames = Animation::SliceSpritesheet("./assets/sprites/air-down.png",
+                                            SpritesheetClipInfo(8, 20, 3, 2), 0.2, {0, 2});
+
+  // Halt character
+  auto stopVelocity = [](GameObject& target) {
+    auto body = target.RequireComponent<Rigidbody>();
+
+    body->velocity.x = 0;
+  };
+
+  frames[0].AddCallback(stopVelocity);
+
+  return frames;
 }
-
-
 
 // === HELPER FUNCTIONS DEFINITIONS
 

@@ -130,6 +130,18 @@ namespace Actions
     }
   };
 
+  // Like land, but falls down on the ground
+  struct Crash : public AnimationAction
+  {
+    std::string GetAnimationName() const override { return "crash"; }
+    int GetPriority() const override { return LAND_PRIORITY; }
+
+    std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override
+    {
+      return CharacterStateRecipes::Recovering(sharedAction);
+    }
+  };
+
   // Ground attacks
   ATTACK(Neutral, "neutral");
   ATTACK(Horizontal, "horizontal");
@@ -144,6 +156,9 @@ namespace Actions
   SPECIAL(SpecialNeutral, "specialNeutral");
   SPECIAL(SpecialHorizontal, "specialHorizontal");
 
+  // === SPECIAL ACTIONS
+
+  // Triggered by a successful parry
   struct Riposte : public Action
   {
     void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
@@ -161,6 +176,22 @@ namespace Actions
     Damage parriedDamage;
   };
 
+  // Triggered by attacks that are meant to hit the ground
+  struct LandingAttack : public Action
+  {
+    void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
+
+    int GetPriority() const override { return LAND_PRIORITY; }
+
+    std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override
+    {
+      return CharacterStateRecipes::Attacking(sharedAction);
+    }
+
+    LandingAttack(float landingSpeed) : landingSpeed(landingSpeed) {}
+
+    float landingSpeed;
+  };
 }
 
 #endif

@@ -1,4 +1,5 @@
 #include "CharacterController.h"
+#include "LandEffector.h"
 #include "Parry.h"
 #include "CharacterStateRecipes.h"
 #include "Action.h"
@@ -141,18 +142,40 @@ void CharacterController::Start()
     input->OnReleaseAttack.AddListener("character-controller", [warnStates]()
                                        { warnStates(ATTACKING_STATE); });
     input->OnReleaseSpecial.AddListener("character-controller", [warnStates]()
-                                       { warnStates(SPECIAL_ATTACKING_STATE); });
+                                        { warnStates(SPECIAL_ATTACKING_STATE); });
   }
 }
 
 void CharacterController::OnLand()
 {
+  // Restore air dash
   airDashAvailable = true;
+
+  // If no control on reach ground, crash instead of landing
+  if (stateManager.HasControl() == false)
+  {
+    DispatchNonDelayable<Actions::Crash>();
+    return;
+  }
+
+  // Detect effector interception
+  if (auto effectors = gameObject.GetComponents<LandEffector>(); effectors.size() > 0)
+  {
+    // Check if one of them will override land
+    for (auto effector : effectors)
+      if (auto effectorAction = effector->GetLandAction(); effectorAction != nullptr)
+      {
+        stateManager.Perform(effectorAction);
+        return;
+      }
+  }
 
   // Perform land action if velocity is big enough
   static const float sqrMinSpeed = minLandAnimationSpeed * minLandAnimationSpeed;
+
   if (rigidbody.velocity.SqrMagnitude() >= sqrMinSpeed)
     DispatchNonDelayable<Actions::Land>();
+
   else if (stateManager.GetStates().size() == 0)
     animator.Play("idle");
 }
