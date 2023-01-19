@@ -29,7 +29,7 @@ void ControllerInput::HandleButtonPress(SDL_GameControllerButton button)
 
   // Detect dash
   if (button == SDL_CONTROLLER_BUTTON_RIGHTSHOULDER)
-    OnDash.Invoke(analogDirection);
+    OnDash.Invoke(currentDirection);
 
   // Detect attack
   if (button == SDL_CONTROLLER_BUTTON_X)

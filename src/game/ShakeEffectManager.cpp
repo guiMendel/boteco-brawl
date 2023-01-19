@@ -38,7 +38,7 @@ void ShakeEffectManager::StopShake(shared_ptr<GameObject> target, float override
 
 void ShakeEffectManager::EraseShake(int targetId) { activeShakes.erase(targetId); }
 
-void ShakeEffectManager::PhysicsUpdate(float deltaTime)
+void ShakeEffectManager::Update(float deltaTime)
 {
   // Update each effect
   for (auto &[targetId, effect] : activeShakes)
@@ -55,11 +55,12 @@ ShakeEffect::ShakeEffect(shared_ptr<GameObject> target,
     : manager(manager),
       weakRenderer(target->RequireComponent<SpriteRenderer>()),
       angle(angle),
+      duration(effectDuration),
       timeToLive(effectDuration),
+      displacementEvolution(displacementEvolution),
+      revolutionTimeEvolution(revolutionTimeEvolution),
       maxDisplacement(displacementEvolution.first),
       revolutionTime(revolutionTimeEvolution.first),
-      maxDisplacementChange((displacementEvolution.second - displacementEvolution.first) / effectDuration),
-      revolutionTimeChange((revolutionTimeEvolution.second - revolutionTimeEvolution.first) / effectDuration),
       stopDuration(stopDuration)
 {
   LOCK(weakRenderer, renderer);
@@ -75,11 +76,12 @@ ShakeEffect::ShakeEffect(shared_ptr<GameObject> target,
 ShakeEffect::~ShakeEffect()
 {
   cout << "Effect collected" << endl;
-  
-  LOCK(weakRenderer, renderer);
 
-  // Clean up listener
-  renderer->OnSetOffset.RemoveListener("shake-effect-" + to_string(renderer->gameObject.id));
+  IF_LOCK(weakRenderer, renderer)
+  {
+    // Clean up listener
+    renderer->OnSetOffset.RemoveListener("shake-effect-" + to_string(renderer->gameObject.id));
+  }
 
   // Reset any modifications
   Reset();
@@ -93,7 +95,10 @@ void ShakeEffect::Reset()
 
 void ShakeEffect::SetOffset(Vector2 value)
 {
-  LOCK(weakRenderer, renderer);
+  IF_NOT_LOCK(weakRenderer, renderer)
+  {
+    return;
+  }
 
   // Set ignore flag
   ignoreNewOffsetEvent = true;
@@ -109,8 +114,11 @@ void ShakeEffect::Stop()
 {
   LOCK(weakRenderer, renderer);
 
-  // If already in stop time (or there is no stop time), erase self
-  if (inStopTime || stopDuration <= 0)
+  // Add stop time
+  timeToLive += stopDuration;
+
+  // If already in stop time (or there is no stop time) or even by adding stop time it's still up, erase self
+  if (inStopTime || stopDuration <= 0 || timeToLive <= 0)
   {
     manager.EraseShake(renderer->gameObject.id);
     return;
@@ -118,13 +126,10 @@ void ShakeEffect::Stop()
 
   // Set stop time
   inStopTime = true;
+  displacementEvolution = {maxDisplacement, 0};
+  revolutionTimeEvolution = {revolutionTime, 0.0001};
 
-  // Set time of stop duration
-  timeToLive = stopDuration;
-
-  // Set speeds
-  maxDisplacementChange = -maxDisplacement / stopDuration;
-  revolutionTimeChange = -revolutionTime / stopDuration;
+  duration = stopDuration;
 }
 
 void ShakeEffect::Update(float deltaTime)
@@ -136,32 +141,69 @@ void ShakeEffect::Update(float deltaTime)
     return;
   }
 
-  // Apply param speeds
-  maxDisplacement += maxDisplacementChange * deltaTime;
-  revolutionTime += revolutionTimeChange * deltaTime;
+  // Evolve params
+  maxDisplacement = Lerp(displacementEvolution, (duration - timeToLive) / duration);
+  revolutionTime = Lerp(revolutionTimeEvolution, (duration - timeToLive) / duration);
 
   // Find out which speed to apply to displacement
-  float speed;
+  float modification;
 
   // Check if already passed max displacement
   if (abs(displacement) >= maxDisplacement)
   {
-    // Ensure it will reduce if it's positive, and reduce if negative
-    increasingDisplacement = displacement < 0;
-
-    // Calculate speed over actual distance to displace back
-    speed = (3 * maxDisplacement + abs(displacement)) / revolutionTime;
+    // Ensure it will reduce if it's positive, and raise if negative
+    if (displacement < 0)
+    {
+      displacementDirection = 1;
+      displacement = -maxDisplacement;
+    }
+    else
+    {
+      displacementDirection = -1;
+      displacement = maxDisplacement;
+    }
   }
 
-  // Otherwise, calculate speed off of params
-  else
-    speed = 4 * maxDisplacement / revolutionTime;
+  // Get a priori modification
+  float periodDistance = 4 * maxDisplacement;
+  modification = fmod(periodDistance / revolutionTime * deltaTime, periodDistance);
+
+  // Wrap it around the max displacement values
+  bool wrapped;
+  do
+  {
+    wrapped = false;
+
+    if (displacementDirection > 0)
+    {
+      if (maxDisplacement - displacement < modification)
+      {
+        modification -= maxDisplacement - displacement;
+        displacement = maxDisplacement;
+        displacementDirection = -1;
+        wrapped = true;
+      }
+    }
+    else
+    {
+      if (displacement - (-maxDisplacement) < modification)
+      {
+        modification -= displacement - (-maxDisplacement);
+        displacement = -maxDisplacement;
+        displacementDirection = 1;
+        wrapped = true;
+      }
+    }
+  } while (wrapped);
 
   // Calculate new displacement
-  displacement += speed * (increasingDisplacement ? 1 : -1) * deltaTime;
+  displacement += modification * displacementDirection;
+
+  LOCK(weakRenderer, renderer);
+  float currentAngle = renderer->gameObject.GetScale().x < 0 ? M_PI - angle : angle;
 
   // Apply it
-  SetOffset(originalSpriteOffset + Vector2::Angled(angle, displacement));
+  SetOffset(originalSpriteOffset + Vector2::Angled(currentAngle, displacement));
 
   // Count time
   if ((timeToLive -= deltaTime) <= 0)

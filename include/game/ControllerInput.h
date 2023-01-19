@@ -28,9 +28,6 @@ private:
 
   // To which player this controller input is bound
   const std::weak_ptr<Player> weakPlayer;
-
-  // Last left analog input
-  Vector2 analogDirection;
 };
 
 #endif

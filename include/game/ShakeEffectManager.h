@@ -8,8 +8,6 @@ class ShakeEffectManager;
 // Struct that stores and handles each individual active shake effect
 struct ShakeEffect
 {
-  ShakeEffect();
-  
   ShakeEffect(std::shared_ptr<GameObject> target,
               ShakeEffectManager &manager,
               float angle,
@@ -40,6 +38,9 @@ struct ShakeEffect
   // Angle of shaking
   float angle;
 
+  // How long the effect will play for
+  float duration;
+
   // Effect's time to live
   float timeToLive;
 
@@ -49,17 +50,14 @@ struct ShakeEffect
   // Original offset of the renderer's current sprite
   Vector2 originalSpriteOffset;
 
+  std::pair<float, float> displacementEvolution;
+  std::pair<float, float> revolutionTimeEvolution;
+
   // Current value of max displacement to apply
   float maxDisplacement;
 
   // Current value of revolution time
   float revolutionTime;
-
-  // Speed of change to maxDisplacement
-  float maxDisplacementChange;
-
-  // Speed of change to revolution time
-  float revolutionTimeChange;
 
   // How long to take to stabilize displacement back to 0
   float stopDuration;
@@ -71,7 +69,7 @@ struct ShakeEffect
   bool ignoreNewOffsetEvent{false};
 
   // Whether is currently increasing displacement
-  bool increasingDisplacement{true};
+  float displacementDirection{1};
 };
 
 class ShakeEffectManager : public Component
@@ -82,7 +80,7 @@ public:
   ShakeEffectManager(GameObject &associatedObject);
   virtual ~ShakeEffectManager() {}
 
-  void PhysicsUpdate(float) override;
+  void Update(float) override;
 
   // Apply a shake effect to an object for a given time
   void Shake(std::shared_ptr<GameObject> target,
