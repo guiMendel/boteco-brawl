@@ -48,6 +48,9 @@ void MainState::InitializeObjects()
 
   CreateObject("Platform", ObjectRecipes::Platform({2, 0.5}, true), Vector2(0, 0));
 
+  // FindObjectOfType<ShakeEffectManager>()->Shake(
+  //     character1->gameObject.GetShared(), DegreesToRadians(-45), {1, 0.1}, {1, 0.05}, 8);
+
   // character1->velocity = Vector2(2, 0);
   // character2->velocity = Vector2(-2, 1);
 

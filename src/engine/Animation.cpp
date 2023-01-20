@@ -10,7 +10,7 @@ int Animation::idGenerator{0};
 Animation::Animation(Animator &animator) : animator(animator)
 {
   auto weakAnimator{weak_ptr(dynamic_pointer_cast<Animator>(animator.GetShared()))};
-  
+
   // Link it's event types to this animation's
   OnCycleEnd.AddListener("animator-propagation", [this, weakAnimator]()
                          { LOCK(weakAnimator, animator); animator->OnCycleEnd.Invoke(); });
@@ -45,7 +45,7 @@ void Animation::InternalStart(bool raise)
   {
     Assert(EndBehavior() != CycleEndBehavior::Loop, "Empty looping animations are forbidden");
 
-    Finish();
+    PassAndDelete();
     return;
   }
 
@@ -83,14 +83,21 @@ void Animation::TriggerFrame(int frame)
 
 bool Animation::IsPlaying()
 {
-
   return animator.GetCurrentAnimation()->Name() == Name();
 }
 
 void Animation::Update(float deltaTime)
 {
+  OnUpdate(deltaTime);
+
   if (IsPlaying() == false)
     return;
+
+  if (finished)
+  {
+    PassAndDelete();
+    return;
+  }
 
   // Discount time
   secondsToNextFrame -= deltaTime;
@@ -105,7 +112,7 @@ void Animation::Update(float deltaTime)
   // If finished cycle
   if (nextFrame == 0)
   {
-    Finish();
+    PassAndDelete();
     return;
   }
 
@@ -178,9 +185,8 @@ vector<AnimationFrame> Animation::SliceSpritesheet(string filename, SpritesheetC
 
 int Animation::GetNextFrameIndex() { return (currentFrame + 1) % Frames().size(); }
 
-void Animation::Finish()
+void Animation::PassAndDelete()
 {
-
   // Announce
   OnCycleEnd.Invoke();
 
@@ -206,3 +212,5 @@ bool Animation::operator==(Animation &other)
 }
 
 bool Animation::operator!=(Animation &other) { return !(*this == other); }
+
+void Animation::Finish() { finished = true; }

@@ -211,17 +211,25 @@ namespace GeneralAnimations
     ATTACK_CANCEL(5)
   };
 
-  class Horizontal : public AttackAnimation
+  class Horizontal : public InnerLoopAnimation
   {
   public:
-    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Horizontal)
+    LOOP_CONSTRUCTOR_AND_DESTRUCTOR(Horizontal)
 
-    DEF_NAME("horizontal")
-    DELCARE_FRAMES
+    DEF_FIRST_NAME("horizontal")
 
-    SET_DAMAGE(3, AttackImpulse(Vector2::AngledDegrees(-5), 8), 0.6)
+    std::vector<AnimationFrame> InitializeInLoopFrames() override;
+    std::vector<AnimationFrame> InitializePostLoopFrames() override;
+    float MaxInnerLoopDuration() const override { return 2; }
+    void InternalOnStart() override;
 
-    ATTACK_CANCEL(4)
+    SET_DAMAGE(
+        Helper::Lerp(1.2f, 3.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()),
+        AttackImpulse(Vector2::AngledDegrees(-5),
+                      Helper::Lerp(5.5f, 10.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
+        0.6)
+
+    int PostLoopCancelFrame() const override { return 3; }
   };
 
   class Up : public InnerLoopAnimation

@@ -106,6 +106,7 @@ void Heat::TriggerHitEffect(Damage damage)
 
   // Calculate duration
   float duration = min(impulseFactor * damage.impulse.magnitude, maxDuration);
+  cout << "duration " << duration << endl;
 
   // Apply to self
   timeScaleManager->AlterTimeScale(gameObject.GetShared(), 0.00001, duration);

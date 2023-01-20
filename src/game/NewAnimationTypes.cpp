@@ -162,7 +162,7 @@ void AttackAnimation::RemoveHitbox()
 
 // === INNER LOOP ANIMATIONS
 
-InnerLoopAnimation::InnerLoopAnimation(Animator& animator) : AttackAnimation(animator)
+InnerLoopAnimation::InnerLoopAnimation(Animator &animator) : AttackAnimation(animator)
 {
   auto weakAnimator{weak_ptr(dynamic_pointer_cast<Animator>(animator.GetShared()))};
 
@@ -191,7 +191,13 @@ InnerLoopAnimation::InnerLoopAnimation(Animator& animator) : AttackAnimation(ani
     {
       IF_LOCK(weakActionState, actionState)
       {
-        if (sequencePhase == SequencePhase::InLoop && actionState->ActionInputReleased())
+        if (
+            // If in loop
+            sequencePhase == SequencePhase::InLoop &&
+            // And either action input was released
+            (actionState->ActionInputReleased() ||
+             // Or timed out
+             (MaxInnerLoopDuration() >= 0 && GetInnerLoopElapsedTime() >= MaxInnerLoopDuration())))
           endBehavior = CycleEndBehavior::PlayNext;
       }
     };
@@ -239,6 +245,7 @@ shared_ptr<StatefulAnimation> InnerLoopAnimation::GetNextStateful()
   // Set it accordingly
   next->sequencePhase = SequencePhase(int(sequencePhase) + 1);
   next->pastPhaseId = id;
+  next->innerLoopElapsedTime = innerLoopElapsedTime;
 
   // End behavior for in loop
   if (next->sequencePhase == SequencePhase::InLoop)
@@ -291,3 +298,20 @@ string InnerLoopAnimation::Name()
 
 string InnerLoopAnimation::Phase2Name() { return Phase1Name() + "InLoop"; }
 string InnerLoopAnimation::Phase3Name() { return Phase1Name() + "PostLoop"; }
+
+void InnerLoopAnimation::OnUpdate(float deltaTime)
+{
+  if (sequencePhase != SequencePhase::InLoop)
+    return;
+
+  innerLoopElapsedTime += deltaTime;
+
+  auto thing = MaxInnerLoopDuration();
+
+  if (MaxInnerLoopDuration() >= 0 && innerLoopElapsedTime >= MaxInnerLoopDuration())
+    Finish();
+}
+
+float InnerLoopAnimation::GetInnerLoopElapsedTime() const { return innerLoopElapsedTime; }
+
+float InnerLoopAnimation::MaxInnerLoopDuration() const { return -1; }

@@ -45,7 +45,7 @@ struct ShakeEffect
   float timeToLive;
 
   // Current displacement applied to renderer
-  float displacement;
+  float displacement{0};
 
   // Original offset of the renderer's current sprite
   Vector2 originalSpriteOffset;
@@ -70,6 +70,9 @@ struct ShakeEffect
 
   // Whether is currently increasing displacement
   float displacementDirection{1};
+
+  // Whether manager should destroy this next update
+  bool destroyRequested{false};
 };
 
 class ShakeEffectManager : public Component
@@ -94,9 +97,6 @@ public:
   void StopShake(std::shared_ptr<GameObject> target, float overrideStopDuration = -1);
 
 private:
-  // Removes effect and resets any of it's modifications
-  void EraseShake(int targetId);
-
   // Associates the id of an object with an active shake to the shake effect
   std::unordered_map<int, std::unique_ptr<ShakeEffect>> activeShakes;
 };

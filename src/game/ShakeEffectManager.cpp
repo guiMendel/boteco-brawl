@@ -36,13 +36,17 @@ void ShakeEffectManager::StopShake(shared_ptr<GameObject> target, float override
   effect->Stop();
 }
 
-void ShakeEffectManager::EraseShake(int targetId) { activeShakes.erase(targetId); }
-
 void ShakeEffectManager::Update(float deltaTime)
 {
   // Update each effect
-  for (auto &[targetId, effect] : activeShakes)
-    effect->Update(deltaTime);
+  auto shakeEntryIterator = activeShakes.begin();
+  while (shakeEntryIterator != activeShakes.end())
+  {
+    if (shakeEntryIterator->second->destroyRequested)
+      shakeEntryIterator = activeShakes.erase(shakeEntryIterator);
+    else
+      (shakeEntryIterator++)->second->Update(deltaTime);
+  }
 }
 
 ShakeEffect::ShakeEffect(shared_ptr<GameObject> target,
@@ -120,7 +124,7 @@ void ShakeEffect::Stop()
   // If already in stop time (or there is no stop time) or even by adding stop time it's still up, erase self
   if (inStopTime || stopDuration <= 0 || timeToLive <= 0)
   {
-    manager.EraseShake(renderer->gameObject.id);
+    destroyRequested = true;
     return;
   }
 
@@ -134,16 +138,23 @@ void ShakeEffect::Stop()
 
 void ShakeEffect::Update(float deltaTime)
 {
-  // If no time for revolution, nothing to do
-  if (revolutionTime == 0)
+  // Count time
+  if ((timeToLive -= deltaTime) <= 0)
   {
-    Reset();
+    Stop();
     return;
   }
 
   // Evolve params
   maxDisplacement = Lerp(displacementEvolution, (duration - timeToLive) / duration);
   revolutionTime = Lerp(revolutionTimeEvolution, (duration - timeToLive) / duration);
+
+  // If no time for revolution, nothing to do
+  if (revolutionTime == 0 || maxDisplacement == 0)
+  {
+    Reset();
+    return;
+  }
 
   // Find out which speed to apply to displacement
   float modification;
@@ -204,8 +215,4 @@ void ShakeEffect::Update(float deltaTime)
 
   // Apply it
   SetOffset(originalSpriteOffset + Vector2::Angled(currentAngle, displacement));
-
-  // Count time
-  if ((timeToLive -= deltaTime) <= 0)
-    Stop();
 }

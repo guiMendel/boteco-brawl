@@ -1,4 +1,5 @@
 #include "GeneralAnimations.h"
+#include "ShakeEffectManager.h"
 #include "GunParry.h"
 #include "ParticleFX.h"
 #include "Movement.h"
@@ -94,14 +95,44 @@ vector<AnimationFrame> Neutral2::InitializeFrames()
 
 // === HORIZONTAL
 
-vector<AnimationFrame> Horizontal::InitializeFrames()
+void Horizontal::InternalOnStart()
+{
+  if (sequencePhase == SequencePhase::InLoop)
+  {
+    animator.GetState()->FindObjectOfType<ShakeEffectManager>()->Shake(
+        animator.gameObject.GetShared(),
+        0,
+        {0, 0.15},
+        {0.15, 0.08},
+        MaxInnerLoopDuration(),
+        0);
+  }
+
+  InnerLoopAnimation::InternalOnStart();
+}
+
+vector<AnimationFrame> Horizontal::InitializeInLoopFrames()
+{
+  return SliceSpritesheet("./assets/sprites/horizontal.png",
+                          SpritesheetClipInfo(24, 8, 1), 0.2);
+}
+
+vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
 {
   auto frames{SliceSpritesheet("./assets/sprites/horizontal.png",
-                               SpritesheetClipInfo(24, 8), 0.2)};
+                               SpritesheetClipInfo(24, 8, 3, 1), 0.2)};
+
+  // Stop shake
+  auto stopShake = [](GameObject &target)
+  {
+    target.GetState()->FindObjectOfType<ShakeEffectManager>()->StopShake(
+        target.GetShared());
+  };
+  frames[0].AddCallback(stopShake);
 
   // Add hitboxes
-  FrameHitbox(frames[1], {Circle({16, 3}, 3.5), Circle({21, 3}, 3.5)});
-  FrameHitbox(frames[2]);
+  FrameHitbox(frames[0], {Circle({16, 3}, 3.5), Circle({21, 3}, 3.5)});
+  FrameHitbox(frames[1]);
 
   // Replicate last frame
   SplitLastFrame(frames, 2, 0.1);
@@ -246,7 +277,8 @@ vector<AnimationFrame> LandingAttack::InitializeFrames()
                                             SpritesheetClipInfo(8, 20, 3, 2), 0.2, {0, 2});
 
   // Halt character
-  auto stopVelocity = [](GameObject& target) {
+  auto stopVelocity = [](GameObject &target)
+  {
     auto body = target.RequireComponent<Rigidbody>();
 
     body->velocity.x = 0;

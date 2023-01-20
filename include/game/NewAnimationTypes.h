@@ -10,7 +10,7 @@
 class StatefulAnimation : public Animation
 {
 public:
-  StatefulAnimation(Animator& animator);
+  StatefulAnimation(Animator &animator);
   virtual ~StatefulAnimation();
 
   // Register the state
@@ -41,7 +41,7 @@ protected:
 class AttackAnimation : public StatefulAnimation
 {
 public:
-  AttackAnimation(Animator& animator) : StatefulAnimation(animator) {}
+  AttackAnimation(Animator &animator) : StatefulAnimation(animator) {}
   virtual ~AttackAnimation() {}
 
   virtual DamageParameters GetAttackProperties() const;
@@ -52,11 +52,11 @@ protected:
   // Sets hitbox for a given frame
   void FrameHitbox(AnimationFrame &frame, std::vector<Circle> hitboxAreas = {});
 
-private:
   // Setup attack properties
   void InternalOnStart() override;
   void InternalOnStop() override;
 
+private:
   // Create attack child
   void SetupAttack();
 
@@ -75,7 +75,7 @@ private:
 class InnerLoopAnimation : public AttackAnimation
 {
 public:
-  InnerLoopAnimation(Animator& animator);
+  InnerLoopAnimation(Animator &animator);
   virtual ~InnerLoopAnimation() {}
 
   // Raised when either the whole sequence ends or is interrupted
@@ -98,6 +98,10 @@ protected:
   // Provides frames to be played after loop sequence
   // Default implementation provides no frames
   virtual std::vector<AnimationFrame> InitializePostLoopFrames();
+
+  // Max duration of inner loop
+  // Negative value means no limit
+  virtual float MaxInnerLoopDuration() const;
 
   // Provides cancel frame for last phase
   virtual int PostLoopCancelFrame() const;
@@ -129,7 +133,10 @@ protected:
 
   void OnParentActionInputRelease() override;
 
-private:
+  void OnUpdate(float) override;
+
+  float GetInnerLoopElapsedTime() const;
+
   // Indicates for which phase of the complete pre-in-post sequence this animation is being instantiated for
   enum class SequencePhase
   {
@@ -141,11 +148,15 @@ private:
   // Store this animation's phase
   SequencePhase sequencePhase{SequencePhase::PreLoop};
 
+private:
   // Store the end behavior for this phase
   CycleEndBehavior endBehavior{CycleEndBehavior::PlayNext};
 
   // Store id of past phase
   int pastPhaseId{-1};
+
+  // How long the inner loop animation has ran for
+  float innerLoopElapsedTime{0};
 };
 
 #endif

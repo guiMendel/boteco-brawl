@@ -63,7 +63,7 @@ namespace Helper
     // Range distance
     T rangeDistance = max - min;
 
-    return min + amount * rangeDistance;
+    return min + Clamp(amount, 0.0f, 1.0f) * rangeDistance;
   }
 
   template <typename T>

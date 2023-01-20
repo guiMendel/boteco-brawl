@@ -70,7 +70,7 @@ public:
   // === ANIMATION SPECIFICITIES
 
   // Instances need their animator
-  Animation(Animator& animator);
+  Animation(Animator &animator);
   virtual ~Animation() {}
 
   // Access the animation name
@@ -121,7 +121,7 @@ protected:
   // Gets the next frame index
   int GetNextFrameIndex();
 
-  // Concludes the current cycle and invokes the end behavior
+  // Marks to conclude in the next update cycle
   void Finish();
 
   // Called when animation starts
@@ -143,12 +143,20 @@ protected:
   int currentFrame{0};
 
 private:
+  // Concludes the current cycle and invokes the end behavior
+  void PassAndDelete();
+
   void InternalStart(bool raise);
+
+  bool finished{false};
 
   // === HELPERS
 public:
   // Access frames directly
   AnimationFrame &operator[](int index);
+
+  // Allow inherited classes to add functionality to update
+  virtual void OnUpdate(float) {}
 
   // Automatically generates the frame vector for a spritesheet animation
   // Allows offsetting the frames by some virtual pixels
@@ -156,7 +164,7 @@ public:
       std::string filename, SpritesheetClipInfo clipInfo, float frameDuration, Vector2 virtualPixelOffset = Vector2::Zero(), SpriteConfig config = SpriteConfig());
 
   // Reference to it's animator
-  Animator& animator;
+  Animator &animator;
 };
 
 #endif
