@@ -76,6 +76,8 @@
     return frame;                  \
   }
 
+#define BASE_DAMAGE animator.gameObject.RequireComponent<Character>()->GetBaseDamage()
+
 class Animator;
 
 namespace GeneralAnimations
@@ -192,7 +194,7 @@ namespace GeneralAnimations
     DEF_NAME("neutral1")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1, AttackImpulse(Vector2::AngledDegrees(-5), 0.5), 0.2)
+    SET_DAMAGE(BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.5), 0.2)
 
     ATTACK_SEQUENCE(3)
     ATTACK_CANCEL(4)
@@ -206,7 +208,7 @@ namespace GeneralAnimations
     DEF_NAME("neutral2")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1.2, AttackImpulse(Vector2::AngledDegrees(-5), 4), 0.3)
+    SET_DAMAGE(1.2f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 4), 0.3)
 
     ATTACK_CANCEL(5)
   };
@@ -224,7 +226,7 @@ namespace GeneralAnimations
     void InternalOnStart() override;
 
     SET_DAMAGE(
-        Helper::Lerp(1.2f, 3.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()),
+        Helper::Lerp(1.2f, 3.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
         AttackImpulse(Vector2::AngledDegrees(-5),
                       Helper::Lerp(5.5f, 10.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
         0.6)
@@ -243,7 +245,7 @@ namespace GeneralAnimations
     std::vector<AnimationFrame> InitializeInLoopFrames() override;
     std::vector<AnimationFrame> InitializePostLoopFrames() override;
 
-    SET_DAMAGE(2, AttackImpulse(Vector2::AngledDegrees(-90), 1.5), 0.2)
+    SET_DAMAGE(2 * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-90), 1.5), 0.2)
     SET_HIT_COOLDOWN(0.2)
   };
 
@@ -255,7 +257,7 @@ namespace GeneralAnimations
     DEF_NAME("airHorizontal")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1.5, AttackImpulse(Vector2::AngledDegrees(-5), 3), 0.3)
+    SET_DAMAGE(1.5f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 3), 0.3)
 
     ATTACK_CANCEL(3)
   };
@@ -268,7 +270,7 @@ namespace GeneralAnimations
     DEF_NAME("airUp")
     DELCARE_FRAMES
 
-    SET_DAMAGE(0.5, AttackImpulse(Vector2::AngledDegrees(-90), 9), 0.1)
+    SET_DAMAGE(0.5f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-90), 9), 0.1)
 
     ATTACK_CANCEL(3)
   };
@@ -286,7 +288,7 @@ namespace GeneralAnimations
 
     bool QuitLoopOnInputRelease() const override { return false; }
 
-    SET_DAMAGE(4.5, AttackImpulse(animator.gameObject.GetShared(), 6), 0.4)
+    SET_DAMAGE(4.5f * BASE_DAMAGE, AttackImpulse(animator.gameObject.GetShared(), 6), 0.4)
   };
 
   class SpecialNeutral : public StatefulAnimation
@@ -339,11 +341,16 @@ namespace GeneralAnimations
   class Projectile : public AttackAnimation
   {
   public:
-    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Projectile)
+    std::weak_ptr<GameObject> weakParent;
+
+    Projectile(Animator &animator, std::weak_ptr<GameObject> weakParent)
+        : AttackAnimation(animator), weakParent(weakParent) {}
+    ~Projectile() {}
 
     DEF_NAME("projectile")
     DELCARE_FRAMES
     void OnConnectAttack(std::shared_ptr<CharacterController>) override;
+    void InternalOnStart() override;
 
     SET_DAMAGE(1.8, AttackImpulse(animator.gameObject.GetShared(), 2), 0.2)
   };

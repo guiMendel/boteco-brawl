@@ -5,6 +5,12 @@ using namespace std;
 
 Animator::Animator(GameObject &associatedObject) : Component(associatedObject) {}
 
+void Animator::OnBeforeDestroy()
+{
+  Stop(false);
+  OnAnimationStop.Invoke();
+}
+
 void Animator::Start()
 {
   // Play initial animation
@@ -21,7 +27,7 @@ void Animator::Update(float deltaTime)
   currentAnimation->Update(deltaTime);
 }
 
-void Animator::Stop()
+void Animator::Stop(bool transitionToDefault)
 {
   if (currentAnimation == nullptr)
     return;
@@ -33,7 +39,8 @@ void Animator::Stop()
   currentAnimation = nullptr;
 
   // Transition to default
-  Play(defaultAnimation);
+  if (transitionToDefault)
+    Play(defaultAnimation);
 }
 
 void Animator::Stop(string animation)
@@ -105,7 +112,14 @@ void Animator::RegisterAnimation(function<shared_ptr<Animation>()> animationBuil
   animations[animation->Name()] = animationBuilder;
 
   if (makeDefault || defaultAnimation == "")
+  {
+    // Store new default animation
     defaultAnimation = animation->Name();
+
+    // If already started, play this
+    if (HasCalledStart())
+      Play(animation);
+  }
 
   // Add it's next if it's there
   if (auto next = animation->GetNext(); next != nullptr && animations.count(next->Name()) == 0)

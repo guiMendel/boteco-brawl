@@ -84,6 +84,7 @@ public:
   virtual ~ShakeEffectManager() {}
 
   void Update(float) override;
+  void OnBeforeDestroy() override;
 
   // Apply a shake effect to an object for a given time
   void Shake(std::shared_ptr<GameObject> target,
@@ -95,6 +96,7 @@ public:
 
   // Stop shaking a given object
   void StopShake(std::shared_ptr<GameObject> target, float overrideStopDuration = -1);
+  void StopShake(int targetId, float overrideStopDuration = -1);
 
 private:
   // Associates the id of an object with an active shake to the shake effect

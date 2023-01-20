@@ -54,6 +54,8 @@ public:
   // The associated game state
   std::shared_ptr<GameState> GetState() const;
 
+  bool HasCalledStart() const;
+
   bool operator==(const Component &other) const;
 
   explicit operator std::string() const;

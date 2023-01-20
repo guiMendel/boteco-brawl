@@ -32,6 +32,8 @@ Vector2 SpriteRenderer::RenderPositionFor(Vector2 position, shared_ptr<Sprite> r
   auto scale = gameObject.GetScale().GetAbsolute();
   auto sprite = referenceSprite == nullptr ? this->sprite : referenceSprite;
 
+  Assert(sprite != nullptr, "Sprite renderer had no sprite set");
+
   // Get sprite's dimensions
   auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
 

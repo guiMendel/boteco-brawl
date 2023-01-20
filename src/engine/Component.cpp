@@ -41,11 +41,15 @@ void Component::RegisterLayer()
 
 void Component::SafeStart()
 {
-  if (started)
+  if (HasCalledStart())
     return;
+
   started = true;
+
   Start();
 }
+
+bool Component::HasCalledStart() const { return started; }
 
 bool Component::operator==(const Component &other) const { return id == other.id; }
 

@@ -81,8 +81,8 @@ private:
 // A struct that contains information on how to derive a Damage struct
 struct DamageParameters
 {
-  // Heat damage multiplier
-  float heatMultiplier;
+  // Damage applied to heat
+  float heatDamage;
 
   // How much impulse to apply, along with direction
   // Right direction means aligned to facing direction
@@ -92,7 +92,7 @@ struct DamageParameters
   float stunTime;
 
   // Derive a damage struct
-  Damage DeriveDamage(float baseHeatDamage, std::shared_ptr<GameObject> author) const;
+  Damage DeriveDamage(std::shared_ptr<GameObject> author) const;
 
   DamageParameters() = default;
 };

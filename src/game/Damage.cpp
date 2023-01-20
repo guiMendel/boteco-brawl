@@ -29,14 +29,14 @@ Vector2 AttackImpulse::DeriveImpulse(std::shared_ptr<GameObject> target) const
   throw runtime_error("Trying to derive impulse with unrecognized type");
 }
 
-Damage DamageParameters::DeriveDamage(float baseHeatDamage, shared_ptr<GameObject> author) const
+Damage DamageParameters::DeriveDamage(shared_ptr<GameObject> author) const
 {
   AttackImpulse damageImpulse{impulse};
   damageImpulse.mirrored = author->GetScale().x < 0;
 
   return Damage{
       // Total damage
-      baseHeatDamage * heatMultiplier,
+      heatDamage,
       // Impulse
       damageImpulse,
       // Stun time

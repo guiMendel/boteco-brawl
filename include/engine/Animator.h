@@ -28,18 +28,19 @@ public:
 
   void Start() override;
   void Update(float deltaTime) override;
+  void OnBeforeDestroy() override;
 
   // Registers an animation to this animator
-  template <class T>
-  void RegisterAnimation(bool makeDefault = false)
+  template <class T, typename... Args>
+  void RegisterAnimation(Args &&...args)
   {
     // Create it's builder
-    auto builder = [this]()
+    auto builder = [this, args...]()
     {
-      return std::make_shared<T>(*this);
+      return std::make_shared<T>(*this, std::forward<Args>(args)...);
     };
 
-    RegisterAnimation(builder, makeDefault);
+    RegisterAnimation(builder);
   }
 
   // Stops current animation and starts the given one
@@ -52,7 +53,7 @@ public:
   void Play(std::string animation, bool forceReset = false);
 
   // Stops any animation
-  void Stop();
+  void Stop(bool transitionToDefault = true);
 
   // If the current animation has this name, stops it
   void Stop(std::string animation);
@@ -80,7 +81,7 @@ public:
   std::string defaultAnimation;
 
 private:
-  void RegisterAnimation(std::function<std::shared_ptr<Animation>()> animationBuilder, bool makeDefault);
+  void RegisterAnimation(std::function<std::shared_ptr<Animation>()> animationBuilder, bool makeDefault = false);
 
   // Store registered animation types
   animation_map animations;

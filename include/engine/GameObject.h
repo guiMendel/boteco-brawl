@@ -74,10 +74,10 @@ public:
 
 private:
   // Unlinks from parent, destroys all children and destroys self
-  void InternalDestroy();
+  auto InternalDestroy() -> std::unordered_map<int, std::weak_ptr<GameObject>>::iterator;
 
   // Deletes reference to parent and paren't reference to self
-  void UnlinkParent();
+  auto UnlinkParent() -> std::unordered_map<int, std::weak_ptr<GameObject>>::iterator;
 
   // Whether is dead
   bool destroyRequested{false};

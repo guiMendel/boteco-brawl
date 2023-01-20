@@ -125,7 +125,12 @@ void AttackAnimation::InternalOnStart() { SetupAttack(); }
 void AttackAnimation::InternalOnStop()
 {
   if (attackObjectId >= 0)
-    animator.gameObject.RequireChild(attackObjectId)->RequestDestroy();
+  {
+    auto attackObject = animator.gameObject.GetChild(attackObjectId);
+
+    if (attackObject != nullptr)
+      attackObject->RequestDestroy();
+  }
 }
 
 void AttackAnimation::SetupAttack()
@@ -189,6 +194,13 @@ void AttackAnimation::RemoveHitbox()
 
   for (auto collider : colliders)
     attackObject->RemoveComponent(collider);
+}
+
+shared_ptr<Attack> AttackAnimation::GetAttack() const
+{
+  Assert(attackObjectId >= 0, "Attack object id was never stored");
+
+  return animator.gameObject.RequireChild(attackObjectId)->RequireComponent<Attack>();
 }
 
 // === INNER LOOP ANIMATIONS

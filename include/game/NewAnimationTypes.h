@@ -6,6 +6,7 @@
 #include "Damage.h"
 #include "Circle.h"
 #include "CharacterController.h"
+#include "Attack.h"
 
 // An animation that was created by an action and has a reference to the action's resulting state
 class StatefulAnimation : public Animation
@@ -71,6 +72,9 @@ protected:
 
   // Allow reacting to attack connections
   virtual void OnConnectAttack(std::shared_ptr<CharacterController>) {}
+
+  // Get attack object
+  std::shared_ptr<Attack> GetAttack() const;
 
 private:
   // Create attack child

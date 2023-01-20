@@ -6,11 +6,6 @@ using namespace std;
 Attack::Attack(GameObject &associatedObject, DamageParameters damage, float hitSecondsCooldown)
     : Component(associatedObject), damage(damage), hitCooldown(hitSecondsCooldown * 1000) {}
 
-void Attack::Awake()
-{
-  weakCharacter = gameObject.GetParent()->RequireComponent<Character>();
-}
-
 void Attack::Land(shared_ptr<CharacterController> targetController)
 {
   // If already hit this target
@@ -36,8 +31,15 @@ void Attack::OnTriggerCollisionEnter(TriggerCollisionData trigger)
 {
   LOCK(trigger.weakOther, other);
 
-  // If other has a heat
-  auto controller = other->GetOwner()->GetComponent<CharacterController>();
+  // Get other object
+  auto otherObject = other->GetOwner();
+
+  // Check if ignored
+  if (ignoredObjects.count(otherObject->id) > 0)
+    return;
+
+  // If other has a character controller
+  auto controller = otherObject->GetComponent<CharacterController>();
 
   // Land an attack
   if (controller != nullptr)
@@ -46,7 +48,10 @@ void Attack::OnTriggerCollisionEnter(TriggerCollisionData trigger)
 
 Damage Attack::GetDamage() const
 {
-  LOCK(weakCharacter, character);
+  return damage.DeriveDamage(gameObject.GetParent());
+}
 
-  return damage.DeriveDamage(character->GetBaseDamage(), gameObject.GetParent());
+void Attack::Ignore(std::shared_ptr<GameObject> target)
+{
+  ignoredObjects.insert(target->id);
 }

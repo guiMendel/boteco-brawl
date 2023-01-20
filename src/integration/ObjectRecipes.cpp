@@ -215,26 +215,29 @@ auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(s
   };
 }
 
-auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> parent) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> parent, Vector2 gravityScale) -> function<void(shared_ptr<GameObject>)>
 {
   auto weakParent{weak_ptr(parent)};
-  return [initialVelocity, weakParent](shared_ptr<GameObject> projectile)
+  return [initialVelocity, weakParent, gravityScale](shared_ptr<GameObject> projectile)
   {
     projectile->SetPhysicsLayer(PhysicsLayer::Hazard);
-    IF_NOT_LOCK(weakParent, parent) { return; }
 
     // Add physics
     auto body = projectile->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
-    
+
     // Get sprite
-    auto spriteRenderer = projectile->AddComponent<SpriteRenderer>(RenderLayer::Projectiles);
+    projectile->AddComponent<SpriteRenderer>(RenderLayer::Projectiles);
 
     // Add animator
     auto animator = projectile->AddComponent<Animator>();
 
     // Add animations
-    animator->RegisterAnimation<GeneralAnimations::Projectile>();
+    animator->RegisterAnimation<GeneralAnimations::Projectile>(weakParent);
 
+    // Add speed
     body->velocity = initialVelocity;
+
+    // Change gravity
+    body->gravityScale = gravityScale;
   };
 }

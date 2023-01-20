@@ -194,6 +194,9 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
   {
     float mirrorFactor = GetSign(target.GetScale().x);
 
+    // Get shoot position
+    Vector2 shotPosition = GlobalVirtualPixelPosition({10, 3});
+
     // Add smoke
     ParticleEmissionParameters smoke;
     smoke.angle = {DegreesToRadians(-35), DegreesToRadians(35)};
@@ -204,12 +207,7 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
     smoke.speed = {0.5 * mirrorFactor, 5 * mirrorFactor};
     smoke.behavior = ParticleBehavior::Accelerate({-mirrorFactor, 0}, {0, numeric_limits<float>::max()});
 
-    ParticleFX::EffectAt(
-        GlobalVirtualPixelPosition({10, 3}),
-        0.01,
-        0.01,
-        smoke,
-        1);
+    ParticleFX::EffectAt(shotPosition, 0.01, 0.01, smoke, 1);
 
     // Add sparks
     ParticleEmissionParameters sparks;
@@ -219,14 +217,14 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
     sparks.lifetime = {0.05, 0.3};
     sparks.speed = {2 * mirrorFactor, 8 * mirrorFactor};
 
-    ParticleFX::EffectAt(
-        GlobalVirtualPixelPosition({10, 3}),
-        0.01,
-        0.01,
-        sparks,
-        1);
+    ParticleFX::EffectAt(shotPosition, 0.01, 0.01, sparks, 1);
 
-    // animator.GetState()->CreateObject("Projectile", ObjectRecipes::Projectile({5 * mirrorFactor, 0}, ))
+    auto projectile = animator.GetState()->CreateObject(
+        "Projectile",
+        ObjectRecipes::Projectile({5 * mirrorFactor, 0}, animator.gameObject.GetShared(), {0, 0}),
+        shotPosition);
+
+    projectile->localScale = {mirrorFactor, 1};
   };
 
   frames[1].AddCallback(shoot);
@@ -365,6 +363,17 @@ void Projectile::OnConnectAttack(std::shared_ptr<CharacterController>)
 
   // Go away
   animator.gameObject.RequestDestroy();
+}
+
+void Projectile::InternalOnStart()
+{
+  AttackAnimation::InternalOnStart();
+
+  // Don't attack parent
+  IF_LOCK(weakParent, parent)
+  {
+    GetAttack()->Ignore(parent);
+  }
 }
 
 vector<AnimationFrame> Projectile::InitializeFrames()

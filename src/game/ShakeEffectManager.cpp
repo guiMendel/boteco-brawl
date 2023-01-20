@@ -5,6 +5,18 @@ using namespace std;
 
 ShakeEffectManager::ShakeEffectManager(GameObject &associatedObject) : Component(associatedObject) {}
 
+void ShakeEffectManager::OnBeforeDestroy()
+{
+  // Stop all effects and collect them
+  auto shakeEntryIterator = activeShakes.begin();
+  while (shakeEntryIterator != activeShakes.end())
+  {
+    StopShake(shakeEntryIterator->first, 0);
+
+    shakeEntryIterator = activeShakes.erase(shakeEntryIterator);
+  }
+}
+
 void ShakeEffectManager::Shake(shared_ptr<GameObject> target,
                                float angle,
                                pair<float, float> displacementEvolution,
@@ -22,11 +34,16 @@ void ShakeEffectManager::Shake(shared_ptr<GameObject> target,
 
 void ShakeEffectManager::StopShake(shared_ptr<GameObject> target, float overrideStopDuration)
 {
-  if (activeShakes.count(target->id) == 0)
+  StopShake(target->id, overrideStopDuration);
+}
+
+void ShakeEffectManager::StopShake(int targetId, float overrideStopDuration)
+{
+  if (activeShakes.count(targetId) == 0)
     return;
 
   // Get the effect
-  auto &effect = activeShakes[target->id];
+  auto &effect = activeShakes[targetId];
 
   // Apply override
   if (overrideStopDuration > 0)

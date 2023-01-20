@@ -315,13 +315,18 @@ shared_ptr<GameObject> GameObject::GetParent() const
   return parent->id == 0 ? nullptr : parent;
 }
 
-void GameObject::UnlinkParent()
+auto GameObject::UnlinkParent() -> unordered_map<int, weak_ptr<GameObject>>::iterator
 {
-  if (IsRoot())
-    return;
+  Assert(IsRoot() == false, "Root has no parent to unlink");
 
-  InternalGetParent()->children.erase(id);
+  // Get own iterator
+  auto iterator = InternalGetParent()->children.find(id);
+
+  // Remove it
+  iterator = InternalGetParent()->children.erase(iterator);
   weakParent.reset();
+
+  return iterator;
 }
 
 void GameObject::SetParent(shared_ptr<GameObject> newParent)
@@ -367,7 +372,7 @@ float GameObject::GetTimeScale() const
 {
   if (IsRoot())
     return localTimeScale;
-    
+
   return InternalGetParent()->GetTimeScale() * localTimeScale;
 }
 
@@ -377,9 +382,9 @@ void GameObject::SetTimeScale(float newScale)
 
   if (IsRoot())
     localTimeScale = newScale;
-    
+
   float parentTimeScale{InternalGetParent()->GetTimeScale()};
-    
+
   Assert(parentTimeScale > 0, "Parent timeScale is invalid");
 
   localTimeScale = newScale / parentTimeScale;
@@ -396,7 +401,12 @@ void GameObject::SetScale(const Vector2 newScale)
 {
   if (IsRoot())
     localScale = newScale;
-  localScale = newScale - InternalGetParent()->GetScale();
+
+  Vector2 parentScale{InternalGetParent()->GetScale()};
+
+  Assert(parentScale.x > 0 && parentScale.y > 0, "Parent scale had a 0 is invalid");
+
+  localScale = newScale / parentScale;
 }
 
 // Absolute rotation in radians
@@ -518,8 +528,26 @@ shared_ptr<GameObject> GameObject::GetChild(string name)
   return nullptr;
 }
 
-void GameObject::InternalDestroy()
+auto GameObject::InternalDestroy() -> unordered_map<int, weak_ptr<GameObject>>::iterator
 {
+  cout << "Destroying " << *this << endl;
+  cout << "Children: " << endl;
+  for (auto [childId, weakChild] : children)
+  {
+    LOCK(weakChild, child);
+
+    cout << "Child " << *child << endl;
+  }
+
+  // Remove all children
+  auto pairIterator = children.begin();
+  while (pairIterator != children.end())
+  {
+    LOCK(pairIterator->second, child);
+
+    pairIterator = child->InternalDestroy();
+  }
+
   // Wrap all components up
   for (
       auto componentIterator = components.begin();
@@ -530,22 +558,19 @@ void GameObject::InternalDestroy()
   // Get pointer to self
   auto shared = GetShared();
 
-  // Remove all children
-  for (auto pairIterator = children.begin(); pairIterator != children.end(); ++pairIterator)
-  {
-    LOCK(pairIterator->second, child);
-
-    child->InternalDestroy();
-  }
-
   // Remove this object's reference from it's parent
-  UnlinkParent();
+  unordered_map<int, weak_ptr<GameObject>>::iterator iterator;
+
+  if (IsRoot() == false)
+    iterator = UnlinkParent();
 
   // Delete self from state's list
   GetState()->RemoveObject(id);
 
   // Ensure no more references to self than the one in this function and the one which called this function
   Assert(shared.use_count() == 2, "Found leaked references to game object " + GetName() + " when trying to destroy it");
+
+  return iterator;
 }
 
 void GameObject::OnCollision(Collision::Data collisionData)

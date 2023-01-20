@@ -4,6 +4,14 @@ using namespace std;
 
 TimeScaleManager::TimeScaleManager(GameObject &associatedObject) : Component(associatedObject) {}
 
+void TimeScaleManager::OnBeforeDestroy()
+{
+  // Reset time scales
+  auto objectEntryIterator = alteredObjects.begin();
+  while (objectEntryIterator != alteredObjects.end())
+    objectEntryIterator = ResetTimeScale(objectEntryIterator->first);
+}
+
 void TimeScaleManager::AlterTimeScale(shared_ptr<GameObject> target, float newScale, float duration)
 {
   Assert(newScale > 0, "Invalid new time scale: it must be a positive value");
@@ -37,20 +45,20 @@ void TimeScaleManager::ResetTimeScale(std::shared_ptr<GameObject> target)
   ResetTimeScale(target->id);
 }
 
-void TimeScaleManager::ResetTimeScale(int targetId)
+auto TimeScaleManager::ResetTimeScale(int targetId) -> decltype(alteredObjects)::iterator
 {
   // Ignore unaltered objects
   if (alteredObjects.count(targetId) == 0)
-    return;
+    return alteredObjects.end();
 
   // Reset the timescale
-  GetState()->RequireObject(targetId)->SetTimeScale(1);
-
-  cout << *GetState()->RequireObject(targetId) << " timescale reset back to " << GetState()->RequireObject(targetId)->GetTimeScale() << endl;
+  auto target = GetState()->GetObject(targetId);
+  if (target != nullptr)
+    target->SetTimeScale(1);
 
   // Cancel reset if necessary
   gameObject.CancelDelayedFunction(alteredObjects[targetId]);
 
   // Forget it
-  alteredObjects.erase(targetId);
+  return alteredObjects.erase(alteredObjects.find(targetId));
 }

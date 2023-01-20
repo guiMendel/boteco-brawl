@@ -16,7 +16,8 @@ Animation::Animation(Animator &animator) : animator(animator)
                          { LOCK(weakAnimator, animator); animator->OnCycleEnd.Invoke(); });
 
   OnStop.AddListener("animator-propagation", [this, weakAnimator]()
-                     { LOCK(weakAnimator, animator); animator->OnAnimationStop.Invoke(); });
+                     { IF_LOCK(weakAnimator, animator)
+                       animator->OnAnimationStop.Invoke(); });
 }
 
 vector<AnimationFrame> &Animation::Frames()
