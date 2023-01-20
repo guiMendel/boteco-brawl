@@ -145,9 +145,9 @@ Vector2 Vector2::Pivot(Vector2 point, float radians) const
 
 // === STATIC GETTERS
 
-Vector2 Vector2::Up(float magnitude) { return Vector2(0, magnitude); }
+Vector2 Vector2::Up(float magnitude) { return Vector2(0, -magnitude); }
 Vector2 Vector2::Left(float magnitude) { return Vector2(-magnitude, 0); }
-Vector2 Vector2::Down(float magnitude) { return Vector2(0, -magnitude); }
+Vector2 Vector2::Down(float magnitude) { return Vector2(0, magnitude); }
 Vector2 Vector2::Right(float magnitude) { return Vector2(magnitude, 0); }
 Vector2 Vector2::Zero() { return Vector2(0, 0); }
 Vector2 Vector2::One() { return Vector2(1, 1); }

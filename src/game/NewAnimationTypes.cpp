@@ -77,6 +77,44 @@ shared_ptr<Animation> StatefulAnimation::GetNext()
 
 shared_ptr<StatefulAnimation> StatefulAnimation::GetNextStateful() { return nullptr; }
 
+Vector2 StatefulAnimation::GlobalVirtualPixelPosition(Vector2 virtualPixel)
+{
+  return GlobalVirtualPixelPosition(virtualPixel, GetFrame(currentFrame));
+}
+Vector2 StatefulAnimation::VirtualPixelPosition(Vector2 virtualPixel)
+{
+  return VirtualPixelPosition(virtualPixel, GetFrame(currentFrame));
+}
+
+Vector2 StatefulAnimation::GlobalVirtualPixelPosition(Vector2 virtualPixel, const AnimationFrame &frame)
+{
+  return VirtualPixelPosition(virtualPixel, frame) + animator.gameObject.GetPosition();
+}
+
+Vector2 StatefulAnimation::VirtualPixelPosition(Vector2 virtualPixel, const AnimationFrame &frame)
+{
+  // Get sprite renderer
+  auto spriteRenderer = animator.gameObject.RequireComponent<SpriteRenderer>();
+
+  // Get the frame's sprite
+  auto sprite = frame.GetSprite();
+  Assert(sprite != nullptr, "Provided frame must contain a sprite");
+
+  // Global position of sprite's top-left pixel, in units
+  Vector2 topLeftPosition = spriteRenderer->RenderPositionFor(animator.gameObject.GetPosition(), sprite);
+
+  // Displacement to apply to object's position to get to top-left pixel's position
+  Vector2 spriteOrigin = topLeftPosition - animator.gameObject.GetPosition();
+
+  // When mirrored, we want to displace with reference to top-right pixel, so sum the sprite's width
+  auto mirrorFactor = Vector2(GetSign(animator.gameObject.GetScale().x), 1);
+
+  if (mirrorFactor.x < 0)
+    spriteOrigin.x = spriteOrigin.x + sprite->GetWidth();
+
+  return spriteOrigin + mirrorFactor * (virtualPixel + Vector2{0.5, 0.5}) / float(Game::defaultVirtualPixelsPerUnit);
+}
+
 // === ATTACK ANIMATIONS
 
 float AttackAnimation::GetHitCooldown() const { return -1; }
@@ -99,7 +137,11 @@ void AttackAnimation::SetupAttack()
   attackObjectId = attackObject->id;
 
   // Give it the attack component
-  attackObject->AddComponent<Attack>(GetAttackProperties(), GetHitCooldown());
+  auto attack = attackObject->AddComponent<Attack>(GetAttackProperties(), GetHitCooldown());
+
+  // React to connections
+  attack->OnConnect.AddListener("animation-reaction", [this](shared_ptr<CharacterController> target)
+                                { OnConnectAttack(target); });
 }
 
 void AttackAnimation::FrameHitbox(AnimationFrame &frame, vector<Circle> hitboxAreas)
@@ -117,32 +159,21 @@ void AttackAnimation::FrameHitbox(AnimationFrame &frame, vector<Circle> hitboxAr
 
 void AttackAnimation::SetHitbox(const AnimationFrame &frame, vector<Circle> hitboxAreas)
 {
-
+  // Get attack object
   auto attackObject = animator.gameObject.RequireChild(attackObjectId);
 
   // First, remove all colliders already there
   RemoveHitbox();
 
-  // Get sprite renderer
-  auto spriteRenderer = attackObject->GetParent()->RequireComponent<SpriteRenderer>();
-
-  // Global position of sprite's top-left pixel, in units
-  Vector2 topLeftPosition = spriteRenderer->RenderPositionFor(attackObject->GetParent()->GetPosition(), frame.GetSprite());
-
-  // Displacement to apply to attackObject's position to get to this pixel's position
-  Vector2 spriteOrigin = topLeftPosition - attackObject->GetPosition();
-
-  // When mirrored, we want to displace with reference to top-right pixel, so sum the sprite's width
-  // But also keep this offset positive so as to not double-mirror it on render
-  if (GetSign(attackObject->GetScale().x) < 0)
-    spriteOrigin.x = -(spriteOrigin.x + frame.GetSprite()->GetWidth());
+  auto mirrorFactor = GetSign(attackObject->GetScale().x);
 
   // Now, add each provided area as a collider
   for (auto circle : hitboxAreas)
   {
-    // Convert circle's virtual pixels to units, and also make it relative to the center of the top left pixel
+    // Convert circle's virtual pixels to units
     circle = Circle(
-        spriteOrigin + (circle.center + Vector2{0.5, 0.5}) / float(Game::defaultVirtualPixelsPerUnit),
+        // But also remove mirroring because it will be reapplied on render
+        VirtualPixelPosition(circle.center, frame) * mirrorFactor,
         circle.radius / float(Game::defaultVirtualPixelsPerUnit));
 
     attackObject->AddComponent<CircleCollider>(circle, true);
@@ -305,8 +336,6 @@ void InnerLoopAnimation::OnUpdate(float deltaTime)
     return;
 
   innerLoopElapsedTime += deltaTime;
-
-  auto thing = MaxInnerLoopDuration();
 
   if (MaxInnerLoopDuration() >= 0 && innerLoopElapsedTime >= MaxInnerLoopDuration())
     Finish();

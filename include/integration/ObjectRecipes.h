@@ -28,7 +28,7 @@ public:
 
   static auto Arena(std::string imagePath) -> std::function<void(std::shared_ptr<GameObject>)>;
 
-  static auto CharacterStateManager(std::shared_ptr<Player> player) -> std::function<void(std::shared_ptr<GameObject>)>;
+  static auto Character(std::shared_ptr<Player> player) -> std::function<void(std::shared_ptr<GameObject>)>;
 
   static auto Platform(Vector2 size, bool withEffector = false) -> std::function<void(std::shared_ptr<GameObject>)>;
 

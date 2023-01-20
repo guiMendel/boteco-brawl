@@ -60,7 +60,7 @@ auto ObjectRecipes::Arena(string imagePath) -> function<void(shared_ptr<GameObje
   };
 }
 
-auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared_ptr<GameObject>)>
 {
   auto weakPlayer{weak_ptr(player)};
   return [weakPlayer](shared_ptr<GameObject> character)
@@ -96,6 +96,7 @@ auto ObjectRecipes::CharacterStateManager(shared_ptr<Player> player) -> function
     animator->RegisterAnimation<GeneralAnimations::AirUp>();
     animator->RegisterAnimation<GeneralAnimations::AirDown>();
     animator->RegisterAnimation<GeneralAnimations::SpecialNeutral>();
+    animator->RegisterAnimation<GeneralAnimations::SpecialHorizontal>();
     animator->RegisterAnimation<GeneralAnimations::Riposte>();
     animator->RegisterAnimation<GeneralAnimations::LandingAttack>();
 
@@ -222,10 +223,17 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> p
     projectile->SetPhysicsLayer(PhysicsLayer::Hazard);
     IF_NOT_LOCK(weakParent, parent) { return; }
 
+    // Add physics
     auto body = projectile->AddComponent<Rigidbody>(RigidbodyType::Dynamic);
-    // auto collider = projectile->AddComponent<BoxCollider>(Rectangle({0, 0}, 0.2, 0.2), true, ColliderDensity::Wood);
-    auto collider = projectile->AddComponent<CircleCollider>(Circle({0, 0}, 0.2), true, ColliderDensity::Wood);
-    projectile->AddComponent<::Projectile>(parent);
+    
+    // Get sprite
+    auto spriteRenderer = projectile->AddComponent<SpriteRenderer>(RenderLayer::Projectiles);
+
+    // Add animator
+    auto animator = projectile->AddComponent<Animator>();
+
+    // Add animations
+    animator->RegisterAnimation<GeneralAnimations::Projectile>();
 
     body->velocity = initialVelocity;
   };

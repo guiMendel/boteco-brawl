@@ -23,6 +23,8 @@ void Attack::Land(shared_ptr<CharacterController> targetController)
       return;
   }
 
+  OnConnect.Invoke(targetController);
+
   // Apply hit
   targetController->TakeHit(GetDamage());
 

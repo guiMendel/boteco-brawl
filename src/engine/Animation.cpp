@@ -71,14 +71,13 @@ AnimationFrame &Animation::GetFrame(int frame)
 
 void Animation::TriggerFrame(int frame)
 {
+  currentFrame = frame;
 
   // Trigger it
   GetFrame(frame).Trigger(animator.gameObject);
 
   // Get next frame time
   secondsToNextFrame = GetFrame(frame).GetDuration() * speedModifier;
-
-  currentFrame = frame;
 }
 
 bool Animation::IsPlaying()

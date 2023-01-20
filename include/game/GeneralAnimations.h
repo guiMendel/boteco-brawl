@@ -300,6 +300,16 @@ namespace GeneralAnimations
     DELCARE_FRAMES
   };
 
+  class SpecialHorizontal : public StatefulAnimation
+  {
+  public:
+    CONSTRUCTOR_AND_DESTRUCTOR(SpecialHorizontal)
+
+    DEF_NAME("specialHorizontal")
+    DELCARE_FRAMES
+    ATTACK_CANCEL(3)
+  };
+
   class Riposte : public AttackAnimation
   {
   public:
@@ -324,6 +334,18 @@ namespace GeneralAnimations
 
     // Speed at which ground was intercepted
     float landingSpeed;
+  };
+
+  class Projectile : public AttackAnimation
+  {
+  public:
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Projectile)
+
+    DEF_NAME("projectile")
+    DELCARE_FRAMES
+    void OnConnectAttack(std::shared_ptr<CharacterController>) override;
+
+    SET_DAMAGE(1.8, AttackImpulse(animator.gameObject.GetShared(), 2), 0.2)
   };
 
 }

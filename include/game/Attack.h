@@ -13,6 +13,9 @@ class CharacterController;
 struct Attack : public Component
 {
 public:
+  // Raised when attack connects
+  EventI<std::shared_ptr<CharacterController>> OnConnect;
+
   // Initializes with the attack damage's parameters and an optional hit cooldown, which if set allows for multi-hits
   Attack(GameObject &associatedObject, DamageParameters damage, float hitSecondsCooldown = -1);
   virtual ~Attack() {}

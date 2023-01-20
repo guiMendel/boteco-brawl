@@ -25,4 +25,10 @@ private:
   std::unordered_map<int, float> childrenDestroyTimers;
 };
 
+namespace ParticleBehavior
+{
+  Particle::behavior_callback Accelerate(Vector2 acceleration);
+  Particle::behavior_callback Accelerate(Vector2 acceleration, Vector2 maxVelocity);
+}
+
 #endif

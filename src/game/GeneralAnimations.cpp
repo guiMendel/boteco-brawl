@@ -178,6 +178,62 @@ void SpecialNeutral::InternalOnStop()
   parry->ready = false;
 }
 
+// === SPECIAL HORIZONTAL
+
+vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/special-horizontal.png",
+                               SpritesheetClipInfo(16, 8), 0.3, {4, 0})};
+
+  // Add a recovery frame
+  SplitLastFrame(frames, 2, 0.15);
+  frames[1].SetDuration(0.2);
+
+  // Add shoot frame
+  auto shoot = [this](GameObject &target)
+  {
+    float mirrorFactor = GetSign(target.GetScale().x);
+
+    // Add smoke
+    ParticleEmissionParameters smoke;
+    smoke.angle = {DegreesToRadians(-35), DegreesToRadians(35)};
+    smoke.color = {Color(90, 90, 90), Color(200, 200, 200)};
+    smoke.frequency = {0.0005, 0.001};
+    smoke.gravityModifier = {Vector2::Up(0.5), Vector2::Zero()};
+    smoke.lifetime = {0.1, 0.7};
+    smoke.speed = {0.5 * mirrorFactor, 5 * mirrorFactor};
+    smoke.behavior = ParticleBehavior::Accelerate({-mirrorFactor, 0}, {0, numeric_limits<float>::max()});
+
+    ParticleFX::EffectAt(
+        GlobalVirtualPixelPosition({10, 3}),
+        0.01,
+        0.01,
+        smoke,
+        1);
+
+    // Add sparks
+    ParticleEmissionParameters sparks;
+    sparks.angle = {DegreesToRadians(-35), DegreesToRadians(35)};
+    sparks.color = {Color::Yellow(), Color::ClampValid(Color::Yellow() * 1.5)};
+    sparks.frequency = {0.0008, 0.003};
+    sparks.lifetime = {0.05, 0.3};
+    sparks.speed = {2 * mirrorFactor, 8 * mirrorFactor};
+
+    ParticleFX::EffectAt(
+        GlobalVirtualPixelPosition({10, 3}),
+        0.01,
+        0.01,
+        sparks,
+        1);
+
+    // animator.GetState()->CreateObject("Projectile", ObjectRecipes::Projectile({5 * mirrorFactor, 0}, ))
+  };
+
+  frames[1].AddCallback(shoot);
+
+  return frames;
+}
+
 // === RIPOSTE
 
 vector<AnimationFrame> Riposte::InitializeFrames()
@@ -285,6 +341,39 @@ vector<AnimationFrame> LandingAttack::InitializeFrames()
   };
 
   frames[0].AddCallback(stopVelocity);
+
+  return frames;
+}
+
+// === PROJECTILE
+
+void Projectile::OnConnectAttack(std::shared_ptr<CharacterController>)
+{
+  // Play effect
+  ParticleEmissionParameters hit;
+  hit.color = {Color::Black(), Color::Gray()};
+  hit.frequency = {0.001, 0.005};
+  hit.lifetime = {0.05, 0.2};
+  hit.speed = {1, 3};
+
+  ParticleFX::EffectAt(
+      animator.gameObject.GetPosition(),
+      0.1,
+      0.001,
+      hit,
+      4);
+
+  // Go away
+  animator.gameObject.RequestDestroy();
+}
+
+vector<AnimationFrame> Projectile::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/bullet.png",
+                               SpritesheetClipInfo(3, 2), 0.15)};
+
+  // Add hitboxes
+  FrameHitbox(frames[0], {Circle({1.0, 0.5}, 1.5)});
 
   return frames;
 }

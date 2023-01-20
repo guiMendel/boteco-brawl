@@ -59,3 +59,30 @@ void ParticleFX::Update(float deltaTime)
       timerIterator++;
   }
 }
+
+Particle::behavior_callback ParticleBehavior::Accelerate(Vector2 acceleration)
+{
+  return [acceleration](Particle &particle, float deltaTime)
+  {
+    particle.velocity += acceleration * deltaTime;
+  };
+}
+
+Particle::behavior_callback ParticleBehavior::Accelerate(Vector2 acceleration, Vector2 maxVelocity)
+{
+  return [acceleration, maxVelocity](Particle &particle, float deltaTime)
+  {
+    particle.velocity += acceleration * deltaTime;
+
+    // Apply max values
+    if (acceleration.x >= 0)
+      particle.velocity.x = min(particle.velocity.x, maxVelocity.x);
+    else
+      particle.velocity.x = max(particle.velocity.x, maxVelocity.x);
+
+    if (acceleration.y >= 0)
+      particle.velocity.y = min(particle.velocity.y, maxVelocity.y);
+    else
+      particle.velocity.y = max(particle.velocity.y, maxVelocity.y);
+  };
+}

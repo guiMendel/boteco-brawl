@@ -122,9 +122,4 @@ private:
   ParticleEmissionParameters currentParams;
 };
 
-// namespace ParticleBehaviors
-// {
-//   static void Oscillate(Particle &);
-// }
-
 #endif

@@ -5,6 +5,7 @@
 #include "CharacterState.h"
 #include "Damage.h"
 #include "Circle.h"
+#include "CharacterController.h"
 
 // An animation that was created by an action and has a reference to the action's resulting state
 class StatefulAnimation : public Animation
@@ -15,6 +16,18 @@ public:
 
   // Register the state
   void RegisterState(std::shared_ptr<CharacterState> actionState);
+
+  // Gets the position in units of the indicated virtual pixel of the provided frame's sprite
+  // Relative to the animator's position!
+  Vector2 VirtualPixelPosition(Vector2 virtualPixel, const AnimationFrame &frame);
+
+  // Gets the position in units of the indicated virtual pixel of the provided frame's sprite
+  Vector2 GlobalVirtualPixelPosition(Vector2 virtualPixel, const AnimationFrame &frame);
+
+  // Uses current frame
+  Vector2 VirtualPixelPosition(Vector2 virtualPixel);
+  // Uses current frame
+  Vector2 GlobalVirtualPixelPosition(Vector2 virtualPixel);
 
 protected:
   // Overtake responsibilty for this
@@ -55,6 +68,9 @@ protected:
   // Setup attack properties
   void InternalOnStart() override;
   void InternalOnStop() override;
+
+  // Allow reacting to attack connections
+  virtual void OnConnectAttack(std::shared_ptr<CharacterController>) {}
 
 private:
   // Create attack child
