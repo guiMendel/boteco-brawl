@@ -353,6 +353,7 @@ namespace GeneralAnimations
     void InternalOnStart() override;
 
     SET_DAMAGE(1.8, AttackImpulse(animator.gameObject.GetShared(), 2), 0.2)
+    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 
 }

@@ -48,7 +48,7 @@ void GameState::CascadeDown(shared_ptr<GameObject> object, function<void(GameObj
 void GameState::DeleteObjects()
 {
   // Check for dead objects
-  vector<shared_ptr<GameObject>> deadObjects;
+  vector<weak_ptr<GameObject>> deadObjects;
 
   // Collect them
   for (auto &objectPair : gameObjects)
@@ -56,15 +56,18 @@ void GameState::DeleteObjects()
     // If is dead, collect
     if (objectPair.second->DestroyRequested())
     {
-      deadObjects.push_back(objectPair.second);
+      deadObjects.emplace_back(objectPair.second);
     }
 
     // Not a good idea to delete them here directly, as it would invalidate this loop's iterator
   }
 
   // Erase them
-  for (auto &deadObject : deadObjects)
-    deadObject->InternalDestroy();
+  for (auto &weakObject : deadObjects)
+    IF_LOCK(weakObject, deadObject)
+    {
+      deadObject->InternalDestroy();
+    }
 }
 
 void GameState::Update(float deltaTime)
@@ -253,14 +256,10 @@ void GameState::RegisterLayerRenderer(shared_ptr<Component> component)
 
 shared_ptr<GameObject> GameState::GetObject(int id)
 {
-  try
-  {
-    return gameObjects.at(id);
-  }
-  catch (out_of_range &)
-  {
+  if (gameObjects.count(id) == 0)
     return nullptr;
-  }
+
+  return gameObjects.at(id);
 }
 
 shared_ptr<GameObject> GameState::RequireObject(int id)

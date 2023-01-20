@@ -6,6 +6,8 @@
 
 using namespace std;
 
+const float GameObject::objectCollectionRange{50};
+
 // Private constructor
 GameObject::GameObject(string name, int gameStateId, int id)
     : id(id >= 0 ? id : Game::GetInstance().SupplyId()), name(name), gameStateId(gameStateId)
@@ -105,6 +107,16 @@ void GameObject::Update(float deltaTime)
   {
     if (component->IsEnabled())
       component->Update(deltaTime);
+  }
+
+  // Check range collection
+  auto absolutePosition = GetPosition().GetAbsolute();
+
+  if (absolutePosition.x > objectCollectionRange || absolutePosition.y > objectCollectionRange)
+  {
+    cout << "Collecting " << *this << " for exceeding collection range" << endl;
+
+    RequestDestroy();
   }
 }
 
@@ -530,14 +542,14 @@ shared_ptr<GameObject> GameObject::GetChild(string name)
 
 auto GameObject::InternalDestroy() -> unordered_map<int, weak_ptr<GameObject>>::iterator
 {
-  cout << "Destroying " << *this << endl;
-  cout << "Children: " << endl;
-  for (auto [childId, weakChild] : children)
-  {
-    LOCK(weakChild, child);
+  // cout << "Destroying " << *this << endl;
+  // cout << "Children: " << endl;
+  // for (auto [childId, weakChild] : children)
+  // {
+  //   LOCK(weakChild, child);
 
-    cout << "Child " << *child << endl;
-  }
+  //   cout << "Child " << *child << endl;
+  // }
 
   // Remove all children
   auto pairIterator = children.begin();
@@ -568,7 +580,7 @@ auto GameObject::InternalDestroy() -> unordered_map<int, weak_ptr<GameObject>>::
   GetState()->RemoveObject(id);
 
   // Ensure no more references to self than the one in this function and the one which called this function
-  Assert(shared.use_count() == 2, "Found leaked references to game object " + GetName() + " when trying to destroy it");
+  Assert(shared.use_count() <= 2, "Found " + to_string(shared.use_count() - 2) + " leaked references to game object " + GetName() + " when trying to destroy it");
 
   return iterator;
 }

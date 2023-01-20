@@ -17,6 +17,9 @@ struct Action
   // Whether this action is friends with this state
   bool IsFriend(std::shared_ptr<CharacterState> state) const { return GetFriendStates().count(state->name) > 0; }
 
+  // Whether this action can be triggered right now for this object
+  virtual bool IsValid(GameObject &) const { return true; }
+
   // Executed when this action is triggered
   virtual void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) = 0;
 
@@ -44,6 +47,9 @@ struct Action
 
   // How many time this action has been executed in succession prior to this execution
   int sequenceIndex{0};
+
+  // Whether to set any states created with NextState with action input as already released
+  bool actionInputAlreadyReleased{false};
 };
 
 // A specialization which simply plays an animation on trigger

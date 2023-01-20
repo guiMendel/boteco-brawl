@@ -128,21 +128,31 @@ void CharacterController::Start()
     input->OnSpecialHorizontal.AddListener("character-controller", [this]()
                                            { Dispatch<Actions::SpecialHorizontal>(); });
 
-    auto warnStates = [this](string targetStateName)
-    {
-      // For each state
-      for (auto state : stateManager.GetStates())
-      {
-        if (state->name == targetStateName)
-          state->ReleaseActionInput();
-      }
-    };
-
     // Raise release events on states
-    input->OnReleaseAttack.AddListener("character-controller", [warnStates]()
-                                       { warnStates(ATTACKING_STATE); });
-    input->OnReleaseSpecial.AddListener("character-controller", [warnStates]()
-                                        { warnStates(SPECIAL_ATTACKING_STATE); });
+    input->OnReleaseAttack.AddListener("character-controller", [this]()
+                                       { AnnounceInputRelease(ATTACKING_STATE); });
+    input->OnReleaseSpecial.AddListener("character-controller", [this]()
+                                        { AnnounceInputRelease(SPECIAL_ATTACKING_STATE); });
+  }
+}
+
+void CharacterController::AnnounceInputRelease(std::string targetState)
+{
+  // For each state
+  for (auto state : stateManager.GetStates())
+  {
+    if (state->name == targetState)
+      state->ReleaseActionInput();
+  }
+
+  auto queuedAction = stateManager.GetQueuedAction();
+
+  if (queuedAction != nullptr)
+  {
+    auto actionState = queuedAction->NextState(queuedAction);
+
+    if (actionState->name == targetState)
+      queuedAction->actionInputAlreadyReleased = true;
   }
 }
 

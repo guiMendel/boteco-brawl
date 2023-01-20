@@ -6,6 +6,7 @@
 #include "CharacterStateRecipes.h"
 #include "Damage.h"
 #include "Parry.h"
+#include "Movement.h"
 
 // Action priorities
 #define MOVEMENT_PRIORITY 1
@@ -15,13 +16,17 @@
 #define LAND_PRIORITY 2
 
 // Shorthand for attack actions
-#define ATTACK(actionName, animationName)         \
-  struct actionName : public AttackAction         \
-  {                                               \
-    std::string GetAnimationName() const override \
-    {                                             \
-      return animationName;                       \
-    }                                             \
+#define ATTACK(actionName, animationName)                       \
+  struct actionName : public AttackAction                       \
+  {                                                             \
+    std::string GetAnimationName() const override               \
+    {                                                           \
+      return animationName;                                     \
+    }                                                           \
+    bool IsValid(GameObject &target) const override             \
+    {                                                           \
+      return target.RequireComponent<Movement>()->IsGrounded(); \
+    }                                                           \
   }
 
 #define AIR_ATTACK(actionName, animationName)                                                \
@@ -38,6 +43,10 @@
     std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override \
     {                                                                                        \
       return CharacterStateRecipes::AirAttacking(sharedAction);                              \
+    }                                                                                        \
+    bool IsValid(GameObject &target) const override                                          \
+    {                                                                                        \
+      return target.RequireComponent<Movement>()->IsGrounded() == false;                     \
     }                                                                                        \
   }
 

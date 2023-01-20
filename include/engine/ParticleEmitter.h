@@ -68,6 +68,8 @@ public:
   // Stop emission
   void Stop();
 
+  bool IsEmitting() const;
+
   // How many seconds to emit for
   float duration;
 

@@ -20,7 +20,6 @@
 #include "CharacterStateManager.h"
 #include "ParticleEmitter.h"
 #include "PlayerManager.h"
-#include "Projectile.h"
 #include "CharacterRepelCollision.h"
 #include "BoxCollider.h"
 #include "CircleCollider.h"
@@ -239,5 +238,18 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> p
 
     // Change gravity
     body->gravityScale = gravityScale;
+
+    // Release smoke as it passes
+    auto emitter = projectile->AddComponent<ParticleEmitter>(RenderLayer::VFX, 0.2, true);
+
+    emitter->emission.color = {Color(90, 90, 90), Color(200, 200, 200)};
+    emitter->emission.frequency = {0.001, 0.2};
+    emitter->emission.gravityModifier = {Vector2::Up(0.1), Vector2::Down(0.01)};
+    emitter->emission.lifetime = {0.2, 0.8};
+    emitter->emission.speed = {0, 0};
+
+    // If it started playing before we could set the emission params, reset it
+    if (emitter->IsEmitting())
+      emitter->StartEmission();
   };
 }

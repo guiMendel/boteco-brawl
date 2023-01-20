@@ -43,6 +43,9 @@ public:
   // Removes a state from it's unique id
   void RemoveState(unsigned id, bool interruption = false);
 
+  // Get queued action, if any
+  std::shared_ptr<Action> GetQueuedAction() const;
+
   // If the action's priority is high enough, trigger it for this character and set it's state accordingly
   // The canDelay param specifies if this action can wait until the current state is over, if it's not able to interrupt it immediately
   void Perform(std::shared_ptr<Action> action, bool canDelay = false);

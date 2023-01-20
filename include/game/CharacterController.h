@@ -43,6 +43,10 @@ private:
 
   void OnLand();
 
+  // Warns all states with this name that the action input was released
+  // Also warn the queued action if it will produce this state
+  void AnnounceInputRelease(std::string targetState);
+
   // Whether an air dash is available
   bool airDashAvailable{true};
 

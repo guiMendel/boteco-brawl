@@ -63,6 +63,9 @@ private:
   // DESTRUCTION
   // =================================
 public:
+  // How far from origin an object can get in either coordinates before being destroyed
+  static const float objectCollectionRange;
+
   // Whether is dead
   bool DestroyRequested() const { return destroyRequested; }
 

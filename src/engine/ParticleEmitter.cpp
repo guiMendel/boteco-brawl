@@ -131,3 +131,5 @@ ParticleSystem &ParticleEmitter::GetSystem() const
 {
   return GetState()->particleSystem;
 }
+
+bool ParticleEmitter::IsEmitting() const { return active; }

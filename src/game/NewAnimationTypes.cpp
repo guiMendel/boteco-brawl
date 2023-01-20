@@ -170,7 +170,7 @@ void AttackAnimation::SetHitbox(const AnimationFrame &frame, vector<Circle> hitb
   // First, remove all colliders already there
   RemoveHitbox();
 
-  auto mirrorFactor = GetSign(attackObject->GetScale().x);
+  auto mirrorFactor = Vector2(GetSign(attackObject->GetScale().x), 1);
 
   // Now, add each provided area as a collider
   for (auto circle : hitboxAreas)
@@ -232,17 +232,22 @@ InnerLoopAnimation::InnerLoopAnimation(Animator &animator) : AttackAnimation(ani
   {
     auto maybeChangeEndBehavior = [this]()
     {
+      if (sequencePhase != SequencePhase::InLoop)
+        return;
+
       IF_LOCK(weakActionState, actionState)
       {
+        cout << "Action released: " << actionState->ActionInputReleased() << endl;
+
         if (
-            // If in loop
-            sequencePhase == SequencePhase::InLoop &&
-            // And either action input was released
+            // Either action input was released
             (actionState->ActionInputReleased() ||
              // Or timed out
              (MaxInnerLoopDuration() >= 0 && GetInnerLoopElapsedTime() >= MaxInnerLoopDuration())))
           endBehavior = CycleEndBehavior::PlayNext;
       }
+
+      else endBehavior = CycleEndBehavior::PlayNext;
     };
 
     OnCycleEnd.AddListener("update-inner-loop-end-behavior", maybeChangeEndBehavior);

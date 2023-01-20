@@ -221,7 +221,7 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
 
     auto projectile = animator.GetState()->CreateObject(
         "Projectile",
-        ObjectRecipes::Projectile({5 * mirrorFactor, 0}, animator.gameObject.GetShared(), {0, 0}),
+        ObjectRecipes::Projectile({8 * mirrorFactor, 0}, animator.gameObject.GetShared(), {0, 0}),
         shotPosition);
 
     projectile->localScale = {mirrorFactor, 1};
