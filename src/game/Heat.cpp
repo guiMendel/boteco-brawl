@@ -90,6 +90,8 @@ void Heat::TakeDamage(Damage damage)
 
   // Particle effect
   PlayHitParticles(gameObject.GetPosition());
+
+  OnTakeDamage.Invoke(damage);
 }
 
 void Heat::TriggerHitEffect(Damage damage)

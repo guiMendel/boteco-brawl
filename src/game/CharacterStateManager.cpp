@@ -90,8 +90,6 @@ bool CharacterStateManager::CanPerform(std::shared_ptr<Action> action)
 
   // If none of the states blocks this action, it can be performed
   return action->IsValid(gameObject) && any_of(states.begin(), states.end(), stateBlocksAction) == false;
-
-  // TODO: a ground attack must not be performed in air (happens when it's queued after a jump)
 }
 
 void CharacterStateManager::SetSequenceIndex(shared_ptr<Action> action)

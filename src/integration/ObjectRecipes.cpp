@@ -1,9 +1,12 @@
 #include "ObjectRecipes.h"
+#include "ObjectRecipes.h"
 #include "LandingAttackEffector.h"
 #include "Arena.h"
 #include "FallOffDeath.h"
 #include "PlatformEffector.h"
 #include "TestCharacter.h"
+#include "Text.h"
+#include "CharacterBadge.h"
 #include "PlatformDrop.h"
 #include "CameraFollower.h"
 #include "Animator.h"
@@ -168,7 +171,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     // === ATTACKING
 
     // Give it a character to differentiate which animations to play for each attack
-    character->AddComponent<TestCharacter>();
+    auto selectedCharacter = character->AddComponent<TestCharacter>();
 
     // Make it vulnerable
     character->AddComponent<Heat>(1);
@@ -191,6 +194,18 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // Give it the landing attack effector
     character->AddComponent<LandingAttackEffector>(effectorCondition);
+
+    // === HEAT DISPLAY
+
+    // Add display in a separate child
+    auto display = character->CreateChild(CHARACTER_BADGE_OBJECT, {0, -collider->GetBox().height / 2 - 0.5f});
+
+    // Add text
+    auto badgeText = display->AddComponent<Text>("0.0", "./assets/engine/fonts/PixelOperator.ttf", 30);
+    badgeText->SetBorderSize(3);
+
+    // Add the badge
+    display->AddComponent<CharacterBadge>(selectedCharacter);
   };
 }
 

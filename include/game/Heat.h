@@ -14,6 +14,9 @@ public:
   // Max value heat can assume
   static const float maxHeat;
 
+  // When some damage is taken
+  EventI<Damage> OnTakeDamage;
+
   Heat(GameObject &associatedObject, float armor);
   virtual ~Heat() {}
 

@@ -15,16 +15,16 @@ public:
   enum class Style
   {
     // Default text
-    solid,
+    Solid,
     // With black background
-    shaded,
+    Shaded,
     // With smoothed edges (more resource intensive)
-    blended
+    Blended
   };
 
   Text(
       GameObject &associatedObject, std::string text, std::string fontPath,
-      int size = 10, Style style = Style::solid, Color color = Color::White());
+      int size = 10, Style style = Style::Solid, Color color = Color::White());
 
   virtual ~Text() {}
 
@@ -33,19 +33,24 @@ public:
 
   void SetFontFile(const std::string fontPath);
 
-  int GetWidth() const { return width; }
-  int GetHeight() const { return height; }
+  int GetWidth() const { return pixelWidth; }
+  int GetHeight() const { return pixelHeight; }
 
   void SetText(std::string text);
   void SetColor(Color color);
   void SetStyle(Style style);
   void SetFontSize(int fontSize);
+  void SetBorderSize(int borderSize);
+  void SetBorderColor(Color borderColor);
 
   // Getters aren't necessary yet so weren't implemented
 
 private:
-  // Remakes the texture according to the new text settings
+  // Recreates the main texture, applying a border
   void RemakeTexture();
+
+  // Gets a simple texture for the current text, with the specified color
+  auto_unique_ptr<SDL_Texture> GetTextureWithColor(Color targetColor);
 
   // Which text to show
   std::string text;
@@ -59,6 +64,12 @@ private:
   // Color of the font
   Color color;
 
+  // Pixel size of border
+  size_t borderPixels{0};
+
+  // Color of border
+  Color borderColor{Color::Black()};
+
   // The file path to the font
   std::string fontPath;
 
@@ -66,13 +77,16 @@ private:
   std::shared_ptr<TTF_Font> font;
 
   // Texture of text
-  auto_unique_ptr<SDL_Texture> texture;
+  auto_unique_ptr<SDL_Texture> mainTexture;
 
   // Quick access to texture width
-  int width{0};
+  int pixelWidth{0};
 
   // Quick access to texture height
-  int height{0};
+  int pixelHeight{0};
+
+  // Format to use when creating textures
+  Uint32 textureFormat;
 };
 
 #endif
