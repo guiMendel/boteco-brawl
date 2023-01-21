@@ -123,6 +123,9 @@ public:
 
   void RegisterLayerRenderer(std::shared_ptr<Component> component);
 
+  // Sorts the layer by the components render order
+  void Sort(std::vector<std::weak_ptr<Component>> &components);
+
   std::list<std::shared_ptr<Camera>> GetCameras();
 
   // The state's own physics system instance

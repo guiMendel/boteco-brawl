@@ -30,6 +30,7 @@ public:
 
   void Render() override;
   RenderLayer GetRenderLayer() override { return RenderLayer::UI; }
+  int GetRenderOrder() override { return renderOrder; }
 
   void SetFontFile(const std::string fontPath);
 
@@ -43,7 +44,15 @@ public:
   void SetBorderSize(int borderSize);
   void SetBorderColor(Color borderColor);
 
-  // Getters aren't necessary yet so weren't implemented
+  std::string GetText();
+  Color GetColor();
+  Style GetStyle();
+  int GetFontSize();
+  int GetBorderSize();
+  Color GetBorderColor();
+
+  // Order in which to render;
+  int renderOrder{0};
 
 private:
   // Recreates the main texture, applying a border

@@ -62,7 +62,11 @@ void Text::SetStyle(Style style)
 
 void Text::SetFontSize(int fontSize)
 {
+  if (fontSize == this->fontSize)
+    return;
+
   this->fontSize = fontSize;
+  this->font = Resources::GetFont(fontPath, fontSize);
   RemakeTexture();
 }
 
@@ -162,7 +166,12 @@ void Text::RemakeTexture()
 
 void Text::SetFontFile(const string fontPath)
 {
+  if (fontPath == this->fontPath)
+    return;
+
   this->fontPath = fontPath;
+  this->font = Resources::GetFont(fontPath, fontSize);
+
   RemakeTexture();
 }
 
@@ -177,3 +186,10 @@ void Text::SetBorderColor(Color borderColor)
   this->borderColor = borderColor;
   RemakeTexture();
 }
+
+string Text::GetText() { return text; }
+Color Text::GetColor() { return color; }
+Text::Style Text::GetStyle() { return style; }
+int Text::GetFontSize() { return fontSize; }
+int Text::GetBorderSize() { return borderPixels; }
+Color Text::GetBorderColor() { return borderColor; }

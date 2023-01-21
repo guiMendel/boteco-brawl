@@ -9,13 +9,17 @@
 class CharacterBadge : public Component
 {
 public:
+  // How quickly the text size multiplier decays back to 1
+  static const float textSizeMultiplierDecay;
+
   CharacterBadge(GameObject &associatedObject, std::shared_ptr<Character> character);
   virtual ~CharacterBadge() {}
 
   void Start() override;
+  void Update(float) override;
 
   // Set the heat damage to the display text
-  void UpdateDisplay() const;
+  void UpdateDisplay(float damage);
 
 private:
   // Reference to character
@@ -23,6 +27,12 @@ private:
 
   // Reference to text
   std::weak_ptr<Text> weakText;
+
+  // Original size of text
+  int originalTextSize;
+
+  // Current modifier applied to text size
+  float textSizeModifier{1};
 };
 
 #endif

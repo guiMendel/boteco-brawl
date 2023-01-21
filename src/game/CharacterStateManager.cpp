@@ -109,10 +109,10 @@ void CharacterStateManager::SetSequenceIndex(shared_ptr<Action> action)
 
 void CharacterStateManager::Perform(shared_ptr<Action> action, bool canDelay)
 {
-  cout << "States: ";
-  for (auto state : states)
-    cout << state->name << " ";
-  cout << endl;
+  // cout << "States: ";
+  // for (auto state : states)
+  //   cout << state->name << " ";
+  // cout << endl;
 
   // Set incoming action's sequence index
   SetSequenceIndex(action);

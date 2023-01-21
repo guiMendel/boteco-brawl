@@ -237,8 +237,6 @@ InnerLoopAnimation::InnerLoopAnimation(Animator &animator) : AttackAnimation(ani
 
       IF_LOCK(weakActionState, actionState)
       {
-        cout << "Action released: " << actionState->ActionInputReleased() << endl;
-
         if (
             // Either action input was released
             (actionState->ActionInputReleased() ||

@@ -126,7 +126,7 @@ void Heat::TriggerHitEffect(Damage damage)
     shakeManager->Shake(
         gameObject.GetShared(),
         impulse.Angle(),
-        {min(log10f(damage.impulse.magnitude - 10) / 2, 1.0f), 0},
+        {log10f(damage.impulse.magnitude - 10) / 2, 0},
         {0.2, 0.01},
         duration, 0);
 }
