@@ -12,6 +12,7 @@
 #define SPECIAL_ATTACKING_STATE "specialAttacking"
 #define LANDING_STATE "landing"
 #define RECOVERING_STATE "recovering"
+#define STUNNED_STATE "stunned"
 
 class CharacterState;
 class Action;
@@ -26,7 +27,12 @@ public:
   static std::shared_ptr<CharacterState> AirAttacking(std::shared_ptr<Action>);
   static std::shared_ptr<CharacterState> SpecialAttacking(std::shared_ptr<Action>);
   static std::shared_ptr<CharacterState> Landing(std::shared_ptr<Action>);
+
+  // After performing an action which warrants recovery time
   static std::shared_ptr<CharacterState> Recovering(std::shared_ptr<Action>);
+
+  // After sustaining a blow
+  static std::shared_ptr<CharacterState> Stunned(std::shared_ptr<Action>);
 };
 
 #endif

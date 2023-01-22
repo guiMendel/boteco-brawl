@@ -387,6 +387,18 @@ vector<AnimationFrame> Projectile::InitializeFrames()
   return frames;
 }
 
+// === CRASH
+
+vector<AnimationFrame> Crash::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/get-up.png",
+                               SpritesheetClipInfo(8, 8), 0.15)};
+
+  frames[0].SetDuration(0.6);
+
+  return frames;
+}
+
 // === HELPER FUNCTIONS DEFINITIONS
 
 void SplitLastFrame(vector<AnimationFrame> &frames, int numberOfInstances, float newDuration)

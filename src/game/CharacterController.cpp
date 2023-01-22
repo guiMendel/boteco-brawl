@@ -8,8 +8,14 @@
 #include "PlayerInput.h"
 #include <iostream>
 
-// Min speed that trigger landing animation on land
-const static float minLandAnimationSpeed{1};
+// Min speed that triggers landing animation on land
+const static float minLandAnimationSpeed{2};
+
+// Min speed at which character crashes on ground instead of landing (only when stunned)
+const static float minCrashSpeed{7};
+
+// Min speed at which character bounces off the ground instead of crashing or landing
+const static float minBounceSpeed{13};
 
 using namespace std;
 
@@ -21,6 +27,11 @@ CharacterController::CharacterController(GameObject &associatedObject)
       movement(*gameObject.RequireComponent<Movement>()),
       rigidbody(*gameObject.RequireComponent<Rigidbody>()),
       animator(*gameObject.RequireComponent<Animator>()) {}
+
+void CharacterController::PhysicsUpdate(float)
+{
+  lastVelocity = rigidbody.velocity;
+}
 
 void CharacterController::Update(float deltaTime)
 {
@@ -37,7 +48,7 @@ void CharacterController::HandleMovementAnimation()
   auto states = stateManager.GetStates();
 
   // Whether just moving
-  bool justMoving = states.size() == 1 && states.front()->name == "moving";
+  bool justMoving = states.size() == 1 && stateManager.HasState(MOVING_STATE);
 
   if (movement.IsGrounded())
   {
@@ -55,16 +66,25 @@ void CharacterController::HandleMovementAnimation()
 
     // Otherwise, stop run animation if it's playing
     else if (animator.GetCurrentAnimation()->Name() == "run" || animator.GetCurrentAnimation()->Name() == "brake")
-      // else if (animator.GetCurrentAnimation() == "run")
       animator.Play("idle");
+
+    // Also brake when in movement but in idle state
+    if (animator.GetCurrentAnimation()->Name() == animator.defaultAnimation && abs(rigidbody.velocity.x) > 0.5f)
+      animator.Play("brake");
   }
 
+  // When not grounded
   else
-    // When not grounded, rise & fall animations
+  {
+    // Rise & fall animations
     if (justMoving || states.size() == 0)
-    {
       animator.Play(rigidbody.velocity.y < -0.01f ? "rise" : "fall");
-    }
+
+    // Stun spin
+    if (stateManager.HasState(STUNNED_STATE) &&
+        animator.GetCurrentAnimation()->Name() == animator.defaultAnimation)
+      animator.Play("spin");
+  }
 }
 
 void CharacterController::Start()
@@ -158,11 +178,19 @@ void CharacterController::AnnounceInputRelease(std::string targetState)
 
 void CharacterController::OnLand()
 {
+  cout << gameObject << " reaching ground with " << lastVelocity << endl;
+  
+  auto sqrSpeed = lastVelocity.SqrMagnitude();
+
+  // Check if will actually just bounce right off
+  if (stateManager.HasState(STUNNED_STATE) && sqrSpeed >= minBounceSpeed * minBounceSpeed)
+    return;
+
   // Restore air dash
   airDashAvailable = true;
 
-  // If no control on reach ground, crash instead of landing
-  if (stateManager.HasControl() == false)
+  // If stunned on reach ground, crash instead of landing
+  if (stateManager.HasState(STUNNED_STATE) && sqrSpeed >= minCrashSpeed * minCrashSpeed)
   {
     DispatchNonDelayable<Actions::Crash>();
     return;
@@ -181,9 +209,7 @@ void CharacterController::OnLand()
   }
 
   // Perform land action if velocity is big enough
-  static const float sqrMinSpeed = minLandAnimationSpeed * minLandAnimationSpeed;
-
-  if (rigidbody.velocity.SqrMagnitude() >= sqrMinSpeed)
+  if (sqrSpeed >= minLandAnimationSpeed * minLandAnimationSpeed)
     DispatchNonDelayable<Actions::Land>();
 
   else if (stateManager.GetStates().size() == 0)

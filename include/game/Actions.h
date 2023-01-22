@@ -15,6 +15,9 @@
 #define JUMP_PRIORITY 1
 #define LAND_PRIORITY 2
 
+// Action timer names
+#define STUN_DURATION_TIMER "stun-duration"
+
 // Shorthand for attack actions
 #define ATTACK(actionName, animationName)                       \
   struct actionName : public AttackAction                       \
@@ -101,18 +104,16 @@ namespace Actions
   struct TakeDamage : public Action
   {
     void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
-    void StopHook(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
 
     int GetPriority() const override { return TAKE_DAMAGE_PRIORITY; }
 
     std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override
     {
-      return damage.stunTime > 0 ? CharacterStateRecipes::Recovering(sharedAction) : nullptr;
+      return damage.stunTime > 0 ? CharacterStateRecipes::Stunned(sharedAction) : nullptr;
     }
 
     TakeDamage(Damage damage) : damage(damage) {}
     Damage damage;
-    std::string ouchAnimation;
   };
 
   struct Jump : public AnimationAction

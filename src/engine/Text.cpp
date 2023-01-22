@@ -44,8 +44,6 @@ void Text::SetText(string text)
 {
   this->text = text;
   RemakeTexture();
-
-  cout << "new text: " << text << endl;
 }
 
 void Text::SetColor(Color color)

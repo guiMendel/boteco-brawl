@@ -5,6 +5,7 @@
 #include <string>
 
 // Allows storing timers in seconds
+// Timer always increase
 class Timer
 {
   struct Entry

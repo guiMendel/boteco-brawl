@@ -44,9 +44,9 @@ void MainState::InitializeObjects()
 
   auto character2 = CreateObject("Character2", ObjectRecipes::Character(player2), Vector2(3.5, -10))->GetComponent<Rigidbody>();
 
-  CreateObject("Ground", ObjectRecipes::Platform({10, 2}), Vector2(0, 4));
-  CreateObject("LeftWall", ObjectRecipes::Platform({2, 10}), Vector2(-6, 2));
-  CreateObject("RightWall", ObjectRecipes::Platform({2, 10}), Vector2(6, 2));
+  CreateObject("Ground", ObjectRecipes::Platform({20, 2}), Vector2(0, 4));
+  CreateObject("LeftWall", ObjectRecipes::Platform({2, 10}), Vector2(-10, 2));
+  CreateObject("RightWall", ObjectRecipes::Platform({2, 10}), Vector2(10, 2));
 
   CreateObject("Platform", ObjectRecipes::Platform({2, 0.5}, true), Vector2(0, 0));
 

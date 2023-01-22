@@ -22,6 +22,7 @@ public:
 private:
   void Start() override;
   void Update(float deltaTime) override;
+  void PhysicsUpdate(float deltaTime) override;
 
   template <class ActionType, typename... Args>
   void Dispatch(Args &&...args)
@@ -55,6 +56,8 @@ private:
 
   // How long (seconds) character must wait between successive dashes
   static const float totalDashCooldown;
+
+  Vector2 lastVelocity;
 
   CharacterStateManager &stateManager;
   Movement &movement;

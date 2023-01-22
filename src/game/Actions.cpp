@@ -45,9 +45,6 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   // Align facing direction to dash direction
   target.localScale.x = Helper::GetSign(direction.x, target.localScale.x);
 
-  // Disable character control
-  character->SetControl(false);
-
   // Store these info
   int dashStateId = dashState->id;
 
@@ -109,7 +106,6 @@ void Dash::StopHook(GameObject &target, shared_ptr<CharacterState>)
   // Restore original values
   rigidbody->gravityScale = Vector2::One();
   rigidbody->airFriction = 0;
-  target.GetComponent<CharacterStateManager>()->SetControl(true);
 
   // Stop particles
   target.GetChild(DASH_PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>()->Stop();
@@ -117,7 +113,7 @@ void Dash::StopHook(GameObject &target, shared_ptr<CharacterState>)
 
 // ============================= TAKE DAMAGE =============================
 
-void TakeDamage::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
+void TakeDamage::Trigger(GameObject &target, shared_ptr<CharacterState>)
 {
   // Get target's heat
   auto heat = target.RequireComponent<Heat>();
@@ -125,34 +121,18 @@ void TakeDamage::Trigger(GameObject &target, shared_ptr<CharacterState> actionSt
   // Apply the damage to it
   heat->TakeDamage(damage);
 
+  // Start the remove timer
+  target.timer.Reset(STUN_DURATION_TIMER, -damage.stunTime);
+
   // If it has stun time
   if (damage.stunTime > 0)
   {
     // Pick an ouch animation
-    ouchAnimation = "ouch" + to_string(RandomRange(1, 3));
+    string ouchAnimation = "ouch" + to_string(RandomRange(1, 3));
 
     // Play it
     target.RequireComponent<Animator>()->Play(ouchAnimation);
-    // Store these
-    int actionStateId = actionState->id;
-    auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());
-
-    // Remove state after stun time
-    auto removeState = [actionStateId, weakStateManager]()
-    {
-      IF_LOCK(weakStateManager, stateManager)
-      {
-        stateManager->RemoveState(actionStateId);
-      }
-    };
-
-    target.DelayFunction(removeState, damage.stunTime);
   }
-}
-
-void TakeDamage::StopHook(GameObject &target, shared_ptr<CharacterState>)
-{
-  target.RequireComponent<Animator>()->Stop(ouchAnimation);
 }
 
 // ============================= RIPOSTE =============================

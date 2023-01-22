@@ -10,7 +10,7 @@ using namespace std;
 const float jumpCooldown{0.1f};
 
 // How far from the ground character can jump
-const float jumpRange{0.2f};
+const float groundedRange{0.2f};
 
 const float Movement::totalCoyoteTime{0.2f};
 
@@ -58,6 +58,9 @@ void Movement::OnLandInternal()
 
 void Movement::PhysicsUpdate(float deltaTime)
 {
+  // Update grounded state
+  GroundCheck();
+
   // Discount gravity modifier
   if (currentGravityModifier > 1)
   {
@@ -75,9 +78,6 @@ void Movement::PhysicsUpdate(float deltaTime)
 
 void Movement::Update(float deltaTime)
 {
-  // Update grounded state
-  GroundCheck();
-
   // Update coyote timer
   if (IsGrounded() == false && remainingCoyoteTime > 0)
     remainingCoyoteTime -= deltaTime;
@@ -91,7 +91,7 @@ void Movement::Update(float deltaTime)
 
 void Movement::Run(float deltaTime)
 {
-  if (targetSpeed == rigidbody.velocity.x || stateManager.HasControl() == false)
+  if (targetSpeed == rigidbody.velocity.x)
     return;
 
   // Use deceleration modifier
@@ -202,7 +202,7 @@ void Movement::GroundCheck()
   // Update old value
   wasGrounded = isGrounded;
 
-  isGrounded = rigidbody.ColliderCast(M_PI / 2, feetDistance + jumpRange, 0.9f);
+  isGrounded = rigidbody.ColliderCast(M_PI / 2, groundedRange, 0.9f);
 
   if (wasGrounded == false && isGrounded)
   {

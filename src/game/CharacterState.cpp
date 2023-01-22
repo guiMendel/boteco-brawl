@@ -20,3 +20,11 @@ void CharacterState::ReleaseActionInput()
   actionInputReleased = true;
   OnActionInputRelease.Invoke();
 }
+
+bool CharacterState::RemoveRequested(std::shared_ptr<CharacterStateManager> stateManager)
+{
+  if (removeCondition == nullptr)
+    return false;
+
+  return removeCondition(stateManager);
+}

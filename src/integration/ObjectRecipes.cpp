@@ -101,6 +101,8 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     animator->RegisterAnimation<GeneralAnimations::SpecialHorizontal>();
     animator->RegisterAnimation<GeneralAnimations::Riposte>();
     animator->RegisterAnimation<GeneralAnimations::LandingAttack>();
+    animator->RegisterAnimation<GeneralAnimations::Crash>();
+    animator->RegisterAnimation<GeneralAnimations::Spin>();
 
     // === COLLISION
 

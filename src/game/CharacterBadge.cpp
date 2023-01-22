@@ -37,8 +37,6 @@ void CharacterBadge::Update(float deltaTime)
     // Apply new multiplier
     LOCK(weakText, text);
 
-    cout << "Multiplier: " << textSizeModifier << endl;
-
     text->SetFontSize(round(originalTextSize * textSizeModifier));
   }
 }

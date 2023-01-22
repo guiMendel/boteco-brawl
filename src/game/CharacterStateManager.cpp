@@ -3,13 +3,38 @@
 #include <algorithm>
 #include <typeinfo>
 
+#define CONTROL_RECOVER_TIMER "control-recover"
+
 using namespace std;
+
+const float CharacterStateManager::dangerousFlySpeed{15};
+
 const float CharacterStateManager::maxActionDelay{1};
 
 CharacterStateManager::CharacterStateManager(GameObject &associatedObject)
     : Component(associatedObject) {}
 
 void CharacterStateManager::Update(float deltaTime)
+{
+  HandleStateExpiration();
+
+  HandleQueuedAction(deltaTime);
+
+  // Raise control change
+  bool frameControl = HasControl();
+
+  if (lastFrameControl != frameControl)
+    OnControlChange.Invoke(frameControl);
+
+  lastFrameControl = frameControl;
+}
+
+void CharacterStateManager::Awake()
+{
+  weakBody = gameObject.RequireComponent<Rigidbody>();
+}
+
+void CharacterStateManager::HandleQueuedAction(float deltaTime)
 {
   if (queuedActionTTL <= 0)
     return;
@@ -36,10 +61,10 @@ void CharacterStateManager::SetState(shared_ptr<CharacterState> newState, unorde
   // Add it
   AddState(newState);
 
+  // Remove other states
   // Make sure not to remove it right away
   keepStates.insert(newState->name);
 
-  // Remove other states
   RemoveStatesNotIn(keepStates, true);
 }
 
@@ -92,7 +117,7 @@ bool CharacterStateManager::CanPerform(std::shared_ptr<Action> action)
   return action->IsValid(gameObject) && any_of(states.begin(), states.end(), stateBlocksAction) == false;
 }
 
-void CharacterStateManager::SetSequenceIndex(shared_ptr<Action> action)
+void CharacterStateManager::SetActionSequenceIndex(shared_ptr<Action> action)
 {
   // For each state
   for (auto state : states)
@@ -115,7 +140,7 @@ void CharacterStateManager::Perform(shared_ptr<Action> action, bool canDelay)
   // cout << endl;
 
   // Set incoming action's sequence index
-  SetSequenceIndex(action);
+  SetActionSequenceIndex(action);
 
   if (CanPerform(action) == false)
   {
@@ -194,16 +219,6 @@ void CharacterStateManager::AddState(std::shared_ptr<CharacterState> newState)
   states.push_back(newState);
 }
 
-void CharacterStateManager::SetControl(bool value)
-{
-  if (hasControl == value)
-    return;
-
-  hasControl = value;
-
-  OnControlChange.Invoke(value);
-}
-
 bool CharacterStateManager::HasState(std::string stateName)
 {
   return find_if(states.begin(), states.end(), [stateName](shared_ptr<CharacterState> state)
@@ -211,3 +226,29 @@ bool CharacterStateManager::HasState(std::string stateName)
 }
 
 shared_ptr<Action> CharacterStateManager::GetQueuedAction() const { return queuedAction; }
+
+bool CharacterStateManager::HasControl() const
+{
+  // If any state loses control, no control
+  return all_of(states.begin(), states.end(), [](shared_ptr<CharacterState> state)
+                { return state->losesControl == false; });
+}
+
+void CharacterStateManager::HandleStateExpiration()
+{
+  auto shared = dynamic_pointer_cast<CharacterStateManager>(GetShared());
+  
+  auto stateIterator = states.begin();
+  while (stateIterator != states.end())
+  {
+    auto state = *stateIterator;
+
+    // Remove it if requested
+    if (state->RemoveRequested(shared))
+      stateIterator = RemoveState(stateIterator, false);
+
+    // Otherwise, cary on
+    else
+      stateIterator++;
+  }
+}

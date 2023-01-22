@@ -7,6 +7,7 @@ using namespace Helper;
 
 const float Heat::maxHeat{200};
 const float Heat::inverseMaxHeat{1.0f / maxHeat};
+const float Heat::blowLift{0.25f};
 
 void PlayHitParticles(Vector2 source);
 
@@ -67,7 +68,7 @@ void Heat::TakeDamage(Damage damage)
   // When grounded
   if (movement->IsGrounded())
     // Instantly lift target a little bit from the floor
-    gameObject.Translate({0, -0.15});
+    gameObject.Translate({0, -blowLift});
 
   // Apply impulse
   body->ApplyImpulse(impulse);
@@ -108,7 +109,7 @@ void Heat::TriggerHitEffect(Damage damage)
 
   // Calculate duration
   float duration = min(impulseFactor * damage.impulse.magnitude, maxDuration);
-  cout << "duration " << duration << endl;
+  // cout << "duration " << duration << endl;
 
   // Apply to self
   timeScaleManager->AlterTimeScale(gameObject.GetShared(), 0.00001, duration);

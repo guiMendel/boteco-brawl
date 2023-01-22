@@ -3,6 +3,7 @@
 
 #include "Component.h"
 
+// Base class for defining specific characteristics for each of the game's characters
 class Character : public Component
 {
 public:

@@ -332,7 +332,7 @@ public:
 
   void CancelDelayedFunction(int tokenId);
 
-  // A timer helper
+  // A timer helper. Stored values are increased each frame
   Timer timer;
 
 private:

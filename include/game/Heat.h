@@ -11,6 +11,9 @@
 struct Heat : public Component
 {
 public:
+  // How much characters get lifted from the ground when taking a blow
+  static const float blowLift;
+
   // Max value heat can assume
   static const float maxHeat;
 

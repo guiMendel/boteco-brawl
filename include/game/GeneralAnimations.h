@@ -141,7 +141,7 @@ namespace GeneralAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Land)
 
     DEF_NAME("land")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 1, 4), 0.1))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 1, 4), 0.15))
   };
 
   class Brake : public StatefulAnimation
@@ -161,9 +161,7 @@ namespace GeneralAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Ouch1)
 
     DEF_NAME("ouch1")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/ouch.png", SpritesheetClipInfo(8, 8, 1), 0.1))
-
-    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/ouch.png", SpritesheetClipInfo(8, 8, 1), 0.2))
   };
 
   class Ouch2 : public StatefulAnimation
@@ -172,9 +170,7 @@ namespace GeneralAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Ouch2)
 
     DEF_NAME("ouch2")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/ouch.png", SpritesheetClipInfo(8, 8, 1, 1), 0.1))
-
-    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/ouch.png", SpritesheetClipInfo(8, 8, 1, 1), 0.2))
   };
 
   class Dash : public StatefulAnimation
@@ -227,7 +223,7 @@ namespace GeneralAnimations
 
     SET_DAMAGE(
         Helper::Lerp(1.2f, 3.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
-        AttackImpulse(Vector2::AngledDegrees(-5),
+        AttackImpulse(Vector2::AngledDegrees(-20),
                       Helper::Lerp(5.5f, 10.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
         0.6)
 
@@ -336,6 +332,26 @@ namespace GeneralAnimations
 
     // Speed at which ground was intercepted
     float landingSpeed;
+  };
+
+  class Spin : public StatefulAnimation
+  {
+  public:
+    CONSTRUCTOR_AND_DESTRUCTOR(Spin)
+
+    DEF_NAME("spin")
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/spinning.png", SpritesheetClipInfo(10, 10), 0.15))
+
+    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
+  };
+
+  class Crash : public StatefulAnimation
+  {
+  public:
+    CONSTRUCTOR_AND_DESTRUCTOR(Crash)
+
+    DEF_NAME("crash")
+    DELCARE_FRAMES
   };
 
   class Projectile : public AttackAnimation
