@@ -1,4 +1,5 @@
 #include "GeneralAnimations.h"
+#include "CharacterVFX.h"
 #include "ShakeEffectManager.h"
 #include "GunParry.h"
 #include "ParticleFX.h"
@@ -21,17 +22,8 @@ vector<AnimationFrame> Jump::InitializeFrames()
   auto frames{SliceSpritesheet("./assets/sprites/jump.png",
                                SpritesheetClipInfo(8, 8, 2), 0.1)};
 
-  // Particles to emit on jump
-  ParticleEmissionParameters particleEmission;
-  particleEmission.angle = {DegreesToRadians(-135), DegreesToRadians(-100)};
-  particleEmission.color = {Color::Black(), Color::Gray()};
-  particleEmission.frequency = {0.0005, 0.02};
-  particleEmission.lifetime = {0.2, 1.0};
-  particleEmission.speed = {3, 8};
-  particleEmission.gravityModifier = {Vector2::One(), Vector2::One()};
-
   // Add jump impulse to jump frame
-  auto callback = [particleEmission](GameObject &object)
+  auto callback = [](GameObject &object)
   {
     // Jump
     auto movement = object.RequireComponent<Movement>();
@@ -43,19 +35,11 @@ vector<AnimationFrame> Jump::InitializeFrames()
 
     // Get emission position
     auto colliderBox = object.RequireComponent<BoxCollider>()->GetBox();
-    auto offset = Vector2(-colliderBox.width / 4, colliderBox.height / 2);
 
-    // Particles
-    auto emission = particleEmission;
-
-    if (object.localScale.x < 0)
-    {
-      offset.x *= -1;
-      emission.angle.first = M_PI - emission.angle.first;
-      emission.angle.second = M_PI - emission.angle.second;
-    }
-
-    ParticleFX::EffectAt(object.GetPosition() + offset, 0.1, 0.1, emission, 3.0);
+    object.RequireComponent<CharacterVFX>()->PlayDust(
+      Vector2(-colliderBox.width / 4, colliderBox.height / 2),
+      {DegreesToRadians(-135), DegreesToRadians(-100)} 
+    );
   };
 
   frames[1].AddCallback(callback);

@@ -20,7 +20,7 @@ public:
   FallOffDeath(GameObject &associatedObject);
   virtual ~FallOffDeath() {}
 
-  void Update(float);
+  void Update(float) override;
 
   // Disable or enable the character (remove it from arena)
   void SetCharacterActive(bool active);

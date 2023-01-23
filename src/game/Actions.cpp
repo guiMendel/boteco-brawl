@@ -1,4 +1,5 @@
 #include "Actions.h"
+#include "CharacterVFX.h"
 #include "Movement.h"
 #include "Animation.h"
 #include "Rigidbody.h"
@@ -92,11 +93,7 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   animator->Play(animation);
 
   // Play particles
-  auto particleObject = target.GetChild(DASH_PARTICLES_OBJECT);
-
-  Assert(particleObject != nullptr, target.GetName() + " had no " DASH_PARTICLES_OBJECT " child");
-
-  particleObject->RequireComponent<ParticleEmitter>()->StartEmission();
+  target.RequireComponent<CharacterVFX>()->StartDash();
 }
 
 void Dash::StopHook(GameObject &target, shared_ptr<CharacterState>)
@@ -108,7 +105,7 @@ void Dash::StopHook(GameObject &target, shared_ptr<CharacterState>)
   rigidbody->airFriction = 0;
 
   // Stop particles
-  target.GetChild(DASH_PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>()->Stop();
+  target.RequireComponent<CharacterVFX>()->StopDash();
 }
 
 // ============================= TAKE DAMAGE =============================

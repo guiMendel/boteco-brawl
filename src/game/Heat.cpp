@@ -1,4 +1,5 @@
 #include "Heat.h"
+#include "CharacterVFX.h"
 #include "FallOffDeath.h"
 #include "ParticleFX.h"
 
@@ -8,8 +9,6 @@ using namespace Helper;
 const float Heat::maxHeat{200};
 const float Heat::inverseMaxHeat{1.0f / maxHeat};
 const float Heat::blowLift{0.25f};
-
-void PlayHitParticles(Vector2 source);
 
 Heat::Heat(GameObject &associatedObject, float armor)
     : Component(associatedObject) { SetArmor(armor); }
@@ -96,7 +95,7 @@ void Heat::TakeDamage(Damage damage)
   TriggerHitEffect(damage);
 
   // Particle effect
-  PlayHitParticles(gameObject.GetPosition());
+  gameObject.RequireComponent<CharacterVFX>()->PlaySparks({0, 0}, {0.01, 0.001});
 
   OnTakeDamage.Invoke(damage);
 }
@@ -136,24 +135,6 @@ void Heat::TriggerHitEffect(Damage damage)
         {log10f(damage.impulse.magnitude - 10) / 2, 0},
         {0.2, 0.01},
         duration, 0);
-}
-
-void PlayHitParticles(Vector2 source)
-{
-  // Get random angle
-  float angleCenter = RandomRange(0, 2 * M_PI);
-
-  // Arc of hit effect
-  static const float effectArc{DegreesToRadians(30)};
-
-  ParticleEmissionParameters params;
-  params.color = {Color::Yellow(), Color::White()};
-  params.speed = {-25, 25};
-  params.frequency = {0.005, 0.0005};
-  params.lifetime = {0.01, 0.1};
-  params.angle = {angleCenter + effectArc / 2, angleCenter - effectArc / 2};
-
-  ParticleFX::EffectAt(source, 0.1, 0.05, params, 0.2);
 }
 
 void Heat::OnCollisionEnter(Collision::Data)

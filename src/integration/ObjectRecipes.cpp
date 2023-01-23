@@ -1,4 +1,5 @@
 #include "ObjectRecipes.h"
+#include "CharacterVFX.h"
 #include "ObjectRecipes.h"
 #include "LandingAttackEffector.h"
 #include "Arena.h"
@@ -115,20 +116,8 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // === PARTICLE EFFECTS
 
-    // Give it a dash particle emitter
-    auto dashParticleObject = character->CreateChild(DASH_PARTICLES_OBJECT);
-    auto particleEmitter = dashParticleObject->AddComponent<ParticleEmitter>(RenderLayer::VFX, 0.25, true, 5);
-    particleEmitter->SetOffset({0, 0.25});
-    particleEmitter->emission.color = {Color::Black(), Color::Gray()};
-    particleEmitter->emission.frequency = {0.0001, 0.001};
-    particleEmitter->emission.speed = {0.01, 0.1};
-    particleEmitter->emission.lifetime = {0.2, 0.6};
-    particleEmitter->emitOnStart = false;
-    // Reduce frequency over emission
-    particleEmitter->emissionEvolution = [](ParticleEmissionParameters &params, float deltaTime)
-    { auto reduction = 0.5 * deltaTime;
-      params.frequency = {params.frequency.first + reduction,
-                          params.frequency.second + reduction}; };
+    // Give it VFX emitters
+    character->AddComponent<CharacterVFX>();
 
     // === DYING FROM FALLING OFF
 
