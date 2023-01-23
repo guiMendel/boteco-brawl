@@ -4,6 +4,7 @@
 #include "Component.h"
 #include "ParticleEmitter.h"
 #include "ParticleFX.h"
+#include "Rigidbody.h"
 
 #define PARTICLE_EMITTER_OBJECT "ParticleEffects"
 
@@ -16,7 +17,6 @@ public:
   CharacterVFX(GameObject &associatedObject);
   virtual ~CharacterVFX() {}
 
-  // void Update(float) override;
   void Awake() override;
 
   // Plays dust particles
@@ -31,6 +31,7 @@ public:
 private:
   std::weak_ptr<ParticleEmitter> weakDashEmitter;
   std::weak_ptr<ParticleEmitter> weakSmokeEmitter;
+  std::weak_ptr<Rigidbody> weakBody;
 };
 
 #endif

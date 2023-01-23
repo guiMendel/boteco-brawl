@@ -66,7 +66,7 @@ void CharacterStateManager::Awake()
 {
   weakBody = gameObject.RequireComponent<Rigidbody>();
 
-  auto bounceIfTooFast = [this](Damage)
+  auto bounceIfTooFast = [this](Damage, float)
   {
     LOCK(weakBody, body);
 

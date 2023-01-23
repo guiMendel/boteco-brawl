@@ -16,11 +16,11 @@ CharacterBadge::CharacterBadge(GameObject &associatedObject, shared_ptr<Characte
 
 void CharacterBadge::Start()
 {
-  gameObject.GetParent()->RequireComponent<Heat>()->OnTakeDamage.AddListener("update-heat-display", [this](Damage damage)
+  gameObject.GetParent()->RequireComponent<Heat>()->OnTakeDamage.AddListener("update-heat-display", [this](Damage damage, float)
                                                                              { UpdateDisplay(damage.heatDamage); });
 
   gameObject.GetParent()->RequireComponent<FallOffDeath>()->OnDeath.AddListener("update-heat-display", [this]()
-                                                                             { UpdateDisplay(0); });
+                                                                                { UpdateDisplay(0); });
 
   UpdateDisplay(0);
 }

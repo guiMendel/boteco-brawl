@@ -117,6 +117,9 @@ void ParticleEmitter::StartEmission()
 
 void ParticleEmitter::Stop()
 {
+  if (active == false)
+    return;
+    
   cycleLifetime = 0;
   active = false;
   OnStop.Invoke();

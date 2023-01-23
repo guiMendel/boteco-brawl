@@ -1,10 +1,16 @@
 #include "CharacterVFX.h"
+#include "Heat.h"
 #include "BoxCollider.h"
+
+// Minimum speed to start emitting smoke
+static const float minSmokeSpeed{6};
 
 CharacterVFX::CharacterVFX(GameObject &associatedObject) : Component(associatedObject) {}
 
 void CharacterVFX::Awake()
 {
+  weakBody = gameObject.RequireComponent<Rigidbody>();
+
   auto emitterObject = gameObject.CreateChild(PARTICLE_EMITTER_OBJECT);
   auto characterBox = gameObject.RequireComponent<BoxCollider>()->GetBox();
 
@@ -14,8 +20,7 @@ void CharacterVFX::Awake()
 
   weakDashEmitter = dashEmitter;
 
-  dashEmitter->SetOffset({0, 0.25});
-  dashEmitter->emission.color = {Color::Black(), Color::Gray()};
+  dashEmitter->emission.color = {Color::White(), Color::Gray()};
   dashEmitter->emission.frequency = {0.0001, 0.001};
   dashEmitter->emission.speed = {0.01, 0.1};
   dashEmitter->emission.lifetime = {0.2, 0.6};
@@ -35,6 +40,42 @@ void CharacterVFX::Awake()
   weakSmokeEmitter = smokeEmitter;
 
   smokeEmitter->emitOnStart = false;
+  smokeEmitter->emission.color = {{255, 255, 255, 125}, Color::Gray()};
+  smokeEmitter->emission.frequency = {0.01, 0.005};
+  smokeEmitter->emission.speed = {0.05, 0.5};
+  smokeEmitter->emission.lifetime = {0.5, 1.4};
+  smokeEmitter->emission.gravityModifier = {Vector2::Up(0.05), Vector2::Zero()};
+  smokeEmitter->emitOnStart = false;
+  smokeEmitter->emissionEvolution = [this](ParticleEmissionParameters &params, float)
+  {
+    LOCK(weakBody, body);
+
+    float sqrSpeed = body->velocity.SqrMagnitude();
+
+    if (sqrSpeed < minSmokeSpeed * minSmokeSpeed)
+    {
+      LOCK(weakSmokeEmitter, smokeEmitter);
+
+      smokeEmitter->Stop();
+    }
+
+    else
+      params.frequency = {1 / sqrSpeed, 1 / sqrSpeed / 3};
+  };
+
+  auto emitSmoke = [this](Damage, float delay)
+  {
+    // auto body = [this]()
+    // {
+      LOCK(weakSmokeEmitter, smokeEmitter);
+
+      smokeEmitter->StartEmission();
+    // };
+
+    // gameObject.DelayFunction(body, delay);
+  };
+
+  gameObject.RequireComponent<Heat>()->OnTakeDamage.AddListener("start-smoke-particles", emitSmoke);
 }
 
 void CharacterVFX::PlayDust(Vector2 offset, range<float> angle, range<float> speed)

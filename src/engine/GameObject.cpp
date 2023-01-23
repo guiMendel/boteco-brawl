@@ -92,7 +92,7 @@ void GameObject::RegisterToState()
 void GameObject::Update(float deltaTime)
 {
   // Apply timescale
-  deltaTime *= localTimeScale;
+  deltaTime *= GetTimeScale();
 
   // Update timers
   timer.Update(deltaTime);
@@ -125,7 +125,7 @@ void GameObject::PhysicsUpdate(float deltaTime)
   if (enabled == false)
     return;
 
-  deltaTime *= localTimeScale;
+  deltaTime *= GetTimeScale();
 
   // Check for collision & trigger exit
   DetectCollisionExits();

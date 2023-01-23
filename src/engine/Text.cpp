@@ -131,7 +131,7 @@ void Text::RemakeTexture()
   SDL_RenderFillRect(renderer, NULL);
 
   // Revert blend mode
-  // SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
+  SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
   // Start blipping border texture onto it
   for (size_t row = 0; row <= borderPixels * 2; row++)

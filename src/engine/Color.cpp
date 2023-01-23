@@ -7,7 +7,7 @@ using namespace Helper;
 Color::Color(int red, int green, int blue, int alpha) : red(red), green(green), blue(blue), alpha(alpha) {}
 
 // With only colors
-Color::Color(int red, int green, int blue) : Color(red, green, blue, 256) {}
+Color::Color(int red, int green, int blue) : Color(red, green, blue, 255) {}
 
 // Copy constructor
 Color::Color(const Color &other) : Color(other.red, other.green, other.blue, other.alpha) {}
@@ -21,7 +21,7 @@ Color::Color(const SDL_Color &other) : Color(other.r, other.g, other.b, other.a)
 // Tells whether this color has valid values for all it's fields
 bool Color::IsValid() const
 {
-  return red >= 0 && red < 255 && green >= 0 && green < 255 && blue >= 0 && blue < 255 && alpha >= 0 && alpha < 255;
+  return red >= 0 && red < 256 && green >= 0 && green < 256 && blue >= 0 && blue < 256 && alpha >= 0 && alpha < 256;
 }
 
 float Color::ClampValid(float value) { return Clamp(value, 0.0f, 255.0f); }

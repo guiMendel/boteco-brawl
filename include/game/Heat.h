@@ -19,8 +19,8 @@ public:
   // Max value heat can assume
   static const float maxHeat;
 
-  // When some damage is taken
-  EventI<Damage> OnTakeDamage;
+  // When some damage is taken (passes damage and hit stop duration)
+  EventII<Damage, float> OnTakeDamage;
 
   Heat(GameObject &associatedObject, float armor);
   virtual ~Heat() {}
@@ -44,7 +44,8 @@ public:
 
 private:
   // Triggers a hit stop for the current damage
-  void TriggerHitEffect(Damage damage);
+  // Returns the duration of applied hit stop
+  float TriggerHitEffect(Damage damage);
 
   static const float inverseMaxHeat;
 

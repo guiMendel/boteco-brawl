@@ -92,18 +92,18 @@ void Heat::TakeDamage(Damage damage)
   heat += damage.heatDamage;
 
   // Hit stop effect with updated damage
-  TriggerHitEffect(damage);
+  float hitStopDuration = TriggerHitEffect(damage);
 
   // Particle effect
   gameObject.RequireComponent<CharacterVFX>()->PlaySparks({0, 0}, {0.01, 0.001});
 
-  OnTakeDamage.Invoke(damage);
+  OnTakeDamage.Invoke(damage, hitStopDuration);
 }
 
-void Heat::TriggerHitEffect(Damage damage)
+float Heat::TriggerHitEffect(Damage damage)
 {
   if (damage.impulse.magnitude == 0 && damage.minHitStop == 0)
-    return;
+    return 0;
 
   // Multiplier to apply to impulse to get duration
   static const float impulseFactor{0.005};
@@ -135,6 +135,8 @@ void Heat::TriggerHitEffect(Damage damage)
         {log10f(damage.impulse.magnitude - 10) / 2, 0},
         {0.2, 0.01},
         duration, 0);
+
+  return duration;
 }
 
 void Heat::OnCollisionEnter(Collision::Data)
