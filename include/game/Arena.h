@@ -8,11 +8,14 @@
 class Arena : public Component
 {
 public:
-  Arena(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer);
-  virtual ~Arena() {}
+  Arena(GameObject &associatedObject, float width, float height);
 
-  // Get's the background renderer
-  std::shared_ptr<SpriteRenderer> GetBackgroundRenderer() const;
+  Arena(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer);
+
+  virtual ~Arena() {}
+  void Render() override;
+
+  RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
   // Arena size's width
   const float width;

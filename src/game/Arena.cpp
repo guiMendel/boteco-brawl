@@ -1,15 +1,21 @@
 #include "Arena.h"
+#include "Debug.h"
 
 using namespace std;
 
-Arena::Arena(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer)
-    : Component(associatedObject),
-      width(backgroundRenderer->sprite->GetWidth()),
-      height(backgroundRenderer->sprite->GetHeight()),
-      weakBackgroundRenderer(backgroundRenderer) {}
+Arena::Arena(GameObject &associatedObject, float width, float height)
+    : Component(associatedObject), width(width), height(height) {}
 
-shared_ptr<SpriteRenderer> Arena::GetBackgroundRenderer() const
+Arena::Arena(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer)
+    : Arena(associatedObject, backgroundRenderer->sprite->GetWidth(), backgroundRenderer->sprite->GetHeight())
 {
-  LOCK(weakBackgroundRenderer, renderer);
-  return renderer;
+  weakBackgroundRenderer = backgroundRenderer;
+}
+
+void Arena::Render()
+{
+  auto box = Rectangle({0,0}, width, height);
+  
+  Debug::DrawBox(box, Color::Red());
+  Debug::DrawBox(box * 0.95, Color::Red());
 }

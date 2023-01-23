@@ -24,7 +24,8 @@ public:
     };
   }
 
-  static auto Camera(float size = 5) -> std::function<void(std::shared_ptr<GameObject>)>;
+  static auto Camera(std::shared_ptr<GameObject> charactersParent)
+      -> std::function<void(std::shared_ptr<GameObject>)>;
 
   static auto Arena(std::string imagePath) -> std::function<void(std::shared_ptr<GameObject>)>;
 
@@ -32,8 +33,8 @@ public:
 
   static auto Platform(Vector2 size, bool withEffector = false) -> std::function<void(std::shared_ptr<GameObject>)>;
 
-  static auto Projectile(Vector2 initialSpeed, std::shared_ptr<GameObject> parent, Vector2 gravityScale = Vector2::One()) -> std::function<void(std::shared_ptr<GameObject>)>;
-
+  static auto Projectile(Vector2 initialSpeed, std::shared_ptr<GameObject> parent, Vector2 gravityScale = Vector2::One())
+      -> std::function<void(std::shared_ptr<GameObject>)>;
 };
 
 #endif

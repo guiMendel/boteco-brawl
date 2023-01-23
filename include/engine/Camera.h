@@ -51,6 +51,12 @@ public:
 
   float GetRealPixelsPerUnit() const { return realPixelsPerUnit; }
 
+  // Generates a rectangle with the camera's global position and dimensions in game units
+  Rectangle ToRectangle() const;
+
+  // Color of camera's background
+  Color background{40, 100, 207};
+
 private:
   // Current unit resolution of camera
   float realPixelsPerUnit;

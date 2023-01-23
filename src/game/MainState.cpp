@@ -21,6 +21,12 @@ void MainState::OnUpdate(float)
 
 void MainState::InitializeObjects()
 {
+  // Object to hold character
+  auto charactersParent = CreateObject("CharactersParent");
+
+  // Create the main camera
+  auto mainCamera = CreateObject("MainCamera", ObjectRecipes::Camera(charactersParent))->GetComponent<Camera>();
+
   // Add player manager
   auto playerManager = CreateObject("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true))->RequireComponent<PlayerManager>();
 
@@ -40,9 +46,21 @@ void MainState::InitializeObjects()
   CreateObject("Arena", ObjectRecipes::Arena("./assets/images/boteco.jpg"));
 
   // Add player
-  auto character1 = CreateObject("Character", ObjectRecipes::Character(playerManager->GetMainPlayer()), Vector2(-3.5, -10))->GetComponent<Rigidbody>();
+  auto character1 = CreateObject(
+                        "Character-1",
+                        ObjectRecipes::Character(playerManager->GetMainPlayer()),
+                        Vector2{-3.5, -10},
+                        0,
+                        charactersParent)
+                        ->GetComponent<Rigidbody>();
 
-  auto character2 = CreateObject("Character2", ObjectRecipes::Character(player2), Vector2(3.5, -10))->GetComponent<Rigidbody>();
+  auto character2 = CreateObject(
+                        "Character-2",
+                        ObjectRecipes::Character(player2),
+                        Vector2{3.5, -10},
+                        0,
+                        charactersParent)
+                        ->GetComponent<Rigidbody>();
 
   CreateObject("Ground", ObjectRecipes::Platform({40, 2}), Vector2(0, 4));
   CreateObject("LeftWall", ObjectRecipes::Platform({2, 10}), Vector2(-20, 2));

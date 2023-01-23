@@ -16,11 +16,7 @@ shared_ptr<Camera> Camera::GetMain()
 {
   auto cameras = Game::GetInstance().GetState()->GetCameras();
 
-  if (cameras.empty())
-  {
-    cout << "WARNING: Trying to get Main camera when no cameras are registered" << endl;
-    return nullptr;
-  }
+  Assert(cameras.empty() == false, "Trying to get Main camera when no cameras are registered");
 
   return cameras.front();
 }
@@ -96,4 +92,13 @@ Rectangle Camera::ScreenToWorld(const Rectangle &screenRectangle) const
 Rectangle Camera::WorldToScreen(const Rectangle &worldRectangle) const
 {
   return (worldRectangle - GetTopLeft()) * realPixelsPerUnit;
+}
+
+Rectangle Camera::ToRectangle() const
+{
+  static const float screenRatio = Game::screenWidth / Game::screenHeight;
+
+  float doubleSize = GetSize() * 2;
+
+  return Rectangle(gameObject.GetPosition(), doubleSize * screenRatio, doubleSize);
 }

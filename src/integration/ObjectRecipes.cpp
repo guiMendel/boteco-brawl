@@ -30,17 +30,27 @@
 #include "Circle.h"
 #include "Heat.h"
 #include "GunParry.h"
+#include "CameraBehavior.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
 
 using namespace std;
 
-auto ObjectRecipes::Camera(float size) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Camera(shared_ptr<GameObject> charactersParent)
+    -> function<void(shared_ptr<GameObject>)>
 {
-  return [size](shared_ptr<GameObject> cameraObject)
+  auto weakParent{weak_ptr(charactersParent)};
+  return [weakParent](shared_ptr<GameObject> cameraObject)
   {
-    cameraObject->AddComponent<::Camera>(size);
+    LOCK(weakParent, charactersParent);
+
+    auto camera = cameraObject->AddComponent<::Camera>(5);
+
+    // Register it prematurely
+    camera->RegisterToState();
+
+    cameraObject->AddComponent<CameraBehavior>(charactersParent);
   };
 }
 
@@ -49,17 +59,18 @@ auto ObjectRecipes::Arena(string imagePath) -> function<void(shared_ptr<GameObje
   return [imagePath](shared_ptr<GameObject> arena)
   {
     // Get a background sprite
-    auto spriteRenderer = arena->AddComponent<SpriteRenderer>(imagePath, RenderLayer::Background);
-    auto sprite = spriteRenderer->sprite;
+    // auto spriteRenderer = arena->AddComponent<SpriteRenderer>(imagePath, RenderLayer::Background);
+    // auto sprite = spriteRenderer->sprite;
 
-    // Make it cover the screen
-    if (sprite->GetWidth() < sprite->GetHeight())
-      sprite->SetTargetDimension(Game::screenWidth / Camera::GetMain()->GetRealPixelsPerUnit());
-    else
-      sprite->SetTargetDimension(-1, Game::screenHeight / Camera::GetMain()->GetRealPixelsPerUnit());
+    // // Make it cover the screen
+    // if (sprite->GetWidth() < sprite->GetHeight())
+    //   sprite->SetTargetDimension(Game::screenWidth / Camera::GetMain()->GetRealPixelsPerUnit());
+    // else
+    //   sprite->SetTargetDimension(-1, Game::screenHeight / Camera::GetMain()->GetRealPixelsPerUnit());
 
     // Add arena
-    arena->AddComponent<::Arena>(spriteRenderer);
+    arena->AddComponent<::Arena>(50, 13);
+    // arena->AddComponent<::Arena>(24, 12);
   };
 }
 
@@ -70,7 +81,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
   {
     character->SetPhysicsLayer(PhysicsLayer::Character);
 
-    IF_NOT_LOCK(weakPlayer, player) { return; }
+    LOCK(weakPlayer, player);
 
     // === RENDERING
 

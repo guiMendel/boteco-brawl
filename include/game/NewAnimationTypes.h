@@ -56,7 +56,7 @@ class AttackAnimation : public StatefulAnimation
 {
 public:
   AttackAnimation(Animator &animator) : StatefulAnimation(animator) {}
-  virtual ~AttackAnimation() {}
+  virtual ~AttackAnimation();
 
   virtual DamageParameters GetAttackProperties() const;
 

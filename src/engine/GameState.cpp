@@ -105,6 +105,13 @@ void GameState::PhysicsUpdate(float deltaTime)
 
 void GameState::Render()
 {
+  // Clear screen
+  auto back = Camera::GetMain()->background;
+  auto renderer = Game::GetInstance().GetRenderer();
+  
+  SDL_SetRenderDrawColor(renderer, back.red, back.green, back.blue, 255);
+  SDL_RenderClear(renderer);
+
   // Foreach layer
   for (int layer{0}; layer != (int)RenderLayer::None; layer++)
   {
@@ -165,12 +172,6 @@ void GameState::Start()
 
   // Load any assets
   LoadAssets();
-
-  // Create the main camera
-  auto mainCamera = CreateObject("MainCamera", ObjectRecipes::Camera())->GetComponent<Camera>();
-
-  // Register it before going on
-  RegisterCamera(mainCamera);
 
   // Create the initial objects
   InitializeObjects();

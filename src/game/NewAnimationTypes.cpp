@@ -117,6 +117,11 @@ Vector2 StatefulAnimation::VirtualPixelPosition(Vector2 virtualPixel, const Anim
 
 // === ATTACK ANIMATIONS
 
+AttackAnimation::~AttackAnimation()
+{
+  cout << "Destroying attack animation " << id << endl;
+}
+
 float AttackAnimation::GetHitCooldown() const { return -1; }
 
 DamageParameters AttackAnimation::GetAttackProperties() const { return {0, AttackImpulse(Vector2::Zero(), 0), 0}; }
