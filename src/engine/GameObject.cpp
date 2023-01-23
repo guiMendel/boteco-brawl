@@ -820,3 +820,7 @@ void GameObject::CancelDelayedFunction(int tokenId)
   // Set it as not supposed to be called
   delayedFunctions[tokenId].second = false;
 }
+
+bool GameObject::DestroyRequested() const { return destroyRequested; }
+
+void GameObject::RequestDestroy() { SetEnabled(false), destroyRequested = true; }

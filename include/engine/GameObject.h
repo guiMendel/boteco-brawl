@@ -67,10 +67,10 @@ public:
   static const float objectCollectionRange;
 
   // Whether is dead
-  bool DestroyRequested() const { return destroyRequested; }
+  bool DestroyRequested() const;
 
   // Destroys the object
-  void RequestDestroy() { destroyRequested = true; }
+  void RequestDestroy();
 
   // Whether to keep this object when loading next state (only works for root objects)
   void DontDestroyOnLoad(bool value = true);
