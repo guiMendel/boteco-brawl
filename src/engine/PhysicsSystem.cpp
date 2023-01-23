@@ -579,7 +579,7 @@ void PhysicsSystem::UnregisterColliders(int objectId)
 
 Vector2 PhysicsSystem::ApplyFriction(Vector2 velocity, float friction)
 {
-  if (!velocity)
+  if (!velocity || friction == 0)
     return velocity;
 
   float frictionModifier = 1 - friction;

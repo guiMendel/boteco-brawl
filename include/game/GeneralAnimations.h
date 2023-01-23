@@ -222,9 +222,9 @@ namespace GeneralAnimations
     void InternalOnStart() override;
 
     SET_DAMAGE(
-        Helper::Lerp(1.2f, 3.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
+        Helper::Lerp(1.2f, 6.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
         AttackImpulse(Vector2::AngledDegrees(-20),
-                      Helper::Lerp(5.5f, 10.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
+                      Helper::Lerp(5.5f, 20.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
         0.6)
 
     int PostLoopCancelFrame() const override { return 3; }
@@ -284,7 +284,7 @@ namespace GeneralAnimations
 
     bool QuitLoopOnInputRelease() const override { return false; }
 
-    SET_DAMAGE(4.5f * BASE_DAMAGE, AttackImpulse(animator.gameObject.GetShared(), 6), 0.4)
+    SET_DAMAGE(3.5f * BASE_DAMAGE, AttackImpulse(animator.gameObject.GetShared(), 6), 0.4)
   };
 
   class SpecialNeutral : public StatefulAnimation

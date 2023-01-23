@@ -8,12 +8,6 @@ using namespace std;
 
 const float Rigidbody::defaultAirFriction{0.0f};
 
-// Modifier applied to trajectory rectangle thickness
-const float trajectoryThicknessModifier{0.8f};
-
-// Slack to give beginning of trajectory
-const float trajectorySlack{0.8f};
-
 Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity, float friction)
     : Component(associatedObject), elasticity(elasticity), friction(friction), type(type), lastPosition(gameObject.GetPosition()) {}
 

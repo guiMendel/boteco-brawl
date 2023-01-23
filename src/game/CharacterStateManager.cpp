@@ -1,4 +1,5 @@
 #include "CharacterStateManager.h"
+#include "Heat.h"
 #include "Action.h"
 #include <algorithm>
 #include <typeinfo>
@@ -7,12 +8,44 @@
 
 using namespace std;
 
-const float CharacterStateManager::dangerousFlySpeed{15};
+const float CharacterStateManager::minBounceSpeed{10};
 
 const float CharacterStateManager::maxActionDelay{1};
 
+// Elasticity applied to rigidbody when character is bouncing
+static const float bounceElasticity{0.9};
+
 CharacterStateManager::CharacterStateManager(GameObject &associatedObject)
     : Component(associatedObject) {}
+
+void CharacterStateManager::StartBouncing()
+{
+  LOCK(weakBody, body);
+
+  // Add elasticity to bounce
+  body->elasticity = bounceElasticity;
+}
+
+void CharacterStateManager::StopBouncing()
+{
+  LOCK(weakBody, body);
+
+  // Remove elasticity
+  body->elasticity = 0;
+}
+
+void CharacterStateManager::PhysicsUpdate(float)
+{
+  // Detect end of bounciness
+  if (IsBouncing() == false)
+    return;
+
+  LOCK(weakBody, body);
+
+  // Check if speed is low enough
+  if (body->velocity.SqrMagnitude() < minBounceSpeed * minBounceSpeed)
+    StopBouncing();
+}
 
 void CharacterStateManager::Update(float deltaTime)
 {
@@ -32,6 +65,17 @@ void CharacterStateManager::Update(float deltaTime)
 void CharacterStateManager::Awake()
 {
   weakBody = gameObject.RequireComponent<Rigidbody>();
+
+  auto bounceIfTooFast = [this](Damage)
+  {
+    LOCK(weakBody, body);
+
+    // Check if velocity is high enough
+    if (body->velocity.SqrMagnitude() >= minBounceSpeed * minBounceSpeed)
+      StartBouncing();
+  };
+
+  gameObject.RequireComponent<Heat>()->OnTakeDamage.AddListener("start-bounce", bounceIfTooFast);
 }
 
 void CharacterStateManager::HandleQueuedAction(float deltaTime)
@@ -68,7 +112,7 @@ void CharacterStateManager::SetState(shared_ptr<CharacterState> newState, unorde
   RemoveStatesNotIn(keepStates, true);
 }
 
-void CharacterStateManager::RemoveStatesNotIn(std::unordered_set<std::string> keepStates, bool interruption)
+void CharacterStateManager::RemoveStatesNotIn(unordered_set<string> keepStates, bool interruption)
 {
   auto stateIterator = states.begin();
   while (stateIterator != states.end())
@@ -91,7 +135,7 @@ void CharacterStateManager::ResetQueue()
   queuedActionTTL = 0;
 }
 
-void CharacterStateManager::QueueAction(std::shared_ptr<Action> action)
+void CharacterStateManager::QueueAction(shared_ptr<Action> action)
 {
   queuedAction = action;
 
@@ -99,7 +143,7 @@ void CharacterStateManager::QueueAction(std::shared_ptr<Action> action)
   queuedActionTTL = maxActionDelay;
 }
 
-bool CharacterStateManager::CanPerform(std::shared_ptr<Action> action)
+bool CharacterStateManager::CanPerform(shared_ptr<Action> action)
 {
   // Check if this state blocks the incoming action
   auto stateBlocksAction = [action](shared_ptr<CharacterState> state)
@@ -170,6 +214,20 @@ void CharacterStateManager::Perform(shared_ptr<Action> action, bool canDelay)
   action->Trigger(gameObject, newState);
 }
 
+void CharacterStateManager::RemoveState(string name, bool interruption)
+{
+  // Find this state
+  auto stateIterator = find_if(states.begin(), states.end(), [name](shared_ptr<CharacterState> state)
+                               { return state->name == name; });
+
+  //  If it's not there, stop
+  if (stateIterator == states.end())
+    return;
+
+  // Remove it
+  RemoveState(stateIterator, interruption);
+}
+
 void CharacterStateManager::RemoveState(unsigned id, bool interruption)
 {
   // Find this state
@@ -189,6 +247,9 @@ auto CharacterStateManager::RemoveState(decltype(states)::iterator stateIterator
   auto state = *stateIterator;
 
   // Call it's stop callback if necessary
+  if (state->onRemove != nullptr)
+    state->onRemove(GetSharedCasted());
+
   if (state->parentAction != nullptr)
     state->parentAction->StopHook(gameObject, state);
 
@@ -206,7 +267,7 @@ auto CharacterStateManager::RemoveState(decltype(states)::iterator stateIterator
   return newIterator;
 }
 
-void CharacterStateManager::AddState(std::shared_ptr<CharacterState> newState)
+void CharacterStateManager::AddState(shared_ptr<CharacterState> newState)
 {
   // If it's already there, remove it first
   auto stateIterator = find_if(states.begin(), states.end(), [newState](shared_ptr<CharacterState> state)
@@ -217,9 +278,13 @@ void CharacterStateManager::AddState(std::shared_ptr<CharacterState> newState)
 
   // Add it
   states.push_back(newState);
+
+  // Trigger it's callback
+  if (newState->onAdd != nullptr)
+    newState->onAdd(GetSharedCasted());
 }
 
-bool CharacterStateManager::HasState(std::string stateName)
+bool CharacterStateManager::HasState(string stateName)
 {
   return find_if(states.begin(), states.end(), [stateName](shared_ptr<CharacterState> state)
                  { return state->name == stateName; }) != states.end();
@@ -236,8 +301,8 @@ bool CharacterStateManager::HasControl() const
 
 void CharacterStateManager::HandleStateExpiration()
 {
-  auto shared = dynamic_pointer_cast<CharacterStateManager>(GetShared());
-  
+  auto shared = GetSharedCasted();
+
   auto stateIterator = states.begin();
   while (stateIterator != states.end())
   {
@@ -251,4 +316,17 @@ void CharacterStateManager::HandleStateExpiration()
     else
       stateIterator++;
   }
+}
+
+bool CharacterStateManager::IsBouncing() const
+{
+  LOCK(weakBody, body);
+
+  // If has elasticity, it's bouncing
+  return body->elasticity != 0;
+}
+
+shared_ptr<CharacterStateManager> CharacterStateManager::GetSharedCasted() const
+{
+  return dynamic_pointer_cast<CharacterStateManager>(GetShared());
 }

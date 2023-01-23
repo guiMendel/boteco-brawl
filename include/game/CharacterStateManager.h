@@ -19,6 +19,7 @@ public:
 
   void Awake() override;
 
+  void PhysicsUpdate(float) override;
   void Update(float) override;
 
   // =================================
@@ -28,16 +29,21 @@ public:
   // When control is lost or recovered
   EventI<bool> OnControlChange;
 
-  // Speed after which character will get damaged when bouncing off of surfaces AND cannot crash in the ground
-  static const float dangerousFlySpeed;
+  // Minimum speed at which character will bounce off of surfaces (even the ground)
+  static const float minBounceSpeed;
 
   // Whether character has control of self
   bool HasControl() const;
 
   // Whether character is stunned and going fast enough to bounce on surfaces
-  // bool IsBouncing() const;
+  bool IsBouncing() const;
 
 private:
+  // Sets character to start bouncing
+  void StartBouncing();
+
+  // Stops bouncing
+  void StopBouncing();
 
   // Keeps track of whether character had control last frame
   bool lastFrameControl{true};
@@ -69,6 +75,9 @@ public:
 
   // Removes a state from it's unique id
   void RemoveState(unsigned id, bool interruption = false);
+
+  // Remove a state given it's name if it's present
+  void RemoveState(std::string name, bool interruption = false);
 
   // Get queued action, if any
   std::shared_ptr<Action> GetQueuedAction() const;
@@ -117,6 +126,9 @@ private:
   // =================================
   // UTILITY
   // =================================
+public:
+  std::shared_ptr<CharacterStateManager> GetSharedCasted() const;
+
 private:
   std::weak_ptr<Rigidbody> weakBody;
 };

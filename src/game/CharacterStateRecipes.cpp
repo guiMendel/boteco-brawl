@@ -9,6 +9,9 @@ using namespace std;
 // Max speed from which character can recover from stunned state
 static const float stunRecoverSpeed{2};
 
+// Air friction applied to rigidbody when character is stunned
+static const float stunAirFriction{0.1};
+
 shared_ptr<CharacterState> CharacterStateRecipes::Moving(shared_ptr<Action> action)
 {
   return make_shared<CharacterState>(MOVING_STATE, 1, action);
@@ -61,8 +64,6 @@ shared_ptr<CharacterState> CharacterStateRecipes::Stunned(shared_ptr<Action> act
 
   state->removeCondition = [](shared_ptr<CharacterStateManager> stateManager)
   {
-    // cout << stateManager->gameObject.timer.Get(STUN_DURATION_TIMER) << endl;
-    
     // Check if stun time is up
     if (stateManager->gameObject.timer.Get(STUN_DURATION_TIMER) < 0)
       return false;
@@ -70,6 +71,17 @@ shared_ptr<CharacterState> CharacterStateRecipes::Stunned(shared_ptr<Action> act
     // Check if velocity is low enough
     return stateManager->gameObject.RequireComponent<Rigidbody>()->velocity.SqrMagnitude() <=
            stunRecoverSpeed * stunRecoverSpeed;
+  };
+
+  // Toggle air friction
+  state->onAdd = [](shared_ptr<CharacterStateManager> stateManager)
+  {
+    stateManager->gameObject.RequireComponent<Rigidbody>()->airFriction = stunAirFriction;
+  };
+
+  state->onRemove = [](shared_ptr<CharacterStateManager> stateManager)
+  {
+    stateManager->gameObject.RequireComponent<Rigidbody>()->airFriction = 0;
   };
 
   return state;

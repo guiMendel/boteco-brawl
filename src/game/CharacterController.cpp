@@ -14,9 +14,6 @@ const static float minLandAnimationSpeed{2};
 // Min speed at which character crashes on ground instead of landing (only when stunned)
 const static float minCrashSpeed{7};
 
-// Min speed at which character bounces off the ground instead of crashing or landing
-const static float minBounceSpeed{13};
-
 using namespace std;
 
 const float CharacterController::totalDashCooldown{1};
@@ -179,11 +176,11 @@ void CharacterController::AnnounceInputRelease(std::string targetState)
 void CharacterController::OnLand()
 {
   cout << gameObject << " reaching ground with " << lastVelocity << endl;
-  
+
   auto sqrSpeed = lastVelocity.SqrMagnitude();
 
   // Check if will actually just bounce right off
-  if (stateManager.HasState(STUNNED_STATE) && sqrSpeed >= minBounceSpeed * minBounceSpeed)
+  if (stateManager.IsBouncing() && lastVelocity.y >= CharacterStateManager::minBounceSpeed)
     return;
 
   // Restore air dash
@@ -207,6 +204,9 @@ void CharacterController::OnLand()
         return;
       }
   }
+
+  // If had no control before, restore it now
+  stateManager.RemoveState(STUNNED_STATE);
 
   // Perform land action if velocity is big enough
   if (sqrSpeed >= minLandAnimationSpeed * minLandAnimationSpeed)

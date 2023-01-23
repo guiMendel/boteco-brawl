@@ -91,7 +91,7 @@ void Movement::Update(float deltaTime)
 
 void Movement::Run(float deltaTime)
 {
-  if (targetSpeed == rigidbody.velocity.x)
+  if (targetSpeed == rigidbody.velocity.x || stateManager.HasState(STUNNED_STATE))
     return;
 
   // Use deceleration modifier

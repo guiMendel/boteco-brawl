@@ -48,6 +48,12 @@ public:
   // State removal condition callback
   std::function<bool(std::shared_ptr<CharacterStateManager>)> removeCondition{nullptr};
 
+  // Callback to trigger on state add
+  std::function<void(std::shared_ptr<CharacterStateManager>)> onAdd{nullptr};
+
+  // Callback to trigger on state remove
+  std::function<void(std::shared_ptr<CharacterStateManager>)> onRemove{nullptr};
+
   // Whether this state can be interrupted by an action of the same type of parent regardless of priority
   bool openToSequence{false};
 
