@@ -63,16 +63,11 @@ void CharacterVFX::Awake()
       params.frequency = {1 / sqrSpeed, 1 / sqrSpeed / 3};
   };
 
-  auto emitSmoke = [this](Damage, float delay)
+  auto emitSmoke = [this](Damage, float)
   {
-    // auto body = [this]()
-    // {
-      LOCK(weakSmokeEmitter, smokeEmitter);
+    LOCK(weakSmokeEmitter, smokeEmitter);
 
-      smokeEmitter->StartEmission();
-    // };
-
-    // gameObject.DelayFunction(body, delay);
+    smokeEmitter->StartEmission();
   };
 
   gameObject.RequireComponent<Heat>()->OnTakeDamage.AddListener("start-smoke-particles", emitSmoke);

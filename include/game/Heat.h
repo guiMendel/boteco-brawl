@@ -22,6 +22,9 @@ public:
   // When some damage is taken (passes damage and hit stop duration)
   EventII<Damage, float> OnTakeDamage;
 
+  // When heat value changes
+  EventII<float, float> OnHeatChange;
+
   Heat(GameObject &associatedObject, float armor);
   virtual ~Heat() {}
 
@@ -46,6 +49,8 @@ private:
   // Triggers a hit stop for the current damage
   // Returns the duration of applied hit stop
   float TriggerHitEffect(Damage damage);
+
+  void SetHeat(float newValue);
 
   static const float inverseMaxHeat;
 

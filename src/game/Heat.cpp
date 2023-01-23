@@ -89,8 +89,8 @@ void Heat::TakeDamage(Damage damage)
   damage.heatDamage *= inverseArmor;
 
   // Add heat
-  heat += damage.heatDamage;
-
+  SetHeat(heat + damage.heatDamage);
+  
   // Hit stop effect with updated damage
   float hitStopDuration = TriggerHitEffect(damage);
 
@@ -160,4 +160,16 @@ void Heat::OnCollisionEnter(Collision::Data)
   collisionDamage.stunTime = 0.5;
 
   characterController->TakeHit(collisionDamage, false);
+}
+
+void Heat::SetHeat(float newValue)
+{
+  if (heat == newValue)
+    return;
+
+  float oldValue = heat;
+
+  heat = newValue;
+
+  OnHeatChange.Invoke(newValue, oldValue);
 }

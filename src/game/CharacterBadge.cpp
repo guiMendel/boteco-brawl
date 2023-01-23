@@ -16,13 +16,13 @@ CharacterBadge::CharacterBadge(GameObject &associatedObject, shared_ptr<Characte
 
 void CharacterBadge::Start()
 {
-  gameObject.GetParent()->RequireComponent<Heat>()->OnTakeDamage.AddListener("update-heat-display", [this](Damage damage, float)
-                                                                             { UpdateDisplay(damage.heatDamage); });
+  gameObject.GetParent()->RequireComponent<Heat>()->OnHeatChange.AddListener("update-heat-display", [this](float newHeat, float oldHeat)
+                                                                             { UpdateDisplay(newHeat, oldHeat); });
 
   gameObject.GetParent()->RequireComponent<FallOffDeath>()->OnDeath.AddListener("update-heat-display", [this]()
-                                                                                { UpdateDisplay(0); });
+                                                                                { UpdateDisplay(0, 0); });
 
-  UpdateDisplay(0);
+  UpdateDisplay(0, 0);
 }
 
 void CharacterBadge::Update(float deltaTime)
@@ -41,14 +41,13 @@ void CharacterBadge::Update(float deltaTime)
   }
 }
 
-void CharacterBadge::UpdateDisplay(float damage)
+void CharacterBadge::UpdateDisplay(float newHeat, float oldHeat)
 {
   LOCK(weakText, text);
-  auto heat = gameObject.GetParent()->RequireComponent<Heat>();
 
   // Convert heat to 1 decimal number string
   stringstream damageString;
-  damageString << fixed << setprecision(1) << heat->GetHeat();
+  damageString << fixed << setprecision(1) << newHeat;
 
   // Set the text
   text->SetText(damageString.str());
@@ -57,10 +56,17 @@ void CharacterBadge::UpdateDisplay(float damage)
   text->renderOrder = SDL_GetTicks();
 
   // Set a size pop effect
-  textSizeModifier = min(textSizeModifier + log10f(damage + 5), 5.0f);
+  textSizeModifier = min(textSizeModifier + log10f(abs(newHeat - oldHeat) + 5), 5.0f);
 
   // Give it a color proportional to heat
-  float heatProportion = heat->GetHeat() / 100.0f;
+  float heatProportion = newHeat / 100.0f;
   text->SetColor(Lerp(Color::White(), Color::Red(), heatProportion));
   text->SetBorderColor(Lerp(Color::Black(), Color(70, 0, 0), heatProportion));
+}
+
+void CharacterBadge::ShowBadge(bool show)
+{
+  LOCK(weakText, text);
+
+  text->SetEnabled(show);
 }

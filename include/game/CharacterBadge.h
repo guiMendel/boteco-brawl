@@ -19,7 +19,9 @@ public:
   void Update(float) override;
 
   // Set the heat damage to the display text
-  void UpdateDisplay(float damage);
+  void UpdateDisplay(float newHeat, float oldHeat);
+
+  void ShowBadge(bool show);
 
 private:
   // Reference to character

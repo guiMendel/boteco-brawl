@@ -1,4 +1,5 @@
 #include "FallOffDeath.h"
+#include "CharacterBadge.h"
 #include "CharacterRepelCollision.h"
 #include "Animator.h"
 #include "Movement.h"
@@ -166,6 +167,7 @@ void FallOffDeath::SetCharacterActive(bool active)
   gameObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
   gameObject.RequireComponent<CharacterController>()->SetEnabled(active);
   gameObject.RequireComponentInChildren<CharacterRepelCollision>()->SetEnabled(active);
+  gameObject.RequireComponentInChildren<CharacterBadge>()->ShowBadge(active);
 }
 
 bool FallOffDeath::IsDead() const { return dead; }
