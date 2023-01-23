@@ -17,7 +17,7 @@ public:
   virtual ~CharacterController() {}
 
   // Dispatches either a take damage action or a riposte action
-  void TakeHit(Damage damage);
+  void TakeHit(Damage damage, bool parryable = true);
 
 private:
   void Start() override;

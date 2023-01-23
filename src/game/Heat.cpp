@@ -18,6 +18,8 @@ void Heat::Awake()
 {
   weakBody = gameObject.RequireComponent<Rigidbody>();
   weakMovement = gameObject.RequireComponent<Movement>();
+  weakStateManager = gameObject.RequireComponent<CharacterStateManager>();
+  weakCharacterController = gameObject.RequireComponent<CharacterController>();
   weakTimeScaleManager = GetState()->RequireObjectOfType<TimeScaleManager>();
   weakShakeManager = GetState()->RequireObjectOfType<ShakeEffectManager>();
 }
@@ -49,36 +51,40 @@ void Heat::TakeDamage(Damage damage)
   LOCK(weakBody, body);
   LOCK(weakMovement, movement);
 
-  // Cancel any previous speed
-  body->velocity = Vector2::Zero();
+  // When damage has impulse
+  if (damage.impulse.magnitude != 0)
+  {
+    // Cancel any previous speed
+    body->velocity = Vector2::Zero();
 
-  // Get impulse multiplier from heat, a value from 1 to 100
-  float heatMultiplier = 99 * heat * inverseMaxHeat + 1;
+    // Get impulse multiplier from heat, a value from 1 to 100
+    float heatMultiplier = 99 * heat * inverseMaxHeat + 1;
 
-  // Apply multiplier
-  damage.impulse.magnitude *= heatMultiplier;
+    // Apply multiplier
+    damage.impulse.magnitude *= heatMultiplier;
 
-  // Get base impulse
-  auto impulse = damage.impulse.DeriveImpulse(gameObject.GetShared());
+    // Get base impulse
+    auto impulse = damage.impulse.DeriveImpulse(gameObject.GetShared());
 
-  cout << gameObject << " taking damage: " << damage.heatDamage << " heatDamage, " << impulse.Magnitude() << " impulse." << endl;
-  cout << "Inverse Armor: " << inverseArmor << ", Heat: " << heat << ", Inverse Max Heat: " << inverseMaxHeat << ", Heat multiplier: " << heatMultiplier << endl;
-  cout << "Resulting damage: " << inverseArmor * damage.heatDamage << ", Resulting velocity add: " << (impulse * heatMultiplier * body->GetInverseMass()).Magnitude() << endl;
+    // When grounded
+    if (movement->IsGrounded())
+      // Instantly lift target a little bit from the floor
+      gameObject.Translate({0, -blowLift});
 
-  // When grounded
-  if (movement->IsGrounded())
-    // Instantly lift target a little bit from the floor
-    gameObject.Translate({0, -blowLift});
+    // Apply impulse
+    body->ApplyImpulse(impulse);
 
-  // Apply impulse
-  body->ApplyImpulse(impulse);
+    // Get impulse x direction
+    float impulseDirection = GetSign(impulse.x, 0);
 
-  // Get impulse x direction
-  float impulseDirection = GetSign(impulse.x, 0);
+    // Face inverse direction of impulse
+    if (impulseDirection != 0)
+      body->gameObject.localScale.x = -impulseDirection;
+  }
 
-  // Face inverse direction of impulse
-  if (impulseDirection != 0)
-    body->gameObject.localScale.x = -impulseDirection;
+  // cout << gameObject << " taking damage: " << damage.heatDamage << " heatDamage, " << impulse.Magnitude() << " impulse." << endl;
+  // cout << "Inverse Armor: " << inverseArmor << ", Heat: " << heat << ", Inverse Max Heat: " << inverseMaxHeat << ", Heat multiplier: " << heatMultiplier << endl;
+  // cout << "Resulting damage: " << inverseArmor * damage.heatDamage << ", Resulting velocity add: " << (impulse * heatMultiplier * body->GetInverseMass()).Magnitude() << endl;
 
   // Update damage heat
   damage.heatDamage *= inverseArmor;
@@ -97,7 +103,7 @@ void Heat::TakeDamage(Damage damage)
 
 void Heat::TriggerHitEffect(Damage damage)
 {
-  if (damage.impulse.magnitude == 0)
+  if (damage.impulse.magnitude == 0 && damage.minHitStop == 0)
     return;
 
   // Multiplier to apply to impulse to get duration
@@ -108,7 +114,7 @@ void Heat::TriggerHitEffect(Damage damage)
   LOCK(weakShakeManager, shakeManager);
 
   // Calculate duration
-  float duration = min(impulseFactor * damage.impulse.magnitude, maxDuration);
+  float duration = Clamp(impulseFactor * damage.impulse.magnitude, damage.minHitStop, maxDuration);
   // cout << "duration " << duration << endl;
 
   // Apply to self
@@ -148,4 +154,27 @@ void PlayHitParticles(Vector2 source)
   params.angle = {angleCenter + effectArc / 2, angleCenter - effectArc / 2};
 
   ParticleFX::EffectAt(source, 0.1, 0.05, params, 0.2);
+}
+
+void Heat::OnCollisionEnter(Collision::Data)
+{
+  LOCK(weakStateManager, stateManager);
+
+  // Check if bouncing
+  if (stateManager->IsBouncing() == false)
+    return;
+
+  LOCK(weakCharacterController, characterController);
+  LOCK(weakBody, body);
+
+  // Take damage from collision, proportional to current speed
+  float speedFactor = pow(body->velocity.SqrMagnitude(), 0.25f);
+
+  Damage collisionDamage{speedFactor};
+
+  // Add some hit stop too
+  collisionDamage.minHitStop = speedFactor / 20;
+  collisionDamage.stunTime = 0.5;
+
+  characterController->TakeHit(collisionDamage, false);
 }

@@ -7,6 +7,8 @@
 #include "Movement.h"
 #include "TimeScaleManager.h"
 #include "ShakeEffectManager.h"
+#include "CharacterStateManager.h"
+#include "CharacterController.h"
 
 struct Heat : public Component
 {
@@ -25,6 +27,7 @@ public:
 
   void Awake() override;
   void Start() override;
+  void OnCollisionEnter(Collision::Data) override;
 
   // Applies the given damage to the current heat level and applies it's impulse to the body
   void TakeDamage(Damage damage);
@@ -53,6 +56,8 @@ private:
 
   // Reference to body
   std::weak_ptr<Rigidbody> weakBody;
+  std::weak_ptr<CharacterStateManager> weakStateManager;
+  std::weak_ptr<CharacterController> weakCharacterController;
   std::weak_ptr<Movement> weakMovement;
   std::weak_ptr<TimeScaleManager> weakTimeScaleManager;
   std::weak_ptr<ShakeEffectManager> weakShakeManager;

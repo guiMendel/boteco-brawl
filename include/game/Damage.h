@@ -61,21 +61,20 @@ struct Damage
   friend struct DamageParameters;
 
   // How much heat to add
-  float heatDamage;
+  float heatDamage{0};
 
   // How much impulse to apply, along with direction
   // Corresponds to actual direction to which target will be launched
-  AttackImpulse impulse;
+  AttackImpulse impulse{};
 
   // How much time to leave target stunned, unable to move
-  float stunTime;
+  float stunTime{0};
 
   // Reference to object dealing this damage
-  std::weak_ptr<GameObject> weakAuthor;
+  std::weak_ptr<GameObject> weakAuthor{};
 
-private:
-  // Make constructor private
-  Damage() = default;
+  // Minimum hit stop to apply
+  float minHitStop{0};
 };
 
 // A struct that contains information on how to derive a Damage struct

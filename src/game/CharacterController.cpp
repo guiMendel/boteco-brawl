@@ -248,16 +248,21 @@ void CharacterController::DispatchDash(Vector2 direction)
   Dispatch<Actions::Dash>(direction);
 }
 
-void CharacterController::TakeHit(Damage damage)
+void CharacterController::TakeHit(Damage damage, bool parryable)
 {
   // Check if can parry
-  auto parry = gameObject.GetComponent<Parry>();
+  if (parryable)
+  {
+    auto parry = gameObject.GetComponent<Parry>();
 
-  // If can parry, perform riposte
-  if (parry != nullptr && parry->CanParry(damage))
-    Dispatch<Actions::Riposte>(parry, damage);
+    // If can parry, perform riposte
+    if (parry != nullptr && parry->CanParry(damage))
+    {
+      Dispatch<Actions::Riposte>(parry, damage);
+      return;
+    }
+  }
 
   // Otherwise, take damage
-  else
-    DispatchNonDelayable<Actions::TakeDamage>(damage);
+  DispatchNonDelayable<Actions::TakeDamage>(damage);
 }
