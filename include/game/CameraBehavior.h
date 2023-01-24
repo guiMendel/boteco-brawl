@@ -11,8 +11,23 @@ public:
   // How much padding to add between characters and edges of the camera
   static const float padding;
 
+  // Base speed of camera displacement
+  static const float baseSpeed;
+
+  // Base speed of camera size change
+  static const float baseSizeSpeed;
+
+  // Base acceleration of camera displacement
+  static const float baseAcceleration;
+
+  // Base acceleration of camera size change
+  static const float baseSizeAcceleration;
+
   CameraBehavior(GameObject &associatedObject, std::shared_ptr<GameObject> charactersParent);
   virtual ~CameraBehavior() {}
+
+  // Get current width and height of frame in units (dimensions of camera discounting padding)
+  Vector2 GetFrameDimensions() const;
 
   void Awake() override;
   void Start() override;
@@ -21,6 +36,9 @@ public:
 private:
   // Adjusts target position and size to be as small as possible while still fitting all characters
   void UpdateTargets();
+
+  // Move camera values towards targets
+  void MoveTowardsTargets(float deltaTime);
 
   // Moves camera to the given position
   void SetPosition(Vector2 position);
@@ -39,6 +57,15 @@ private:
 
   // Size to change camera to
   float targetSize;
+
+  // Current velocity
+  float speed;
+
+  // Size speed
+  float sizeSpeed{0};
+
+  // Max distance that any character's body is beyond the current frame of the camera
+  float currentlyUnframedSpace{0};
 
   // Aspect ratio of arena
   float arenaAspectRatio;
