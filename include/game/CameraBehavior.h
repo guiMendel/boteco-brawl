@@ -12,7 +12,7 @@ public:
   static const float padding;
 
   // Base speed of camera displacement
-  static const float baseSpeed;
+  static const float maxSpeed;
 
   // Base speed of camera size change
   static const float baseSizeSpeed;
@@ -30,8 +30,11 @@ public:
   Vector2 GetFrameDimensions() const;
 
   void Awake() override;
+  void Render() override;
   void Start() override;
   void Update(float) override;
+
+  RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
 private:
   // Adjusts target position and size to be as small as possible while still fitting all characters
@@ -59,7 +62,10 @@ private:
   float targetSize;
 
   // Current velocity
-  float speed;
+  Vector2 velocity;
+
+  // Last acceleration applied (for debug only)
+  Vector2 lastAcceleration;
 
   // Size speed
   float sizeSpeed{0};

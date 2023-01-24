@@ -48,6 +48,9 @@ namespace Helper
   // Converts degrees to radians
   float DegreesToRadians(int degrees);
 
+  // Returns minimum angle distance between angle A and B, in radians
+  float AngleDistance(float radiansA, float radiansB);
+
   // Returns true with probability equal to parameter.
   // Parameter must be a number between 0 and 1, where 0 is no chance and 1 is 100% chance
   bool ThrowCoin(float chance);
@@ -70,6 +73,21 @@ namespace Helper
   T Lerp(std::pair<T, T> range, float amount)
   {
     return Lerp(range.first, range.second, amount);
+  }
+
+  template <typename T>
+  float InverseLerp(T min, T max, T value)
+  {
+    // Range distance
+    T rangeDistance = max - min;
+
+    return (value - min) / rangeDistance;
+  }
+
+  template <typename T>
+  float InverseLerp(std::pair<T, T> range, T value)
+  {
+    return InverseLerp(range.first, range.second, value);
   }
 
   template <typename T>

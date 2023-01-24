@@ -69,3 +69,15 @@ bool Helper::ThrowCoin(float chance)
   Assert(chance >= 0 && chance <= 1, "Chance must be a value in range [0, 1]");
   return RandomRange(0.0f, 1.0f) < chance;
 }
+
+float Helper::AngleDistance(float radiansA, float radiansB)
+{
+  // Get a priori distance
+  float firstDistance = fmod(radiansB - radiansA, 2 * M_PI);
+
+  // Check if the opposite direction is quicker
+  if (2 * M_PI - abs(firstDistance) < abs(firstDistance))
+    return firstDistance - 2 * M_PI;
+
+  return firstDistance;
+}

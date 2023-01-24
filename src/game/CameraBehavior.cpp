@@ -7,11 +7,14 @@ using namespace std;
 
 const float CameraBehavior::padding{2};
 
-const float CameraBehavior::baseSpeed{4};
+const float CameraBehavior::maxSpeed{3};
 const float CameraBehavior::baseSizeSpeed{0.5};
 
-const float CameraBehavior::baseAcceleration{0.1};
+const float CameraBehavior::baseAcceleration{2};
 const float CameraBehavior::baseSizeAcceleration{0.5};
+
+// Bias applied towards deceleration
+const float decelerationBias{2};
 
 static const float alignTolerance{DegreesToRadians(35)};
 
@@ -64,7 +67,7 @@ void CameraBehavior::Update(float deltaTime)
   MoveTowardsTargets(deltaTime);
 
   // Adjust values to ensure camera is valid
-  ConfineToArena();
+  // ConfineToArena();
 }
 
 void CameraBehavior::UpdateTargets()
@@ -140,26 +143,44 @@ void CameraBehavior::MoveTowardsTargets(float deltaTime)
 {
   LOCK(weakCamera, camera);
 
+  // Distance to target position
+  Vector2 targetDisplacement = targetPosition - gameObject.GetPosition();
+
+  // Find how much acceleration will be redirected towards decelerating
+  // It's an amount proportional to how unaligned the velocity is to the target position
+  float decelerationPortion = InverseLerp(0.0f,
+                                          float(M_PI),
+                                          decelerationBias * abs(AngleDistance(velocity.Angle(), targetDisplacement.Angle())));
+
+  // Get acceleration and deceleration
+  float acceleration = (1 - decelerationPortion) * baseAcceleration;
+  float deceleration = decelerationPortion * baseAcceleration;
+
+  lastAcceleration = (targetDisplacement.Normalized() * acceleration +
+                      -velocity.Normalized() * deceleration);
+
+  // Apply both accelerations to current velocity
+  velocity = (velocity + lastAcceleration * deltaTime).CapMagnitude(maxSpeed);
+
+  // Apply velocity to position
+  SetPosition(gameObject.GetPosition() + velocity * deltaTime);
+
   // Find this frame's target speeds
   float unframedFactor = max(1.0f, currentlyUnframedSpace * currentlyUnframedSpace);
-  float targetSpeed = baseSpeed * unframedFactor;
   float targetSizeSpeed = baseSizeSpeed * unframedFactor;
 
   // Get speed difference
-  float speedDifference = Clamp(targetSpeed - speed, -baseAcceleration, baseAcceleration);
   float sizeSpeedDifference = Clamp(targetSizeSpeed - sizeSpeed, -baseSizeAcceleration, baseSizeAcceleration);
 
   // Accelerate current speed to target speed
-  speed += speedDifference;
   sizeSpeed += sizeSpeedDifference;
 
   // Get target position direction
-  Vector2 targetDisplacement = targetPosition - gameObject.GetPosition();
   float sizeChange = targetSize - camera->GetSize();
 
   // Apply displacement but cap it to possible speed
-  SetPosition(gameObject.GetPosition() + targetDisplacement.CapMagnitude(speed * deltaTime));
-  SetSize(camera->GetSize() + Clamp(sizeChange, -sizeSpeed * deltaTime, sizeSpeed * deltaTime));
+  // SetSize(camera->GetSize() + Clamp(sizeChange, -sizeSpeed * deltaTime, sizeSpeed * deltaTime));
+  SetSize(5);
 }
 
 void CameraBehavior::SetPosition(Vector2 position)
@@ -198,4 +219,18 @@ void CameraBehavior::Reset()
 
   // Adjust size to be the maximum possible which still fits inside the arena
   SetSize(maxSize);
+}
+
+void CameraBehavior::Render()
+{
+  LOCK(weakCamera, camera);
+
+  // Draw target position
+  Debug::DrawCircle(Circle(targetPosition, 0.03), Color::Yellow());
+
+  // Draw actual position
+  Debug::DrawCircle(Circle(camera->GetPosition(), 0.05), Color::Pink());
+
+  if (lastAcceleration)
+    Debug::DrawArrow(camera->GetPosition(), camera->GetPosition() + lastAcceleration, Color::Pink(), 0.2);
 }
