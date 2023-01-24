@@ -18,16 +18,27 @@ public:
   void Start() override;
   void Update(float) override;
 
-  // Moves camera to the given position and zooms out as much as possible
-  void MoveTo(Vector2 position);
-
-  // Adjusts camera size to be as small as possible while still fitting all characters
-  // May reposition it to ensure it also fits within the arena
-  void FitCharacters();
-
 private:
+  // Adjusts target position and size to be as small as possible while still fitting all characters
+  void UpdateTargets();
+
+  // Moves camera to the given position
+  void SetPosition(Vector2 position);
+
+  // Changes camera's size to the given size
+  void SetSize(float newSize);
+
+  // If necessary, adjusts camera's position to ensure that it fits within the arena
+  void ConfineToArena();
+
   // Resets camera to center with maximum size
   void Reset();
+
+  // Position to move camera towards
+  Vector2 targetPosition;
+
+  // Size to change camera to
+  float targetSize;
 
   // Aspect ratio of arena
   float arenaAspectRatio;

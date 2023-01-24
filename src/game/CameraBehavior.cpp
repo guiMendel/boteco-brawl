@@ -15,10 +15,19 @@ CameraBehavior::CameraBehavior(GameObject &associatedObject, shared_ptr<GameObje
 
 void CameraBehavior::Awake()
 {
-  weakCamera = gameObject.RequireComponent<Camera>();
+  // Get camera
+  auto camera = gameObject.RequireComponent<Camera>();
+  weakCamera = camera;
+
+  // Initialize targets
+  targetSize = camera->GetSize();
+  targetPosition = gameObject.GetPosition();
+
+  // Get arena
   auto arena = GetState()->FindObjectOfType<Arena>();
   weakArena = arena;
 
+  // Calculate arena dependent params
   arenaAspectRatio = arena->width / arena->height;
 
   maxSize = min(arena->height / 2, arena->width / screenRatio / 2);
@@ -31,11 +40,25 @@ void CameraBehavior::Start()
 
 void CameraBehavior::Update(float)
 {
+  // Calculate new targets
+  UpdateTargets();
+
+  SetPosition(targetPosition);
+  SetSize(targetSize);
+
+  // Adjust values to ensure camera is valid
+  ConfineToArena();
+}
+
+void CameraBehavior::UpdateTargets()
+{
   LOCK(weakCharactersParent, charactersParent);
 
-  // Will hold the center point between all characters
-  Vector2 centerPoint;
+  // Reset target position
+  // It will hold the center point between all characters
+  targetPosition = Vector2::Zero();
 
+  // Count live characters
   int liveCharacters{0};
 
   for (auto character : charactersParent->GetChildren())
@@ -45,30 +68,16 @@ void CameraBehavior::Update(float)
       continue;
 
     liveCharacters++;
-    centerPoint += character->GetPosition();
+    targetPosition += character->GetPosition();
   }
 
+  // Get average if there were at least one alive
   if (liveCharacters > 0)
-    centerPoint /= liveCharacters;
+    targetPosition /= liveCharacters;
 
-  // Move to center point
-  MoveTo(centerPoint);
-}
+  // === NEW SIZE CALCULATION
 
-void CameraBehavior::MoveTo(Vector2 position)
-{
-  // Set the new position
-  gameObject.SetPosition(position);
-
-  // Frame characters
-  FitCharacters();
-}
-
-void CameraBehavior::FitCharacters()
-{
-  LOCK(weakCharactersParent, charactersParent);
-
-  // Maximum distance from a character's outer side from the center of the camera
+  // Maximum distance from a character's outer side from the target position
   Vector2 maxDistances;
 
   for (auto character : charactersParent->GetChildren())
@@ -79,32 +88,45 @@ void CameraBehavior::FitCharacters()
     // Keep biggest x distance
     maxDistances.x = max(
         maxDistances.x,
-        abs(character->GetPosition().x - gameObject.GetPosition().x) + characterBox.width / 2);
+        abs(character->GetPosition().x - targetPosition.x) + characterBox.width / 2);
 
     // Keep biggest y distance
     maxDistances.y = max(
         maxDistances.y,
-        abs(character->GetPosition().y - gameObject.GetPosition().y) + characterBox.height / 2);
+        abs(character->GetPosition().y - targetPosition.y) + characterBox.height / 2);
   }
 
   LOCK(weakCamera, camera);
 
-
   // Set the size to the largest dimension
-  float newSize = max(maxDistances.y, maxDistances.x / screenRatio) + padding;
-  
+  targetSize = max(maxDistances.y, maxDistances.x / screenRatio) + padding;
+}
+
+void CameraBehavior::SetPosition(Vector2 position)
+{
+  // Set the new position
+  gameObject.SetPosition(position);
+}
+
+void CameraBehavior::SetSize(float newSize)
+{
+  LOCK(weakCamera, camera);
+
   // Ensure it doesn't surpass max size possible for arena size
   camera->SetSize(min(newSize, maxSize));
+}
+
+void CameraBehavior::ConfineToArena()
+{
+  LOCK(weakArena, arena);
+  LOCK(weakCamera, camera);
 
   float horizontalSize = camera->GetSize() * screenRatio;
 
-  LOCK(weakArena, arena);
-
   // Adjust position to fit within arena
-  gameObject.SetPosition(Vector2(
-    Clamp(gameObject.GetPosition().x, -arena->width / 2 + horizontalSize, arena->width / 2 - horizontalSize),
-    Clamp(gameObject.GetPosition().y, -arena->height / 2 + camera->GetSize(), arena->height / 2 - camera->GetSize())
-  ));
+  SetPosition(Vector2(
+      Clamp(gameObject.GetPosition().x, -arena->width / 2 + horizontalSize, arena->width / 2 - horizontalSize),
+      Clamp(gameObject.GetPosition().y, -arena->height / 2 + camera->GetSize(), arena->height / 2 - camera->GetSize())));
 }
 
 void CameraBehavior::Reset()
@@ -112,8 +134,8 @@ void CameraBehavior::Reset()
   LOCK(weakCamera, camera);
   LOCK(weakArena, arena);
 
-  gameObject.SetPosition({0, 0});
+  SetPosition({0, 0});
 
   // Adjust size to be the maximum possible which still fits inside the arena
-  camera->SetSize(maxSize);
+  SetSize(maxSize);
 }
