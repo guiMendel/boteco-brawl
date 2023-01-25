@@ -27,7 +27,13 @@ namespace Helper
 
   // Limits a value to a given range
   template <class T>
-  T Clamp(T value, T minValue, T maxValue) { return std::max(std::min(value, maxValue), minValue); }
+  T Clamp(T value, T minValue, T maxValue)
+  {
+    if (minValue >= maxValue)
+      return (minValue + maxValue) / 2;
+
+    return std::max(std::min(value, maxValue), minValue);
+  }
 
   // Returns -1 if value is negative, 1 if positive, and the second parameter otherwise
   float GetSign(float value, float caseZeroValue = 1);

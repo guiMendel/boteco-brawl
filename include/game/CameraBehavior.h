@@ -26,6 +26,9 @@ public:
   // How far from target camera needs to be to start moving
   static const float deadZoneRange;
 
+  // Minimum camera size
+  static const float minSize;
+
   CameraBehavior(GameObject &associatedObject, std::shared_ptr<GameObject> charactersParent);
   virtual ~CameraBehavior() {}
 
@@ -43,8 +46,14 @@ private:
   // Adjusts target position and size to be as small as possible while still fitting all characters
   void UpdateTargets();
 
-  // Move camera values towards targets
-  void MoveTowardsTargets(float deltaTime);
+  // Move camera position towards target
+  void ApplyTargetPosition(float deltaTime);
+
+  // Resize camera towards target
+  void ApplyTargetSize(float deltaTime);
+
+  // Get a multiplier for target approximation based on the currently unframed space
+  float GetUnframedFactor() const;
 
   // Moves camera to the given position
   void SetPosition(Vector2 position);

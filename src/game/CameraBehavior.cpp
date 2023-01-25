@@ -15,6 +15,8 @@ const float CameraBehavior::baseSizeAcceleration{0.5};
 
 const float CameraBehavior::deadZoneRange{0.3};
 
+const float CameraBehavior::minSize{3};
+
 // Bias applied towards deceleration
 const float decelerationBias{1};
 
@@ -68,7 +70,8 @@ void CameraBehavior::Update(float deltaTime)
   UpdateTargets();
 
   // Move camera position and size towards targets
-  MoveTowardsTargets(deltaTime);
+  ApplyTargetPosition(deltaTime);
+  ApplyTargetSize(deltaTime);
 
   // Adjust values to ensure camera is valid
   SetPosition(ConfineToArena(gameObject.GetPosition(), camera->GetSize()));
@@ -141,9 +144,8 @@ void CameraBehavior::UpdateTargets()
 
   LOCK(weakCamera, camera);
 
-  // Set the size to the largest dimension
-  targetSize = max(maxDistances.y, maxDistances.x / screenRatio) + padding;
-  targetSize = 5;
+  // Set the size to the largest dimension (also respect min size)
+  targetSize = max(max(maxDistances.y, maxDistances.x / screenRatio) + padding, minSize);
 
   // === VALIDATE TARGETS
 
@@ -151,29 +153,31 @@ void CameraBehavior::UpdateTargets()
   targetPosition = ConfineToArena(targetPosition, targetSize);
 }
 
-void CameraBehavior::MoveTowardsTargets(float deltaTime)
+float CameraBehavior::GetUnframedFactor() const
 {
-  LOCK(weakCamera, camera);
+  return max(1.0f, currentlyUnframedSpace * currentlyUnframedSpace);
+}
 
+void CameraBehavior::ApplyTargetPosition(float deltaTime)
+{
   // Find this frame's target speeds
-  float unframedFactor = max(1.0f, currentlyUnframedSpace * currentlyUnframedSpace);
+  float unframedFactor = GetUnframedFactor();
 
   // Distance to target position
   Vector2 targetDisplacement = targetPosition - gameObject.GetPosition();
+  float scaledAcceleration = baseAcceleration * unframedFactor;
 
   // Find how much acceleration will be redirected towards decelerating
   // It's an amount proportional to how unaligned the velocity is to the target position
   float decelerationPortion;
 
-  bool lowSpeed = velocity.SqrMagnitude() <= 0.2 * 0.2;
-
-  // Only decelerate if too close
+  // If too close, only decelerate
   if (targetDisplacement.SqrMagnitude() <= deadZoneRange * deadZoneRange)
   {
     // If speed is low enough, simply do nothing
-    if (lowSpeed)
+    if (velocity.SqrMagnitude() <= scaledAcceleration * scaledAcceleration)
     {
-      lastAcceleration = Vector2::Zero();
+      velocity = lastAcceleration = Vector2::Zero();
       return;
     }
 
@@ -181,7 +185,7 @@ void CameraBehavior::MoveTowardsTargets(float deltaTime)
   }
 
   // If going too slow, don't bother decelerating
-  else if (lowSpeed)
+  else if (velocity.SqrMagnitude() <= 0.2 * 0.2)
     decelerationPortion = 0;
 
   else
@@ -191,8 +195,6 @@ void CameraBehavior::MoveTowardsTargets(float deltaTime)
         decelerationBias * abs(AngleDistance(velocity.Angle(), targetDisplacement.Angle())));
 
   // Get acceleration and deceleration
-  cout << "decelerationPortion: " << decelerationPortion << endl;
-  float scaledAcceleration = baseAcceleration * unframedFactor;
   float acceleration = (1 - decelerationPortion) * scaledAcceleration;
   float deceleration = decelerationPortion * scaledAcceleration;
 
@@ -200,7 +202,7 @@ void CameraBehavior::MoveTowardsTargets(float deltaTime)
   float closingSpeed = Vector2::Dot(velocity, targetDisplacement.Normalized());
 
   // Find how far from the target we need to start braking, given the current speed
-  float brakeDistance = -closingSpeed * closingSpeed / (acceleration * 2);
+  float brakeDistance = closingSpeed * closingSpeed / (acceleration * 2);
 
   // If inside brake distance, revert acceleration to brake
   if (targetDisplacement.SqrMagnitude() <= brakeDistance * brakeDistance)
@@ -214,21 +216,54 @@ void CameraBehavior::MoveTowardsTargets(float deltaTime)
 
   // Apply velocity to position
   SetPosition(gameObject.GetPosition() + velocity * deltaTime);
+}
 
-  float targetSizeSpeed = baseSizeSpeed * unframedFactor;
+void CameraBehavior::ApplyTargetSize(float deltaTime)
+{
+  LOCK(weakCamera, camera);
 
-  // Get speed difference
-  float sizeSpeedDifference = Clamp(targetSizeSpeed - sizeSpeed, -baseSizeAcceleration, baseSizeAcceleration);
-
-  // Accelerate current speed to target speed
-  sizeSpeed += sizeSpeedDifference;
-
-  // Get target position direction
+  float unframedFactor = GetUnframedFactor();
   float sizeChange = targetSize - camera->GetSize();
+  float scaledAcceleration = baseSizeAcceleration * unframedFactor;
+
+  // Acceleration to apply this frame
+  float sizeAcceleration{0};
+
+  // Don't accelerate if size change is minimal
+  if (abs(sizeChange) <= 0.1)
+  {
+    if (abs(sizeSpeed) <= scaledAcceleration)
+    {
+      sizeSpeed = 0;
+      return;
+    }
+
+    sizeAcceleration = scaledAcceleration * -GetSign(sizeSpeed);
+  }
+  else
+  {
+    // If speed is null or going against target, always accelerate toward it
+    if (sizeChange * sizeSpeed <= 0)
+      sizeAcceleration = scaledAcceleration * GetSign(sizeChange);
+
+    // Otherwise, check if it's time to brake
+    else
+    {
+      // Min difference from which to start braking
+      float brakeDifference = abs(sizeSpeed * sizeSpeed / (scaledAcceleration * 2));
+
+      // Accelerate against target if needs to brake
+      sizeAcceleration = scaledAcceleration * GetSign(sizeChange) * (abs(sizeChange) <= brakeDifference ? -1 : 1);
+    }
+  }
 
   // Apply displacement but cap it to possible speed
-  // SetSize(camera->GetSize() + Clamp(sizeChange, -sizeSpeed * deltaTime, sizeSpeed * deltaTime));
-  SetSize(5);
+  float scaledMaxSpeed = baseSizeSpeed * unframedFactor;
+
+  // Accelerate current speed to target speed
+  sizeSpeed = Clamp(sizeSpeed + sizeAcceleration, -scaledMaxSpeed, scaledMaxSpeed);
+
+  SetSize(min(camera->GetSize() + sizeSpeed * deltaTime, maxSize));
 }
 
 void CameraBehavior::SetPosition(Vector2 position)
@@ -270,10 +305,17 @@ void CameraBehavior::Reset()
 
 void CameraBehavior::Render()
 {
+  return;
+  
   LOCK(weakCamera, camera);
 
   // Draw target position
   Debug::DrawCircle(Circle(targetPosition, 0.03), Color::Yellow());
+
+  Rectangle box{targetPosition, targetSize * 2 * screenRatio, targetSize * 2};
+
+  Debug::DrawBox(box, Color::Yellow());
+  Debug::DrawBox(Rectangle(box.center, box.width * 0.95, box.height * 0.95), Color::Yellow());
 
   // Draw actual position
   Debug::DrawCircle(Circle(camera->GetPosition(), 0.05), Color::Pink());
