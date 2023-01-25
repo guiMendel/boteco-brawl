@@ -144,10 +144,10 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     if (player->IsMain())
       character->AddComponent<KeyboardInput>();
     else
-      character->AddComponent<ControllerInput>(player);
+      character->AddComponent<ControllerInput>();
 
     // Give it control
-    character->AddComponent<CharacterController>();
+    character->AddComponent<CharacterController>(player);
 
     // === CHARACTER REPELLING
 
@@ -200,11 +200,15 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     // === HEAT DISPLAY
 
     // Add display in a separate child
-    auto display = character->CreateChild(CHARACTER_BADGE_OBJECT, {0, -collider->GetBox().height / 2 - 0.5f});
+    auto display = character->CreateChild(CHARACTER_BADGE_OBJECT, {0, -collider->GetBox().height / 2 - 0.9f});
 
     // Add text
     auto badgeText = display->AddComponent<Text>("0.0", "./assets/engine/fonts/PixelOperator.ttf", 30);
     badgeText->SetBorderSize(3);
+
+    // Add badge sprite
+    auto badgeSprite = display->AddComponent<SpriteRenderer>("./assets/sprites/badge.png", RenderLayer::UI);
+    badgeSprite->SetOffset({0, 0.5});
 
     // Add the badge
     display->AddComponent<CharacterBadge>(selectedCharacter);

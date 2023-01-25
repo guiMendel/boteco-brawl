@@ -1,4 +1,5 @@
 #include "ControllerInput.h"
+#include "CharacterController.h"
 #include "Movement.h"
 #include "InputManager.h"
 
@@ -6,9 +7,12 @@
 
 using namespace std;
 
-ControllerInput::ControllerInput(GameObject &associatedObject, std::shared_ptr<Player> player)
-    : PlayerInput(associatedObject), weakPlayer(player)
+ControllerInput::ControllerInput(GameObject &associatedObject)
+    : PlayerInput(associatedObject),
+      weakPlayer(gameObject.RequireComponent<CharacterController>()->GetPlayer())
 {
+  LOCK(weakPlayer, player);
+
   cout << "Using controller for player " << player->PlayerId() << endl;
 
   // Make sure this player is using a controller
@@ -53,8 +57,10 @@ void ControllerInput::HandleButtonRelease(SDL_GameControllerButton button)
 
 void ControllerInput::Start()
 {
+  LOCK(weakPlayer, player);
+
   // This component callback identifier
-  string callbackIdentifier = "controller-input-player-" + to_string(GetPlayer()->PlayerId());
+  string callbackIdentifier = "controller-input-player-" + to_string(player->PlayerId());
 
   // Subscribe to analog movement
   inputManager.OnControllerLeftAnalog.AddListener(callbackIdentifier, [this](Vector2 direction, int targetId)
@@ -65,20 +71,14 @@ void ControllerInput::Start()
                                                    { if (targetId == GetAssociatedControllerId()) HandleButtonPress(button); });
 
   inputManager.OnControllerButtonRelease.AddListener(callbackIdentifier, [this](SDL_GameControllerButton button, int targetId)
-                                                   { if (targetId == GetAssociatedControllerId()) HandleButtonRelease(button); });
-}
-
-// Get player associated to this controller input
-const shared_ptr<Player> ControllerInput::GetPlayer() const
-{
-  Assert(weakPlayer.expired() == false, "ControllerInput unexpectedly lost pointer to it's associated player");
-
-  return weakPlayer.lock();
+                                                     { if (targetId == GetAssociatedControllerId()) HandleButtonRelease(button); });
 }
 
 int ControllerInput::GetAssociatedControllerId() const
 {
-  auto controller = GetPlayer()->GetController();
+  LOCK(weakPlayer, player);
+
+  auto controller = player->GetController();
 
   return controller == nullptr ? -1 : controller->instanceId;
 }

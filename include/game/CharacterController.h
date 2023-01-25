@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include "Component.h"
 #include "Movement.h"
+#include "Player.h"
 #include "CharacterStateManager.h"
 #include "Action.h"
 #include "Damage.h"
@@ -13,8 +14,11 @@
 class CharacterController : public Component
 {
 public:
-  CharacterController(GameObject &associatedObject);
+  CharacterController(GameObject &associatedObject, std::shared_ptr<Player> player);
   virtual ~CharacterController() {}
+
+  // Get player associated to this character
+  std::shared_ptr<Player> GetPlayer() const;
 
   // Dispatches either a take damage action or a riposte action
   void TakeHit(Damage damage, bool parryable = true);
@@ -56,6 +60,9 @@ private:
 
   // How long (seconds) character must wait between successive dashes
   static const float totalDashCooldown;
+
+  // Player associated to this character
+  std::weak_ptr<Player> weakPlayer;
 
   Vector2 lastVelocity;
 

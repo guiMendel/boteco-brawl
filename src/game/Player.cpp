@@ -5,8 +5,8 @@
 
 using namespace std;
 
-Player::Player(GameObject &associatedObject, PlayerManager &manager)
-    : Component(associatedObject), playerManager(manager) {}
+Player::Player(GameObject &associatedObject, PlayerManager &manager, Color color)
+    : Component(associatedObject), playerManager(manager), color(color) {}
 
 // Is searching when need a controller but has no controller
 bool Player::SearchingForController() const { return usingController && weakController.expired(); }
@@ -58,3 +58,5 @@ void Player::AssociateController(shared_ptr<ControllerDevice> newDevice)
 }
 
 int Player::PlayerId() const { return gameObject.id; }
+
+Color Player::GetColor() const { return color; }

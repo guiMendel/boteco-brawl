@@ -4,6 +4,9 @@
 
 using namespace std;
 
+// Set player colors
+const Color PlayerManager::playerColors[]{Color::Green(), Color::Yellow(), Color::Blue(), Color::Red()};
+
 PlayerManager::PlayerManager(GameObject &associatedObject)
     : Component(associatedObject)
 {
@@ -13,12 +16,16 @@ PlayerManager::PlayerManager(GameObject &associatedObject)
 
 shared_ptr<Player> PlayerManager::AddNewPlayer()
 {
-  auto newPlayer = gameObject.CreateChild(PLAYER_OBJECT_NAME)->AddComponent<Player>(*this);
-
-  // If this is the only player, set it as main
+  // Get current players
   auto players = GetPlayers();
 
-  if (players.size() == 1)
+  Assert(players.size() < 4, "Tried adding more players than allowed");
+
+  // Create and pick this player's color
+  auto newPlayer = gameObject.CreateChild(PLAYER_OBJECT_NAME)->AddComponent<Player>(*this, playerColors[players.size()]);
+
+  // If this is the only player, set it as main
+  if (GetPlayers().size() == 1)
     SetMainPlayer(newPlayer);
 
   return newPlayer;

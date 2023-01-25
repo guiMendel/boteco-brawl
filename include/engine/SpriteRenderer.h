@@ -45,6 +45,12 @@ public:
   // Which sprite is currently loaded
   std::shared_ptr<Sprite> sprite;
 
+  // Color to modulate sprite with
+  Color modulateColor{Color::White()};
+
+  // Color to add to sprite
+  Color addColor{Color::Black()};
+
   // Whether to center the sprite on the render coordinates
   bool centered;
 

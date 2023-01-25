@@ -8,13 +8,10 @@
 class ControllerInput : public PlayerInput
 {
 public:
-  ControllerInput(GameObject &associatedObject, std::shared_ptr<Player> player);
+  ControllerInput(GameObject &associatedObject);
   virtual ~ControllerInput() {}
 
   void Start() override;
-
-  // Get player associated to this controller input
-  const std::shared_ptr<Player> GetPlayer() const;
 
   // Get controller instance id associated to this controller input's player
   int GetAssociatedControllerId() const;

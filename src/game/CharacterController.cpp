@@ -18,8 +18,9 @@ using namespace std;
 
 const float CharacterController::totalDashCooldown{1};
 
-CharacterController::CharacterController(GameObject &associatedObject)
+CharacterController::CharacterController(GameObject &associatedObject, shared_ptr<Player> player)
     : Component(associatedObject),
+      weakPlayer(player),
       stateManager(*gameObject.RequireComponent<CharacterStateManager>()),
       movement(*gameObject.RequireComponent<Movement>()),
       rigidbody(*gameObject.RequireComponent<Rigidbody>()),
@@ -212,7 +213,6 @@ void CharacterController::OnLand()
     cout << state->name << " ";
   cout << endl;
 
-
   // If had no control before, restore it now
   stateManager.RemoveState(STUNNED_STATE);
 
@@ -273,4 +273,10 @@ void CharacterController::TakeHit(Damage damage, bool parryable)
 
   // Otherwise, take damage
   DispatchNonDelayable<Actions::TakeDamage>(damage);
+}
+
+shared_ptr<Player> CharacterController::GetPlayer() const
+{
+  LOCK(weakPlayer, player);
+  return player;
 }

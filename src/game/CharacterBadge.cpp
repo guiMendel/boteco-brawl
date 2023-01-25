@@ -20,9 +20,15 @@ void CharacterBadge::Start()
                                                                              { UpdateDisplay(newHeat, oldHeat); });
 
   gameObject.GetParent()->RequireComponent<FallDeath>()->OnFall.AddListener("update-heat-display", [this]()
-                                                                                { UpdateDisplay(0, 0); });
+                                                                            { UpdateDisplay(0, 0); });
 
   UpdateDisplay(0, 0);
+
+  // Get player
+  auto player = gameObject.RequireComponent<CharacterController>()->GetPlayer();
+
+  // Set badge color to player color
+  gameObject.RequireComponent<SpriteRenderer>()->modulateColor = player->GetColor();
 }
 
 void CharacterBadge::Update(float deltaTime)

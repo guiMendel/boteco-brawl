@@ -11,7 +11,7 @@ class PlayerManager;
 class Player : public Component
 {
 public:
-  Player(GameObject &associatedObject, PlayerManager &manager);
+  Player(GameObject &associatedObject, PlayerManager &manager, Color color);
 
   virtual ~Player() {}
 
@@ -39,7 +39,12 @@ public:
   // Gets id used to identify this player
   int PlayerId() const;
 
+  Color GetColor() const;
+
 private:
+  // Color associated to this player
+  Color color;
+
   // Controller associated to this player
   std::weak_ptr<ControllerDevice> weakController;
 
