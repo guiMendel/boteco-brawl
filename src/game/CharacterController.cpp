@@ -176,6 +176,8 @@ void CharacterController::AnnounceInputRelease(std::string targetState)
 void CharacterController::OnLand()
 {
   cout << gameObject << " reaching ground with " << lastVelocity << endl;
+  // cout << stateManager.IsBouncing() << " and " << (lastVelocity.y >= CharacterStateManager::minBounceSpeed) << endl;
+  // cout << lastVelocity.y << " and " << CharacterStateManager::minBounceSpeed << endl;
 
   auto sqrSpeed = lastVelocity.SqrMagnitude();
 
@@ -204,6 +206,12 @@ void CharacterController::OnLand()
         return;
       }
   }
+
+  cout << "States: ";
+  for (auto state : stateManager.GetStates())
+    cout << state->name << " ";
+  cout << endl;
+
 
   // If had no control before, restore it now
   stateManager.RemoveState(STUNNED_STATE);

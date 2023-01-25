@@ -528,8 +528,8 @@ void ApplyImpulse(Collision::Data collisionData)
   float frictionModifier = min(bodyA->friction, bodyB->friction);
 
   // Apply it
-  bodyA->velocity = PhysicsSystem::ApplyFriction(bodyA->velocity, frictionModifier);
-  bodyB->velocity = PhysicsSystem::ApplyFriction(bodyB->velocity, frictionModifier);
+  bodyA->velocity = PhysicsSystem::ApplyFriction(bodyA->velocity, frictionModifier, bodyB->gameObject.GetTimeScale());
+  bodyB->velocity = PhysicsSystem::ApplyFriction(bodyB->velocity, frictionModifier, bodyA->gameObject.GetTimeScale());
 
   // Elasticity of collision
   float elasticity = (bodyA->elasticity + bodyB->elasticity) / 2.0f;
@@ -577,7 +577,7 @@ void PhysicsSystem::UnregisterColliders(int objectId)
   staticColliderStructure.erase(objectId);
 }
 
-Vector2 PhysicsSystem::ApplyFriction(Vector2 velocity, float friction)
+Vector2 PhysicsSystem::ApplyFriction(Vector2 velocity, float friction, float timeScale)
 {
   if (!velocity || friction == 0)
     return velocity;
@@ -598,7 +598,7 @@ Vector2 PhysicsSystem::ApplyFriction(Vector2 velocity, float friction)
   float speedProportion = sqrSpeed > 1 ? pow(sqrSpeed, 0.25f) : 1;
 
   // Get delta time
-  float deltaTime = Game::GetInstance().GetPhysicsDeltaTime();
+  float deltaTime = Game::GetInstance().GetPhysicsDeltaTime() * timeScale;
 
   // Make friction proportional to delta time and speed
   float proportionalFriction = min(

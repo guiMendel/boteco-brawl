@@ -110,7 +110,7 @@ private:
   // =================================
 public:
   // Applies a given friction to the velocity
-  static Vector2 ApplyFriction(Vector2 velocity, float friction);
+  static Vector2 ApplyFriction(Vector2 velocity, float friction, float timeScale = 1);
 
   // =================================
   // RAY & COLLIDER CASTING

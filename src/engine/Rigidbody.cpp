@@ -42,7 +42,7 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
   velocity += GetState()->physicsSystem.gravity * gravityScale * deltaTime;
 
   // Apply air friction
-  velocity = PhysicsSystem::ApplyFriction(velocity, airFriction);
+  velocity = PhysicsSystem::ApplyFriction(velocity, airFriction, gameObject.GetTimeScale());
 
   // Update the last position variable
   lastPosition = gameObject.GetPosition();

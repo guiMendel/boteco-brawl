@@ -1,4 +1,5 @@
 #include "Heat.h"
+#include "Character.h"
 #include "CharacterVFX.h"
 #include "FallOffDeath.h"
 #include "ParticleFX.h"
@@ -90,7 +91,7 @@ void Heat::TakeDamage(Damage damage)
 
   // Add heat
   SetHeat(heat + damage.heatDamage);
-  
+
   // Hit stop effect with updated damage
   float hitStopDuration = TriggerHitEffect(damage);
 
@@ -102,8 +103,15 @@ void Heat::TakeDamage(Damage damage)
 
 float Heat::TriggerHitEffect(Damage damage)
 {
-  if (damage.impulse.magnitude == 0 && damage.minHitStop == 0)
+  // An effect needs impulse (or some hit stop) AND a character author
+  if ((damage.impulse.magnitude == 0 && damage.minHitStop == 0) || damage.weakAuthor.expired())
     return 0;
+
+  IF_LOCK(damage.weakAuthor, author)
+  {
+    if (author->GetComponent<Character>() == nullptr)
+      return 0;
+  }
 
   // Multiplier to apply to impulse to get duration
   static const float impulseFactor{0.005};
@@ -143,8 +151,8 @@ void Heat::OnCollisionEnter(Collision::Data)
 {
   LOCK(weakStateManager, stateManager);
 
-  // Check if bouncing
-  if (stateManager->IsBouncing() == false)
+  // Check if bouncing OR not already recovering
+  if (stateManager->IsBouncing() == false || stateManager->HasState(RECOVERING_STATE))
     return;
 
   LOCK(weakCharacterController, characterController);
