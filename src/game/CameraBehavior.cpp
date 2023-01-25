@@ -150,7 +150,7 @@ void CameraBehavior::UpdateTargets()
   LOCK(weakCamera, camera);
 
   // Set the size to the largest dimension (also respect min size)
-  targetSize = max(max(maxDistances.y, maxDistances.x / screenRatio) + padding, minSize);
+  targetSize = Clamp(max(maxDistances.y, maxDistances.x / screenRatio) + padding, minSize, maxSize);
 
   // === VALIDATE TARGETS
 
