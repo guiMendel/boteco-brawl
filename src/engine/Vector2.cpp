@@ -100,12 +100,12 @@ Vector2 Vector2::CapMagnitude(float value)
 
 Vector2 Vector2::Normalized()
 {
-  float magnitude = Magnitude();
+  float sqrMagnitude = SqrMagnitude();
 
-  if (!magnitude)
+  if (sqrMagnitude == 0)
     return Vector2::Zero();
 
-  return Vector2(*this) / magnitude;
+  return Vector2(*this) * InverseRoot(sqrMagnitude);
 }
 
 float Vector2::Angle() const { return atan2(y, x); }

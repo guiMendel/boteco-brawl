@@ -7,14 +7,16 @@ using namespace std;
 
 const float CameraBehavior::padding{2};
 
-const float CameraBehavior::maxSpeed{3};
+const float CameraBehavior::maxSpeed{5};
 const float CameraBehavior::baseSizeSpeed{0.5};
 
-const float CameraBehavior::baseAcceleration{2};
+const float CameraBehavior::baseAcceleration{6};
 const float CameraBehavior::baseSizeAcceleration{0.5};
 
+const float CameraBehavior::deadZoneRange{0.3};
+
 // Bias applied towards deceleration
-const float decelerationBias{2};
+const float decelerationBias{1};
 
 static const float alignTolerance{DegreesToRadians(35)};
 
@@ -60,6 +62,8 @@ void CameraBehavior::Start()
 
 void CameraBehavior::Update(float deltaTime)
 {
+  LOCK(weakCamera, camera);
+
   // Calculate new targets
   UpdateTargets();
 
@@ -67,11 +71,13 @@ void CameraBehavior::Update(float deltaTime)
   MoveTowardsTargets(deltaTime);
 
   // Adjust values to ensure camera is valid
-  // ConfineToArena();
+  SetPosition(ConfineToArena(gameObject.GetPosition(), camera->GetSize()));
 }
 
 void CameraBehavior::UpdateTargets()
 {
+  // === NEW POSITION CALCULATION
+
   LOCK(weakCharactersParent, charactersParent);
 
   // Reset target position
@@ -137,36 +143,78 @@ void CameraBehavior::UpdateTargets()
 
   // Set the size to the largest dimension
   targetSize = max(maxDistances.y, maxDistances.x / screenRatio) + padding;
+  targetSize = 5;
+
+  // === VALIDATE TARGETS
+
+  // Validate it
+  targetPosition = ConfineToArena(targetPosition, targetSize);
 }
 
 void CameraBehavior::MoveTowardsTargets(float deltaTime)
 {
   LOCK(weakCamera, camera);
 
+  // Find this frame's target speeds
+  float unframedFactor = max(1.0f, currentlyUnframedSpace * currentlyUnframedSpace);
+
   // Distance to target position
   Vector2 targetDisplacement = targetPosition - gameObject.GetPosition();
 
   // Find how much acceleration will be redirected towards decelerating
   // It's an amount proportional to how unaligned the velocity is to the target position
-  float decelerationPortion = InverseLerp(0.0f,
-                                          float(M_PI),
-                                          decelerationBias * abs(AngleDistance(velocity.Angle(), targetDisplacement.Angle())));
+  float decelerationPortion;
+
+  bool lowSpeed = velocity.SqrMagnitude() <= 0.2 * 0.2;
+
+  // Only decelerate if too close
+  if (targetDisplacement.SqrMagnitude() <= deadZoneRange * deadZoneRange)
+  {
+    // If speed is low enough, simply do nothing
+    if (lowSpeed)
+    {
+      lastAcceleration = Vector2::Zero();
+      return;
+    }
+
+    decelerationPortion = 1;
+  }
+
+  // If going too slow, don't bother decelerating
+  else if (lowSpeed)
+    decelerationPortion = 0;
+
+  else
+    decelerationPortion = InverseLerp(
+        0.0f,
+        float(M_PI),
+        decelerationBias * abs(AngleDistance(velocity.Angle(), targetDisplacement.Angle())));
 
   // Get acceleration and deceleration
-  float acceleration = (1 - decelerationPortion) * baseAcceleration;
-  float deceleration = decelerationPortion * baseAcceleration;
+  cout << "decelerationPortion: " << decelerationPortion << endl;
+  float scaledAcceleration = baseAcceleration * unframedFactor;
+  float acceleration = (1 - decelerationPortion) * scaledAcceleration;
+  float deceleration = decelerationPortion * scaledAcceleration;
+
+  // Get velocity portion which is pointing to the target position
+  float closingSpeed = Vector2::Dot(velocity, targetDisplacement.Normalized());
+
+  // Find how far from the target we need to start braking, given the current speed
+  float brakeDistance = -closingSpeed * closingSpeed / (acceleration * 2);
+
+  // If inside brake distance, revert acceleration to brake
+  if (targetDisplacement.SqrMagnitude() <= brakeDistance * brakeDistance)
+    acceleration = -acceleration;
 
   lastAcceleration = (targetDisplacement.Normalized() * acceleration +
                       -velocity.Normalized() * deceleration);
 
   // Apply both accelerations to current velocity
-  velocity = (velocity + lastAcceleration * deltaTime).CapMagnitude(maxSpeed);
+  velocity = (velocity + lastAcceleration * deltaTime).CapMagnitude(maxSpeed * unframedFactor);
 
   // Apply velocity to position
   SetPosition(gameObject.GetPosition() + velocity * deltaTime);
 
-  // Find this frame's target speeds
-  float unframedFactor = max(1.0f, currentlyUnframedSpace * currentlyUnframedSpace);
   float targetSizeSpeed = baseSizeSpeed * unframedFactor;
 
   // Get speed difference
@@ -197,17 +245,16 @@ void CameraBehavior::SetSize(float newSize)
   camera->SetSize(min(newSize, maxSize));
 }
 
-void CameraBehavior::ConfineToArena()
+Vector2 CameraBehavior::ConfineToArena(Vector2 position, float size)
 {
   LOCK(weakArena, arena);
-  LOCK(weakCamera, camera);
 
-  float horizontalSize = camera->GetSize() * screenRatio;
+  float horizontalSize = size * screenRatio;
 
   // Adjust position to fit within arena
-  SetPosition(Vector2(
-      Clamp(gameObject.GetPosition().x, -arena->width / 2 + horizontalSize, arena->width / 2 - horizontalSize),
-      Clamp(gameObject.GetPosition().y, -arena->height / 2 + camera->GetSize(), arena->height / 2 - camera->GetSize())));
+  return Vector2(
+      Clamp(position.x, -arena->width / 2 + horizontalSize, arena->width / 2 - horizontalSize),
+      Clamp(position.y, -arena->height / 2 + size, arena->height / 2 - size));
 }
 
 void CameraBehavior::Reset()

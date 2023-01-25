@@ -51,6 +51,10 @@ namespace Helper
   // Returns minimum angle distance between angle A and B, in radians
   float AngleDistance(float radiansA, float radiansB);
 
+  // Gets the inverse of the square root of the value
+  // Uses the fast inverse square root algorithm
+  float InverseRoot(float value);
+
   // Returns true with probability equal to parameter.
   // Parameter must be a number between 0 and 1, where 0 is no chance and 1 is 100% chance
   bool ThrowCoin(float chance);
@@ -81,7 +85,7 @@ namespace Helper
     // Range distance
     T rangeDistance = max - min;
 
-    return (value - min) / rangeDistance;
+    return (Clamp(value, min, max) - min) / rangeDistance;
   }
 
   template <typename T>

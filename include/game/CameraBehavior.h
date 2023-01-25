@@ -23,6 +23,9 @@ public:
   // Base acceleration of camera size change
   static const float baseSizeAcceleration;
 
+  // How far from target camera needs to be to start moving
+  static const float deadZoneRange;
+
   CameraBehavior(GameObject &associatedObject, std::shared_ptr<GameObject> charactersParent);
   virtual ~CameraBehavior() {}
 
@@ -49,8 +52,8 @@ private:
   // Changes camera's size to the given size
   void SetSize(float newSize);
 
-  // If necessary, adjusts camera's position to ensure that it fits within the arena
-  void ConfineToArena();
+  // Adjusts given position to ensure that it fits within the arena
+  Vector2 ConfineToArena(Vector2 position, float size);
 
   // Resets camera to center with maximum size
   void Reset();
