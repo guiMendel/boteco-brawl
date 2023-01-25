@@ -1,4 +1,4 @@
-#include "FallOffDeath.h"
+#include "FallDeath.h"
 #include "CharacterBadge.h"
 #include "CharacterRepelCollision.h"
 #include "Animator.h"
@@ -12,20 +12,21 @@
 
 using namespace std;
 
-const float FallOffDeath::deathMargin{3};
-const float FallOffDeath::respawnDelay{2};
+const float FallDeath::deathMargin{3};
+const float FallDeath::respawnDelay{2};
+const int FallDeath::startingLives{1};
 
-FallOffDeath::FallOffDeath(GameObject &associatedObject)
+FallDeath::FallDeath(GameObject &associatedObject)
     : Component(associatedObject), weakArena(GetState()->FindObjectOfType<Arena>())
 {
   Assert(weakArena.expired() == false, "Failed to find an Arena component");
 }
 
-void FallOffDeath::Update(float)
+void FallDeath::Update(float)
 {
   LOCK(weakArena, arena);
 
-  if (IsDead())
+  if (IsFallen())
   {
     // If respawn timer is up, respawn
     if (gameObject.timer.Get(RESPAWN_TIMER) >= respawnDelay)
@@ -46,16 +47,19 @@ void FallOffDeath::Update(float)
       position.y < -arena->height / 2 - deathMargin ||
       // Off bottom
       position.y > arena->height / 2 + deathMargin)
-    Die();
+    Fall();
 }
 
-void FallOffDeath::Die()
+void FallDeath::Fall()
 {
-  LOCK(weakArena, arena);
+  // Record time
+  lastFallTime = SDL_GetTicks();
 
-  dead = true;
+  // Set flag
+  fallen = true;
 
-  OnDeath.Invoke();
+  // Raise event
+  OnFall.Invoke();
 
   // Reset speed
   gameObject.RequireComponent<Rigidbody>()->velocity = Vector2::Zero();
@@ -66,8 +70,65 @@ void FallOffDeath::Die()
   // Disable character
   SetCharacterActive(false);
 
-  // Start respawn timer
-  gameObject.timer.Start(RESPAWN_TIMER);
+  // Discount life
+  if (--lives > 0)
+    // Start respawn timer
+    gameObject.timer.Start(RESPAWN_TIMER);
+
+  // Raise death event
+  else
+    OnDeath.Invoke();
+
+  PlayEffect();
+}
+
+void FallDeath::Respawn()
+{
+  LOCK(weakArena, arena);
+
+  fallen = false;
+
+  // Reset timer
+  gameObject.timer.Reset(RESPAWN_TIMER, 0, false);
+
+  // Get height
+  auto height = gameObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
+
+  // Set new position
+  gameObject.SetPosition({0, -arena->height / 2 - height / 2});
+
+  // Enable it
+  SetCharacterActive(true);
+
+  auto body = gameObject.RequireComponent<Rigidbody>();
+  auto movement = gameObject.RequireComponent<Movement>();
+  auto input = gameObject.RequireComponent<PlayerInput>();
+  auto stateManager = gameObject.RequireComponent<CharacterStateManager>();
+
+  return;
+}
+
+void FallDeath::SetCharacterActive(bool active)
+{
+  gameObject.RequireComponent<SpriteRenderer>()->SetEnabled(active);
+  gameObject.RequireComponent<Animator>()->SetEnabled(active);
+  gameObject.RequireComponent<Rigidbody>()->SetEnabled(active);
+  gameObject.RequireComponent<Collider>()->SetEnabled(active);
+  gameObject.RequireComponent<Movement>()->SetEnabled(active);
+  gameObject.RequireComponent<PlayerInput>()->SetEnabled(active);
+  gameObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
+  gameObject.RequireComponent<CharacterController>()->SetEnabled(active);
+  gameObject.RequireComponentInChildren<CharacterRepelCollision>()->SetEnabled(active);
+  gameObject.RequireComponentInChildren<CharacterBadge>()->ShowBadge(active);
+}
+
+bool FallDeath::IsFallen() const { return fallen; }
+
+int FallDeath::GetLives() const { return lives; }
+
+void FallDeath::PlayEffect() const
+{
+  LOCK(weakArena, arena);
 
   // Get radius
   auto radius = gameObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
@@ -125,49 +186,10 @@ void FallOffDeath::Die()
   ParticleFX::EffectAt(effectPosition, radius, 0.5, fireParams, 5);
   ParticleFX::EffectAt(effectPosition, radius, 0.5, smokeParams, 5);
   ParticleFX::EffectAt(effectPosition, 0.1, 0.001, arcParams, 10);
-
-  // Relocate character
-  gameObject.SetPosition({0, 0});
 }
 
-void FallOffDeath::Respawn()
-{
-  LOCK(weakArena, arena);
+bool FallDeath::IsDead() const { return lives <= 0; }
 
-  dead = false;
+bool FallDeath::IsRespawning() const { return IsFallen() && (IsDead() == false); }
 
-  // Reset timer
-  gameObject.timer.Reset(RESPAWN_TIMER, 0, false);
-
-  // Get height
-  auto height = gameObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
-
-  // Set new position
-  gameObject.SetPosition({0, -arena->height / 2 - height / 2});
-
-  // Enable it
-  SetCharacterActive(true);
-
-  auto body = gameObject.RequireComponent<Rigidbody>();
-  auto movement = gameObject.RequireComponent<Movement>();
-  auto input = gameObject.RequireComponent<PlayerInput>();
-  auto stateManager = gameObject.RequireComponent<CharacterStateManager>();
-
-  return;
-}
-
-void FallOffDeath::SetCharacterActive(bool active)
-{
-  gameObject.RequireComponent<SpriteRenderer>()->SetEnabled(active);
-  gameObject.RequireComponent<Animator>()->SetEnabled(active);
-  gameObject.RequireComponent<Rigidbody>()->SetEnabled(active);
-  gameObject.RequireComponent<Collider>()->SetEnabled(active);
-  gameObject.RequireComponent<Movement>()->SetEnabled(active);
-  gameObject.RequireComponent<PlayerInput>()->SetEnabled(active);
-  gameObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
-  gameObject.RequireComponent<CharacterController>()->SetEnabled(active);
-  gameObject.RequireComponentInChildren<CharacterRepelCollision>()->SetEnabled(active);
-  gameObject.RequireComponentInChildren<CharacterBadge>()->ShowBadge(active);
-}
-
-bool FallOffDeath::IsDead() const { return dead; }
+float FallDeath::GetLastFallAge() const { return (SDL_GetTicks() - lastFallTime) / 1000.0f; }

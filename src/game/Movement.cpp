@@ -1,5 +1,5 @@
 #include "Movement.h"
-#include "FallOffDeath.h"
+#include "FallDeath.h"
 #include "ObjectRecipes.h"
 #include "CharacterStateManager.h"
 #include "Rigidbody.h"
@@ -40,7 +40,7 @@ void Movement::Start()
   originalGravityScale = rigidbody.gravityScale;
 
   // On death, reset fast fall & direction
-  gameObject.RequireComponent<FallOffDeath>()->OnDeath.AddListener("reset-movement", [this]()
+  gameObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-movement", [this]()
                                                                    { SetDirection(0); StopFallFast(); });
 }
 

@@ -1,5 +1,5 @@
 #include "CameraBehavior.h"
-#include "FallOffDeath.h"
+#include "FallDeath.h"
 #include "BoxCollider.h"
 #include "Debug.h"
 
@@ -17,8 +17,11 @@ const float CameraBehavior::deadZoneRange{0.3};
 
 const float CameraBehavior::minSize{3};
 
+// How long to show a fallen character's fall position in screen for
+static const float fallStickTime{2};
+
 // Bias applied towards deceleration
-const float decelerationBias{1};
+static const float decelerationBias{1};
 
 static const float alignTolerance{DegreesToRadians(35)};
 
@@ -92,8 +95,10 @@ void CameraBehavior::UpdateTargets()
 
   for (auto character : charactersParent->GetChildren())
   {
-    // Filter out dead ones
-    if (character->RequireComponent<FallOffDeath>()->IsDead())
+    // Filter out those that have fallen a while ago
+    auto fallDeath = character->RequireComponent<FallDeath>();
+
+    if (fallDeath->IsFallen() && fallDeath->GetLastFallAge() > fallStickTime)
       continue;
 
     liveCharacters++;
@@ -306,7 +311,7 @@ void CameraBehavior::Reset()
 void CameraBehavior::Render()
 {
   return;
-  
+
   LOCK(weakCamera, camera);
 
   // Draw target position

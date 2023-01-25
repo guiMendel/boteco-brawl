@@ -1,5 +1,5 @@
 #include "CharacterBadge.h"
-#include "FallOffDeath.h"
+#include "FallDeath.h"
 #include <sstream>
 #include <iomanip>
 
@@ -19,7 +19,7 @@ void CharacterBadge::Start()
   gameObject.GetParent()->RequireComponent<Heat>()->OnHeatChange.AddListener("update-heat-display", [this](float newHeat, float oldHeat)
                                                                              { UpdateDisplay(newHeat, oldHeat); });
 
-  gameObject.GetParent()->RequireComponent<FallOffDeath>()->OnDeath.AddListener("update-heat-display", [this]()
+  gameObject.GetParent()->RequireComponent<FallDeath>()->OnFall.AddListener("update-heat-display", [this]()
                                                                                 { UpdateDisplay(0, 0); });
 
   UpdateDisplay(0, 0);

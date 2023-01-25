@@ -1,5 +1,5 @@
 #include "PlayerInput.h"
-#include "FallOffDeath.h"
+#include "FallDeath.h"
 
 using namespace std;
 
@@ -11,7 +11,7 @@ PlayerInput::PlayerInput(GameObject &associatedObject)
     SetDirection({0, 0});
   };
 
-  gameObject.RequireComponent<FallOffDeath>()->OnDeath.AddListener("reset-movement-direction", reset);
+  gameObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-movement-direction", reset);
 }
 
 void PlayerInput::SetDirection(Vector2 direction)

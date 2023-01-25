@@ -3,7 +3,7 @@
 #include "ObjectRecipes.h"
 #include "LandingAttackEffector.h"
 #include "Arena.h"
-#include "FallOffDeath.h"
+#include "FallDeath.h"
 #include "PlatformEffector.h"
 #include "TestCharacter.h"
 #include "Text.h"
@@ -132,7 +132,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // === DYING FROM FALLING OFF
 
-    character->AddComponent<FallOffDeath>();
+    character->AddComponent<FallDeath>();
 
     // === MOVEMENT CONTROL
 

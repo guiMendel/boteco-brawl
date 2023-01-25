@@ -1,7 +1,7 @@
 #include "Heat.h"
 #include "Character.h"
 #include "CharacterVFX.h"
-#include "FallOffDeath.h"
+#include "FallDeath.h"
 #include "ParticleFX.h"
 
 using namespace std;
@@ -27,7 +27,7 @@ void Heat::Awake()
 void Heat::Start()
 {
   // On death, reset heat
-  gameObject.RequireComponent<FallOffDeath>()->OnDeath.AddListener("reset-heat", [this]()
+  gameObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-heat", [this]()
                                                                    { heat = 0; });
 }
 
