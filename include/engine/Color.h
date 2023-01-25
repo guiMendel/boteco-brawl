@@ -55,6 +55,9 @@ struct Color
 
   Color operator/(float value) const;
 
+  bool operator==(const Color &other);
+  bool operator!=(const Color &other);
+
   // === SDL INTEGRATION
 
   operator SDL_Color() const;

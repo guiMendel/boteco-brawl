@@ -77,6 +77,13 @@ Color Color::operator/(float value) const
       int(alpha / value));
 }
 
+bool Color::operator==(const Color &other)
+{
+  return red == other.red && green == other.green && blue == other.blue && alpha == other.alpha;
+}
+
+bool Color::operator!=(const Color &other) { return !(*this == other); }
+
 // === SDL INTEGRATION
 
 Color::operator SDL_Color() const { return SDL_Color{(Uint8)red, (Uint8)green, (Uint8)blue, (Uint8)alpha}; }

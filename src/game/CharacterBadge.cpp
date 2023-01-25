@@ -25,10 +25,10 @@ void CharacterBadge::Start()
   UpdateDisplay(0, 0);
 
   // Get player
-  auto player = gameObject.RequireComponent<CharacterController>()->GetPlayer();
+  auto player = gameObject.GetParent()->RequireComponent<CharacterController>()->GetPlayer();
 
   // Set badge color to player color
-  gameObject.RequireComponent<SpriteRenderer>()->modulateColor = player->GetColor();
+  gameObject.RequireComponent<SpriteRenderer>()->SetColor(player->GetColor());
 }
 
 void CharacterBadge::Update(float deltaTime)

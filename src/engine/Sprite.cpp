@@ -68,3 +68,5 @@ float Sprite::GetHeight(float scale) const
 }
 
 void Sprite::SetConfig(SpriteConfig newConfig) { config = newConfig; }
+
+std::shared_ptr<SDL_Texture> Sprite::GetTexture() const { return texture; }

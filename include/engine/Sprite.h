@@ -32,7 +32,7 @@ public:
 
   SDL_Rect GetClip() const;
 
-  std::shared_ptr<SDL_Texture> GetTexture() const { return texture; }
+  std::shared_ptr<SDL_Texture> GetTexture() const;
 
   // Sets which rectangle of the image is to be displayed
   void SetClip(SDL_Rect rect);

@@ -13,7 +13,7 @@ SpriteRenderer::SpriteRenderer(GameObject &associatedObject, RenderLayer renderL
 }
 
 // Constructor with image file name
-SpriteRenderer::SpriteRenderer(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer, int renderOrder, bool centerObject) : SpriteRenderer(associatedObject, renderLayer, renderOrder, centerObject)
+SpriteRenderer::SpriteRenderer(GameObject &associatedObject, const string fileName, RenderLayer renderLayer, int renderOrder, bool centerObject) : SpriteRenderer(associatedObject, renderLayer, renderOrder, centerObject)
 {
   sprite = Resources::GetSprite(fileName);
 }
@@ -59,15 +59,21 @@ void SpriteRenderer::Render(Vector2 position)
   // Get source clip
   auto sourceRect = sprite->GetClip();
 
-  // Put the texture in the renderer
-  SDL_RenderCopyEx(
-      Game::GetInstance().GetRenderer(),
-      sprite->GetTexture().get(),
-      &sourceRect,
-      &destinationRect,
-      Helper::RadiansToDegrees(gameObject.GetRotation()),
-      nullptr,
-      SDL_RendererFlip(horizontalFlip | verticalFlip));
+  // Puts the texture in the renderer
+  auto render = [&](SDL_Texture *texture)
+  {
+    SDL_RenderCopyEx(
+        Game::GetInstance().GetRenderer(),
+        texture,
+        &sourceRect,
+        &destinationRect,
+        Helper::RadiansToDegrees(gameObject.GetRotation()),
+        nullptr,
+        SDL_RendererFlip(horizontalFlip | verticalFlip));
+  };
+
+  // Apply render procedure
+  UseTexture(render);
 }
 
 Vector2 SpriteRenderer::GetOffset() const { return offset; }
@@ -77,3 +83,49 @@ void SpriteRenderer::SetOffset(Vector2 newOffset)
   offset = newOffset;
   OnSetOffset.Invoke(offset);
 }
+
+void SpriteRenderer::UseTexture(function<void(SDL_Texture *)> procedure)
+{
+  // Get texture from sprite
+  auto texture = sprite->GetTexture();
+
+  // Apply color modulation
+  if (modulateColor != Color::White())
+  {
+    SDL_SetTextureColorMod(texture.get(), modulateColor.red, modulateColor.green, modulateColor.blue);
+
+    if (modulateColor.alpha < 255)
+      SDL_SetTextureAlphaMod(texture.get(), modulateColor.alpha);
+  }
+
+  // Execute procedure
+  procedure(texture.get());
+
+  // Revert modifications to texture
+  SDL_SetTextureColorMod(texture.get(), 255, 255, 255);
+  SDL_SetTextureAlphaMod(texture.get(), 255);
+}
+
+void SpriteRenderer::SetColor(Color modulateColor, Color addColor)
+{
+  if (modulateColor.IsValid())
+    this->modulateColor = modulateColor;
+
+  if (addColor.IsValid())
+    this->addColor = addColor;
+
+  // Reset generated texture
+  lastTexture = nullptr;
+}
+
+pair<Color, Color> SpriteRenderer::GetColors() const { return {modulateColor, addColor}; }
+
+void SpriteRenderer::SetSprite(shared_ptr<Sprite> newSprite)
+{
+  sprite = newSprite;
+
+  // Reset generated texture
+  lastTexture = nullptr;
+}
+
+shared_ptr<Sprite> SpriteRenderer::GetSprite() const { return sprite; }

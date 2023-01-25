@@ -6,7 +6,7 @@
 using namespace std;
 
 Player::Player(GameObject &associatedObject, PlayerManager &manager, Color color)
-    : Component(associatedObject), playerManager(manager), color(color) {}
+    : Component(associatedObject), color(color), playerManager(manager) {}
 
 // Is searching when need a controller but has no controller
 bool Player::SearchingForController() const { return usingController && weakController.expired(); }

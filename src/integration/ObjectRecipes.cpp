@@ -140,14 +140,14 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     character->AddComponent<::CharacterStateManager>();
     character->AddComponent<Movement>(35, 5, collider->GetBox().height / 2);
 
+    // Give it control
+    character->AddComponent<CharacterController>(player);
+
     // Give it input
     if (player->IsMain())
       character->AddComponent<KeyboardInput>();
     else
       character->AddComponent<ControllerInput>();
-
-    // Give it control
-    character->AddComponent<CharacterController>(player);
 
     // === CHARACTER REPELLING
 

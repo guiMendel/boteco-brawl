@@ -54,7 +54,7 @@ void AnimationFrame::Trigger(GameObject &gameObject) const
     // Then the object must have a sprite renderer
     auto spriteRenderer = gameObject.RequireComponent<SpriteRenderer>();
 
-    spriteRenderer->sprite = sprite;
+    spriteRenderer->SetSprite(sprite);
 
     // Apply offset
     spriteRenderer->SetOffset(spriteOffset);
