@@ -39,7 +39,7 @@ void Rigidbody::PhysicsUpdate(float deltaTime)
 void Rigidbody::DynamicBodyUpdate(float deltaTime)
 {
   // Apply gravity
-  velocity += GetState()->physicsSystem.gravity * gravityScale * deltaTime;
+  velocity += GetScene()->physicsSystem.gravity * gravityScale * deltaTime;
 
   // Apply air friction
   velocity = PhysicsSystem::ApplyFriction(velocity, airFriction, worldObject.GetTimeScale());
@@ -98,7 +98,7 @@ void Rigidbody::DeriveMassFromColliders()
 // Gets the list of colliders associated with this body
 vector<shared_ptr<Collider>> Rigidbody::GetColliders() const
 {
-  auto &physicsSystem = GetState()->physicsSystem;
+  auto &physicsSystem = GetScene()->physicsSystem;
 
   PhysicsSystem::WeakColliders weakColliders;
   if (IsStatic())
@@ -149,11 +149,11 @@ void Rigidbody::SetType(RigidbodyType newType)
     return;
 
   type = newType;
-  GetState()->physicsSystem.UnregisterColliders(worldObject.id);
+  GetScene()->physicsSystem.UnregisterColliders(worldObject.id);
 
   // Re-register colliders
   for (auto collider : GetColliders())
-    GetState()->physicsSystem.RegisterCollider(collider, worldObject.id);
+    GetScene()->physicsSystem.RegisterCollider(collider, worldObject.id);
 }
 
 bool Rigidbody::Raycast(float angle, float maxDistance, RaycastData &data)
@@ -162,7 +162,7 @@ bool Rigidbody::Raycast(float angle, float maxDistance, RaycastData &data)
   CollisionFilter filter;
   filter.ignoredObjects.insert(worldObject.id);
 
-  return GetState()->physicsSystem.Raycast(worldObject.GetPosition(), angle, maxDistance, data, filter);
+  return GetScene()->physicsSystem.Raycast(worldObject.GetPosition(), angle, maxDistance, data, filter);
 }
 
 bool Rigidbody::Raycast(float angle, float maxDistance)
@@ -177,7 +177,7 @@ bool Rigidbody::ColliderCast(float angle, float maxDistance, ColliderCastData &d
   CollisionFilter filter;
   filter.ignoredObjects.insert(worldObject.id);
 
-  return GetState()->physicsSystem.ColliderCast(GetColliders(), worldObject.GetPosition(), angle, maxDistance, data, filter, scaleColliders);
+  return GetScene()->physicsSystem.ColliderCast(GetColliders(), worldObject.GetPosition(), angle, maxDistance, data, filter, scaleColliders);
 }
 
 bool Rigidbody::ColliderCast(float angle, float maxDistance, float scaleColliders)

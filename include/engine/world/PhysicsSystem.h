@@ -11,7 +11,7 @@
 #include "PhysicsLayerHandler.h"
 #include "TriggerCollisionData.h"
 
-class GameState;
+class GameScene;
 class Rigidbody;
 class Collider;
 
@@ -47,11 +47,11 @@ struct CollisionFilter
 
 class PhysicsSystem
 {
-  friend class GameState;
+  friend class GameScene;
   friend class Rigidbody;
 
 public:
-  PhysicsSystem(GameState &gameState);
+  PhysicsSystem(GameScene &gameScene);
 
   // =================================
   // CONFIGURATION
@@ -166,7 +166,7 @@ private:
   // UTILITY
   // =================================
 public:
-  GameState &gameState;
+  GameScene &gameScene;
 };
 
 #endif

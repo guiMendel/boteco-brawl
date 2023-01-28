@@ -9,16 +9,16 @@
 #include "Game.h"
 #include "Helper.h"
 #include "Resources.h"
-#include "GameState.h"
-#include "MainState.h"
+#include "GameScene.h"
+#include "MainScene.h"
 
 using namespace std;
 using namespace Helper;
 
-class no_state_error : runtime_error
+class no_scene_error : runtime_error
 {
 public:
-  no_state_error(string message) : runtime_error(message) {}
+  no_scene_error(string message) : runtime_error(message) {}
 };
 
 // === EXTERNAL FIELDS
@@ -139,7 +139,7 @@ Game::Game(string title, int width, int height)
   // Retrieve the window & the renderer from the initializer
   auto pointers = InitializeSDL(title, width, height);
 
-  // === INITIALIZE STATE
+  // === INITIALIZE SCENE
 
   window.reset(pointers.first);
   renderer.reset(pointers.second);
@@ -246,8 +246,8 @@ Game &Game::GetInstance()
     // Create it
     gameInstance.reset(new Game("GuilhermeMendel-170143970", screenWidth, screenHeight));
 
-    // Set a starting state as next state
-    gameInstance->PushState(gameInstance->GetInitialState());
+    // Set a starting scene as next scene
+    gameInstance->PushScene(gameInstance->GetInitialScene());
   }
 
   // Return the instance
@@ -256,14 +256,14 @@ Game &Game::GetInstance()
 
 void Game::Start()
 {
-  // Push next state in if necessary
-  if (nextState != nullptr)
-    PushNextState();
+  // Push next scene in if necessary
+  if (nextScene != nullptr)
+    PushNextScene();
 
   started = true;
 
-  // Start the initial state
-  GetState()->Start();
+  // Start the initial scene
+  GetScene()->Start();
 
   GameLoop();
 }
@@ -286,7 +286,7 @@ void Game::GameLoop()
   int executionStart = SDL_GetTicks();
 
   // Loop while exit not requested
-  while (GetState()->QuitRequested() == false)
+  while (GetScene()->QuitRequested() == false)
   {
 #ifdef DISPLAY_REAL_FPS
     CountElapsedFrames(SDL_GetTicks() - executionStart);
@@ -304,12 +304,12 @@ void Game::GameLoop()
 
       if (nextFrameIn <= 0)
       {
-        // Throws when trying to pop it's last state (and no nextState is set)
+        // Throws when trying to pop it's last scene (and no nextScene is set)
         Frame();
         nextFrameIn = frameDelay;
       }
     }
-    catch (const no_state_error &)
+    catch (const no_scene_error &)
     {
       break;
     }
@@ -334,9 +334,9 @@ void Game::GameLoop()
     }
   }
 
-  // Make sure state pile is empty
-  while (loadedStates.size() > 0)
-    loadedStates.pop();
+  // Make sure scene pile is empty
+  while (loadedScenes.size() > 0)
+    loadedScenes.pop();
 
   // Clear resources
   Resources::ClearAll();
@@ -352,27 +352,27 @@ void Game::Frame()
   // Count this frame
   framesThisSecond++;
 #endif
-  // Objects to add to state
+  // Objects to add to scene
   vector<shared_ptr<WorldObject>> objectsToAdd;
 
-  // Check if state needs to be popped
-  // Throws when it's the last state (and no nextState is set)
-  if (GetState()->PopRequested())
+  // Check if scene needs to be popped
+  // Throws when it's the last scene (and no nextScene is set)
+  if (GetScene()->PopRequested())
   {
-    objectsToAdd = GetState()->GetObjectsToCarryOn();
-    PopState();
+    objectsToAdd = GetScene()->GetObjectsToCarryOn();
+    PopScene();
   }
 
-  // Load next state if necessary
-  if (nextState != nullptr)
-    PushNextState();
+  // Load next scene if necessary
+  if (nextScene != nullptr)
+    PushNextScene();
 
-  // Get reference to current state
-  GameState &state{*GetState()};
+  // Get reference to current scene
+  GameScene &scene{*GetScene()};
 
   // Add new objects
   for (auto newObject : objectsToAdd)
-    state.RegisterObject(newObject);
+    scene.RegisterObject(newObject);
 
   // Get input
   auto pollDelay = inputManager.Update();
@@ -384,21 +384,21 @@ void Game::Frame()
   // Calculate frame's delta time
   CalculateDeltaTime(frameStart, deltaTime);
 
-  // Update the state's timer
-  state.timer.Update(deltaTime);
+  // Update the scene's timer
+  scene.timer.Update(deltaTime);
 
-  // Update the state
-  state.Update(deltaTime);
+  // Update the scene
+  scene.Update(deltaTime);
 
-  // Render the state
-  state.Render();
+  // Render the scene
+  scene.Render();
 
 #ifdef DISPLAY_REAL_FPS
   // Render frame count
   DisplayRealFps();
 #endif
 
-  // WARNING: DO NOT USE state FROM HERE UNTIL END OF LOOP
+  // WARNING: DO NOT USE scene FROM HERE UNTIL END OF LOOP
 
   // Render the window
   SDL_RenderPresent(GetRenderer());
@@ -424,62 +424,62 @@ void Game::PhysicsFrame()
 
   // cout << "Physics delta time: " << physicsDeltaTime << endl;
 
-  // Update the state
-  GetState()->PhysicsUpdate(physicsDeltaTime);
+  // Update the scene
+  GetScene()->PhysicsUpdate(physicsDeltaTime);
 
 #ifdef PRINT_FRAME_DURATION
   cout << "Physics took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
 #endif
 }
 
-shared_ptr<GameState> Game::GetState()
+shared_ptr<GameScene> Game::GetScene()
 {
-  Assert(loadedStates.size() > 0, "No game state loaded");
+  Assert(loadedScenes.size() > 0, "No game scene loaded");
 
-  return loadedStates.top();
+  return loadedScenes.top();
 }
 
-void Game::PushState(shared_ptr<GameState> &&state)
+void Game::PushScene(shared_ptr<GameScene> &&scene)
 {
   // Alert if next is overridden
-  if (nextState != nullptr)
+  if (nextScene != nullptr)
     cout << "WARNING: call to " << __FUNCTION__ << " will override previous call in the same frame" << endl;
 
-  // Store this state for next frame
-  nextState = move(state);
+  // Store this scene for next frame
+  nextScene = move(scene);
 }
 
-void Game::PushNextState()
+void Game::PushNextScene()
 {
-  Assert(nextState != nullptr, "Failed to push next state: it was nullptr");
+  Assert(nextScene != nullptr, "Failed to push next scene: it was nullptr");
 
-  // Put current state on hold
-  if (loadedStates.size() > 0)
-    GetState()->Pause();
+  // Put current scene on hold
+  if (loadedScenes.size() > 0)
+    GetScene()->Pause();
 
-  // Move this state to the stack
-  loadedStates.emplace(move(nextState));
+  // Move this scene to the stack
+  loadedScenes.emplace(move(nextScene));
 
   // Start it if necessary
   if (started)
-    GetState()->Start();
+    GetScene()->Start();
 }
 
-void Game::PopState()
+void Game::PopScene()
 {
-  // Remove the state
-  loadedStates.pop();
+  // Remove the scene
+  loadedScenes.pop();
 
-  // If this is the last state
-  if (loadedStates.size() == 0)
+  // If this is the last scene
+  if (loadedScenes.size() == 0)
   {
-    // Throws if there is no nextState
-    if (nextState == nullptr)
-      throw no_state_error("Game was left without any loaded states");
+    // Throws if there is no nextScene
+    if (nextScene == nullptr)
+      throw no_scene_error("Game was left without any loaded scenes");
 
     return;
   }
 
-  // Resume next state
-  GetState()->Resume();
+  // Resume next scene
+  GetScene()->Resume();
 }

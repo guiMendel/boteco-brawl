@@ -1,15 +1,15 @@
-#ifndef __MAIN_STATE__
-#define __MAIN_STATE__
+#ifndef __MAIN_SCENE__
+#define __MAIN_SCENE__
 
-#include "GameState.h"
+#include "GameScene.h"
 #include "WorldObject.h"
 #include <functional>
 #include <memory>
 
-class MainState : public GameState
+class MainScene : public GameScene
 {
 public:
-  virtual ~MainState() {}
+  virtual ~MainScene() {}
 
   void LoadAssets() override;
   void InitializeObjects() override;

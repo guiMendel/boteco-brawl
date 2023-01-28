@@ -1,5 +1,5 @@
-#ifndef __GAME_STATE__
-#define __GAME_STATE__
+#ifndef __GAME_SCENE__
+#define __GAME_SCENE__
 
 #include <functional>
 #include <memory>
@@ -21,8 +21,8 @@ class Collider;
 class Camera;
 class Game;
 
-// Abstract class that defines a state of the game
-class GameState
+// Abstract class that defines a scene of the game
+class GameScene
 {
   friend class Collider;
   friend class Camera;
@@ -30,14 +30,14 @@ class GameState
   friend class Game;
 
 public:
-  GameState();
+  GameScene();
 
-  virtual ~GameState();
+  virtual ~GameScene();
 
   // Whether the game should exit
   bool QuitRequested() { return quitRequested; }
 
-  // Whether to remove this state from the queue
+  // Whether to remove this scene from the queue
   bool PopRequested() { return popRequested; }
 
   void Update(float deltaTime);
@@ -60,12 +60,12 @@ public:
   std::shared_ptr<WorldObject> RegisterObject(WorldObject *worldObject);
   std::shared_ptr<WorldObject> RegisterObject(std::shared_ptr<WorldObject> worldObject);
 
-  // Creates a new game object
+  // Creates a new world object
   template <typename... Args>
   std::shared_ptr<WorldObject> CreateObject(
       std::string name, std::function<void(std::shared_ptr<WorldObject>)> recipe = nullptr, Args &&...args)
   {
-    // Create the object, which automatically registers it's pointer to the state's list
+    // Create the object, which automatically registers it's pointer to the scene's list
     int objectId = (new WorldObject(name, std::forward<Args>(args)...))->id;
     auto object = gameObjects[objectId];
 
@@ -83,7 +83,7 @@ public:
   // Throws if this object doesn't exist
   std::shared_ptr<WorldObject> RequireObject(int id);
 
-  std::shared_ptr<GameState> GetShared();
+  std::shared_ptr<GameScene> GetShared();
 
   template <class T>
   auto FindObjectOfType() -> std::shared_ptr<T>
@@ -105,20 +105,20 @@ public:
   {
     auto object = FindObjectOfType<T>();
 
-    Helper::Assert(object != nullptr, "Required object type was not present in game state");
+    Helper::Assert(object != nullptr, "Required object type was not present in game scene");
 
     return object;
   }
 
   std::shared_ptr<WorldObject> FindObject(std::string name);
 
-  // Initializes the state's objects
+  // Initializes the scene's objects
   virtual void InitializeObjects() = 0;
 
   // Preloads all the assets so that they are ready when required
   virtual void LoadAssets() {}
 
-  // Supplies a valid unique id for a game object or a component
+  // Supplies a valid unique id for a world object or a component
   int SupplyId();
 
   void RegisterLayerRenderer(std::shared_ptr<Component> component);
@@ -128,7 +128,7 @@ public:
 
   std::list<std::shared_ptr<Camera>> GetCameras();
 
-  // The state's own physics system instance
+  // The scene's own physics system instance
   PhysicsSystem physicsSystem;
 
   // Particle system
@@ -137,20 +137,20 @@ public:
   // A timer helper
   Timer timer;
 
-  // Unique identifier of this state
+  // Unique identifier of this scene
   const int id;
 
 protected:
   // Reference to input manager
   InputManager &inputManager;
 
-  // Array with all of the state's objects
+  // Array with all of the scene's objects
   std::unordered_map<int, std::shared_ptr<WorldObject>> gameObjects;
 
   // Root object reference
   std::shared_ptr<WorldObject> rootObject;
 
-  // Indicates that the state mus tbe removed from queue
+  // Indicates that the scene mus tbe removed from queue
   bool popRequested{false};
 
   // Indicates that the game must exit
@@ -168,7 +168,7 @@ private:
   void CascadeDown(std::shared_ptr<WorldObject> object, std::function<void(WorldObject &)> callback, bool topDown = true);
   void DeleteObjects();
 
-  // Whether the state has executed the start method
+  // Whether the scene has executed the start method
   bool started{false};
   bool awoke{false};
 

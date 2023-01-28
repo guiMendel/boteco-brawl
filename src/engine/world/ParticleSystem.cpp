@@ -2,7 +2,7 @@
 
 using namespace std;
 
-ParticleSystem::ParticleSystem(GameState &gameState) : gameState(gameState) {}
+ParticleSystem::ParticleSystem(GameScene &gameScene) : gameScene(gameScene) {}
 
 shared_ptr<Particle> ParticleSystem::CreateParticle(
     Vector2 position, float lifetime, Vector2 velocity,

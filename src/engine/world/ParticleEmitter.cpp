@@ -132,7 +132,7 @@ list<shared_ptr<Particle>> ParticleEmitter::GetEmittedParticles()
 
 ParticleSystem &ParticleEmitter::GetSystem() const
 {
-  return GetState()->particleSystem;
+  return GetScene()->particleSystem;
 }
 
 bool ParticleEmitter::IsEmitting() const { return active; }

@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <math.h>
-#include "GameState.h"
+#include "GameScene.h"
 #include "Vector2.h"
 #include "Sound.h"
 #include "Camera.h"
@@ -13,7 +13,7 @@
 using namespace std;
 
 // Initialize root object
-GameState::GameState()
+GameScene::GameScene()
     : physicsSystem(*this),
       particleSystem(*this),
       id(SupplyId()),
@@ -24,13 +24,13 @@ GameState::GameState()
   rootObject->physicsLayer = PhysicsLayer::Default;
 }
 
-GameState::~GameState()
+GameScene::~GameScene()
 {
   // Clear unused resources
   Resources::ClearAll();
 }
 
-void GameState::CascadeDown(shared_ptr<WorldObject> object, function<void(WorldObject &)> callback, bool topDown)
+void GameScene::CascadeDown(shared_ptr<WorldObject> object, function<void(WorldObject &)> callback, bool topDown)
 {
   // Execute on this object
   if (topDown)
@@ -45,7 +45,7 @@ void GameState::CascadeDown(shared_ptr<WorldObject> object, function<void(WorldO
     callback(*object);
 }
 
-void GameState::DeleteObjects()
+void GameScene::DeleteObjects()
 {
   // Check for dead objects
   vector<weak_ptr<WorldObject>> deadObjects;
@@ -70,7 +70,7 @@ void GameState::DeleteObjects()
     }
 }
 
-void GameState::Update(float deltaTime)
+void GameScene::Update(float deltaTime)
 {
   // Quit if necessary
   if (inputManager.QuitRequested())
@@ -78,7 +78,7 @@ void GameState::Update(float deltaTime)
     quitRequested = true;
   }
 
-  // Update game objects
+  // Update world objects
   CASCADE_OBJECTS(Update, deltaTime);
 
   // Delete dead ones
@@ -89,7 +89,7 @@ void GameState::Update(float deltaTime)
   OnUpdate(deltaTime);
 }
 
-void GameState::PhysicsUpdate(float deltaTime)
+void GameScene::PhysicsUpdate(float deltaTime)
 {
   // Physics update
   CASCADE_OBJECTS(PhysicsUpdate, deltaTime);
@@ -103,7 +103,7 @@ void GameState::PhysicsUpdate(float deltaTime)
   particleSystem.PhysicsUpdate(deltaTime);
 }
 
-void GameState::Render()
+void GameScene::Render()
 {
   // Clear screen
   auto back = Camera::GetMain()->background;
@@ -145,7 +145,7 @@ void GameState::Render()
   }
 }
 
-void GameState::Sort(std::vector<std::weak_ptr<Component>> &components)
+void GameScene::Sort(std::vector<std::weak_ptr<Component>> &components)
 {
   // Component comparer
   // Must return true iff first parameter comes before second parameter
@@ -165,7 +165,7 @@ void GameState::Sort(std::vector<std::weak_ptr<Component>> &components)
   sort(components.begin(), components.end(), comparer);
 }
 
-void GameState::Start()
+void GameScene::Start()
 {
   if (started)
     return;
@@ -183,8 +183,8 @@ void GameState::Start()
 
   started = true;
 
-  // Register components to state
-  CASCADE_OBJECTS(RegisterToState, );
+  // Register components to scene
+  CASCADE_OBJECTS(RegisterToScene, );
 
   // Start objects
   CASCADE_OBJECTS(Start, );
@@ -193,44 +193,44 @@ void GameState::Start()
   physicsSystem.Start();
 }
 
-void GameState::Pause()
+void GameScene::Pause()
 {
   // Communicate to objects
-  CASCADE_OBJECTS(OnStatePause, );
+  CASCADE_OBJECTS(OnScenePause, );
 }
 
-void GameState::Resume()
+void GameScene::Resume()
 {
   // Communicate to objects
-  CASCADE_OBJECTS(OnStateResume, );
+  CASCADE_OBJECTS(OnSceneResume, );
 }
 
-void GameState::RemoveObject(int id)
+void GameScene::RemoveObject(int id)
 {
   gameObjects.erase(id);
 }
 
-shared_ptr<WorldObject> GameState::RegisterObject(shared_ptr<WorldObject> worldObject)
+shared_ptr<WorldObject> GameScene::RegisterObject(shared_ptr<WorldObject> worldObject)
 {
   gameObjects[worldObject->id] = worldObject;
-  worldObject->gameStateId = id;
+  worldObject->gameSceneId = id;
 
   if (awoke)
     worldObject->Awake();
 
   if (started)
   {
-    // Register this object's hierarchy to this new state
-    worldObject->RegisterToState();
+    // Register this object's hierarchy to this new scene
+    worldObject->RegisterToScene();
     worldObject->Start();
   }
 
   return worldObject;
 }
 
-shared_ptr<WorldObject> GameState::RegisterObject(WorldObject *worldObject) { return RegisterObject(shared_ptr<WorldObject>(worldObject)); }
+shared_ptr<WorldObject> GameScene::RegisterObject(WorldObject *worldObject) { return RegisterObject(shared_ptr<WorldObject>(worldObject)); }
 
-shared_ptr<WorldObject> GameState::GetPointer(const WorldObject *targetObject)
+shared_ptr<WorldObject> GameScene::GetPointer(const WorldObject *targetObject)
 {
   // Find this pointer in the list
   auto foundObjectIterator = find_if(
@@ -248,7 +248,7 @@ shared_ptr<WorldObject> GameState::GetPointer(const WorldObject *targetObject)
   return foundObjectIterator->second;
 }
 
-void GameState::RegisterLayerRenderer(shared_ptr<Component> component)
+void GameScene::RegisterLayerRenderer(shared_ptr<Component> component)
 {
   // Simply ignore invalid requests
   if (!component)
@@ -261,7 +261,7 @@ void GameState::RegisterLayerRenderer(shared_ptr<Component> component)
   layer.emplace_back(component);
 }
 
-shared_ptr<WorldObject> GameState::GetObject(int id)
+shared_ptr<WorldObject> GameScene::GetObject(int id)
 {
   if (gameObjects.count(id) == 0)
     return nullptr;
@@ -269,7 +269,7 @@ shared_ptr<WorldObject> GameState::GetObject(int id)
   return gameObjects.at(id);
 }
 
-shared_ptr<WorldObject> GameState::RequireObject(int id)
+shared_ptr<WorldObject> GameScene::RequireObject(int id)
 {
   auto object = GetObject(id);
 
@@ -278,7 +278,7 @@ shared_ptr<WorldObject> GameState::RequireObject(int id)
   return object;
 }
 
-void GameState::RegisterCamera(shared_ptr<Camera> camera)
+void GameScene::RegisterCamera(shared_ptr<Camera> camera)
 {
   auto cameras = GetCameras();
 
@@ -287,14 +287,14 @@ void GameState::RegisterCamera(shared_ptr<Camera> camera)
     camerasWeak.emplace_back(camera);
 }
 
-list<shared_ptr<Camera>> GameState::GetCameras()
+list<shared_ptr<Camera>> GameScene::GetCameras()
 {
   return ParseWeakIntoShared(camerasWeak);
 }
 
-int GameState::SupplyId() { return Game::GetInstance().SupplyId(); }
+int GameScene::SupplyId() { return Game::GetInstance().SupplyId(); }
 
-vector<shared_ptr<WorldObject>> GameState::GetObjectsToCarryOn()
+vector<shared_ptr<WorldObject>> GameScene::GetObjectsToCarryOn()
 {
   vector<shared_ptr<WorldObject>> savedObjects;
 
@@ -305,16 +305,16 @@ vector<shared_ptr<WorldObject>> GameState::GetObjectsToCarryOn()
   return savedObjects;
 }
 
-shared_ptr<GameState> GameState::GetShared()
+shared_ptr<GameScene> GameScene::GetShared()
 {
-  auto currentState = Game::GetInstance().GetState();
+  auto currentScene = Game::GetInstance().GetScene();
 
-  Assert(id == currentState->id, "Tried to get shared pointer of inactive game state");
+  Assert(id == currentScene->id, "Tried to get shared pointer of inactive game scene");
 
-  return currentState;
+  return currentScene;
 }
 
-shared_ptr<WorldObject> GameState::FindObject(string name)
+shared_ptr<WorldObject> GameScene::FindObject(string name)
 {
   for (auto [objectId, object] : gameObjects)
     if (object->GetName() == name)

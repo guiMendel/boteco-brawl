@@ -9,7 +9,7 @@ ParticleFX::ParticleFX(WorldObject &associatedObject)
 void ParticleFX::EffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter)
 {
   // Find the instance
-  auto instance = Game::GetInstance().GetState()->FindObjectOfType<ParticleFX>();
+  auto instance = Game::GetInstance().GetScene()->FindObjectOfType<ParticleFX>();
 
   Assert(instance != nullptr, "Could not find ParticleFX instance");
 

@@ -1,5 +1,5 @@
-#ifndef __GAME_OBJECT__
-#define __GAME_OBJECT__
+#ifndef __WORLD_OBJECT__
+#define __WORLD_OBJECT__
 
 #include <typeinfo>
 #include <string>
@@ -16,16 +16,16 @@
 #include "PhysicsSystem.h"
 #include "TriggerCollisionData.h"
 
-class GameState;
+class GameScene;
 
 class WorldObject
 {
-  friend class GameState;
+  friend class GameScene;
   friend class PhysicsSystem;
 
-  // Constructor dedicated for a state's root object
-  // Initialize with given state
-  WorldObject(std::string name, int gameStateId, int id = -1);
+  // Constructor dedicated for a scene's root object
+  // Initialize with given scene
+  WorldObject(std::string name, int gameSceneId, int id = -1);
 
 public:
   // With dimensions
@@ -45,19 +45,19 @@ public:
   void Update(float deltaTime);
   void PhysicsUpdate(float deltaTime);
 
-  void OnStatePause();
-  void OnStateResume();
+  void OnScenePause();
+  void OnSceneResume();
 
 private:
-  // Allows for registering to the state's variables
-  void RegisterToState();
+  // Allows for registering to the scene's variables
+  void RegisterToScene();
 
   // Whether has already run started
   bool started{false};
   bool awoke{false};
 
-  // Id of last state to which this object has execute RegisterToState()
-  int lastStateRegisteredTo{-1};
+  // Id of last scene to which this object has execute RegisterToScene()
+  int lastSceneRegisteredTo{-1};
 
   // =================================
   // DESTRUCTION
@@ -72,7 +72,7 @@ public:
   // Destroys the object
   void RequestDestroy();
 
-  // Whether to keep this object when loading next state (only works for root objects)
+  // Whether to keep this object when loading next scene (only works for root objects)
   void DontDestroyOnLoad(bool value = true);
 
 private:
@@ -85,7 +85,7 @@ private:
   // Whether is dead
   bool destroyRequested{false};
 
-  // Whether to keep this object when loading next state
+  // Whether to keep this object when loading next scene
   bool keepOnLoad{false};
 
   // =================================
@@ -110,7 +110,7 @@ public:
     // Start it
     if (started)
     {
-      component->RegisterToStateWithLayer();
+      component->RegisterToSceneWithLayer();
       component->SafeStart();
     }
 
@@ -276,7 +276,7 @@ public:
   // This object's tag
   Tag tag{Tag::None};
 
-  // The game object's name (not necessarily unique)
+  // The world object's name (not necessarily unique)
   std::string name;
 
   // Whether this object is enabled (updating & rendering)
@@ -324,7 +324,7 @@ private:
   // UTILITY
   // =================================
 public:
-  std::shared_ptr<GameState> GetState();
+  std::shared_ptr<GameScene> GetScene();
 
   // Allows for delaying a function execution
   // Returns a token id that can be used to cancel execution
@@ -339,8 +339,8 @@ private:
   // Trigger delayed functions whose timers are up
   void TriggerDelayedFunctions();
 
-  // State reference id
-  int gameStateId;
+  // Scene reference id
+  int gameSceneId;
 
   // Functions currently waiting to be executed (bool indicates if they are still supposed to be called)
   std::unordered_map<int, std::pair<std::function<void()>, bool>> delayedFunctions;
@@ -429,6 +429,6 @@ public:
 
 std::ostream &operator<<(std::ostream &stream, const WorldObject &vector);
 
-#include "GameState.h"
+#include "GameScene.h"
 
 #endif

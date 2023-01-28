@@ -50,7 +50,7 @@ auto ObjectRecipes::Camera(shared_ptr<WorldObject> charactersParent)
     auto camera = cameraObject->AddComponent<::Camera>(5);
 
     // Register it prematurely
-    camera->RegisterToState();
+    camera->RegisterToScene();
 
     cameraObject->AddComponent<CameraBehavior>(charactersParent);
   };

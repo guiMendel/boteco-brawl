@@ -2,7 +2,7 @@
 #include "Collider.h"
 #include "PlatformEffector.h"
 #include "PhysicsSystem.h"
-#include "GameState.h"
+#include "GameScene.h"
 #include <functional>
 #include <tuple>
 #include <algorithm>
@@ -22,7 +22,7 @@ void ApplyImpulse(Collision::Data collisionData);
 // Given that the 2 colliders collided, checks if a platform effector allows this collision through
 bool PlatformEffectorCheck(Collider &collider1, Collider &collider2);
 
-PhysicsSystem::PhysicsSystem(GameState &gameState) : gameState(gameState) {}
+PhysicsSystem::PhysicsSystem(GameScene &gameScene) : gameScene(gameScene) {}
 
 void PhysicsSystem::PhysicsUpdate(float)
 {
@@ -154,8 +154,8 @@ void PhysicsSystem::HandleCollisions()
     for (auto colliders : dynamicColliders)
     {
       if (WorldObject::SameLineage(
-              *gameState.GetObject(triggerCollider->GetOwnerId()),
-              *gameState.GetObject(colliders.at(0)->GetOwnerId())))
+              *gameScene.GetObject(triggerCollider->GetOwnerId()),
+              *gameScene.GetObject(colliders.at(0)->GetOwnerId())))
         continue;
 
       if (CheckForCollision(colliders, {triggerCollider}, collisionData))
@@ -167,8 +167,8 @@ void PhysicsSystem::HandleCollisions()
     for (auto colliders : nonDynamicTargets)
     {
       if (WorldObject::SameLineage(
-              *gameState.GetObject(triggerCollider->GetOwnerId()),
-              *gameState.GetObject(colliders.at(0)->GetOwnerId())))
+              *gameScene.GetObject(triggerCollider->GetOwnerId()),
+              *gameScene.GetObject(colliders.at(0)->GetOwnerId())))
         continue;
 
       if (CheckForCollision(colliders, {triggerCollider}, collisionData))
@@ -186,8 +186,8 @@ void PhysicsSystem::HandleCollisions()
       auto otherTriggerBody = otherTriggerCollider->rigidbodyWeak.lock();
 
       if (WorldObject::SameLineage(
-              *gameState.GetObject(triggerCollider->GetOwnerId()),
-              *gameState.GetObject(otherTriggerCollider->GetOwnerId())))
+              *gameScene.GetObject(triggerCollider->GetOwnerId()),
+              *gameScene.GetObject(otherTriggerCollider->GetOwnerId())))
         continue;
 
       // Ignore it if both are static
@@ -279,7 +279,7 @@ void PhysicsSystem::DetectObjectBetweenFramesCollision(vector<ValidatedColliders
 
 vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id, WeakColliders &weakColliders)
 {
-  if (gameState.GetObject(id) == nullptr)
+  if (gameScene.GetObject(id) == nullptr)
     return {};
 
   // Will hold verified colliders
@@ -310,7 +310,7 @@ vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id, WeakCollid
   if (colliderWasRemoved)
   {
     // If it has a rigidbody with auto mass on, derive its new mass
-    auto rigidbody = gameState.GetObject(id)->GetComponent<Rigidbody>();
+    auto rigidbody = gameScene.GetObject(id)->GetComponent<Rigidbody>();
 
     if (rigidbody != nullptr)
     {
@@ -419,10 +419,10 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 
   // cout << "After registration:" << endl;
   // for (auto [id, colliders] : dynamicColliderStructure)
-  //   cout << "  Dynamic Object " << gameState.GetObject(id)->GetName() << " has " << colliders.size() << ", first is expired: " << colliders.at(0).expired() << endl;
+  //   cout << "  Dynamic Object " << gameScene.GetObject(id)->GetName() << " has " << colliders.size() << ", first is expired: " << colliders.at(0).expired() << endl;
 
   // for (auto [id, colliders] : staticColliderStructure)
-  //   cout << "  Static Object " << gameState.GetObject(id)->GetName() << " has " << colliders.size() << endl;
+  //   cout << "  Static Object " << gameScene.GetObject(id)->GetName() << " has " << colliders.size() << endl;
   // cout << "Done." << endl;
 }
 

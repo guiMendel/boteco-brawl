@@ -26,7 +26,7 @@ public:
   RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
   // Registers this collider in the physics collider structure
-  void RegisterToState() override;
+  void RegisterToScene() override;
 
   // Allows for debug rendering
   virtual void Render() override {}
@@ -46,7 +46,7 @@ public:
   // Get the associated shape, already rotated, scaled and displaced to this worldObject's scale, rotation and position
   std::shared_ptr<Shape> DeriveShape() const;
 
-  // Get the owner game object
+  // Get the owner world object
   std::shared_ptr<WorldObject> GetOwner() const;
 
   // Whether this collider actually participates in physical collisions

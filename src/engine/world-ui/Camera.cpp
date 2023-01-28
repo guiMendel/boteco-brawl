@@ -14,7 +14,7 @@ Vector2 screenQuarter = Vector2(-Game::screenWidth / 2.0f, -Game::screenHeight /
 
 shared_ptr<Camera> Camera::GetMain()
 {
-  auto cameras = Game::GetInstance().GetState()->GetCameras();
+  auto cameras = Game::GetInstance().GetScene()->GetCameras();
 
   Assert(cameras.empty() == false, "Trying to get Main camera when no cameras are registered");
 
@@ -27,9 +27,9 @@ Camera::Camera(WorldObject &associatedObject, float size)
   SetSize(size);
 }
 
-void Camera::RegisterToState()
+void Camera::RegisterToScene()
 {
-  GetState()->RegisterCamera(dynamic_pointer_cast<Camera>(GetShared()));
+  GetScene()->RegisterCamera(dynamic_pointer_cast<Camera>(GetShared()));
 }
 
 // Get how many units occupy half the camera's height

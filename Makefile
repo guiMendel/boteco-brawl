@@ -128,13 +128,13 @@ WORLD_OBJS = $(patsubst %,$(WORLD_OBJECT_DIRECTORY)\\%,$(_WORLD_OBJS))
 # === WORLD-UI
 
 # Header files
-_WORLD_UI_DEPS = Camera.h Component.h Debug.h Game.h WorldObject.h GameState.h InputManager.h Resources.h Sprite.h Timer.h
+_WORLD_UI_DEPS = Camera.h Component.h Debug.h Game.h WorldObject.h GameScene.h InputManager.h Resources.h Sprite.h Timer.h
 
 # Generate header filepaths
 WORLD_UI_DEPS = $(patsubst %,$(WORLD_UI_INCLUDE_DIRECTORY)\\%,$(_WORLD_UI_DEPS))
 
 # Object files
-_WORLD_UI_OBJS = Camera.o Component.o Debug.o Game.o WorldObject.o GameState.o InputManager.o Resources.o Sprite.o
+_WORLD_UI_OBJS = Camera.o Component.o Debug.o Game.o WorldObject.o GameScene.o InputManager.o Resources.o Sprite.o
 
 # Generate object filepaths
 WORLD_UI_OBJS = $(patsubst %,$(WORLD_UI_OBJECT_DIRECTORY)\\%,$(_WORLD_UI_OBJS))
@@ -178,7 +178,7 @@ _INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h T
 INTEGRATION_DEPS = $(patsubst %,$(INTEGRATION_INCLUDE_DIRECTORY)\\%,$(_INTEGRATION_DEPS))
 
 # Object files
-_INTEGRATION_OBJS = ObjectRecipes.o InitialState.o GameConfiguration.o PhysicsConfiguration.o
+_INTEGRATION_OBJS = ObjectRecipes.o InitialScene.o GameConfiguration.o PhysicsConfiguration.o
 
 # Generate object filepaths
 INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATION_OBJS))
@@ -188,13 +188,13 @@ INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATIO
 
 
 # Header files
-_GAME_DEPS = MainState.h Movement.h PlayerInput.h Action.h CharacterStateManager.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h Player.h PlayerManager.h ControllerDevice.h ParticleFX.h CharacterRepelCollision.h PlatformDrop.h FallDeath.h Arena.h Heat.h Damage.h Attack.h Character.h TestCharacter.h GeneralAnimations.h NewAnimationTypes.h TimeScaleManager.h Parry.h GunParry.h LandingAttackEffector.h LandEffector.h ShakeEffectManager.h CharacterBadge.h CharacterVFX.h CameraBehavior.h CharacterLifeDisplay.h
+_GAME_DEPS = MainScene.h Movement.h PlayerInput.h Action.h CharacterStateManager.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h Player.h PlayerManager.h ControllerDevice.h ParticleFX.h CharacterRepelCollision.h PlatformDrop.h FallDeath.h Arena.h Heat.h Damage.h Attack.h Character.h TestCharacter.h GeneralAnimations.h NewAnimationTypes.h TimeScaleManager.h Parry.h GunParry.h LandingAttackEffector.h LandEffector.h ShakeEffectManager.h CharacterBadge.h CharacterVFX.h CameraBehavior.h CharacterLifeDisplay.h
 
 # Generate header filepaths
 GAME_DEPS = $(patsubst %,$(GAME_INCLUDE_DIRECTORY)\\%,$(_GAME_DEPS))
 
 # Object files
-_GAME_OBJS = MainState.o Movement.o PlayerInput.o CharacterStateManager.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o Player.o PlayerManager.o ControllerDevice.o ParticleFX.o CharacterRepelCollision.o PlatformDrop.o FallDeath.o Arena.o Heat.o Attack.o Character.o TestCharacter.o GeneralAnimations.o NewAnimationTypes.o TimeScaleManager.o GunParry.o Damage.o LandingAttackEffector.o ShakeEffectManager.o CharacterBadge.o CharacterVFX.o CameraBehavior.o CharacterLifeDisplay.o
+_GAME_OBJS = MainScene.o Movement.o PlayerInput.o CharacterStateManager.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o Player.o PlayerManager.o ControllerDevice.o ParticleFX.o CharacterRepelCollision.o PlatformDrop.o FallDeath.o Arena.o Heat.o Attack.o Character.o TestCharacter.o GeneralAnimations.o NewAnimationTypes.o TimeScaleManager.o GunParry.o Damage.o LandingAttackEffector.o ShakeEffectManager.o CharacterBadge.o CharacterVFX.o CameraBehavior.o CharacterLifeDisplay.o
 
 # Generate object filepaths
 GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))

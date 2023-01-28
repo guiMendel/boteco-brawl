@@ -42,7 +42,7 @@ void CameraBehavior::Awake()
   targetPosition = worldObject.GetPosition();
 
   // Get arena
-  auto arena = GetState()->FindObjectOfType<Arena>();
+  auto arena = GetScene()->FindObjectOfType<Arena>();
   weakArena = arena;
 
   // Calculate arena dependent params

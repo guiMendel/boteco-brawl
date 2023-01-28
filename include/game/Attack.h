@@ -25,7 +25,7 @@ public:
   // Apply attack to a given character's controller
   void Land(std::shared_ptr<CharacterController> targetController);
 
-  // Sets a given game object to be ignored by this attack always
+  // Sets a given world object to be ignored by this attack always
   void Ignore(std::shared_ptr<WorldObject> target);
 
   // Damage params
@@ -42,7 +42,7 @@ private:
   // Ids of controllers which were already attacked, mapped to the time of the attack in ms
   std::unordered_map<int, int> struckTargetsTime;
 
-  // Ids of game object which are to be ignored
+  // Ids of world object which are to be ignored
   std::unordered_set<int> ignoredObjects;
 };
 

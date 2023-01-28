@@ -35,7 +35,7 @@ public:
     SetPosition(Vector2::Zero());
   }
 
-  void RegisterToState() override;
+  void RegisterToScene() override;
 
   // Convert coordinates (screen pixels to game units)
   Vector2 ScreenToWorld(const Vector2 &screenCoordinates) const;

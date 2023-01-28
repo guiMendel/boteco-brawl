@@ -7,14 +7,14 @@
 #include <memory>
 #include <unordered_map>
 
-class GameState;
+class GameScene;
 
 class ParticleSystem
 {
   friend class Particle;
 
 public:
-  ParticleSystem(GameState &gameState);
+  ParticleSystem(GameScene &gameScene);
 
   void PhysicsUpdate(float deltaTime);
 
@@ -25,7 +25,7 @@ public:
   std::shared_ptr<Particle> CreateParticle(Vector2 position, float lifetime, Vector2 velocity = Vector2::Zero(), Color color = Color::White(), Vector2 gravityModifier = Vector2::Zero(), Particle::behavior_callback behavior = nullptr);
 
 private:
-  GameState &gameState;
+  GameScene &gameScene;
 
   // Particle id generator
   int nextId{0};

@@ -13,7 +13,7 @@ Particle::Particle(ParticleSystem &particleSystem, int id, Vector2 position, flo
 
 void Particle::PhysicsUpdate(float deltaTime)
 {
-  const static auto &physicsSystem = particleSystem.gameState.physicsSystem;
+  const static auto &physicsSystem = particleSystem.gameScene.physicsSystem;
 
   // Apply behavior
   if (behavior)

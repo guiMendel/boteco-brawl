@@ -52,7 +52,7 @@ auto TimeScaleManager::ResetTimeScale(int targetId) -> decltype(alteredObjects):
     return alteredObjects.end();
 
   // Reset the timescale
-  auto target = GetState()->GetObject(targetId);
+  auto target = GetScene()->GetObject(targetId);
   if (target != nullptr)
     target->SetTimeScale(1);
 

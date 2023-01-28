@@ -5,7 +5,7 @@
 using namespace std;
 
 Component::Component(WorldObject &associatedObject)
-    : worldObject(associatedObject), id(GetState()->SupplyId()), inputManager(Game::GetInstance().GetInputManager()) {}
+    : worldObject(associatedObject), id(GetScene()->SupplyId()), inputManager(Game::GetInstance().GetInputManager()) {}
 
 Component::~Component() {}
 
@@ -23,19 +23,19 @@ shared_ptr<Component> Component::GetShared() const
 
 bool Component::IsEnabled() const { return enabled && worldObject.IsEnabled(); }
 
-shared_ptr<GameState> Component::GetState() const { return worldObject.GetState(); }
+shared_ptr<GameScene> Component::GetScene() const { return worldObject.GetScene(); }
 
-void Component::RegisterToStateWithLayer()
+void Component::RegisterToSceneWithLayer()
 {
   RegisterLayer();
-  RegisterToState();
+  RegisterToScene();
 }
 
 void Component::RegisterLayer()
 {
   if (GetRenderLayer() != RenderLayer::None)
   {
-    Game::GetInstance().GetState()->RegisterLayerRenderer(GetShared());
+    Game::GetInstance().GetScene()->RegisterLayerRenderer(GetShared());
   }
 }
 

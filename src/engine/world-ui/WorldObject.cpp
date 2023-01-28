@@ -9,25 +9,25 @@ using namespace std;
 const float WorldObject::objectCollectionRange{50};
 
 // Private constructor
-WorldObject::WorldObject(string name, int gameStateId, int id)
-    : id(id >= 0 ? id : Game::GetInstance().SupplyId()), name(name), gameStateId(gameStateId)
+WorldObject::WorldObject(string name, int gameSceneId, int id)
+    : id(id >= 0 ? id : Game::GetInstance().SupplyId()), name(name), gameSceneId(gameSceneId)
 {
 }
 
 // With dimensions
 WorldObject::WorldObject(string name, Vector2 coordinates, double rotation, shared_ptr<WorldObject> parent)
-    : WorldObject(name, Game::GetInstance().GetState()->id)
+    : WorldObject(name, Game::GetInstance().GetScene()->id)
 {
-  // Add gameState reference
-  auto gameState = GetState();
-  auto shared = gameState->RegisterObject(this);
+  // Add gameScene reference
+  auto gameScene = GetScene();
+  auto shared = gameScene->RegisterObject(this);
 
   // Only add a parent if not the root object
   if (IsRoot() == false)
   {
     // If no parent, add root as parent
     if (parent == nullptr)
-      parent = gameState->GetRootObject();
+      parent = gameScene->GetRootObject();
 
     // Add reference to parent
     this->weakParent = parent;
@@ -75,18 +75,18 @@ void WorldObject::Awake()
     component->Awake();
 }
 
-// Allows for registering to the state's variables
-void WorldObject::RegisterToState()
+// Allows for registering to the scene's variables
+void WorldObject::RegisterToScene()
 {
-  auto currentState = GetState()->id;
+  auto currentScene = GetScene()->id;
 
-  if (lastStateRegisteredTo == currentState)
+  if (lastSceneRegisteredTo == currentScene)
     return;
 
-  lastStateRegisteredTo = currentState;
+  lastSceneRegisteredTo = currentScene;
 
   for (auto [componentId, component] : components)
-    component->RegisterToStateWithLayer();
+    component->RegisterToSceneWithLayer();
 }
 
 void WorldObject::Update(float deltaTime)
@@ -170,16 +170,16 @@ void WorldObject::DetectCollisionExits()
   frameTriggers.clear();
 }
 
-void WorldObject::OnStatePause()
+void WorldObject::OnScenePause()
 {
   for (auto [componentId, component] : components)
-    component->OnStatePause();
+    component->OnScenePause();
 }
 
-void WorldObject::OnStateResume()
+void WorldObject::OnSceneResume()
 {
   for (auto [componentId, component] : components)
-    component->OnStateResume();
+    component->OnSceneResume();
 }
 
 decltype(WorldObject::components)::iterator WorldObject::RemoveComponent(shared_ptr<Component> component)
@@ -283,7 +283,7 @@ void WorldObject::HandleColliderDestruction(shared_ptr<Component> component)
 
 shared_ptr<WorldObject> WorldObject::GetShared()
 {
-  return GetState()->GetObject(id);
+  return GetScene()->GetObject(id);
 }
 
 auto WorldObject::GetComponent(const Component *componentPointer) -> shared_ptr<Component>
@@ -448,7 +448,7 @@ shared_ptr<WorldObject> WorldObject::CreateChild(string name, Vector2 offset)
 shared_ptr<WorldObject> WorldObject::CreateChild(string name, Vector2 offset, float offsetRotation)
 {
   auto childId = (new WorldObject(name, GetPosition() + offset, GetRotation() + offsetRotation, GetShared()))->id;
-  return GetState()->GetObject(childId);
+  return GetScene()->GetObject(childId);
 }
 
 vector<shared_ptr<WorldObject>> WorldObject::GetChildren()
@@ -576,11 +576,11 @@ auto WorldObject::InternalDestroy() -> unordered_map<int, weak_ptr<WorldObject>>
   if (IsRoot() == false)
     iterator = UnlinkParent();
 
-  // Delete self from state's list
-  GetState()->RemoveObject(id);
+  // Delete self from scene's list
+  GetScene()->RemoveObject(id);
 
   // Ensure no more references to self than the one in this function and the one which called this function
-  Assert(shared.use_count() <= 2, "Found " + to_string(shared.use_count() - 2) + " leaked references to game object " + GetName() + " when trying to destroy it");
+  Assert(shared.use_count() <= 2, "Found " + to_string(shared.use_count() - 2) + " leaked references to world object " + GetName() + " when trying to destroy it");
 
   return iterator;
 }
@@ -644,13 +644,13 @@ void WorldObject::DontDestroyOnLoad(bool value)
   keepOnLoad = value;
 }
 
-shared_ptr<GameState> WorldObject::GetState()
+shared_ptr<GameScene> WorldObject::GetScene()
 {
-  auto currentState = Game::GetInstance().GetState();
+  auto currentScene = Game::GetInstance().GetScene();
 
-  Assert(gameStateId == currentState->id, "Trying to access state of object which is not in the current state");
+  Assert(gameSceneId == currentScene->id, "Trying to access scene of object which is not in the current scene");
 
-  return currentState;
+  return currentScene;
 }
 
 bool WorldObject::IsDescendantOf(const WorldObject &other) const

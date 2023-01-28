@@ -80,7 +80,7 @@ private:
   // The sprite's layer
   RenderLayer renderLayer{RenderLayer::Default};
 
-  // Offset when rendering based on game object's position
+  // Offset when rendering based on world object's position
   Vector2 offset;
 
   // The sprite's render order

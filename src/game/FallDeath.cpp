@@ -17,7 +17,7 @@ const float FallDeath::respawnDelay{2};
 const int FallDeath::startingLives{2};
 
 FallDeath::FallDeath(WorldObject &associatedObject)
-    : Component(associatedObject), weakArena(GetState()->FindObjectOfType<Arena>())
+    : Component(associatedObject), weakArena(GetScene()->FindObjectOfType<Arena>())
 {
   Assert(weakArena.expired() == false, "Failed to find an Arena component");
 }

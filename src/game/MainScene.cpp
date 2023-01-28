@@ -1,4 +1,4 @@
-#include "MainState.h"
+#include "MainScene.h"
 #include "GameData.h"
 #include "ObjectRecipes.h"
 #include "PlayerManager.h"
@@ -9,17 +9,17 @@
 
 using namespace std;
 
-void MainState::LoadAssets()
+void MainScene::LoadAssets()
 {
 }
 
-void MainState::OnUpdate(float)
+void MainScene::OnUpdate(float)
 {
   // auto thing = FindObject("Thing");
   // cout << "Thing at: " << thing->GetPosition() << endl;
 }
 
-void MainState::InitializeObjects()
+void MainScene::InitializeObjects()
 {
   // Object to hold character
   auto charactersParent = CreateObject("CharactersParent");

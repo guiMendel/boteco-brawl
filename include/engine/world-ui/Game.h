@@ -8,7 +8,7 @@
 #include "InputManager.h"
 #include "BuildConfigurations.h"
 
-class GameState;
+class GameScene;
 
 // Class with the main game logic
 class Game
@@ -36,8 +36,8 @@ public:
   // Gets the game instance if it exists or creates one if it doesn't
   static Game &GetInstance();
 
-  // Gets the current game state
-  std::shared_ptr<GameState> GetState();
+  // Gets the current game scene
+  std::shared_ptr<GameScene> GetScene();
 
   // Gets the renderer
   SDL_Renderer *GetRenderer() const { return renderer.get(); }
@@ -48,15 +48,15 @@ public:
   float GetDeltaTime() const { return deltaTime; }
   float GetPhysicsDeltaTime() const { return physicsDeltaTime; }
 
-  // Requests the push of a new state to the queue
-  void PushState(std::shared_ptr<GameState> &&state);
+  // Requests the push of a new scene to the queue
+  void PushScene(std::shared_ptr<GameScene> &&scene);
 
-  // Creates and returns the initial state
-  std::shared_ptr<GameState> GetInitialState() const;
+  // Creates and returns the initial scene
+  std::shared_ptr<GameScene> GetInitialScene() const;
 
   InputManager &GetInputManager() { return inputManager; }
 
-  // Supplies a valid unique id for a game object or a component
+  // Supplies a valid unique id for a world object or a component
   int SupplyId() { return nextId++; }
 
   // Explicit destructor
@@ -72,12 +72,12 @@ private:
   // Calculates the delta time
   void CalculateDeltaTime(int &start, float &deltaTime);
 
-  // Removes current state from stack
+  // Removes current scene from stack
   // Throws if stack is left empty
-  void PopState();
+  void PopScene();
 
-  // Actually pushes the next state to stack
-  void PushNextState();
+  // Actually pushes the next scene to stack
+  void PushNextScene();
 
   void GameLoop();
 
@@ -98,7 +98,7 @@ private:
   // Game instance
   static std::unique_ptr<Game> gameInstance;
 
-  // ID counter for game objects and components
+  // ID counter for world objects and components
   int nextId{1};
 
   // Start time of current frame, in milliseconds
@@ -127,11 +127,11 @@ private:
   // Input manager instance
   InputManager inputManager;
 
-  // State to push next frame
-  std::shared_ptr<GameState> nextState;
+  // Scene to push next frame
+  std::shared_ptr<GameScene> nextScene;
 
-  // Stack of loaded states
-  std::stack<std::shared_ptr<GameState>> loadedStates;
+  // Stack of loaded scenes
+  std::stack<std::shared_ptr<GameScene>> loadedScenes;
 
   // The window we'll be rendering to (with destructor function)
   Helper::auto_unique_ptr<SDL_Window> window;

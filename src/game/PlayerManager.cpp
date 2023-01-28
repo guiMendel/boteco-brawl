@@ -42,7 +42,7 @@ shared_ptr<Player> PlayerManager::GetMainPlayer() const
 {
   Assert(mainPlayerId >= 0, "Tried to get main player when it's never been set");
 
-  auto object = GetState()->GetObject(mainPlayerId);
+  auto object = GetScene()->GetObject(mainPlayerId);
 
   Assert(object != nullptr, "Unexpectedly failed to find main player worldObject");
 

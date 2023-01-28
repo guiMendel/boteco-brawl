@@ -11,7 +11,7 @@
 
 // === COLLISION MATRIX
 
-// When defined, allows for printing the collision matrix on game state construction
+// When defined, allows for printing the collision matrix on game scene construction
 #define PRINT_COLLISION_MATRIX
 
 // How many collision matrix columns to print each time

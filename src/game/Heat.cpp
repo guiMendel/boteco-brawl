@@ -20,8 +20,8 @@ void Heat::Awake()
   weakMovement = worldObject.RequireComponent<Movement>();
   weakStateManager = worldObject.RequireComponent<CharacterStateManager>();
   weakCharacterController = worldObject.RequireComponent<CharacterController>();
-  weakTimeScaleManager = GetState()->RequireObjectOfType<TimeScaleManager>();
-  weakShakeManager = GetState()->RequireObjectOfType<ShakeEffectManager>();
+  weakTimeScaleManager = GetScene()->RequireObjectOfType<TimeScaleManager>();
+  weakShakeManager = GetScene()->RequireObjectOfType<ShakeEffectManager>();
 }
 
 void Heat::Start()

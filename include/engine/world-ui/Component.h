@@ -27,12 +27,12 @@
   Helper::Assert(shared != nullptr, message);
 
 class WorldObject;
-class GameState;
+class GameScene;
 
 class Component
 {
   friend WorldObject;
-  friend GameState;
+  friend GameScene;
 
 public:
   Component(WorldObject &associatedObject);
@@ -51,8 +51,8 @@ public:
   void SetEnabled(bool enabled) { this->enabled = enabled; }
   bool IsEnabled() const;
 
-  // The associated game state
-  std::shared_ptr<GameState> GetState() const;
+  // The associated game scene
+  std::shared_ptr<GameScene> GetScene() const;
 
   bool HasCalledStart() const;
 
@@ -60,7 +60,7 @@ public:
 
   explicit operator std::string() const;
 
-  // The associated game object
+  // The associated world object
   WorldObject &worldObject;
 
   // Whether the component is active
@@ -72,7 +72,7 @@ public:
 protected:
   virtual void Awake() {}
   virtual void Start() {}
-  virtual void RegisterToState() {}
+  virtual void RegisterToScene() {}
 
   // Called once per frame
   virtual void Update(float) {}
@@ -81,8 +81,8 @@ protected:
   // Called once per frame to render to the screen
   virtual void Render() {}
 
-  virtual void OnStateResume() {}
-  virtual void OnStatePause() {}
+  virtual void OnSceneResume() {}
+  virtual void OnScenePause() {}
 
   // Called on the frame it is destroyed, right before being destroyed
   virtual void OnBeforeDestroy() {}
@@ -105,7 +105,7 @@ private:
   void SafeStart();
 
   // Allows for registering to the state's variables
-  void RegisterToStateWithLayer();
+  void RegisterToSceneWithLayer();
 
   // Whether Start has been called already
   bool started{false};
@@ -114,7 +114,7 @@ private:
 std::ostream &operator<<(std::ostream &stream, const Component &vector);
 
 #include "WorldObject.h"
-// #include "GameState.h"
+// #include "GameScene.h"
 #include "Helper.h"
 
 // We don't care it's recommended against doing this — we only want our lives to be easier
