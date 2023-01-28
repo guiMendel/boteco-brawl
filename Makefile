@@ -1,51 +1,96 @@
 # Which compiler to use
 CC = g++
 
-# === DIRECTORY LOCATIONS =======================
 
-# FOR EDITOR
+# ==========================================================================================
+# DIRECTORY LOCATIONS
+# ==========================================================================================
 
-# Where to find the include folder
-EDITOR_INCLUDE_DIRECTORY = .\include\editor
 
-# Where to find the objects folder
-EDITOR_OBJECT_DIRECTORY = .\src\editor\obj
 
-# Where to find source code
-EDITOR_SOURCE_DIRECTORY = .\src\editor
+# === ENGINE ===============================================================================
 
-# FOR ENGINE
+
+# === EDITOR
 
 # Where to find the include folder
-ENGINE_INCLUDE_DIRECTORY = .\include\engine
-
-# Where to find the objects folder
-ENGINE_OBJECT_DIRECTORY = .\src\engine\obj
+EDITOR_INCLUDE_DIRECTORY = .\include\engine\editor
 
 # Where to find source code
-ENGINE_SOURCE_DIRECTORY = .\src\engine
+EDITOR_SOURCE_DIRECTORY = .\src\engine\editor
 
-# FOR INTEGRATION
+# Where to find the objects folder
+EDITOR_OBJECT_DIRECTORY = $(EDITOR_SOURCE_DIRECTORY)\obj
+
+# === WORLD
+
+# Where to find the include folder
+WORLD_INCLUDE_DIRECTORY = .\include\engine\world
+
+# Where to find source code
+WORLD_SOURCE_DIRECTORY = .\src\engine\world
+
+# Where to find the objects folder
+WORLD_OBJECT_DIRECTORY = $(WORLD_SOURCE_DIRECTORY)\obj
+
+# === UI
+
+# Where to find the include folder
+UI_INCLUDE_DIRECTORY = .\include\engine\ui
+
+# Where to find source code
+UI_SOURCE_DIRECTORY = .\src\engine\ui
+
+# Where to find the objects folder
+UI_OBJECT_DIRECTORY = $(UI_SOURCE_DIRECTORY)\obj
+
+# === WORLD-UI
+
+# Where to find the include folder
+WORLD_UI_INCLUDE_DIRECTORY = .\include\engine\world-ui
+
+# Where to find source code
+WORLD_UI_SOURCE_DIRECTORY = .\src\engine\world-ui
+
+# Where to find the objects folder
+WORLD_UI_OBJECT_DIRECTORY = $(WORLD_UI_SOURCE_DIRECTORY)\obj
+
+# === GENERAL
+
+# Where to find the include folder
+GENERAL_INCLUDE_DIRECTORY = .\include\engine\general
+
+# Where to find source code
+GENERAL_SOURCE_DIRECTORY = .\src\engine\general
+
+# Where to find the objects folder
+GENERAL_OBJECT_DIRECTORY = $(GENERAL_SOURCE_DIRECTORY)\obj
+
+
+# === INTEGRATION ===============================================================================
+
 
 # Where to find the include folder
 INTEGRATION_INCLUDE_DIRECTORY = .\include\integration
 
-# Where to find the objects folder
-INTEGRATION_OBJECT_DIRECTORY = .\src\integration\obj
-
 # Where to find source code
 INTEGRATION_SOURCE_DIRECTORY = .\src\integration
 
-# FOR GAME
+# Where to find the objects folder
+INTEGRATION_OBJECT_DIRECTORY = $(INTEGRATION_SOURCE_DIRECTORY)\obj
+
+
+# === GAME ===============================================================================
+
 
 # Where to find the include folder
 GAME_INCLUDE_DIRECTORY = .\include\game
 
-# Where to find the objects folder
-GAME_OBJECT_DIRECTORY = .\src\game\obj
-
 # Where to find source code
 GAME_SOURCE_DIRECTORY = .\src\game
+
+# Where to find the objects folder
+GAME_OBJECT_DIRECTORY = $(GAME_SOURCE_DIRECTORY)\obj
 
 # SDL Include Directory
 SDL_INCLUDE = -IC:\TDM-GCC-32\sdl2\include\SDL2
@@ -53,34 +98,78 @@ SDL_INCLUDE = -IC:\TDM-GCC-32\sdl2\include\SDL2
 # SDL Library Directory
 SDL_LIBRARY = -LC:\TDM-GCC-32\sdl2\lib
 
-# === ARGUMENTS ================================
 
-# Which libraries to include
-LIBS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
 
-# Additional compilation arguments
-COMPILER_FLAGS = -std=c++17 -Wall -Wextra -pedantic
+# ==========================================================================================
+# FILES
+# ==========================================================================================
 
-# Compilation arguments
-COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(ENGINE_INCLUDE_DIRECTORY) -I $(EDITOR_INCLUDE_DIRECTORY) -I $(INTEGRATION_INCLUDE_DIRECTORY) $(SDL_INCLUDE) $(COMPILER_FLAGS)
 
-# === FILES ===================================
 
-# FOR ENGINE
+# === ENGINE ===============================================================================
+
+
+# === EDITOR
+
+# === WORLD
 
 # Header files
-_ENGINE_DEPS = Game.h GameState.h SpriteRenderer.h Helper.h Music.h Vector2.h Rectangle.h Component.h GameObject.h Sound.h Resources.h InputManager.h Camera.h CameraFollower.h Debug.h Animator.h Collision.h Collider.h Text.h Color.h Timer.h Rigidbody.h PhysicsSystem.h Sprite.h Animation.h AnimationFrame.h ParticleEmitter.h Circle.h Particle.h ParticleSystem.h PhysicsLayerHandler.h PlatformEffector.h TriggerCollisionData.h BoxCollider.h CircleCollider.h Shape.h
+_WORLD_DEPS = Animation.h AnimationFrame.h Animator.h BoxCollider.h CameraFollower.h CircleCollider.h Collider.h Collision.h Music.h Particle.h ParticleEmitter.h ParticleSystem.h PhysicsLayerHandler.h PhysicsSystem.h PlatformEffector.h Rigidbody.h Sound.h SpriteRenderer.h TriggerCollisionData.h
 
 # Generate header filepaths
-ENGINE_DEPS = $(patsubst %,$(ENGINE_INCLUDE_DIRECTORY)\\%,$(_ENGINE_DEPS))
+WORLD_DEPS = $(patsubst %,$(WORLD_INCLUDE_DIRECTORY)\\%,$(_WORLD_DEPS))
 
 # Object files
-_ENGINE_OBJS = main.o Game.o GameState.o Sprite.o Music.o Component.o GameObject.o Sound.o Resources.o InputManager.o Camera.o Debug.o Animator.o Collider.o Text.o Rigidbody.o PhysicsSystem.o Sprite.o Animation.o AnimationFrame.o SpriteRenderer.o ParticleEmitter.o Particle.o ParticleSystem.o Circle.o Vector2.o Rectangle.o Color.o PhysicsLayerHandler.o PlatformEffector.o TriggerCollisionData.o Collision.o Helper.o BoxCollider.o CircleCollider.o Shape.o
+_WORLD_OBJS = Animation.o AnimationFrame.o Animator.o BoxCollider.o CircleCollider.o Collider.o Collision.o Music.o Particle.o ParticleEmitter.o ParticleSystem.o PhysicsLayerHandler.o PhysicsSystem.o PlatformEffector.o Rigidbody.o Sound.o SpriteRenderer.o TriggerCollisionData.o
 
 # Generate object filepaths
-ENGINE_OBJS = $(patsubst %,$(ENGINE_OBJECT_DIRECTORY)\\%,$(_ENGINE_OBJS))
+WORLD_OBJS = $(patsubst %,$(WORLD_OBJECT_DIRECTORY)\\%,$(_WORLD_OBJS))
 
-# FOR INTEGRATION
+# === WORLD-UI
+
+# Header files
+_WORLD_UI_DEPS = Camera.h Component.h Debug.h Game.h GameObject.h GameState.h InputManager.h Resources.h Sprite.h Timer.h
+
+# Generate header filepaths
+WORLD_UI_DEPS = $(patsubst %,$(WORLD_UI_INCLUDE_DIRECTORY)\\%,$(_WORLD_UI_DEPS))
+
+# Object files
+_WORLD_UI_OBJS = Camera.o Component.o Debug.o Game.o GameObject.o GameState.o InputManager.o Resources.o Sprite.o
+
+# Generate object filepaths
+WORLD_UI_OBJS = $(patsubst %,$(WORLD_UI_OBJECT_DIRECTORY)\\%,$(_WORLD_UI_OBJS))
+
+# === UI
+
+# Header files
+_UI_DEPS = Text.h
+
+# Generate header filepaths
+UI_DEPS = $(patsubst %,$(UI_INCLUDE_DIRECTORY)\\%,$(_UI_DEPS))
+
+# Object files
+_UI_OBJS = Text.o
+
+# Generate object filepaths
+UI_OBJS = $(patsubst %,$(UI_OBJECT_DIRECTORY)\\%,$(_UI_OBJS))
+
+# === GENERAL
+
+# Header files
+_GENERAL_DEPS = Circle.h Color.h Event.h Helper.h Rectangle.h Shape.h Vector2.h
+
+# Generate header filepaths
+GENERAL_DEPS = $(patsubst %,$(GENERAL_INCLUDE_DIRECTORY)\\%,$(_GENERAL_DEPS))
+
+# Object files
+_GENERAL_OBJS = Circle.o Color.o Helper.o Rectangle.o Shape.o Vector2.o main.o
+
+# Generate object filepaths
+GENERAL_OBJS = $(patsubst %,$(GENERAL_OBJECT_DIRECTORY)\\%,$(_GENERAL_OBJS))
+
+
+# === INTEGRATION ===============================================================================
+
 
 # Header files
 _INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h Tag.h PhysicsLayer.h BuildConfigurations.h
@@ -94,7 +183,9 @@ _INTEGRATION_OBJS = ObjectRecipes.o InitialState.o GameConfiguration.o PhysicsCo
 # Generate object filepaths
 INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATION_OBJS))
 
-# FOR GAME
+
+# === GAME ===============================================================================
+
 
 # Header files
 _GAME_DEPS = MainState.h Movement.h PlayerInput.h Action.h CharacterStateManager.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h Player.h PlayerManager.h ControllerDevice.h ParticleFX.h CharacterRepelCollision.h PlatformDrop.h FallDeath.h Arena.h Heat.h Damage.h Attack.h Character.h TestCharacter.h GeneralAnimations.h NewAnimationTypes.h TimeScaleManager.h Parry.h GunParry.h LandingAttackEffector.h LandEffector.h ShakeEffectManager.h CharacterBadge.h CharacterVFX.h CameraBehavior.h CharacterLifeDisplay.h
@@ -108,30 +199,82 @@ _GAME_OBJS = MainState.o Movement.o PlayerInput.o CharacterStateManager.o Charac
 # Generate object filepaths
 GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))
 
-# === RULES ===================================
 
-# FOR ENGINE
+
+# ==========================================================================================
+# ARGUMENTS
+# ==========================================================================================
+
+
+
+# Which libraries to include
+LIBS = -lmingw32 -lSDL2main -lSDL2 -lSDL2_image -lSDL2_mixer -lSDL2_ttf
+
+# Additional compilation arguments
+COMPILER_FLAGS = -std=c++17 -Wall -Wextra -pedantic
+
+# Compilation arguments
+COMPILATION_ARGS = -I $(GAME_INCLUDE_DIRECTORY) -I $(INTEGRATION_INCLUDE_DIRECTORY) -I $(GENERAL_INCLUDE_DIRECTORY) -I $(EDITOR_INCLUDE_DIRECTORY)  -I $(WORLD_INCLUDE_DIRECTORY) -I $(WORLD_UI_INCLUDE_DIRECTORY) -I $(UI_INCLUDE_DIRECTORY) $(SDL_INCLUDE) $(COMPILER_FLAGS)
+
+
+
+# ==========================================================================================
+# RULES
+# ==========================================================================================
+
+
+
+# === GAME ===============================================================================
+
 
 # Define how to make .o files, and make them dependent on their .c counterparts and the h files
-# The void cast is simply there to hide output of mkdir
-$(ENGINE_OBJECT_DIRECTORY)\\%.o: $(ENGINE_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(ENGINE_DEPS)
+$(GAME_OBJECT_DIRECTORY)\\%.o: $(GAME_SOURCE_DIRECTORY)\%.cpp $(GAME_DEPS) $(INTEGRATION_DEPS) $(WORLD_DEPS) $(UI_DEPS) $(WORLD_UI_DEPS) $(GENERAL_DEPS)
 	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
 
-# FOR INTEGRATION
+
+# === INTEGRATION ===============================================================================
+
 
 # Define how to make .o files, and make them dependent on their .c counterparts and the h files
-# The void cast is simply there to hide output of mkdir
-$(INTEGRATION_OBJECT_DIRECTORY)\\%.o: $(INTEGRATION_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(ENGINE_DEPS) $(GAME_DEPS)
+$(INTEGRATION_OBJECT_DIRECTORY)\\%.o: $(INTEGRATION_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(GAME_DEPS) $(WORLD_DEPS) $(UI_DEPS) $(WORLD_UI_DEPS) $(GENERAL_DEPS)
 	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
 
-# FOR GAME
+
+# === ENGINE ===============================================================================
+
+
+# === EDITOR
 
 # Define how to make .o files, and make them dependent on their .c counterparts and the h files
-# The void cast is simply there to hide output of mkdir
-$(GAME_OBJECT_DIRECTORY)\\%.o: $(GAME_SOURCE_DIRECTORY)\%.cpp $(GAME_DEPS) $(ENGINE_DEPS) $(INTEGRATION_DEPS)
+# $(EDITOR_OBJECT_DIRECTORY)\\%.o: $(EDITOR_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(EDITOR_DEPS)
+#	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
+
+# === WORLD
+
+# Define how to make .o files, and make them dependent on their .c counterparts and the h files
+$(WORLD_OBJECT_DIRECTORY)\\%.o: $(WORLD_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(WORLD_DEPS) $(WORLD_UI_DEPS) $(GENERAL_DEPS)
+	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
+
+# === UI
+
+# Define how to make .o files, and make them dependent on their .c counterparts and the h files
+$(UI_OBJECT_DIRECTORY)\\%.o: $(UI_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(UI_DEPS) $(WORLD_UI_DEPS) $(GENERAL_DEPS)
 	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
 	
+# === WORLD-UI
+
+# Define how to make .o files, and make them dependent on their .c counterparts and the h files
+$(WORLD_UI_OBJECT_DIRECTORY)\\%.o: $(WORLD_UI_SOURCE_DIRECTORY)\%.cpp $(INTEGRATION_DEPS) $(WORLD_UI_DEPS) $(UI_DEPS) $(WORLD_DEPS) $(GENERAL_DEPS)
+	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
+
+# === GENERAL
+
+# Define how to make .o files, and make them dependent on their .c counterparts and the h files
+$(GENERAL_OBJECT_DIRECTORY)\\%.o: $(GENERAL_SOURCE_DIRECTORY)\%.cpp $(GENERAL_DEPS)
+	$(CC) -g -c -o $@ $< $(COMPILATION_ARGS)
+
+	
 # Makes the game
-game: $(GAME_OBJS) $(ENGINE_OBJS) $(INTEGRATION_OBJS)
+game: $(GAME_OBJS) $(INTEGRATION_OBJS) $(WORLD_OBJS) $(UI_OBJS) $(WORLD_UI_OBJS) $(GENERAL_OBJS)
 #	./src/editor/componentTable/tableScrapper.sh
 	$(CC) $^ $(COMPILATION_ARGS) $(LIBS) $(SDL_LIBRARY) -g -o $@
