@@ -1,4 +1,5 @@
 #include "ObjectRecipes.h"
+#include "Resources.h"
 #include "CharacterVFX.h"
 #include "ObjectRecipes.h"
 #include "LandingAttackEffector.h"
@@ -31,6 +32,7 @@
 #include "Heat.h"
 #include "GunParry.h"
 #include "CameraBehavior.h"
+#include "CharacterLifeDisplay.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
@@ -132,7 +134,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // === DYING FROM FALLING OFF
 
-    character->AddComponent<FallDeath>();
+    auto fallDeath =character->AddComponent<FallDeath>();
 
     // === MOVEMENT CONTROL
 
@@ -200,15 +202,31 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     // === HEAT DISPLAY
 
     // Add display in a separate child
-    auto display = character->CreateChild(CHARACTER_BADGE_OBJECT, {0, -collider->GetBox().height / 2 - 0.9f});
+    auto display = character->CreateChild(CHARACTER_BADGE_OBJECT, {0, -collider->GetBox().height / 2 - 0.2f});
+
+    // Real pixels per virtual pixel in badge UI
+    float realPerVirtualPixels{5};
+
+    string badgePath{"./assets/sprites/badge.png"};
+    string lifePath{"./assets/sprites/life.png"};
+
+    float badgeSize = Resources::GetSprite(badgePath)->GetUnscaledWidth() * realPerVirtualPixels;
+    float lifeSize = Resources::GetSprite(lifePath)->GetUnscaledWidth() * realPerVirtualPixels;
 
     // Add text
     auto badgeText = display->AddComponent<Text>("0.0", "./assets/engine/fonts/PixelOperator.ttf", 30);
     badgeText->SetBorderSize(3);
+    badgeText->SetOffset({0, -30});
+    badgeText->SetAnchorPoint({0.5, 1});
 
     // Add badge sprite
-    auto badgeSprite = display->AddComponent<SpriteRenderer>("./assets/sprites/badge.png", RenderLayer::UI);
-    badgeSprite->SetOffset({0, 0.5});
+    auto badgeSprite = display->AddComponent<SpriteRenderer>(badgePath, RenderLayer::UI);
+    badgeSprite->OverrideWidthPixels(badgeSize);
+    badgeSprite->SetAnchorPoint({0.5, 1});
+
+    // Add life display object manager
+    auto lifeDisplay = display->CreateChild(CHARACTER_LIFE_OBJECT, {0, -0.3f});
+    lifeDisplay->AddComponent<CharacterLifeDisplay>(fallDeath, lifeSize, lifePath);
 
     // Add the badge
     display->AddComponent<CharacterBadge>(selectedCharacter);

@@ -44,12 +44,18 @@ public:
   void SetBorderSize(int borderSize);
   void SetBorderColor(Color borderColor);
 
+  // Apply an offset, in real pixels
+  void SetOffset(Vector2 newOffset);
+
   std::string GetText();
   Color GetColor();
   Style GetStyle();
   int GetFontSize();
   int GetBorderSize();
   Color GetBorderColor();
+
+  // Sets which point of the sprite will be at the sprite renderer's position (default is center)
+  void SetAnchorPoint(Vector2 point);
 
   // Order in which to render;
   int renderOrder{0};
@@ -96,6 +102,11 @@ private:
 
   // Format to use when creating textures
   Uint32 textureFormat;
+
+  Vector2 offset;
+
+  // Which point of the texture will be at the gameObject's position (default is center)
+  Vector2 anchorPoint{0.5, 0.5};
 };
 
 #endif

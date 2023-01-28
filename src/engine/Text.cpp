@@ -22,8 +22,12 @@ Text::Text(
 void Text::Render()
 {
   // Get the real position
-  // Offset coordinates to center texture
-  auto realPosition{Camera::GetMain()->WorldToScreen(gameObject.GetPosition()) - Vector2((float)pixelWidth, (float)pixelHeight) / 2};
+  // Offset coordinates to match anchor point
+  Vector2 realPosition{
+      Camera::GetMain()->WorldToScreen(gameObject.GetPosition()) -
+      Vector2((float)pixelWidth, (float)pixelHeight) * anchorPoint +
+      offset};
+
   SDL_Rect destinationRect{int(realPosition.x), int(realPosition.y), pixelWidth, pixelHeight};
 
   // Get clip rectangle
@@ -191,3 +195,7 @@ Text::Style Text::GetStyle() { return style; }
 int Text::GetFontSize() { return fontSize; }
 int Text::GetBorderSize() { return borderPixels; }
 Color Text::GetBorderColor() { return borderColor; }
+
+void Text::SetAnchorPoint(Vector2 point) { anchorPoint = point; }
+
+void Text::SetOffset(Vector2 newOffset) { offset = newOffset; }

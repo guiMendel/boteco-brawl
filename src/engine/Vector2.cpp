@@ -11,13 +11,16 @@ Vector2::Vector2(float x, float y) : x(x), y(y) {}
 Vector2::Vector2() : Vector2(0, 0) {}
 
 // With initializer_list
-Vector2::Vector2(initializer_list<float> list) : x(*list.begin()), y(*(list.begin() + 1)) {}
+Vector2::Vector2(initializer_list<float> list) : Vector2(*list.begin(), *(list.begin() + 1))
+{
+  Assert(list.size() == 2, "Vector2 initializer list must have exactly 2 values");
+}
 
 // Copy constructor
-Vector2::Vector2(const Vector2 &other) : x(other.x), y(other.y) {}
+Vector2::Vector2(const Vector2 &other) : Vector2(other.x, other.y) {}
 
 // Move constructor
-Vector2::Vector2(const Vector2 &&other) : x(other.x), y(other.y) {}
+Vector2::Vector2(const Vector2 &&other) : Vector2(other.x, other.y) {}
 
 // === ALGEBRAIC OPERATIONS
 

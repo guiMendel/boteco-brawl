@@ -7,13 +7,13 @@
 using namespace std;
 using namespace Helper;
 
-SpriteRenderer::SpriteRenderer(GameObject &associatedObject, RenderLayer renderLayer, int renderOrder, bool centerObject)
-    : Component(associatedObject), centered(centerObject), renderLayer(renderLayer), renderOrder(renderOrder)
+SpriteRenderer::SpriteRenderer(GameObject &associatedObject, RenderLayer renderLayer, int renderOrder)
+    : Component(associatedObject), renderLayer(renderLayer), renderOrder(renderOrder)
 {
 }
 
 // Constructor with image file name
-SpriteRenderer::SpriteRenderer(GameObject &associatedObject, const string fileName, RenderLayer renderLayer, int renderOrder, bool centerObject) : SpriteRenderer(associatedObject, renderLayer, renderOrder, centerObject)
+SpriteRenderer::SpriteRenderer(GameObject &associatedObject, const string fileName, RenderLayer renderLayer, int renderOrder) : SpriteRenderer(associatedObject, renderLayer, renderOrder)
 {
   sprite = Resources::GetSprite(fileName);
 }
@@ -25,10 +25,6 @@ Vector2 SpriteRenderer::RenderPositionFor(Vector2 position, shared_ptr<Sprite> r
   // Apply offset
   position += offset * gameObject.GetScale();
 
-  // Offset coordinates if centered
-  if (centered == false)
-    return position;
-
   auto scale = gameObject.GetScale().GetAbsolute();
   auto sprite = referenceSprite == nullptr ? this->sprite : referenceSprite;
 
@@ -37,7 +33,14 @@ Vector2 SpriteRenderer::RenderPositionFor(Vector2 position, shared_ptr<Sprite> r
   // Get sprite's dimensions
   auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
 
-  return position - Vector2(width / 2, height / 2);
+  // Check for override
+  if (overrideWidthPixels > 0)
+  {
+    height = overrideWidthPixels * (height / width) / Camera::GetMain()->GetRealPixelsPerUnit();
+    width = overrideWidthPixels / Camera::GetMain()->GetRealPixelsPerUnit();
+  }
+
+  return position - Vector2(width, height) * anchorPoint;
 }
 
 void SpriteRenderer::Render(Vector2 position)
@@ -48,9 +51,19 @@ void SpriteRenderer::Render(Vector2 position)
 
   auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
 
-  // Get the real position box
-  SDL_Rect destinationRect = (SDL_Rect)Camera::GetMain()->WorldToScreen(
-      Rectangle{Rectangle::TopLeftInitialize, position, width, height});
+  auto camera = Camera::GetMain();
+  auto pixelPosition = camera->WorldToScreen(position);
+
+  SDL_Rect destinationRect = {
+      int(pixelPosition.x), int(pixelPosition.y),
+      int(width * camera->GetRealPixelsPerUnit()), int(height * camera->GetRealPixelsPerUnit())};
+
+  // Check for width override
+  if (overrideWidthPixels > 0)
+  {
+    destinationRect.w = overrideWidthPixels;
+    destinationRect.h = overrideWidthPixels * height / width;
+  }
 
   // Detect flips
   SDL_RendererFlip horizontalFlip = gameObject.localScale.x < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
@@ -129,3 +142,7 @@ void SpriteRenderer::SetSprite(shared_ptr<Sprite> newSprite)
 }
 
 shared_ptr<Sprite> SpriteRenderer::GetSprite() const { return sprite; }
+
+void SpriteRenderer::OverrideWidthPixels(int newWidth) { overrideWidthPixels = newWidth; }
+
+void SpriteRenderer::SetAnchorPoint(Vector2 point) { anchorPoint = point; }

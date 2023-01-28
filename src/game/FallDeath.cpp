@@ -14,7 +14,7 @@ using namespace std;
 
 const float FallDeath::deathMargin{3};
 const float FallDeath::respawnDelay{2};
-const int FallDeath::startingLives{1};
+const int FallDeath::startingLives{2};
 
 FallDeath::FallDeath(GameObject &associatedObject)
     : Component(associatedObject), weakArena(GetState()->FindObjectOfType<Arena>())
@@ -58,9 +58,6 @@ void FallDeath::Fall()
   // Set flag
   fallen = true;
 
-  // Raise event
-  OnFall.Invoke();
-
   // Reset speed
   gameObject.RequireComponent<Rigidbody>()->velocity = Vector2::Zero();
 
@@ -78,6 +75,9 @@ void FallDeath::Fall()
   // Raise death event
   else
     OnDeath.Invoke();
+
+  // Raise event
+  OnFall.Invoke();
 
   PlayEffect();
 }

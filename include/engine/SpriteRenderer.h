@@ -17,10 +17,10 @@ public:
   EventI<Vector2> OnSetOffset;
 
   // Constructor with image file name
-  SpriteRenderer(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0, bool centerObject = true);
+  SpriteRenderer(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
 
   // Default constructor
-  SpriteRenderer(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0, bool centerObject = true);
+  SpriteRenderer(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
 
   virtual ~SpriteRenderer() {}
 
@@ -55,8 +55,11 @@ public:
   // Sets a new sprite
   void SetSprite(std::shared_ptr<Sprite> newSprite);
 
-  // Whether to center the sprite on the render coordinates
-  bool centered;
+  // Sets which point of the sprite will be at the sprite renderer's position (default is center)
+  void SetAnchorPoint(Vector2 point);
+
+  // Sets a new width to render with, in real pixels
+  void OverrideWidthPixels(int newWidth);
 
 private:
   // Allows a procedure to operate with a texture from sprite with color alterations already applied to it
@@ -82,6 +85,12 @@ private:
 
   // The sprite's render order
   int renderOrder{0};
+
+  // The width with which to render the sprite, in real pixels (used mostly for UI)
+  int overrideWidthPixels{-1};
+
+  // Which point of the sprite will be at the center (default is center)
+  Vector2 anchorPoint{0.5, 0.5};
 };
 
 #endif
