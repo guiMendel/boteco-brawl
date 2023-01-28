@@ -14,7 +14,7 @@ const float groundedRange{0.2f};
 
 const float Movement::totalCoyoteTime{0.2f};
 
-Movement::Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance)
+Movement::Movement(WorldObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance)
     : Component(associatedObject),
       acceleration(acceleration),
       defaultSpeed(defaultSpeed),
@@ -24,8 +24,8 @@ Movement::Movement(GameObject &associatedObject, float acceleration, float defau
       airborneControl(0.5f),
       fastFallAcceleration(45),
       jumpGravityModifier(15),
-      rigidbody(*gameObject.RequireComponent<Rigidbody>()),
-      stateManager(*gameObject.RequireComponent<CharacterStateManager>())
+      rigidbody(*worldObject.RequireComponent<Rigidbody>()),
+      stateManager(*worldObject.RequireComponent<CharacterStateManager>())
 {
   SetGravityModifierDecayTime(0.2f);
 }
@@ -40,7 +40,7 @@ void Movement::Start()
   originalGravityScale = rigidbody.gravityScale;
 
   // On death, reset fast fall & direction
-  gameObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-movement", [this]()
+  worldObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-movement", [this]()
                                                                    { SetDirection(0); StopFallFast(); });
 }
 
@@ -116,7 +116,7 @@ void Movement::Run(float deltaTime)
   {
     // Only sets if not attacking
     if (stateManager.HasState(AIR_ATTACKING_STATE) == false)
-      gameObject.localScale = Vector2(GetSign(targetSpeed), 1);
+      worldObject.localScale = Vector2(GetSign(targetSpeed), 1);
   }
 
   // When grounded
@@ -124,7 +124,7 @@ void Movement::Run(float deltaTime)
   {
     // Only set if moving in same direction as input
     if (GetSign(targetSpeed) == GetSign(rigidbody.velocity.x, 0))
-      gameObject.localScale = Vector2(GetSign(targetSpeed), 1);
+      worldObject.localScale = Vector2(GetSign(targetSpeed), 1);
   }
 }
 

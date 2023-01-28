@@ -3,13 +3,13 @@
 
 using namespace std;
 
-LandingAttackEffector::LandingAttackEffector(GameObject &associatedObject, function<bool()> effectorCondition)
+LandingAttackEffector::LandingAttackEffector(WorldObject &associatedObject, function<bool()> effectorCondition)
     : LandEffector(associatedObject), effectorCondition(effectorCondition) {}
 
 shared_ptr<Action> LandingAttackEffector::GetLandAction()
 {
   if (effectorCondition()) {
-    auto body = gameObject.RequireComponent<Rigidbody>();
+    auto body = worldObject.RequireComponent<Rigidbody>();
     return make_shared<Actions::LandingAttack>(body->velocity.Magnitude());
   }
 

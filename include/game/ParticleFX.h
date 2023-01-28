@@ -1,7 +1,7 @@
 #ifndef __PARTICLE_FX__
 #define __PARTICLE_FX__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "ParticleEmitter.h"
 #include <unordered_map>
@@ -9,7 +9,7 @@
 class ParticleFX : public Component
 {
 public:
-  ParticleFX(GameObject &associatedObject);
+  ParticleFX(WorldObject &associatedObject);
   virtual ~ParticleFX() {}
 
   // Spawns a particle emitter to play the given effect, discards the emitter object after duration + destroyAfter seconds

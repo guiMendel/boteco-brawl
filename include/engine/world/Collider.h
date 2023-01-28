@@ -1,7 +1,7 @@
 #ifndef __COLLIDER__
 #define __COLLIDER__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "Vector2.h"
 #include "Shape.h"
@@ -16,7 +16,7 @@ class Collider : public Component
 public:
   // Explicitly initialize shape
   Collider(
-      GameObject &associatedObject,
+      WorldObject &associatedObject,
       std::shared_ptr<Shape> shape,
       bool isTrigger = false,
       ColliderDensity density = ColliderDensity::Default);
@@ -43,11 +43,11 @@ public:
   // Id of object under which this collider is registered
   int GetOwnerId() const;
 
-  // Get the associated shape, already rotated, scaled and displaced to this gameObject's scale, rotation and position
+  // Get the associated shape, already rotated, scaled and displaced to this worldObject's scale, rotation and position
   std::shared_ptr<Shape> DeriveShape() const;
 
   // Get the owner game object
-  std::shared_ptr<GameObject> GetOwner() const;
+  std::shared_ptr<WorldObject> GetOwner() const;
 
   // Whether this collider actually participates in physical collisions
   const bool isTrigger;
@@ -66,7 +66,7 @@ protected:
   virtual std::shared_ptr<Shape> CopyShape() const = 0;
 
 private:
-  // Id of the owner gameObject
+  // Id of the owner worldObject
   int ownerId;
 };
 

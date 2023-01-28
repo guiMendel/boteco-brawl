@@ -1,7 +1,7 @@
 #ifndef __CHARACTER_SLIDE_COLLISION__
 #define __CHARACTER_SLIDE_COLLISION__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "Rigidbody.h"
 #include "CharacterStateManager.h"
@@ -9,7 +9,7 @@
 class CharacterRepelCollision : public Component
 {
 public:
-  CharacterRepelCollision(GameObject &associatedObject, std::shared_ptr<Rigidbody> body);
+  CharacterRepelCollision(WorldObject &associatedObject, std::shared_ptr<Rigidbody> body);
   virtual ~CharacterRepelCollision() {}
 
   void OnTriggerCollision(TriggerCollisionData triggerData) override;

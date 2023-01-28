@@ -1,16 +1,16 @@
 #ifndef __ARENA__
 #define __ARENA__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "SpriteRenderer.h"
 
 class Arena : public Component
 {
 public:
-  Arena(GameObject &associatedObject, float width, float height);
+  Arena(WorldObject &associatedObject, float width, float height);
 
-  Arena(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer);
+  Arena(WorldObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer);
 
   virtual ~Arena() {}
   void Render() override;

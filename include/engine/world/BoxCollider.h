@@ -11,23 +11,23 @@ class BoxCollider : public Collider
 {
 public:
   // Explicitly initialize box
-  BoxCollider(GameObject &associatedObject, Rectangle box, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default);
+  BoxCollider(WorldObject &associatedObject, Rectangle box, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default);
 
   // Use sprite's box
-  BoxCollider(GameObject &associatedObject, std::shared_ptr<Sprite> sprite, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
+  BoxCollider(WorldObject &associatedObject, std::shared_ptr<Sprite> sprite, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
 
   // Use sprite animator's initial animation sprite size
-  BoxCollider(GameObject &associatedObject, std::shared_ptr<Animator> animator, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
+  BoxCollider(WorldObject &associatedObject, std::shared_ptr<Animator> animator, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
 
   // Use other BoxCollider's box
-  BoxCollider(GameObject &associatedObject, std::shared_ptr<BoxCollider> other, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
+  BoxCollider(WorldObject &associatedObject, std::shared_ptr<BoxCollider> other, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default, Vector2 scale = Vector2::One());
 
   virtual ~BoxCollider() {}
 
   // Allows for debug rendering
   void Render() override;
 
-  // Set the box, assuming coordinates & rotation correspond to an offset from the gameObject's
+  // Set the box, assuming coordinates & rotation correspond to an offset from the worldObject's
   void SetBox(const Rectangle &box);
 
   // Get shape as rectangle

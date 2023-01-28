@@ -5,7 +5,7 @@
 #include <unordered_map>
 #include <string>
 #include <functional>
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "SpriteRenderer.h"
 #include "Vector2.h"
@@ -22,7 +22,7 @@ public:
   typedef std::function<std::shared_ptr<Animation>()> animation_builder;
   typedef std::unordered_map<std::string, animation_builder> animation_map;
 
-  Animator(GameObject &associatedObject);
+  Animator(WorldObject &associatedObject);
 
   virtual ~Animator() {}
 

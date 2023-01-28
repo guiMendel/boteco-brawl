@@ -26,16 +26,16 @@
   auto shared = weak.lock();                \
   Helper::Assert(shared != nullptr, message);
 
-class GameObject;
+class WorldObject;
 class GameState;
 
 class Component
 {
-  friend GameObject;
+  friend WorldObject;
   friend GameState;
 
 public:
-  Component(GameObject &associatedObject);
+  Component(WorldObject &associatedObject);
   virtual ~Component();
 
   // In which render layer this component is
@@ -61,7 +61,7 @@ public:
   explicit operator std::string() const;
 
   // The associated game object
-  GameObject &gameObject;
+  WorldObject &worldObject;
 
   // Whether the component is active
   bool enabled{true};
@@ -113,7 +113,7 @@ private:
 
 std::ostream &operator<<(std::ostream &stream, const Component &vector);
 
-#include "GameObject.h"
+#include "WorldObject.h"
 // #include "GameState.h"
 #include "Helper.h"
 

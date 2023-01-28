@@ -75,7 +75,7 @@ void Animation::TriggerFrame(int frame)
   currentFrame = frame;
 
   // Trigger it
-  GetFrame(frame).Trigger(animator.gameObject);
+  GetFrame(frame).Trigger(animator.worldObject);
 
   // Get next frame time
   secondsToNextFrame = GetFrame(frame).GetDuration() * speedModifier;

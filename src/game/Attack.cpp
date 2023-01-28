@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Attack::Attack(GameObject &associatedObject, DamageParameters damage, float hitSecondsCooldown)
+Attack::Attack(WorldObject &associatedObject, DamageParameters damage, float hitSecondsCooldown)
     : Component(associatedObject), damage(damage), hitCooldown(hitSecondsCooldown * 1000) {}
 
 void Attack::Land(shared_ptr<CharacterController> targetController)
@@ -48,10 +48,10 @@ void Attack::OnTriggerCollisionEnter(TriggerCollisionData trigger)
 
 Damage Attack::GetDamage() const
 {
-  return damage.DeriveDamage(gameObject.GetParent());
+  return damage.DeriveDamage(worldObject.GetParent());
 }
 
-void Attack::Ignore(std::shared_ptr<GameObject> target)
+void Attack::Ignore(std::shared_ptr<WorldObject> target)
 {
   ignoredObjects.insert(target->id);
 }

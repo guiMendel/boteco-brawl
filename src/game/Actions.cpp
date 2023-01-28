@@ -14,11 +14,11 @@ using namespace Actions;
 
 // ============================= MOVE =============================
 
-void Move::Trigger(GameObject &target, shared_ptr<CharacterState>)
+void Move::Trigger(WorldObject &target, shared_ptr<CharacterState>)
 {
   target.RequireComponent<Movement>()->SetDirection(direction);
 }
-void Move::StopHook(GameObject &target, shared_ptr<CharacterState>)
+void Move::StopHook(WorldObject &target, shared_ptr<CharacterState>)
 {
   target.RequireComponent<Movement>()->SetDirection(0);
 }
@@ -28,7 +28,7 @@ void Move::StopHook(GameObject &target, shared_ptr<CharacterState>)
 const float Dash::dashFriction{0.995};
 const float Dash::dashSpeed{50};
 
-void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
+void Dash::Trigger(WorldObject &target, shared_ptr<CharacterState> dashState)
 {
   // Get the rigidbody
   auto rigidbody = target.GetComponent<Rigidbody>();
@@ -66,7 +66,7 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   auto animation = animator->BuildAnimation("dash");
 
   // Switch from invulnerable state to recovering state mid-animation
-  auto stateSwitchCallback = [weakState, weakStateManager, weakRecoveringState, this](GameObject &)
+  auto stateSwitchCallback = [weakState, weakStateManager, weakRecoveringState, this](WorldObject &)
   {
     IF_LOCK(weakState, dashState)
     IF_LOCK(weakStateManager, stateManager)
@@ -96,7 +96,7 @@ void Dash::Trigger(GameObject &target, shared_ptr<CharacterState> dashState)
   target.RequireComponent<CharacterVFX>()->StartDash();
 }
 
-void Dash::StopHook(GameObject &target, shared_ptr<CharacterState>)
+void Dash::StopHook(WorldObject &target, shared_ptr<CharacterState>)
 {
   auto rigidbody = target.GetComponent<Rigidbody>();
 
@@ -110,7 +110,7 @@ void Dash::StopHook(GameObject &target, shared_ptr<CharacterState>)
 
 // ============================= TAKE DAMAGE =============================
 
-void TakeDamage::Trigger(GameObject &target, shared_ptr<CharacterState>)
+void TakeDamage::Trigger(WorldObject &target, shared_ptr<CharacterState>)
 {
   // Get target's heat
   auto heat = target.RequireComponent<Heat>();
@@ -134,7 +134,7 @@ void TakeDamage::Trigger(GameObject &target, shared_ptr<CharacterState>)
 
 // ============================= RIPOSTE =============================
 
-void Riposte::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
+void Riposte::Trigger(WorldObject &target, shared_ptr<CharacterState> actionState)
 {
   LOCK(weakParry, parry);
 
@@ -177,7 +177,7 @@ void Riposte::Trigger(GameObject &target, shared_ptr<CharacterState> actionState
 
 // ============================= LANDING ATTACK =============================
 
-void LandingAttack::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
+void LandingAttack::Trigger(WorldObject &target, shared_ptr<CharacterState> actionState)
 {
   // Store these info
   auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());

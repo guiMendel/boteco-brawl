@@ -52,7 +52,7 @@ function table_entry_for() {
   AllowedTypesRegex="(int|float|(std::)?string|bool)"
 
   # First, find all constructors of this component (with primitive types only)
-  ConstructorsRegex="$Class*\s*\(\s*GameObject\s*&\s*$CLabel\s*(,\s*(const\s+)?$AllowedTypesRegex\s*$CLabel\s*(=\s*.+\s*)?)*\)"
+  ConstructorsRegex="$Class*\s*\(\s*WorldObject\s*&\s*$CLabel\s*(,\s*(const\s+)?$AllowedTypesRegex\s*$CLabel\s*(=\s*.+\s*)?)*\)"
   # We will use the FIRST match
   Constructor=$(cat "$ComponentPath" | grep -oP "$ConstructorsRegex")
 
@@ -108,7 +108,7 @@ function treat_component() {
   Class=$2
 
   # Check that this component has the necessary ComponentParameter map constructor to be added to the table
-  CosntructorRegex="$Class\s*\(\s*GameObject\s*&\s*$CLabel\s*,\s*ComponentParameters\s*&\s*$CLabel\s*\)"
+  CosntructorRegex="$Class\s*\(\s*WorldObject\s*&\s*$CLabel\s*,\s*ComponentParameters\s*&\s*$CLabel\s*\)"
   HasConstructor=$(cat $ComponentPath | grep -oP "$CosntructorRegex")
 
   # Only if that's the case

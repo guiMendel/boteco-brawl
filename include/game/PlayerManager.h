@@ -1,7 +1,7 @@
 #ifndef __PLAYER_MANAGER__
 #define __PLAYER_MANAGER__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "Player.h"
 #include "Event.h"
@@ -18,7 +18,7 @@ public:
   // Colors of each player
   static const Color playerColors[];
 
-  PlayerManager(GameObject &associatedObject);
+  PlayerManager(WorldObject &associatedObject);
 
   virtual ~PlayerManager() {}
 
@@ -32,7 +32,7 @@ public:
   std::shared_ptr<Player> AddNewPlayer();
 
 private:
-  // Component id of main player gameObject
+  // Component id of main player worldObject
   // -1 if no player
   int mainPlayerId{-1};
 };

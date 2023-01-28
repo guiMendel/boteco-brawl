@@ -2,7 +2,7 @@
 
 using namespace std;
 
-Character::Character(GameObject &associatedObject)
+Character::Character(WorldObject &associatedObject)
     : Component(associatedObject) {}
 
 int Character::TransformSequenceIndexFor(string animation, int index) const

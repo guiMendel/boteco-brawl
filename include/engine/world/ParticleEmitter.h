@@ -1,7 +1,7 @@
 #ifndef __PARTICLE_EMITTER__
 #define __PARTICLE_EMITTER__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "Circle.h"
 #include "Color.h"
@@ -46,7 +46,7 @@ class ParticleEmitter : public Component
 public:
   Event OnStop;
 
-  ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float radius = 0.01, bool loop = false, float duration = 1);
+  ParticleEmitter(WorldObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float radius = 0.01, bool loop = false, float duration = 1);
 
   ~ParticleEmitter() {}
 

@@ -39,11 +39,11 @@
 
 using namespace std;
 
-auto ObjectRecipes::Camera(shared_ptr<GameObject> charactersParent)
-    -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Camera(shared_ptr<WorldObject> charactersParent)
+    -> function<void(shared_ptr<WorldObject>)>
 {
   auto weakParent{weak_ptr(charactersParent)};
-  return [weakParent](shared_ptr<GameObject> cameraObject)
+  return [weakParent](shared_ptr<WorldObject> cameraObject)
   {
     LOCK(weakParent, charactersParent);
 
@@ -56,9 +56,9 @@ auto ObjectRecipes::Camera(shared_ptr<GameObject> charactersParent)
   };
 }
 
-auto ObjectRecipes::Arena(string imagePath) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Arena(string imagePath) -> function<void(shared_ptr<WorldObject>)>
 {
-  return [imagePath](shared_ptr<GameObject> arena)
+  return [imagePath](shared_ptr<WorldObject> arena)
   {
     // Get a background sprite
     // auto spriteRenderer = arena->AddComponent<SpriteRenderer>(imagePath, RenderLayer::Background);
@@ -76,10 +76,10 @@ auto ObjectRecipes::Arena(string imagePath) -> function<void(shared_ptr<GameObje
   };
 }
 
-auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared_ptr<WorldObject>)>
 {
   auto weakPlayer{weak_ptr(player)};
-  return [weakPlayer](shared_ptr<GameObject> character)
+  return [weakPlayer](shared_ptr<WorldObject> character)
   {
     character->SetPhysicsLayer(PhysicsLayer::Character);
 
@@ -157,8 +157,8 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     auto repelBox = character->CreateChild(CHARACTER_SLIDE_BOX_OBJECT)->AddComponent<BoxCollider>(collider, true);
 
     // Make it a different layer so that they collide
-    repelBox->gameObject.AddComponent<CharacterRepelCollision>(body);
-    repelBox->gameObject.SetPhysicsLayer(PhysicsLayer::CharacterRepelBox);
+    repelBox->worldObject.AddComponent<CharacterRepelCollision>(body);
+    repelBox->worldObject.SetPhysicsLayer(PhysicsLayer::CharacterRepelBox);
 
     // === PLATFORM DETECTOR FOR DROPPING
 
@@ -233,9 +233,9 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
   };
 }
 
-auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(shared_ptr<WorldObject>)>
 {
-  return [size, withEffector](shared_ptr<GameObject> platform)
+  return [size, withEffector](shared_ptr<WorldObject> platform)
   {
     platform->AddComponent<BoxCollider>(Rectangle({0, 0}, size.x, size.y), false, ColliderDensity::Ground);
 
@@ -253,10 +253,10 @@ auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(s
   };
 }
 
-auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<GameObject> parent, Vector2 gravityScale) -> function<void(shared_ptr<GameObject>)>
+auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<WorldObject> parent, Vector2 gravityScale) -> function<void(shared_ptr<WorldObject>)>
 {
   auto weakParent{weak_ptr(parent)};
-  return [initialVelocity, weakParent, gravityScale](shared_ptr<GameObject> projectile)
+  return [initialVelocity, weakParent, gravityScale](shared_ptr<WorldObject> projectile)
   {
     projectile->SetPhysicsLayer(PhysicsLayer::Hazard);
 

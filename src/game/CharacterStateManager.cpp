@@ -15,7 +15,7 @@ const float CharacterStateManager::maxActionDelay{1};
 // Elasticity applied to rigidbody when character is bouncing
 static const float bounceElasticity{0.9};
 
-CharacterStateManager::CharacterStateManager(GameObject &associatedObject)
+CharacterStateManager::CharacterStateManager(WorldObject &associatedObject)
     : Component(associatedObject) {}
 
 void CharacterStateManager::StartBouncing()
@@ -64,7 +64,7 @@ void CharacterStateManager::Update(float deltaTime)
 
 void CharacterStateManager::Awake()
 {
-  weakBody = gameObject.RequireComponent<Rigidbody>();
+  weakBody = worldObject.RequireComponent<Rigidbody>();
 
   auto bounceIfTooFast = [this](Damage, float)
   {
@@ -75,7 +75,7 @@ void CharacterStateManager::Awake()
       StartBouncing();
   };
 
-  gameObject.RequireComponent<Heat>()->OnTakeDamage.AddListener("start-bounce", bounceIfTooFast);
+  worldObject.RequireComponent<Heat>()->OnTakeDamage.AddListener("start-bounce", bounceIfTooFast);
 }
 
 void CharacterStateManager::HandleQueuedAction(float deltaTime)
@@ -158,7 +158,7 @@ bool CharacterStateManager::CanPerform(shared_ptr<Action> action)
   };
 
   // If none of the states blocks this action, it can be performed
-  return action->IsValid(gameObject) && any_of(states.begin(), states.end(), stateBlocksAction) == false;
+  return action->IsValid(worldObject) && any_of(states.begin(), states.end(), stateBlocksAction) == false;
 }
 
 void CharacterStateManager::SetActionSequenceIndex(shared_ptr<Action> action)
@@ -211,7 +211,7 @@ void CharacterStateManager::Perform(shared_ptr<Action> action, bool canDelay)
     RemoveStatesNotIn(action->GetFriendStates(), true);
 
   // Trigger this action
-  action->Trigger(gameObject, newState);
+  action->Trigger(worldObject, newState);
 }
 
 void CharacterStateManager::RemoveState(string name, bool interruption)
@@ -251,7 +251,7 @@ auto CharacterStateManager::RemoveState(decltype(states)::iterator stateIterator
     state->onRemove(GetSharedCasted());
 
   if (state->parentAction != nullptr)
-    state->parentAction->StopHook(gameObject, state);
+    state->parentAction->StopHook(worldObject, state);
 
   // Announce interruption
   if (interruption)

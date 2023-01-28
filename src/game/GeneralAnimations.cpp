@@ -23,7 +23,7 @@ vector<AnimationFrame> Jump::InitializeFrames()
                                SpritesheetClipInfo(8, 8, 2), 0.1)};
 
   // Add jump impulse to jump frame
-  auto callback = [](GameObject &object)
+  auto callback = [](WorldObject &object)
   {
     // Jump
     auto movement = object.RequireComponent<Movement>();
@@ -84,7 +84,7 @@ void Horizontal::InternalOnStart()
   if (sequencePhase == SequencePhase::InLoop)
   {
     animator.GetState()->FindObjectOfType<ShakeEffectManager>()->Shake(
-        animator.gameObject.GetShared(),
+        animator.worldObject.GetShared(),
         0,
         {0, 0.15},
         {0.15, 0.08},
@@ -107,7 +107,7 @@ vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
                                SpritesheetClipInfo(24, 8, 3, 1), 0.2)};
 
   // Stop shake
-  auto stopShake = [](GameObject &target)
+  auto stopShake = [](WorldObject &target)
   {
     target.GetState()->FindObjectOfType<ShakeEffectManager>()->StopShake(
         target.GetShared());
@@ -135,14 +135,14 @@ vector<AnimationFrame> SpecialNeutral::InitializeFrames()
   frames.push_back(frames[0]);
 
   // Ready parry
-  auto startParry = [](GameObject &object)
+  auto startParry = [](WorldObject &object)
   {
     auto parry = object.RequireComponent<GunParry>();
 
     parry->ready = true;
   };
 
-  auto stopParry = [](GameObject &object)
+  auto stopParry = [](WorldObject &object)
   {
     auto parry = object.RequireComponent<GunParry>();
 
@@ -157,7 +157,7 @@ vector<AnimationFrame> SpecialNeutral::InitializeFrames()
 
 void SpecialNeutral::InternalOnStop()
 {
-  auto parry = animator.gameObject.RequireComponent<GunParry>();
+  auto parry = animator.worldObject.RequireComponent<GunParry>();
 
   parry->ready = false;
 }
@@ -174,7 +174,7 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
   frames[1].SetDuration(0.2);
 
   // Add shoot frame
-  auto shoot = [this](GameObject &target)
+  auto shoot = [this](WorldObject &target)
   {
     float mirrorFactor = GetSign(target.GetScale().x);
 
@@ -205,7 +205,7 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
 
     auto projectile = animator.GetState()->CreateObject(
         "Projectile",
-        ObjectRecipes::Projectile({8 * mirrorFactor, 0}, animator.gameObject.GetShared(), {0, 0}),
+        ObjectRecipes::Projectile({8 * mirrorFactor, 0}, animator.worldObject.GetShared(), {0, 0}),
         shotPosition);
 
     projectile->localScale = {mirrorFactor, 1};
@@ -315,7 +315,7 @@ vector<AnimationFrame> LandingAttack::InitializeFrames()
                                             SpritesheetClipInfo(8, 20, 3, 2), 0.2, {0, 2});
 
   // Halt character
-  auto stopVelocity = [](GameObject &target)
+  auto stopVelocity = [](WorldObject &target)
   {
     auto body = target.RequireComponent<Rigidbody>();
 
@@ -339,14 +339,14 @@ void Projectile::OnConnectAttack(std::shared_ptr<CharacterController>)
   hit.speed = {1, 3};
 
   ParticleFX::EffectAt(
-      animator.gameObject.GetPosition(),
+      animator.worldObject.GetPosition(),
       0.1,
       0.001,
       hit,
       4);
 
   // Go away
-  animator.gameObject.RequestDestroy();
+  animator.worldObject.RequestDestroy();
 }
 
 void Projectile::InternalOnStart()

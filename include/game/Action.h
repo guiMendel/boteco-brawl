@@ -9,7 +9,7 @@
 
 #define ATTACK_PRIORITY 1
 
-class GameObject;
+class WorldObject;
 
 // Defines the data of a game action, such as a standing attack or a dash
 struct Action
@@ -18,10 +18,10 @@ struct Action
   bool IsFriend(std::shared_ptr<CharacterState> state) const { return GetFriendStates().count(state->name) > 0; }
 
   // Whether this action can be triggered right now for this object
-  virtual bool IsValid(GameObject &) const { return true; }
+  virtual bool IsValid(WorldObject &) const { return true; }
 
   // Executed when this action is triggered
-  virtual void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) = 0;
+  virtual void Trigger(WorldObject &target, std::shared_ptr<CharacterState> actionState) = 0;
 
   // The priority this action has over the current state
   // It will be discarded and won't trigger if the state's priority is higher
@@ -37,7 +37,7 @@ struct Action
 
   // Executed when this action' state stops (either completes or is interrupted)
   // Ignored if this action yields no state
-  virtual void StopHook(GameObject &, std::shared_ptr<CharacterState>) {}
+  virtual void StopHook(WorldObject &, std::shared_ptr<CharacterState>) {}
 
   virtual ~Action() {}
 
@@ -56,7 +56,7 @@ struct Action
 struct AnimationAction : public Action
 {
   // Takes over responsibility for this
-  void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
+  void Trigger(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
 
   // Requires a name for an animation
   virtual std::string GetAnimationName() const = 0;
@@ -71,7 +71,7 @@ struct AttackAction : public AnimationAction
   int GetPriority() const override;
 
   // Add some functionality
-  void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
+  void Trigger(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
 
   // Fixed next state
   std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override;

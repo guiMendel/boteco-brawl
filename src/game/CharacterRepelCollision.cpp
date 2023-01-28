@@ -6,8 +6,8 @@ using namespace std;
 const float CharacterRepelCollision::maxSlideAcceleration{0.15};
 const float CharacterRepelCollision::slideAccelerationDecay{0.05};
 
-CharacterRepelCollision::CharacterRepelCollision(GameObject &associatedObject, shared_ptr<Rigidbody> body)
-    : Component(associatedObject), weakBody(body), weakStateManager(body->gameObject.RequireComponent<CharacterStateManager>()) {}
+CharacterRepelCollision::CharacterRepelCollision(WorldObject &associatedObject, shared_ptr<Rigidbody> body)
+    : Component(associatedObject), weakBody(body), weakStateManager(body->worldObject.RequireComponent<CharacterStateManager>()) {}
 
 void CharacterRepelCollision::OnTriggerCollision(TriggerCollisionData triggerData)
 {
@@ -37,7 +37,7 @@ void CharacterRepelCollision::SlideAwayFrom(std::shared_ptr<Rigidbody> otherBody
   LOCK(weakBody, body);
 
   // Get distance
-  auto distanceVector = gameObject.GetPosition() - otherBody->gameObject.GetPosition();
+  auto distanceVector = worldObject.GetPosition() - otherBody->worldObject.GetPosition();
 
   // Ignore y axis
   distanceVector.y = 0;

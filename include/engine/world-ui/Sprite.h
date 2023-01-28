@@ -46,10 +46,10 @@ public:
   // Get height of the sprite's image, in real pixels
   int GetUnscaledHeight() const { return clipRect.h; }
 
-  // Get width of sprite scaled by gameObject's scale, in units
+  // Get width of sprite scaled by worldObject's scale, in units
   float GetWidth(float scale = 1) const;
 
-  // Get height of sprite scaled by gameObject's scale, in units
+  // Get height of sprite scaled by worldObject's scale, in units
   float GetHeight(float scale = 1) const;
 
   void SetConfig(SpriteConfig config);

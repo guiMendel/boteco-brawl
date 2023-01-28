@@ -8,7 +8,7 @@ class ShakeEffectManager;
 // Struct that stores and handles each individual active shake effect
 struct ShakeEffect
 {
-  ShakeEffect(std::shared_ptr<GameObject> target,
+  ShakeEffect(std::shared_ptr<WorldObject> target,
               ShakeEffectManager &manager,
               float angle,
               std::pair<float, float> displacementEvolution,
@@ -80,14 +80,14 @@ class ShakeEffectManager : public Component
   friend struct ShakeEffect;
 
 public:
-  ShakeEffectManager(GameObject &associatedObject);
+  ShakeEffectManager(WorldObject &associatedObject);
   virtual ~ShakeEffectManager() {}
 
   void Update(float) override;
   void OnBeforeDestroy() override;
 
   // Apply a shake effect to an object for a given time
-  void Shake(std::shared_ptr<GameObject> target,
+  void Shake(std::shared_ptr<WorldObject> target,
              float angle,
              std::pair<float, float> displacementEvolution,
              std::pair<float, float> revolutionTimeEvolution,
@@ -95,7 +95,7 @@ public:
              float stopDuration = 0.5);
 
   // Stop shaking a given object
-  void StopShake(std::shared_ptr<GameObject> target, float overrideStopDuration = -1);
+  void StopShake(std::shared_ptr<WorldObject> target, float overrideStopDuration = -1);
   void StopShake(int targetId, float overrideStopDuration = -1);
 
 private:

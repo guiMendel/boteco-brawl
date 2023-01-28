@@ -11,11 +11,11 @@ class CircleCollider : public Collider
 {
 public:
   // Explicitly initialize circle
-  CircleCollider(GameObject &associatedObject, Circle circle, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default);
+  CircleCollider(WorldObject &associatedObject, Circle circle, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default);
 
   virtual ~CircleCollider() {}
 
-  // Set the circle, assuming coordinates & rotation correspond to an offset from the gameObject's
+  // Set the circle, assuming coordinates & rotation correspond to an offset from the worldObject's
   void SetCircle(const Circle &circle);
 
   // Get shape as circle

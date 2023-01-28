@@ -1,5 +1,5 @@
 #include "NewAnimationTypes.h"
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "CharacterStateManager.h"
 #include "Attack.h"
 #include "CircleCollider.h"
@@ -24,11 +24,11 @@ void StatefulAnimation::RegisterState(shared_ptr<CharacterState> actionState)
   // If there's a cancel frame
   if (CancelFrame() >= 0)
   {
-    auto stopCallback = [this](GameObject &)
+    auto stopCallback = [this](WorldObject &)
     {
       IF_LOCK(weakActionState, actionState)
       {
-        animator.gameObject.RequireComponent<CharacterStateManager>()->RemoveState(actionState->id);
+        animator.worldObject.RequireComponent<CharacterStateManager>()->RemoveState(actionState->id);
       }
     };
 
@@ -38,7 +38,7 @@ void StatefulAnimation::RegisterState(shared_ptr<CharacterState> actionState)
   // Also add open sequence frame
   if (OpenSequenceFrame() >= 0)
   {
-    GetFrame(OpenSequenceFrame()).AddCallback([this](GameObject &)
+    GetFrame(OpenSequenceFrame()).AddCallback([this](WorldObject &)
                                               { IF_LOCK(weakActionState, actionState)
                                                            actionState->openToSequence = true; });
   }
@@ -88,26 +88,26 @@ Vector2 StatefulAnimation::VirtualPixelPosition(Vector2 virtualPixel)
 
 Vector2 StatefulAnimation::GlobalVirtualPixelPosition(Vector2 virtualPixel, const AnimationFrame &frame)
 {
-  return VirtualPixelPosition(virtualPixel, frame) + animator.gameObject.GetPosition();
+  return VirtualPixelPosition(virtualPixel, frame) + animator.worldObject.GetPosition();
 }
 
 Vector2 StatefulAnimation::VirtualPixelPosition(Vector2 virtualPixel, const AnimationFrame &frame)
 {
   // Get sprite renderer
-  auto spriteRenderer = animator.gameObject.RequireComponent<SpriteRenderer>();
+  auto spriteRenderer = animator.worldObject.RequireComponent<SpriteRenderer>();
 
   // Get the frame's sprite
   auto sprite = frame.GetSprite();
   Assert(sprite != nullptr, "Provided frame must contain a sprite");
 
   // Global position of sprite's top-left pixel, in units
-  Vector2 topLeftPosition = spriteRenderer->RenderPositionFor(animator.gameObject.GetPosition(), sprite);
+  Vector2 topLeftPosition = spriteRenderer->RenderPositionFor(animator.worldObject.GetPosition(), sprite);
 
   // Displacement to apply to object's position to get to top-left pixel's position
-  Vector2 spriteOrigin = topLeftPosition - animator.gameObject.GetPosition();
+  Vector2 spriteOrigin = topLeftPosition - animator.worldObject.GetPosition();
 
   // When mirrored, we want to displace with reference to top-right pixel, so sum the sprite's width
-  auto mirrorFactor = Vector2(GetSign(animator.gameObject.GetScale().x), 1);
+  auto mirrorFactor = Vector2(GetSign(animator.worldObject.GetScale().x), 1);
 
   if (mirrorFactor.x < 0)
     spriteOrigin.x = spriteOrigin.x + sprite->GetWidth();
@@ -131,7 +131,7 @@ void AttackAnimation::InternalOnStop()
 {
   if (attackObjectId >= 0)
   {
-    auto attackObject = animator.gameObject.GetChild(attackObjectId);
+    auto attackObject = animator.worldObject.GetChild(attackObjectId);
 
     if (attackObject != nullptr)
       attackObject->RequestDestroy();
@@ -141,7 +141,7 @@ void AttackAnimation::InternalOnStop()
 void AttackAnimation::SetupAttack()
 {
   // Create child
-  auto attackObject = animator.gameObject.CreateChild(ATTACK_OBJECT);
+  auto attackObject = animator.worldObject.CreateChild(ATTACK_OBJECT);
   attackObject->SetPhysicsLayer(PhysicsLayer::Hitbox);
 
   attackObjectId = attackObject->id;
@@ -156,7 +156,7 @@ void AttackAnimation::SetupAttack()
 
 void AttackAnimation::FrameHitbox(AnimationFrame &frame, vector<Circle> hitboxAreas)
 {
-  auto callback = [this, frame, hitboxAreas](GameObject &)
+  auto callback = [this, frame, hitboxAreas](WorldObject &)
   {
     if (hitboxAreas.empty())
       RemoveHitbox();
@@ -170,7 +170,7 @@ void AttackAnimation::FrameHitbox(AnimationFrame &frame, vector<Circle> hitboxAr
 void AttackAnimation::SetHitbox(const AnimationFrame &frame, vector<Circle> hitboxAreas)
 {
   // Get attack object
-  auto attackObject = animator.gameObject.RequireChild(attackObjectId);
+  auto attackObject = animator.worldObject.RequireChild(attackObjectId);
 
   // First, remove all colliders already there
   RemoveHitbox();
@@ -193,7 +193,7 @@ void AttackAnimation::SetHitbox(const AnimationFrame &frame, vector<Circle> hitb
 void AttackAnimation::RemoveHitbox()
 {
 
-  auto attackObject = animator.gameObject.GetChild(attackObjectId);
+  auto attackObject = animator.worldObject.GetChild(attackObjectId);
 
   auto colliders = attackObject->GetComponents<Collider>();
 
@@ -205,7 +205,7 @@ shared_ptr<Attack> AttackAnimation::GetAttack() const
 {
   Assert(attackObjectId >= 0, "Attack object id was never stored");
 
-  return animator.gameObject.RequireChild(attackObjectId)->RequireComponent<Attack>();
+  return animator.worldObject.RequireChild(attackObjectId)->RequireComponent<Attack>();
 }
 
 // === INNER LOOP ANIMATIONS

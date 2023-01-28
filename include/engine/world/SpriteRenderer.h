@@ -5,7 +5,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include "Helper.h"
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "Sprite.h"
 #include "Color.h"
@@ -17,10 +17,10 @@ public:
   EventI<Vector2> OnSetOffset;
 
   // Constructor with image file name
-  SpriteRenderer(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
+  SpriteRenderer(WorldObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
 
   // Default constructor
-  SpriteRenderer(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
+  SpriteRenderer(WorldObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
 
   virtual ~SpriteRenderer() {}
 

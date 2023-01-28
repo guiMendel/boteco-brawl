@@ -5,14 +5,14 @@
 // Minimum speed to start emitting smoke
 static const float minSmokeSpeed{6};
 
-CharacterVFX::CharacterVFX(GameObject &associatedObject) : Component(associatedObject) {}
+CharacterVFX::CharacterVFX(WorldObject &associatedObject) : Component(associatedObject) {}
 
 void CharacterVFX::Awake()
 {
-  weakBody = gameObject.RequireComponent<Rigidbody>();
+  weakBody = worldObject.RequireComponent<Rigidbody>();
 
-  auto emitterObject = gameObject.CreateChild(PARTICLE_EMITTER_OBJECT);
-  auto characterBox = gameObject.RequireComponent<BoxCollider>()->GetBox();
+  auto emitterObject = worldObject.CreateChild(PARTICLE_EMITTER_OBJECT);
+  auto characterBox = worldObject.RequireComponent<BoxCollider>()->GetBox();
 
   // Configure dash emitter
   auto dashEmitter = emitterObject->AddComponent<ParticleEmitter>(
@@ -70,7 +70,7 @@ void CharacterVFX::Awake()
     smokeEmitter->StartEmission();
   };
 
-  gameObject.RequireComponent<Heat>()->OnTakeDamage.AddListener("start-smoke-particles", emitSmoke);
+  worldObject.RequireComponent<Heat>()->OnTakeDamage.AddListener("start-smoke-particles", emitSmoke);
 }
 
 void CharacterVFX::PlayDust(Vector2 offset, range<float> angle, range<float> speed)
@@ -83,14 +83,14 @@ void CharacterVFX::PlayDust(Vector2 offset, range<float> angle, range<float> spe
   emission.lifetime = {0.2, 1.0};
   emission.gravityModifier = {Vector2::One(), Vector2::One()};
 
-  if (gameObject.localScale.x < 0)
+  if (worldObject.localScale.x < 0)
   {
     offset.x *= -1;
     emission.angle.first = M_PI - emission.angle.first;
     emission.angle.second = M_PI - emission.angle.second;
   }
 
-  ParticleFX::EffectAt(gameObject.GetPosition() + offset, 0.1, 0.1, emission, 3.0);
+  ParticleFX::EffectAt(worldObject.GetPosition() + offset, 0.1, 0.1, emission, 3.0);
 }
 
 void CharacterVFX::PlaySparks(Vector2 offset, range<float> frequency, float effectArc, range<float> speed)
@@ -105,14 +105,14 @@ void CharacterVFX::PlaySparks(Vector2 offset, range<float> frequency, float effe
   emission.lifetime = {0.01, 0.1};
   emission.angle = {angleCenter + effectArc / 2, angleCenter - effectArc / 2};
 
-  if (gameObject.localScale.x < 0)
+  if (worldObject.localScale.x < 0)
   {
     offset.x *= -1;
     emission.angle.first = M_PI - emission.angle.first;
     emission.angle.second = M_PI - emission.angle.second;
   }
 
-  ParticleFX::EffectAt(gameObject.GetPosition() + offset, 0.1, 0.1, emission, 0.2);
+  ParticleFX::EffectAt(worldObject.GetPosition() + offset, 0.1, 0.1, emission, 0.2);
 }
 
 void CharacterVFX::StartDash()

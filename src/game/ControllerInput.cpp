@@ -7,9 +7,9 @@
 
 using namespace std;
 
-ControllerInput::ControllerInput(GameObject &associatedObject)
+ControllerInput::ControllerInput(WorldObject &associatedObject)
     : PlayerInput(associatedObject),
-      weakPlayer(gameObject.RequireComponent<CharacterController>()->GetPlayer())
+      weakPlayer(worldObject.RequireComponent<CharacterController>()->GetPlayer())
 {
   LOCK(weakPlayer, player);
 

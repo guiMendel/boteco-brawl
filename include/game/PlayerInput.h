@@ -10,7 +10,7 @@ class Movement;
 class PlayerInput : public Component
 {
 public:
-  PlayerInput(GameObject &associatedObject);
+  PlayerInput(WorldObject &associatedObject);
   virtual ~PlayerInput() {}
 
   // Raised on movement input

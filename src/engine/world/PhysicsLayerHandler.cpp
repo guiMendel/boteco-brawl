@@ -1,5 +1,5 @@
 #include "PhysicsLayerHandler.h"
-#include "GameObject.h"
+#include "WorldObject.h"
 #include <algorithm>
 #include <string>
 #include <iostream>
@@ -59,7 +59,7 @@ void PhysicsLayerHandler::EnableAll(PhysicsLayer layer)
     Enable(layer, PhysicsLayer(other));
 }
 
-bool PhysicsLayerHandler::HaveCollision(GameObject &object1, GameObject &object2) const
+bool PhysicsLayerHandler::HaveCollision(WorldObject &object1, WorldObject &object2) const
 {
   return HaveCollision(object1.GetPhysicsLayer(), object2.GetPhysicsLayer());
 }

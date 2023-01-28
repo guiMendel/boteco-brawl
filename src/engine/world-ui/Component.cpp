@@ -1,11 +1,11 @@
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "Game.h"
 
 using namespace std;
 
-Component::Component(GameObject &associatedObject)
-    : gameObject(associatedObject), id(GetState()->SupplyId()), inputManager(Game::GetInstance().GetInputManager()) {}
+Component::Component(WorldObject &associatedObject)
+    : worldObject(associatedObject), id(GetState()->SupplyId()), inputManager(Game::GetInstance().GetInputManager()) {}
 
 Component::~Component() {}
 
@@ -13,17 +13,17 @@ shared_ptr<Component> Component::GetShared() const
 {
   try
   {
-    return gameObject.RequireComponent(this);
+    return worldObject.RequireComponent(this);
   }
   catch (runtime_error &)
   {
-    throw runtime_error("Component failed to get own shared pointer: it was not found in it's gameObject list");
+    throw runtime_error("Component failed to get own shared pointer: it was not found in it's worldObject list");
   }
 }
 
-bool Component::IsEnabled() const { return enabled && gameObject.IsEnabled(); }
+bool Component::IsEnabled() const { return enabled && worldObject.IsEnabled(); }
 
-shared_ptr<GameState> Component::GetState() const { return gameObject.GetState(); }
+shared_ptr<GameState> Component::GetState() const { return worldObject.GetState(); }
 
 void Component::RegisterToStateWithLayer()
 {
@@ -55,7 +55,7 @@ bool Component::operator==(const Component &other) const { return id == other.id
 
 Component::operator std::string() const
 {
-  return "(" + string(typeid(*this).name()) + "::" + to_string(id) + ")>" + (string)gameObject;
+  return "(" + string(typeid(*this).name()) + "::" + to_string(id) + ")>" + (string)worldObject;
 }
 
 ostream &operator<<(ostream &stream, const Component &component)

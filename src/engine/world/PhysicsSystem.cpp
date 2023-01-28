@@ -37,7 +37,7 @@ bool PlatformEffectorCheck(Collider &collider1, Collider &collider2)
     if (body == nullptr)
       return false;
 
-    auto platform = collider.gameObject.GetComponent<PlatformEffector>();
+    auto platform = collider.worldObject.GetComponent<PlatformEffector>();
 
     if (platform == nullptr)
       return false;
@@ -74,7 +74,7 @@ bool PhysicsSystem::CheckForCollision(
         continue;
 
       // Verify collision matrix
-      if (layerHandler.HaveCollision(collider1->gameObject, collider2->gameObject) == false)
+      if (layerHandler.HaveCollision(collider1->worldObject, collider2->worldObject) == false)
         continue;
 
       // Apply displacement & scale
@@ -153,7 +153,7 @@ void PhysicsSystem::HandleCollisions()
     // Check against all dynamic objects
     for (auto colliders : dynamicColliders)
     {
-      if (GameObject::SameLineage(
+      if (WorldObject::SameLineage(
               *gameState.GetObject(triggerCollider->GetOwnerId()),
               *gameState.GetObject(colliders.at(0)->GetOwnerId())))
         continue;
@@ -166,7 +166,7 @@ void PhysicsSystem::HandleCollisions()
     auto nonDynamicTargets = isStatic ? kinematicColliders : nonDynamicColliders;
     for (auto colliders : nonDynamicTargets)
     {
-      if (GameObject::SameLineage(
+      if (WorldObject::SameLineage(
               *gameState.GetObject(triggerCollider->GetOwnerId()),
               *gameState.GetObject(colliders.at(0)->GetOwnerId())))
         continue;
@@ -185,7 +185,7 @@ void PhysicsSystem::HandleCollisions()
       auto otherTriggerCollider = *otherTriggerIterator;
       auto otherTriggerBody = otherTriggerCollider->rigidbodyWeak.lock();
 
-      if (GameObject::SameLineage(
+      if (WorldObject::SameLineage(
               *gameState.GetObject(triggerCollider->GetOwnerId()),
               *gameState.GetObject(otherTriggerCollider->GetOwnerId())))
         continue;
@@ -225,7 +225,7 @@ void PhysicsSystem::DetectObjectCollisions(
   // Test for all non dynamic objects
   for (auto otherColliders : nonDynamicColliders)
   {
-    // cout << "Checking for object " << body->gameObject.GetName() << " with " << collidersIterator->second.size() << " colliders against " << otherColliders.at(0)->gameObject.GetName() << " with " << otherColliders.size() << " colliders" << endl;
+    // cout << "Checking for object " << body->worldObject.GetName() << " with " << collidersIterator->second.size() << " colliders against " << otherColliders.at(0)->worldObject.GetName() << " with " << otherColliders.size() << " colliders" << endl;
     // Check if they are colliding
     // Other object's layer
     if (CheckForCollision(*collidersIterator, otherColliders, collisionData))
@@ -239,7 +239,7 @@ void PhysicsSystem::DetectObjectBetweenFramesCollision(vector<ValidatedColliders
   // Get object body
   auto objectBody = collidersIterator->at(0)->RequireRigidbody();
 
-  cout << "Using continuous detection for " << objectBody->gameObject.GetName() << endl;
+  cout << "Using continuous detection for " << objectBody->worldObject.GetName() << endl;
 
   // Get trajectory info
   auto trajectory = objectBody->GetFrameTrajectory();
@@ -267,10 +267,10 @@ void PhysicsSystem::DetectObjectBetweenFramesCollision(vector<ValidatedColliders
     return;
 
   LOCK(castData.collision.weakOther, otherCollider);
-  cout << "Detected between frames collision with " << otherCollider->gameObject.GetName() << endl;
+  cout << "Detected between frames collision with " << otherCollider->worldObject.GetName() << endl;
 
   // Move the body to where collision happened
-  objectBody->gameObject.SetPosition(
+  objectBody->worldObject.SetPosition(
       objectBody->lastPosition + Vector2::Angled(trajectory.Angle(), castData.elapsedDistance));
 
   // Resolve the encountered collision
@@ -429,7 +429,7 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 // Source https://youtu.be/1L2g4ZqmFLQ and https://research.ncl.ac.uk/game/mastersdegree/gametechnologies/previousinformation/physics6collisionresponse/
 void PhysicsSystem::ResolveCollision(Collision::Data collisionData1)
 {
-  // cout << "Resolving collision between " << collisionData.source->gameObject.GetName() << " and " << collisionData.other->gameObject.GetName() << endl;
+  // cout << "Resolving collision between " << collisionData.source->worldObject.GetName() << " and " << collisionData.other->worldObject.GetName() << endl;
   auto collider1 = collisionData1.weakSource.lock();
   auto collider2 = collisionData1.weakOther.lock();
 
@@ -437,7 +437,7 @@ void PhysicsSystem::ResolveCollision(Collision::Data collisionData1)
     return;
 
   // If this collision was already dealt with this frame, ignore it
-  if (collider1->gameObject.CollisionDealtWith(collisionData1))
+  if (collider1->worldObject.CollisionDealtWith(collisionData1))
     return;
 
   // Build another collision data, and switch it's reference
@@ -449,33 +449,33 @@ void PhysicsSystem::ResolveCollision(Collision::Data collisionData1)
   auto body2 = collider2->rigidbodyWeak.lock();
 
   // Forget a body if it's the same object as the collider
-  if (body1 != nullptr && body1->gameObject == collider1->gameObject)
+  if (body1 != nullptr && body1->worldObject == collider1->worldObject)
     body1 = nullptr;
-  if (body2 != nullptr && body2->gameObject == collider2->gameObject)
+  if (body2 != nullptr && body2->worldObject == collider2->worldObject)
     body2 = nullptr;
 
   // Resolve physics
   ApplyImpulse(collisionData1);
 
   // Check if is entering collision
-  if (collider1->gameObject.CollisionDealtWithLastFrame(collisionData1) == false)
+  if (collider1->worldObject.CollisionDealtWithLastFrame(collisionData1) == false)
   {
     // Announce collision enter to components
-    collider1->gameObject.OnCollisionEnter(collisionData1);
-    collider2->gameObject.OnCollisionEnter(collisionData2);
+    collider1->worldObject.OnCollisionEnter(collisionData1);
+    collider2->worldObject.OnCollisionEnter(collisionData2);
     if (body1 != nullptr)
-      body1->gameObject.OnCollisionEnter(collisionData1);
+      body1->worldObject.OnCollisionEnter(collisionData1);
     if (body2 != nullptr)
-      body2->gameObject.OnCollisionEnter(collisionData2);
+      body2->worldObject.OnCollisionEnter(collisionData2);
   }
 
   // Announce collision enter to components
-  collider1->gameObject.OnCollision(collisionData1);
-  collider2->gameObject.OnCollision(collisionData2);
+  collider1->worldObject.OnCollision(collisionData1);
+  collider2->worldObject.OnCollision(collisionData2);
   if (body1 != nullptr)
-    body1->gameObject.OnCollision(collisionData1);
+    body1->worldObject.OnCollision(collisionData1);
   if (body2 != nullptr)
-    body2->gameObject.OnCollision(collisionData2);
+    body2->worldObject.OnCollision(collisionData2);
 }
 
 void PhysicsSystem::ResolveTriggerCollision(shared_ptr<Collider> collider1, shared_ptr<Collider> collider2)
@@ -484,7 +484,7 @@ void PhysicsSystem::ResolveTriggerCollision(shared_ptr<Collider> collider1, shar
   TriggerCollisionData triggerData1{collider1, collider2}, triggerData2{collider2, collider1};
 
   // If this collision was already dealt with this frame, ignore it
-  if (collider1->gameObject.TriggerCollisionDealtWith(triggerData1))
+  if (collider1->worldObject.TriggerCollisionDealtWith(triggerData1))
     return;
 
   // Get bodies
@@ -492,30 +492,30 @@ void PhysicsSystem::ResolveTriggerCollision(shared_ptr<Collider> collider1, shar
   auto body2 = collider2->rigidbodyWeak.lock();
 
   // Forget a body if it's the same object as the collider
-  if (body1 != nullptr && body1->gameObject == collider1->gameObject)
+  if (body1 != nullptr && body1->worldObject == collider1->worldObject)
     body1 = nullptr;
-  if (body2 != nullptr && body2->gameObject == collider2->gameObject)
+  if (body2 != nullptr && body2->worldObject == collider2->worldObject)
     body2 = nullptr;
 
   // Check if is entering collision
-  if (collider1->gameObject.TriggerCollisionDealtWithLastFrame(triggerData1) == false)
+  if (collider1->worldObject.TriggerCollisionDealtWithLastFrame(triggerData1) == false)
   {
     // Raise for involved objects
-    collider1->gameObject.OnTriggerCollisionEnter(triggerData1);
-    collider2->gameObject.OnTriggerCollisionEnter(triggerData2);
+    collider1->worldObject.OnTriggerCollisionEnter(triggerData1);
+    collider2->worldObject.OnTriggerCollisionEnter(triggerData2);
     if (body1 != nullptr)
-      body1->gameObject.OnTriggerCollisionEnter(triggerData1);
+      body1->worldObject.OnTriggerCollisionEnter(triggerData1);
     if (body2 != nullptr)
-      body2->gameObject.OnTriggerCollisionEnter(triggerData2);
+      body2->worldObject.OnTriggerCollisionEnter(triggerData2);
   }
 
   // Raise for involved objects
-  collider1->gameObject.OnTriggerCollision(triggerData1);
-  collider2->gameObject.OnTriggerCollision(triggerData2);
+  collider1->worldObject.OnTriggerCollision(triggerData1);
+  collider2->worldObject.OnTriggerCollision(triggerData2);
   if (body1 != nullptr)
-    body1->gameObject.OnTriggerCollision(triggerData1);
+    body1->worldObject.OnTriggerCollision(triggerData1);
   if (body2 != nullptr)
-    body2->gameObject.OnTriggerCollision(triggerData2);
+    body2->worldObject.OnTriggerCollision(triggerData2);
 }
 
 void ApplyImpulse(Collision::Data collisionData)
@@ -528,8 +528,8 @@ void ApplyImpulse(Collision::Data collisionData)
   float frictionModifier = min(bodyA->friction, bodyB->friction);
 
   // Apply it
-  bodyA->velocity = PhysicsSystem::ApplyFriction(bodyA->velocity, frictionModifier, bodyB->gameObject.GetTimeScale());
-  bodyB->velocity = PhysicsSystem::ApplyFriction(bodyB->velocity, frictionModifier, bodyA->gameObject.GetTimeScale());
+  bodyA->velocity = PhysicsSystem::ApplyFriction(bodyA->velocity, frictionModifier, bodyB->worldObject.GetTimeScale());
+  bodyB->velocity = PhysicsSystem::ApplyFriction(bodyB->velocity, frictionModifier, bodyA->worldObject.GetTimeScale());
 
   // Elasticity of collision
   float elasticity = (bodyA->elasticity + bodyB->elasticity) / 2.0f;
@@ -561,13 +561,13 @@ void ApplyImpulse(Collision::Data collisionData)
 
   float displacementDirection = impulseMagnitude < 0 ? -1 : 1;
 
-  bodyA->gameObject.Translate(collisionData.normal * bodyADisplacement * displacementDirection);
+  bodyA->worldObject.Translate(collisionData.normal * bodyADisplacement * displacementDirection);
 
   // cout << "Displacement: " << bodyADisplacement << endl;
   // cout << "Normal: " << (string)collisionData.normal << endl;
 
   if (bodyBStatic == false)
-    bodyB->gameObject.Translate(-collisionData.normal * bodyBDisplacement * displacementDirection);
+    bodyB->worldObject.Translate(-collisionData.normal * bodyBDisplacement * displacementDirection);
 }
 
 void PhysicsSystem::UnregisterColliders(int objectId)
@@ -694,7 +694,7 @@ bool PhysicsSystem::ColliderCast(vector<shared_ptr<Collider>> colliders, Vector2
   data.triggerCollisions.clear();
 
   // Vector to displace from colliders' current position to the origin parameter
-  Vector2 originDisplacement = origin - colliders[0]->gameObject.GetPosition();
+  Vector2 originDisplacement = origin - colliders[0]->worldObject.GetPosition();
 
   // Get the min collider dimension
   float minColliderDimension{numeric_limits<float>::max()};

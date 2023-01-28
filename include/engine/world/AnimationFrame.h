@@ -7,7 +7,7 @@
 #include <vector>
 #include "Sprite.h"
 
-class GameObject;
+class WorldObject;
 
 class AnimationFrame
 {
@@ -16,13 +16,13 @@ public:
   AnimationFrame(float duration);
 
   // Already adds a callback behavior
-  AnimationFrame(std::function<void(GameObject &)> callback, float duration);
+  AnimationFrame(std::function<void(WorldObject &)> callback, float duration);
 
   // Already adds a sprite behavior
   AnimationFrame(std::shared_ptr<Sprite> sprite, float duration);
 
   // Add a callback behavior
-  void AddCallback(std::function<void(GameObject &)> callback);
+  void AddCallback(std::function<void(WorldObject &)> callback);
 
   // Add a sprite behavior (there can only be one at a time, a previous one will be overwritten)
   void SetSprite(std::shared_ptr<Sprite> sprite);
@@ -31,7 +31,7 @@ public:
   std::shared_ptr<Sprite> GetSprite() const;
 
   // Triggers all of this frame's behaviors
-  void Trigger(GameObject &gameObject) const;
+  void Trigger(WorldObject &worldObject) const;
 
   // Get this frame's default duration
   float GetDuration() const;
@@ -42,7 +42,7 @@ public:
 
 private:
   // All the callbacks triggered by this frame
-  std::vector<std::function<void(GameObject &)>> callbacks;
+  std::vector<std::function<void(WorldObject &)>> callbacks;
 
   // A sprite to be set by this frame
   std::shared_ptr<Sprite> sprite;

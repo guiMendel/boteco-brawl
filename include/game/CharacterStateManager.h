@@ -1,7 +1,7 @@
 #ifndef __CHARACTER_STATE_MANAGER__
 #define __CHARACTER_STATE_MANAGER__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "CharacterState.h"
 #include "CharacterStateRecipes.h"
@@ -14,7 +14,7 @@
 class CharacterStateManager : public Component
 {
 public:
-  CharacterStateManager(GameObject &associatedObject);
+  CharacterStateManager(WorldObject &associatedObject);
   virtual ~CharacterStateManager() {}
 
   void Awake() override;

@@ -25,7 +25,7 @@ public:
   // When heat value changes
   EventII<float, float> OnHeatChange;
 
-  Heat(GameObject &associatedObject, float armor);
+  Heat(WorldObject &associatedObject, float armor);
   virtual ~Heat() {}
 
   void Awake() override;

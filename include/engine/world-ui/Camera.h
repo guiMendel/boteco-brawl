@@ -2,7 +2,7 @@
 #define __CAMERA__
 
 #include "Game.h"
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Vector2.h"
 #include "Rectangle.h"
 #include "Component.h"
@@ -13,13 +13,13 @@ class Camera : public Component
 public:
   static std::shared_ptr<Camera> GetMain();
 
-  Camera(GameObject &associatedObject, float size = 5);
+  Camera(WorldObject &associatedObject, float size = 5);
 
   virtual ~Camera() {}
 
-  Vector2 GetPosition() const { return gameObject.GetPosition(); }
+  Vector2 GetPosition() const { return worldObject.GetPosition(); }
 
-  void SetPosition(Vector2 newPosition) { gameObject.SetPosition(newPosition); }
+  void SetPosition(Vector2 newPosition) { worldObject.SetPosition(newPosition); }
 
   // Get how many units occupy half the camera's height
   float GetSize() const;

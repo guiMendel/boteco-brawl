@@ -21,7 +21,7 @@ shared_ptr<Camera> Camera::GetMain()
   return cameras.front();
 }
 
-Camera::Camera(GameObject &associatedObject, float size)
+Camera::Camera(WorldObject &associatedObject, float size)
     : Component(associatedObject)
 {
   SetSize(size);
@@ -52,7 +52,7 @@ Vector2 Camera::GetTopLeft() const
     topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
   }
 
-  return gameObject.GetPosition() + topLeftDisplacement;
+  return worldObject.GetPosition() + topLeftDisplacement;
 }
 
 void Camera::SetTopLeft(Vector2 newPosition)
@@ -67,7 +67,7 @@ void Camera::SetTopLeft(Vector2 newPosition)
     topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
   }
 
-  gameObject.SetPosition(newPosition - topLeftDisplacement);
+  worldObject.SetPosition(newPosition - topLeftDisplacement);
 }
 
 // Convert coordinates
@@ -100,5 +100,5 @@ Rectangle Camera::ToRectangle() const
 
   float doubleSize = GetSize() * 2;
 
-  return Rectangle(gameObject.GetPosition(), doubleSize * screenRatio, doubleSize);
+  return Rectangle(worldObject.GetPosition(), doubleSize * screenRatio, doubleSize);
 }

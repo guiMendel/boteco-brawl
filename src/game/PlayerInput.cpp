@@ -3,15 +3,15 @@
 
 using namespace std;
 
-PlayerInput::PlayerInput(GameObject &associatedObject)
-    : Component(associatedObject), weakMovement(gameObject.RequireComponent<Movement>())
+PlayerInput::PlayerInput(WorldObject &associatedObject)
+    : Component(associatedObject), weakMovement(worldObject.RequireComponent<Movement>())
 {
   auto reset = [this]()
   {
     SetDirection({0, 0});
   };
 
-  gameObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-movement-direction", reset);
+  worldObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-movement-direction", reset);
 }
 
 void PlayerInput::SetDirection(Vector2 direction)

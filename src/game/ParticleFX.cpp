@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ParticleFX::ParticleFX(GameObject &associatedObject)
+ParticleFX::ParticleFX(WorldObject &associatedObject)
     : Component(associatedObject) {}
 
 void ParticleFX::EffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter)
@@ -19,7 +19,7 @@ void ParticleFX::EffectAt(Vector2 position, float radius, float duration, Partic
 void ParticleFX::PlayEffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter)
 {
   // Create a temporary child to hold the emitter
-  auto emitter = gameObject.CreateChild("FXEmitter", position)
+  auto emitter = worldObject.CreateChild("FXEmitter", position)
                      ->AddComponent<ParticleEmitter>(RenderLayer::VFX, radius, false, duration);
   emitter->emission = params;
 
@@ -27,7 +27,7 @@ void ParticleFX::PlayEffectAt(Vector2 position, float radius, float duration, Pa
   emitter->StartEmission();
 
   // Add to timer struct
-  childrenDestroyTimers[emitter->gameObject.id] = duration + destroyAfter;
+  childrenDestroyTimers[emitter->worldObject.id] = duration + destroyAfter;
 }
 
 void ParticleFX::Update(float deltaTime)
@@ -42,7 +42,7 @@ void ParticleFX::Update(float deltaTime)
     if ((timer -= deltaTime) <= 0)
     {
       // Get child
-      auto child = gameObject.GetChild(childId);
+      auto child = worldObject.GetChild(childId);
 
       Assert(child != nullptr, "Unexpectedly failed to get ParticleFX child by id");
 

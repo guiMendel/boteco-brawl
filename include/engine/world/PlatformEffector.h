@@ -1,7 +1,7 @@
 #ifndef __PLATFORM_EFFECTOR__
 #define __PLATFORM_EFFECTOR__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include <utility>
 #include <memory>
@@ -13,7 +13,7 @@ class Rigidbody;
 class PlatformEffector : public Component
 {
 public:
-  PlatformEffector(GameObject &associatedObject, std::pair<float, float> passThroughArc = defaultPassThroughArc);
+  PlatformEffector(WorldObject &associatedObject, std::pair<float, float> passThroughArc = defaultPassThroughArc);
 
   virtual ~PlatformEffector() {}
 

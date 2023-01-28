@@ -1,7 +1,7 @@
 #ifndef __CHARACTER_CONTROLLER__
 #define __CHARACTER_CONTROLLER__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "Movement.h"
 #include "Player.h"
@@ -14,7 +14,7 @@
 class CharacterController : public Component
 {
 public:
-  CharacterController(GameObject &associatedObject, std::shared_ptr<Player> player);
+  CharacterController(WorldObject &associatedObject, std::shared_ptr<Player> player);
   virtual ~CharacterController() {}
 
   // Get player associated to this character

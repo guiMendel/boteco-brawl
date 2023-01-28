@@ -4,7 +4,7 @@
 #include <SDL_mixer.h>
 #include <iostream>
 #include <functional>
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "Helper.h"
 
@@ -12,7 +12,7 @@ class Sound : public Component
 {
 public:
   // Constructor with sound file name
-  Sound(GameObject &associatedObject, const std::string fileName, bool playOnStart = true);
+  Sound(WorldObject &associatedObject, const std::string fileName, bool playOnStart = true);
 
   // Ensure sound stops if destroyed
   virtual ~Sound() { Stop(); }

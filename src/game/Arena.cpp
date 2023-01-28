@@ -3,10 +3,10 @@
 
 using namespace std;
 
-Arena::Arena(GameObject &associatedObject, float width, float height)
+Arena::Arena(WorldObject &associatedObject, float width, float height)
     : Component(associatedObject), width(width), height(height) {}
 
-Arena::Arena(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer)
+Arena::Arena(WorldObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer)
     : Arena(associatedObject, backgroundRenderer->GetSprite()->GetWidth(), backgroundRenderer->GetSprite()->GetHeight())
 {
   weakBackgroundRenderer = backgroundRenderer;

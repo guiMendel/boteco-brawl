@@ -37,12 +37,12 @@ void BoxCollider::Render()
 // Allows for debug rendering
 void CircleCollider::Render()
 {
-  if (gameObject.GetName() == "Hitbox")
+  if (worldObject.GetName() == "Hitbox")
   {
     auto circle = *dynamic_pointer_cast<Circle>(DeriveShape());
-    auto attack = gameObject.RequireComponent<Attack>();
+    auto attack = worldObject.RequireComponent<Attack>();
 
-    float direction = GetSign(attack->gameObject.GetScale().x);
+    float direction = GetSign(attack->worldObject.GetScale().x);
 
     Debug::DrawCircle(circle, Color::Pink());
     Debug::DrawPoint(circle.center, Color::Pink());

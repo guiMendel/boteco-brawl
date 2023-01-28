@@ -11,15 +11,15 @@ const float Heat::maxHeat{200};
 const float Heat::inverseMaxHeat{1.0f / maxHeat};
 const float Heat::blowLift{0.25f};
 
-Heat::Heat(GameObject &associatedObject, float armor)
+Heat::Heat(WorldObject &associatedObject, float armor)
     : Component(associatedObject), heat(100) { SetArmor(armor); }
 
 void Heat::Awake()
 {
-  weakBody = gameObject.RequireComponent<Rigidbody>();
-  weakMovement = gameObject.RequireComponent<Movement>();
-  weakStateManager = gameObject.RequireComponent<CharacterStateManager>();
-  weakCharacterController = gameObject.RequireComponent<CharacterController>();
+  weakBody = worldObject.RequireComponent<Rigidbody>();
+  weakMovement = worldObject.RequireComponent<Movement>();
+  weakStateManager = worldObject.RequireComponent<CharacterStateManager>();
+  weakCharacterController = worldObject.RequireComponent<CharacterController>();
   weakTimeScaleManager = GetState()->RequireObjectOfType<TimeScaleManager>();
   weakShakeManager = GetState()->RequireObjectOfType<ShakeEffectManager>();
 }
@@ -27,7 +27,7 @@ void Heat::Awake()
 void Heat::Start()
 {
   // On death, reset heat
-  gameObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-heat", [this]()
+  worldObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-heat", [this]()
                                                                    { heat = 0; });
 }
 
@@ -64,12 +64,12 @@ void Heat::TakeDamage(Damage damage)
     damage.impulse.magnitude *= heatMultiplier;
 
     // Get base impulse
-    auto impulse = damage.impulse.DeriveImpulse(gameObject.GetShared());
+    auto impulse = damage.impulse.DeriveImpulse(worldObject.GetShared());
 
     // When grounded
     if (movement->IsGrounded())
       // Instantly lift target a little bit from the floor
-      gameObject.Translate({0, -blowLift});
+      worldObject.Translate({0, -blowLift});
 
     // Apply impulse
     body->ApplyImpulse(impulse);
@@ -79,10 +79,10 @@ void Heat::TakeDamage(Damage damage)
 
     // Face inverse direction of impulse
     if (impulseDirection != 0)
-      body->gameObject.localScale.x = -impulseDirection;
+      body->worldObject.localScale.x = -impulseDirection;
   }
 
-  // cout << gameObject << " taking damage: " << damage.heatDamage << " heatDamage, " << impulse.Magnitude() << " impulse." << endl;
+  // cout << worldObject << " taking damage: " << damage.heatDamage << " heatDamage, " << impulse.Magnitude() << " impulse." << endl;
   // cout << "Inverse Armor: " << inverseArmor << ", Heat: " << heat << ", Inverse Max Heat: " << inverseMaxHeat << ", Heat multiplier: " << heatMultiplier << endl;
   // cout << "Resulting damage: " << inverseArmor * damage.heatDamage << ", Resulting velocity add: " << (impulse * heatMultiplier * body->GetInverseMass()).Magnitude() << endl;
 
@@ -96,7 +96,7 @@ void Heat::TakeDamage(Damage damage)
   float hitStopDuration = TriggerHitEffect(damage);
 
   // Particle effect
-  gameObject.RequireComponent<CharacterVFX>()->PlaySparks({0, 0}, {0.01, 0.001});
+  worldObject.RequireComponent<CharacterVFX>()->PlaySparks({0, 0}, {0.01, 0.001});
 
   OnTakeDamage.Invoke(damage, hitStopDuration);
 }
@@ -125,7 +125,7 @@ float Heat::TriggerHitEffect(Damage damage)
   // cout << "duration " << duration << endl;
 
   // Apply to self
-  timeScaleManager->AlterTimeScale(gameObject.GetShared(), 0.00001, duration);
+  timeScaleManager->AlterTimeScale(worldObject.GetShared(), 0.00001, duration);
 
   // Apply to attack author
   IF_LOCK(damage.weakAuthor, author)
@@ -133,12 +133,12 @@ float Heat::TriggerHitEffect(Damage damage)
     timeScaleManager->AlterTimeScale(author, 0.00001, duration);
   }
 
-  auto impulse = damage.impulse.DeriveImpulse(gameObject.GetShared());
+  auto impulse = damage.impulse.DeriveImpulse(worldObject.GetShared());
 
   if (damage.impulse.magnitude > 11)
     // Apply shaking
     shakeManager->Shake(
-        gameObject.GetShared(),
+        worldObject.GetShared(),
         impulse.Angle(),
         {log10f(damage.impulse.magnitude - 10) / 2, 0},
         {0.2, 0.01},

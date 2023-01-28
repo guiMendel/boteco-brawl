@@ -12,7 +12,7 @@ public:
   // How quickly the text size multiplier decays back to 1
   static const float textSizeMultiplierDecay;
 
-  CharacterBadge(GameObject &associatedObject, std::shared_ptr<Character> character);
+  CharacterBadge(WorldObject &associatedObject, std::shared_ptr<Character> character);
   virtual ~CharacterBadge() {}
 
   void Start() override;

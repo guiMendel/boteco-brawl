@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ShakeEffectManager::ShakeEffectManager(GameObject &associatedObject) : Component(associatedObject) {}
+ShakeEffectManager::ShakeEffectManager(WorldObject &associatedObject) : Component(associatedObject) {}
 
 void ShakeEffectManager::OnBeforeDestroy()
 {
@@ -17,7 +17,7 @@ void ShakeEffectManager::OnBeforeDestroy()
   }
 }
 
-void ShakeEffectManager::Shake(shared_ptr<GameObject> target,
+void ShakeEffectManager::Shake(shared_ptr<WorldObject> target,
                                float angle,
                                pair<float, float> displacementEvolution,
                                pair<float, float> revolutionTimeEvolution,
@@ -32,7 +32,7 @@ void ShakeEffectManager::Shake(shared_ptr<GameObject> target,
       target, *this, angle, displacementEvolution, revolutionTimeEvolution, effectDuration, stopDuration);
 }
 
-void ShakeEffectManager::StopShake(shared_ptr<GameObject> target, float overrideStopDuration)
+void ShakeEffectManager::StopShake(shared_ptr<WorldObject> target, float overrideStopDuration)
 {
   StopShake(target->id, overrideStopDuration);
 }
@@ -66,7 +66,7 @@ void ShakeEffectManager::Update(float deltaTime)
   }
 }
 
-ShakeEffect::ShakeEffect(shared_ptr<GameObject> target,
+ShakeEffect::ShakeEffect(shared_ptr<WorldObject> target,
                          ShakeEffectManager &manager,
                          float angle,
                          pair<float, float> displacementEvolution,
@@ -101,7 +101,7 @@ ShakeEffect::~ShakeEffect()
   IF_LOCK(weakRenderer, renderer)
   {
     // Clean up listener
-    renderer->OnSetOffset.RemoveListener("shake-effect-" + to_string(renderer->gameObject.id));
+    renderer->OnSetOffset.RemoveListener("shake-effect-" + to_string(renderer->worldObject.id));
   }
 
   // Reset any modifications
@@ -228,7 +228,7 @@ void ShakeEffect::Update(float deltaTime)
   displacement += modification * displacementDirection;
 
   LOCK(weakRenderer, renderer);
-  float currentAngle = renderer->gameObject.GetScale().x < 0 ? M_PI - angle : angle;
+  float currentAngle = renderer->worldObject.GetScale().x < 0 ? M_PI - angle : angle;
 
   // Apply it
   SetOffset(originalSpriteOffset + Vector2::Angled(currentAngle, displacement));

@@ -4,7 +4,7 @@
 #include "Vector2.h"
 #include <memory>
 
-class GameObject;
+class WorldObject;
 class CircleCollider;
 
 struct DamageParameters;
@@ -22,10 +22,10 @@ struct AttackImpulse
   AttackImpulse(Vector2 direction, float magnitude);
 
   // Impulse away from origin
-  AttackImpulse(std::shared_ptr<GameObject> origin, float magnitude);
+  AttackImpulse(std::shared_ptr<WorldObject> origin, float magnitude);
 
   // Derive the impulse provided a target
-  Vector2 DeriveImpulse(std::shared_ptr<GameObject> target) const;
+  Vector2 DeriveImpulse(std::shared_ptr<WorldObject> target) const;
 
   // Magnitude of impulse
   float magnitude;
@@ -52,7 +52,7 @@ private:
   Vector2 direction;
 
   // Repulsion
-  std::weak_ptr<GameObject> weakOrigin;
+  std::weak_ptr<WorldObject> weakOrigin;
 };
 
 // A struct that already derived impulse direction and heat damage from the attacker's parameters
@@ -71,7 +71,7 @@ struct Damage
   float stunTime{0};
 
   // Reference to object dealing this damage
-  std::weak_ptr<GameObject> weakAuthor{};
+  std::weak_ptr<WorldObject> weakAuthor{};
 
   // Minimum hit stop to apply
   float minHitStop{0};
@@ -91,7 +91,7 @@ struct DamageParameters
   float stunTime;
 
   // Derive a damage struct
-  Damage DeriveDamage(std::shared_ptr<GameObject> author) const;
+  Damage DeriveDamage(std::shared_ptr<WorldObject> author) const;
 
   DamageParameters() = default;
 };

@@ -4,7 +4,7 @@
 using namespace Helper;
 using namespace std;
 
-Sound::Sound(GameObject &associatedObject, const string fileName, bool playOnStart) : Component(associatedObject), chunkPath(fileName), playOnStart(playOnStart) {}
+Sound::Sound(WorldObject &associatedObject, const string fileName, bool playOnStart) : Component(associatedObject), chunkPath(fileName), playOnStart(playOnStart) {}
 
 void Sound::Play(const int times)
 {

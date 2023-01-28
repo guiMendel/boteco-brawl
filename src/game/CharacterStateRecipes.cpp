@@ -65,23 +65,23 @@ shared_ptr<CharacterState> CharacterStateRecipes::Stunned(shared_ptr<Action> act
   state->removeCondition = [](shared_ptr<CharacterStateManager> stateManager)
   {
     // Check if stun time is up
-    if (stateManager->gameObject.timer.Get(STUN_DURATION_TIMER) < 0)
+    if (stateManager->worldObject.timer.Get(STUN_DURATION_TIMER) < 0)
       return false;
 
     // Check if velocity is low enough
-    return stateManager->gameObject.RequireComponent<Rigidbody>()->velocity.SqrMagnitude() <=
+    return stateManager->worldObject.RequireComponent<Rigidbody>()->velocity.SqrMagnitude() <=
            stunRecoverSpeed * stunRecoverSpeed;
   };
 
   // Toggle air friction
   state->onAdd = [](shared_ptr<CharacterStateManager> stateManager)
   {
-    stateManager->gameObject.RequireComponent<Rigidbody>()->airFriction = stunAirFriction;
+    stateManager->worldObject.RequireComponent<Rigidbody>()->airFriction = stunAirFriction;
   };
 
   state->onRemove = [](shared_ptr<CharacterStateManager> stateManager)
   {
-    stateManager->gameObject.RequireComponent<Rigidbody>()->airFriction = 0;
+    stateManager->worldObject.RequireComponent<Rigidbody>()->airFriction = 0;
   };
 
   return state;

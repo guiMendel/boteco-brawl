@@ -2,7 +2,7 @@
 #define __MAIN_STATE__
 
 #include "GameState.h"
-#include "GameObject.h"
+#include "WorldObject.h"
 #include <functional>
 #include <memory>
 

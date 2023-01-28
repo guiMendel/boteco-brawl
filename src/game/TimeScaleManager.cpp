@@ -2,7 +2,7 @@
 
 using namespace std;
 
-TimeScaleManager::TimeScaleManager(GameObject &associatedObject) : Component(associatedObject) {}
+TimeScaleManager::TimeScaleManager(WorldObject &associatedObject) : Component(associatedObject) {}
 
 void TimeScaleManager::OnBeforeDestroy()
 {
@@ -12,7 +12,7 @@ void TimeScaleManager::OnBeforeDestroy()
     objectEntryIterator = ResetTimeScale(objectEntryIterator->first);
 }
 
-void TimeScaleManager::AlterTimeScale(shared_ptr<GameObject> target, float newScale, float duration)
+void TimeScaleManager::AlterTimeScale(shared_ptr<WorldObject> target, float newScale, float duration)
 {
   Assert(newScale > 0, "Invalid new time scale: it must be a positive value");
 
@@ -34,13 +34,13 @@ void TimeScaleManager::AlterTimeScale(shared_ptr<GameObject> target, float newSc
     ResetTimeScale(targetId);
   };
 
-  auto token = gameObject.DelayFunction(revert, duration);
+  auto token = worldObject.DelayFunction(revert, duration);
 
   // Remember it
   alteredObjects.insert({targetId, token});
 }
 
-void TimeScaleManager::ResetTimeScale(std::shared_ptr<GameObject> target)
+void TimeScaleManager::ResetTimeScale(std::shared_ptr<WorldObject> target)
 {
   ResetTimeScale(target->id);
 }
@@ -57,7 +57,7 @@ auto TimeScaleManager::ResetTimeScale(int targetId) -> decltype(alteredObjects):
     target->SetTimeScale(1);
 
   // Cancel reset if necessary
-  gameObject.CancelDelayedFunction(alteredObjects[targetId]);
+  worldObject.CancelDelayedFunction(alteredObjects[targetId]);
 
   // Forget it
   return alteredObjects.erase(alteredObjects.find(targetId));

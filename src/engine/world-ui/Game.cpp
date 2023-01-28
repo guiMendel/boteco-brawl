@@ -353,7 +353,7 @@ void Game::Frame()
   framesThisSecond++;
 #endif
   // Objects to add to state
-  vector<shared_ptr<GameObject>> objectsToAdd;
+  vector<shared_ptr<WorldObject>> objectsToAdd;
 
   // Check if state needs to be popped
   // Throws when it's the last state (and no nextState is set)

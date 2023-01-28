@@ -7,7 +7,7 @@
 #include <functional>
 
 class ParticleSystem;
-class GameObject;
+class WorldObject;
 
 class Particle
 {
@@ -24,8 +24,8 @@ public:
 
   void Render();
 
-  // Attach position to a gameObject
-  void AttachTo(std::shared_ptr<GameObject> gameObject);
+  // Attach position to a worldObject
+  void AttachTo(std::shared_ptr<WorldObject> worldObject);
 
   // Whether this particle has requested deletion
   bool DeleteRequested() const;
@@ -42,7 +42,7 @@ private:
   ParticleSystem &particleSystem;
 
   // Reference to simulated position attachment to
-  std::weak_ptr<GameObject> referenceObject;
+  std::weak_ptr<WorldObject> referenceObject;
 
   // Whether this particle should be deleted asap
   bool deleteRequested{false};

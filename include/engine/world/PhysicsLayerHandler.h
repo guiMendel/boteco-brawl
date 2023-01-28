@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <string>
 
-class GameObject;
+class WorldObject;
 
 class PhysicsLayerHandler
 {
@@ -34,7 +34,7 @@ public:
 
   // Checks whether the two given layers collide
   bool HaveCollision(PhysicsLayer, PhysicsLayer) const;
-  bool HaveCollision(GameObject &, GameObject &) const;
+  bool HaveCollision(WorldObject &, WorldObject &) const;
 
 private:
   // Prints the collision matrix table

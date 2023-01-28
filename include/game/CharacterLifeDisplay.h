@@ -8,7 +8,7 @@
 class CharacterLifeDisplay : public Component
 {
 public:
-  CharacterLifeDisplay(GameObject &associatedObject, std::shared_ptr<FallDeath> fallDeath, float lifeSize, std::string spritePath);
+  CharacterLifeDisplay(WorldObject &associatedObject, std::shared_ptr<FallDeath> fallDeath, float lifeSize, std::string spritePath);
   virtual ~CharacterLifeDisplay() {}
 
   void Start() override;

@@ -8,7 +8,7 @@
 class LandingAttackEffector : public LandEffector
 {
 public:
-  LandingAttackEffector(GameObject &associatedObject, std::function<bool()> effectorCondition);
+  LandingAttackEffector(WorldObject &associatedObject, std::function<bool()> effectorCondition);
   virtual ~LandingAttackEffector() {}
 
   // Which action to perform for landing

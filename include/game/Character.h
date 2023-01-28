@@ -10,7 +10,7 @@ public:
   using indexTransformer = std::function<int(int)>;
   using transformerMap = std::unordered_map<std::string, indexTransformer>;
 
-  Character(GameObject &associatedObject);
+  Character(WorldObject &associatedObject);
   virtual ~Character() {}
 
   // Transforms a sequence index for a given attack animation name

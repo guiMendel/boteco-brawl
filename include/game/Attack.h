@@ -1,7 +1,7 @@
 #ifndef __ATTACK__
 #define __ATTACK__
 
-// Name of gameObject which will contain this component
+// Name of worldObject which will contain this component
 #define ATTACK_OBJECT "Hitbox"
 
 #include "Component.h"
@@ -17,7 +17,7 @@ public:
   EventI<std::shared_ptr<CharacterController>> OnConnect;
 
   // Initializes with the attack damage's parameters and an optional hit cooldown, which if set allows for multi-hits
-  Attack(GameObject &associatedObject, DamageParameters damage, float hitSecondsCooldown = -1);
+  Attack(WorldObject &associatedObject, DamageParameters damage, float hitSecondsCooldown = -1);
   virtual ~Attack() {}
 
   void OnTriggerCollisionEnter(TriggerCollisionData) override;
@@ -26,7 +26,7 @@ public:
   void Land(std::shared_ptr<CharacterController> targetController);
 
   // Sets a given game object to be ignored by this attack always
-  void Ignore(std::shared_ptr<GameObject> target);
+  void Ignore(std::shared_ptr<WorldObject> target);
 
   // Damage params
   DamageParameters damage;

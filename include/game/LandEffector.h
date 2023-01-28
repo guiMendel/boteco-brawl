@@ -8,7 +8,7 @@
 class LandEffector : public Component
 {
 public:
-  LandEffector(GameObject &associatedObject) : Component(associatedObject) {}
+  LandEffector(WorldObject &associatedObject) : Component(associatedObject) {}
   virtual ~LandEffector() {}
 
   // Which action to perform for landing

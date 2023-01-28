@@ -5,10 +5,10 @@
 using namespace std;
 
 CharacterLifeDisplay::CharacterLifeDisplay(
-    GameObject &associatedObject, shared_ptr<FallDeath> fallDeath, float lifeSize, std::string spritePath)
+    WorldObject &associatedObject, shared_ptr<FallDeath> fallDeath, float lifeSize, std::string spritePath)
     : Component(associatedObject), weakFallDeath(fallDeath), lifeSizeRealPixels(lifeSize), spritePath(spritePath)
 {
-  color = fallDeath->gameObject.RequireComponent<CharacterController>()->GetPlayer()->GetColor();
+  color = fallDeath->worldObject.RequireComponent<CharacterController>()->GetPlayer()->GetColor();
 }
 
 void CharacterLifeDisplay::Start()
@@ -23,10 +23,10 @@ void CharacterLifeDisplay::Start()
 
 void CharacterLifeDisplay::EraseLives() const
 {
-  auto renderers = gameObject.GetComponents<SpriteRenderer>();
+  auto renderers = worldObject.GetComponents<SpriteRenderer>();
 
   for (auto renderer : renderers)
-    gameObject.RemoveComponent(renderer);
+    worldObject.RemoveComponent(renderer);
 }
 
 void CharacterLifeDisplay::UpdateDisplay() const
@@ -50,7 +50,7 @@ void CharacterLifeDisplay::UpdateDisplay() const
   // For each life
   for (int life{0}; life < fallDeath->GetLives(); life++)
   {
-    auto lifeRenderer = gameObject.AddComponent<SpriteRenderer>(spritePath, RenderLayer::UI);
+    auto lifeRenderer = worldObject.AddComponent<SpriteRenderer>(spritePath, RenderLayer::UI);
     lifeRenderer->OverrideWidthPixels(lifeSizeRealPixels);
     lifeRenderer->SetAnchorPoint({0.5, 1});
     lifeRenderer->SetOffset({-firstOffset + life * (livesGap + lifeSizeUnits), 0});

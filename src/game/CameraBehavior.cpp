@@ -28,18 +28,18 @@ static const float alignTolerance{DegreesToRadians(35)};
 // Aspect ratio of game screen
 static const float screenRatio = Game::screenWidth / Game::screenHeight;
 
-CameraBehavior::CameraBehavior(GameObject &associatedObject, shared_ptr<GameObject> charactersParent)
+CameraBehavior::CameraBehavior(WorldObject &associatedObject, shared_ptr<WorldObject> charactersParent)
     : Component(associatedObject), weakCharactersParent(charactersParent) {}
 
 void CameraBehavior::Awake()
 {
   // Get camera
-  auto camera = gameObject.RequireComponent<Camera>();
+  auto camera = worldObject.RequireComponent<Camera>();
   weakCamera = camera;
 
   // Initialize targets
   targetSize = camera->GetSize();
-  targetPosition = gameObject.GetPosition();
+  targetPosition = worldObject.GetPosition();
 
   // Get arena
   auto arena = GetState()->FindObjectOfType<Arena>();
@@ -77,7 +77,7 @@ void CameraBehavior::Update(float deltaTime)
   ApplyTargetSize(deltaTime);
 
   // Adjust values to ensure camera is valid
-  SetPosition(ConfineToArena(gameObject.GetPosition(), camera->GetSize()));
+  SetPosition(ConfineToArena(worldObject.GetPosition(), camera->GetSize()));
 }
 
 void CameraBehavior::UpdateTargets()
@@ -126,7 +126,7 @@ void CameraBehavior::UpdateTargets()
     auto characterBox = character->RequireComponent<BoxCollider>()->GetBox();
 
     // Calculate if this body has unframed space on X axis
-    auto characterScreenPosition = (character->GetPosition() - gameObject.GetPosition()).GetAbsolute();
+    auto characterScreenPosition = (character->GetPosition() - worldObject.GetPosition()).GetAbsolute();
 
     currentlyUnframedSpace = max(currentlyUnframedSpace,
                                  characterScreenPosition.x + characterBox.width / 2 - frameSize.x);
@@ -137,13 +137,13 @@ void CameraBehavior::UpdateTargets()
     // Keep biggest x distance
     maxDistances.x = max(
         maxDistances.x,
-        // abs(character->GetPosition().x - gameObject.GetPosition().x) + characterBox.width / 2);
+        // abs(character->GetPosition().x - worldObject.GetPosition().x) + characterBox.width / 2);
         abs(character->GetPosition().x - targetPosition.x) + characterBox.width / 2);
 
     // Keep biggest y distance
     maxDistances.y = max(
         maxDistances.y,
-        // abs(character->GetPosition().y - gameObject.GetPosition().y) + characterBox.height / 2);
+        // abs(character->GetPosition().y - worldObject.GetPosition().y) + characterBox.height / 2);
         abs(character->GetPosition().y - targetPosition.y) + characterBox.height / 2);
   }
 
@@ -169,7 +169,7 @@ void CameraBehavior::ApplyTargetPosition(float deltaTime)
   float unframedFactor = GetUnframedFactor();
 
   // Distance to target position
-  Vector2 targetDisplacement = targetPosition - gameObject.GetPosition();
+  Vector2 targetDisplacement = targetPosition - worldObject.GetPosition();
   float scaledAcceleration = baseAcceleration * unframedFactor;
 
   // Find how much acceleration will be redirected towards decelerating
@@ -220,7 +220,7 @@ void CameraBehavior::ApplyTargetPosition(float deltaTime)
   velocity = (velocity + lastAcceleration * deltaTime).CapMagnitude(maxSpeed * unframedFactor);
 
   // Apply velocity to position
-  SetPosition(gameObject.GetPosition() + velocity * deltaTime);
+  SetPosition(worldObject.GetPosition() + velocity * deltaTime);
 }
 
 void CameraBehavior::ApplyTargetSize(float deltaTime)
@@ -274,7 +274,7 @@ void CameraBehavior::ApplyTargetSize(float deltaTime)
 void CameraBehavior::SetPosition(Vector2 position)
 {
   // Set the new position
-  gameObject.SetPosition(position);
+  worldObject.SetPosition(position);
 }
 
 void CameraBehavior::SetSize(float newSize)

@@ -29,7 +29,7 @@ public:
   // Minimum camera size
   static const float minSize;
 
-  CameraBehavior(GameObject &associatedObject, std::shared_ptr<GameObject> charactersParent);
+  CameraBehavior(WorldObject &associatedObject, std::shared_ptr<WorldObject> charactersParent);
   virtual ~CameraBehavior() {}
 
   // Get current width and height of frame in units (dimensions of camera discounting padding)
@@ -95,7 +95,7 @@ private:
   std::weak_ptr<Arena> weakArena;
 
   // Reference to object which holds each character's objects
-  std::weak_ptr<GameObject> weakCharactersParent;
+  std::weak_ptr<WorldObject> weakCharactersParent;
 };
 
 #endif

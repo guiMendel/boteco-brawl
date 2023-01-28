@@ -30,10 +30,10 @@ void Particle::PhysicsUpdate(float deltaTime)
     deleteRequested = true;
 }
 
-// Attach position to a gameObject
-void Particle::AttachTo(std::shared_ptr<GameObject> gameObject)
+// Attach position to a worldObject
+void Particle::AttachTo(std::shared_ptr<WorldObject> worldObject)
 {
-  referenceObject = gameObject;
+  referenceObject = worldObject;
 }
 
 void Particle::Render()

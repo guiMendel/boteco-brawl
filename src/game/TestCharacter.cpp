@@ -2,7 +2,7 @@
 
 static const float baseDamage{1};
 
-TestCharacter::TestCharacter(GameObject &associatedObject)
+TestCharacter::TestCharacter(WorldObject &associatedObject)
     : Character(associatedObject) {}
 
 static const TestCharacter::transformerMap sequenceIndexTransformer{

@@ -1,22 +1,22 @@
 #include <algorithm>
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Sound.h"
 #include "Game.h"
 #include <iostream>
 
 using namespace std;
 
-const float GameObject::objectCollectionRange{50};
+const float WorldObject::objectCollectionRange{50};
 
 // Private constructor
-GameObject::GameObject(string name, int gameStateId, int id)
+WorldObject::WorldObject(string name, int gameStateId, int id)
     : id(id >= 0 ? id : Game::GetInstance().SupplyId()), name(name), gameStateId(gameStateId)
 {
 }
 
 // With dimensions
-GameObject::GameObject(string name, Vector2 coordinates, double rotation, shared_ptr<GameObject> parent)
-    : GameObject(name, Game::GetInstance().GetState()->id)
+WorldObject::WorldObject(string name, Vector2 coordinates, double rotation, shared_ptr<WorldObject> parent)
+    : WorldObject(name, Game::GetInstance().GetState()->id)
 {
   // Add gameState reference
   auto gameState = GetState();
@@ -43,7 +43,7 @@ GameObject::GameObject(string name, Vector2 coordinates, double rotation, shared
   SetRotation(rotation);
 }
 
-GameObject::~GameObject()
+WorldObject::~WorldObject()
 {
   cout << "In destructor of " << GetName() << endl;
 
@@ -53,7 +53,7 @@ GameObject::~GameObject()
       cout << "WARNING: Component " << typeid(*component).name() << " has " << component.use_count() - 2 << " leaked references" << endl;
 }
 
-void GameObject::Start()
+void WorldObject::Start()
 {
   if (started)
     return;
@@ -64,7 +64,7 @@ void GameObject::Start()
     component->SafeStart();
 }
 
-void GameObject::Awake()
+void WorldObject::Awake()
 {
   if (awoke)
     return;
@@ -76,7 +76,7 @@ void GameObject::Awake()
 }
 
 // Allows for registering to the state's variables
-void GameObject::RegisterToState()
+void WorldObject::RegisterToState()
 {
   auto currentState = GetState()->id;
 
@@ -89,7 +89,7 @@ void GameObject::RegisterToState()
     component->RegisterToStateWithLayer();
 }
 
-void GameObject::Update(float deltaTime)
+void WorldObject::Update(float deltaTime)
 {
   // Apply timescale
   deltaTime *= GetTimeScale();
@@ -120,7 +120,7 @@ void GameObject::Update(float deltaTime)
   }
 }
 
-void GameObject::PhysicsUpdate(float deltaTime)
+void WorldObject::PhysicsUpdate(float deltaTime)
 {
   if (enabled == false)
     return;
@@ -137,7 +137,7 @@ void GameObject::PhysicsUpdate(float deltaTime)
   }
 }
 
-void GameObject::DetectCollisionExits()
+void WorldObject::DetectCollisionExits()
 {
   // For each of last frame's collisions
   for (auto [collisionHash, collision] : lastFrameCollisions)
@@ -170,19 +170,19 @@ void GameObject::DetectCollisionExits()
   frameTriggers.clear();
 }
 
-void GameObject::OnStatePause()
+void WorldObject::OnStatePause()
 {
   for (auto [componentId, component] : components)
     component->OnStatePause();
 }
 
-void GameObject::OnStateResume()
+void WorldObject::OnStateResume()
 {
   for (auto [componentId, component] : components)
     component->OnStateResume();
 }
 
-decltype(GameObject::components)::iterator GameObject::RemoveComponent(shared_ptr<Component> component)
+decltype(WorldObject::components)::iterator WorldObject::RemoveComponent(shared_ptr<Component> component)
 {
   // Detect not present
   if (components.count(component->id) == 0)
@@ -197,7 +197,7 @@ decltype(GameObject::components)::iterator GameObject::RemoveComponent(shared_pt
   return components.erase(components.find(component->id));
 }
 
-void GameObject::HandleColliderDestruction(shared_ptr<Component> component)
+void WorldObject::HandleColliderDestruction(shared_ptr<Component> component)
 {
   // Get as a collider
   auto colliderToDie = dynamic_pointer_cast<Collider>(component);
@@ -281,12 +281,12 @@ void GameObject::HandleColliderDestruction(shared_ptr<Component> component)
   }
 }
 
-shared_ptr<GameObject> GameObject::GetShared()
+shared_ptr<WorldObject> WorldObject::GetShared()
 {
   return GetState()->GetObject(id);
 }
 
-auto GameObject::GetComponent(const Component *componentPointer) -> shared_ptr<Component>
+auto WorldObject::GetComponent(const Component *componentPointer) -> shared_ptr<Component>
 {
   if (components.count(componentPointer->id) == 0)
     return nullptr;
@@ -294,7 +294,7 @@ auto GameObject::GetComponent(const Component *componentPointer) -> shared_ptr<C
   return components[componentPointer->id];
 }
 
-auto GameObject::RequireComponent(const Component *componentPointer) -> shared_ptr<Component>
+auto WorldObject::RequireComponent(const Component *componentPointer) -> shared_ptr<Component>
 {
   auto component = GetComponent(componentPointer);
 
@@ -306,7 +306,7 @@ auto GameObject::RequireComponent(const Component *componentPointer) -> shared_p
   return component;
 }
 
-shared_ptr<GameObject> GameObject::InternalGetParent() const
+shared_ptr<WorldObject> WorldObject::InternalGetParent() const
 {
   // Ensure not root
   Assert(IsRoot() == false, "Getting parent is forbidden on root object");
@@ -315,19 +315,19 @@ shared_ptr<GameObject> GameObject::InternalGetParent() const
     return nullptr;
 
   // Ensure the parent is there
-  Assert(weakParent.expired() == false, "GameObject " + name + " unexpectedly failed to retrieve parent object");
+  Assert(weakParent.expired() == false, "WorldObject " + name + " unexpectedly failed to retrieve parent object");
 
   return weakParent.lock();
 }
 
-shared_ptr<GameObject> GameObject::GetParent() const
+shared_ptr<WorldObject> WorldObject::GetParent() const
 {
   auto parent = InternalGetParent();
 
   return parent->id == 0 ? nullptr : parent;
 }
 
-auto GameObject::UnlinkParent() -> unordered_map<int, weak_ptr<GameObject>>::iterator
+auto WorldObject::UnlinkParent() -> unordered_map<int, weak_ptr<WorldObject>>::iterator
 {
   Assert(IsRoot() == false, "Root has no parent to unlink");
 
@@ -341,7 +341,7 @@ auto GameObject::UnlinkParent() -> unordered_map<int, weak_ptr<GameObject>>::ite
   return iterator;
 }
 
-void GameObject::SetParent(shared_ptr<GameObject> newParent)
+void WorldObject::SetParent(shared_ptr<WorldObject> newParent)
 {
   Assert(IsRoot() == false, "SetParent is forbidden on root object");
 
@@ -357,7 +357,7 @@ void GameObject::SetParent(shared_ptr<GameObject> newParent)
 }
 
 // Where this object exists in game space, in absolute coordinates
-Vector2 GameObject::GetPosition()
+Vector2 WorldObject::GetPosition()
 {
   if (IsRoot())
     return localPosition;
@@ -367,20 +367,20 @@ Vector2 GameObject::GetPosition()
 
   return InternalGetParent()->GetPosition() + localPosition;
 }
-void GameObject::SetPosition(const Vector2 newPosition)
+void WorldObject::SetPosition(const Vector2 newPosition)
 {
   if (IsRoot())
     localPosition = newPosition;
   localPosition = newPosition - InternalGetParent()->GetPosition();
 }
 
-void GameObject::Translate(const Vector2 translation)
+void WorldObject::Translate(const Vector2 translation)
 {
   SetPosition(GetPosition() + translation);
 }
 
 // Absolute scale of the object
-float GameObject::GetTimeScale() const
+float WorldObject::GetTimeScale() const
 {
   if (IsRoot())
     return localTimeScale;
@@ -388,7 +388,7 @@ float GameObject::GetTimeScale() const
   return InternalGetParent()->GetTimeScale() * localTimeScale;
 }
 
-void GameObject::SetTimeScale(float newScale)
+void WorldObject::SetTimeScale(float newScale)
 {
   Assert(newScale > 0, "Time must flow forward");
 
@@ -403,13 +403,13 @@ void GameObject::SetTimeScale(float newScale)
 }
 
 // Absolute scale of the object
-Vector2 GameObject::GetScale()
+Vector2 WorldObject::GetScale()
 {
   if (IsRoot())
     return localScale;
   return InternalGetParent()->GetScale() * localScale;
 }
-void GameObject::SetScale(const Vector2 newScale)
+void WorldObject::SetScale(const Vector2 newScale)
 {
   if (IsRoot())
     localScale = newScale;
@@ -422,38 +422,38 @@ void GameObject::SetScale(const Vector2 newScale)
 }
 
 // Absolute rotation in radians
-double GameObject::GetRotation()
+double WorldObject::GetRotation()
 {
   if (IsRoot())
     return localRotation;
   return InternalGetParent()->GetRotation() + localRotation;
 }
-void GameObject::SetRotation(const double newRotation)
+void WorldObject::SetRotation(const double newRotation)
 {
   if (IsRoot())
     localRotation = newRotation;
   localRotation = newRotation - InternalGetParent()->GetRotation();
 }
 
-shared_ptr<GameObject> GameObject::CreateChild(string name)
+shared_ptr<WorldObject> WorldObject::CreateChild(string name)
 {
   return CreateChild(name, Vector2::Zero(), 0);
 }
 
-shared_ptr<GameObject> GameObject::CreateChild(string name, Vector2 offset)
+shared_ptr<WorldObject> WorldObject::CreateChild(string name, Vector2 offset)
 {
   return CreateChild(name, offset, 0);
 }
 
-shared_ptr<GameObject> GameObject::CreateChild(string name, Vector2 offset, float offsetRotation)
+shared_ptr<WorldObject> WorldObject::CreateChild(string name, Vector2 offset, float offsetRotation)
 {
-  auto childId = (new GameObject(name, GetPosition() + offset, GetRotation() + offsetRotation, GetShared()))->id;
+  auto childId = (new WorldObject(name, GetPosition() + offset, GetRotation() + offsetRotation, GetShared()))->id;
   return GetState()->GetObject(childId);
 }
 
-vector<shared_ptr<GameObject>> GameObject::GetChildren()
+vector<shared_ptr<WorldObject>> WorldObject::GetChildren()
 {
-  vector<shared_ptr<GameObject>> verifiedChildren;
+  vector<shared_ptr<WorldObject>> verifiedChildren;
 
   // For each child entry
   auto childEntryIterator = children.begin();
@@ -478,7 +478,7 @@ vector<shared_ptr<GameObject>> GameObject::GetChildren()
   return verifiedChildren;
 }
 
-shared_ptr<GameObject> GameObject::RequireChild(int id)
+shared_ptr<WorldObject> WorldObject::RequireChild(int id)
 {
   auto child = GetChild(id);
 
@@ -491,7 +491,7 @@ shared_ptr<GameObject> GameObject::RequireChild(int id)
   return child;
 }
 
-shared_ptr<GameObject> GameObject::RequireChild(string name)
+shared_ptr<WorldObject> WorldObject::RequireChild(string name)
 {
   auto child = GetChild(name);
 
@@ -500,7 +500,7 @@ shared_ptr<GameObject> GameObject::RequireChild(string name)
   return child;
 }
 
-shared_ptr<GameObject> GameObject::GetChild(int id)
+shared_ptr<WorldObject> WorldObject::GetChild(int id)
 {
   if (children.count(id) == 0)
     return nullptr;
@@ -513,7 +513,7 @@ shared_ptr<GameObject> GameObject::GetChild(int id)
   return child;
 }
 
-shared_ptr<GameObject> GameObject::GetChild(string name)
+shared_ptr<WorldObject> WorldObject::GetChild(string name)
 {
   // For each child entry
   auto childEntryIterator = children.begin();
@@ -540,7 +540,7 @@ shared_ptr<GameObject> GameObject::GetChild(string name)
   return nullptr;
 }
 
-auto GameObject::InternalDestroy() -> unordered_map<int, weak_ptr<GameObject>>::iterator
+auto WorldObject::InternalDestroy() -> unordered_map<int, weak_ptr<WorldObject>>::iterator
 {
   // cout << "Destroying " << *this << endl;
   // cout << "Children: " << endl;
@@ -571,7 +571,7 @@ auto GameObject::InternalDestroy() -> unordered_map<int, weak_ptr<GameObject>>::
   auto shared = GetShared();
 
   // Remove this object's reference from it's parent
-  unordered_map<int, weak_ptr<GameObject>>::iterator iterator;
+  unordered_map<int, weak_ptr<WorldObject>>::iterator iterator;
 
   if (IsRoot() == false)
     iterator = UnlinkParent();
@@ -585,7 +585,7 @@ auto GameObject::InternalDestroy() -> unordered_map<int, weak_ptr<GameObject>>::
   return iterator;
 }
 
-void GameObject::OnCollision(Collision::Data collisionData)
+void WorldObject::OnCollision(Collision::Data collisionData)
 {
   // Register collision
   frameCollisions[collisionData.GetHash()] = collisionData;
@@ -595,21 +595,21 @@ void GameObject::OnCollision(Collision::Data collisionData)
     component->OnCollision(collisionData);
 }
 
-void GameObject::OnCollisionEnter(Collision::Data collisionData)
+void WorldObject::OnCollisionEnter(Collision::Data collisionData)
 {
   // Alert all components
   for (auto [componentId, component] : components)
     component->OnCollisionEnter(collisionData);
 }
 
-void GameObject::OnCollisionExit(Collision::Data collisionData)
+void WorldObject::OnCollisionExit(Collision::Data collisionData)
 {
   // Alert all components
   for (auto [componentId, component] : components)
     component->OnCollisionExit(collisionData);
 }
 
-void GameObject::OnTriggerCollision(TriggerCollisionData triggerData)
+void WorldObject::OnTriggerCollision(TriggerCollisionData triggerData)
 {
   // Register trigger
   frameTriggers[triggerData.GetHash()] = triggerData;
@@ -619,21 +619,21 @@ void GameObject::OnTriggerCollision(TriggerCollisionData triggerData)
     component->OnTriggerCollision(triggerData);
 }
 
-void GameObject::OnTriggerCollisionEnter(TriggerCollisionData triggerData)
+void WorldObject::OnTriggerCollisionEnter(TriggerCollisionData triggerData)
 {
   // Alert all components
   for (auto [componentId, component] : components)
     component->OnTriggerCollisionEnter(triggerData);
 }
 
-void GameObject::OnTriggerCollisionExit(TriggerCollisionData triggerData)
+void WorldObject::OnTriggerCollisionExit(TriggerCollisionData triggerData)
 {
   // Alert all components
   for (auto [componentId, component] : components)
     component->OnTriggerCollisionExit(triggerData);
 }
 
-void GameObject::DontDestroyOnLoad(bool value)
+void WorldObject::DontDestroyOnLoad(bool value)
 {
   if (InternalGetParent()->IsRoot() == false)
   {
@@ -644,7 +644,7 @@ void GameObject::DontDestroyOnLoad(bool value)
   keepOnLoad = value;
 }
 
-shared_ptr<GameState> GameObject::GetState()
+shared_ptr<GameState> WorldObject::GetState()
 {
   auto currentState = Game::GetInstance().GetState();
 
@@ -653,7 +653,7 @@ shared_ptr<GameState> GameObject::GetState()
   return currentState;
 }
 
-bool GameObject::IsDescendantOf(const GameObject &other) const
+bool WorldObject::IsDescendantOf(const WorldObject &other) const
 {
   if (id == other.id)
     return true;
@@ -664,12 +664,12 @@ bool GameObject::IsDescendantOf(const GameObject &other) const
   return GetParent()->IsDescendantOf(other);
 }
 
-bool GameObject::SameLineage(const GameObject &first, const GameObject &second)
+bool WorldObject::SameLineage(const WorldObject &first, const WorldObject &second)
 {
   return first.IsDescendantOf(second) || second.IsDescendantOf(first);
 }
 
-void GameObject::SetPhysicsLayer(PhysicsLayer newLayer)
+void WorldObject::SetPhysicsLayer(PhysicsLayer newLayer)
 {
   Assert(newLayer != PhysicsLayer::None, "Setting layer to None is forbidden; use Default for irrelevant objects");
 
@@ -677,9 +677,9 @@ void GameObject::SetPhysicsLayer(PhysicsLayer newLayer)
   inheritedPhysicsLayer = false;
 }
 
-PhysicsLayer GameObject::GetPhysicsLayer() { return physicsLayer; }
+PhysicsLayer WorldObject::GetPhysicsLayer() { return physicsLayer; }
 
-bool GameObject::IsCollidingWith(shared_ptr<Collider> collider)
+bool WorldObject::IsCollidingWith(shared_ptr<Collider> collider)
 {
   for (auto [collisionHash, collision] : frameCollisions)
     IF_LOCK(collision.weakOther, other)
@@ -691,7 +691,7 @@ bool GameObject::IsCollidingWith(shared_ptr<Collider> collider)
   return false;
 }
 
-bool GameObject::WasCollidingWith(shared_ptr<Collider> collider)
+bool WorldObject::WasCollidingWith(shared_ptr<Collider> collider)
 {
   for (auto [collisionHash, collision] : lastFrameCollisions)
     IF_LOCK(collision.weakOther, other)
@@ -703,7 +703,7 @@ bool GameObject::WasCollidingWith(shared_ptr<Collider> collider)
   return false;
 }
 
-bool GameObject::IsTriggerCollidingWith(shared_ptr<Collider> collider)
+bool WorldObject::IsTriggerCollidingWith(shared_ptr<Collider> collider)
 {
   for (auto [triggerHash, triggerData] : frameTriggers)
     IF_LOCK(triggerData.weakOther, other)
@@ -715,7 +715,7 @@ bool GameObject::IsTriggerCollidingWith(shared_ptr<Collider> collider)
   return false;
 }
 
-bool GameObject::WasTriggerCollidingWith(shared_ptr<Collider> collider)
+bool WorldObject::WasTriggerCollidingWith(shared_ptr<Collider> collider)
 {
   for (auto [triggerHash, triggerData] : lastFrameTriggers)
     IF_LOCK(triggerData.weakOther, other)
@@ -727,38 +727,38 @@ bool GameObject::WasTriggerCollidingWith(shared_ptr<Collider> collider)
   return false;
 }
 
-bool GameObject::CollisionDealtWith(Collision::Data collisionData)
+bool WorldObject::CollisionDealtWith(Collision::Data collisionData)
 {
   return frameCollisions.count(collisionData.GetHash()) > 0;
 }
-bool GameObject::CollisionDealtWithLastFrame(Collision::Data collisionData)
+bool WorldObject::CollisionDealtWithLastFrame(Collision::Data collisionData)
 {
   return lastFrameCollisions.count(collisionData.GetHash()) > 0;
 }
 
-bool GameObject::TriggerCollisionDealtWith(TriggerCollisionData triggerData)
+bool WorldObject::TriggerCollisionDealtWith(TriggerCollisionData triggerData)
 {
   return frameTriggers.count(triggerData.GetHash()) > 0;
 }
-bool GameObject::TriggerCollisionDealtWithLastFrame(TriggerCollisionData triggerData)
+bool WorldObject::TriggerCollisionDealtWithLastFrame(TriggerCollisionData triggerData)
 {
   return lastFrameTriggers.count(triggerData.GetHash()) > 0;
 }
 
-bool GameObject::operator==(const GameObject &other) const { return other.id == id; }
+bool WorldObject::operator==(const WorldObject &other) const { return other.id == id; }
 
-GameObject::operator string() const
+WorldObject::operator string() const
 {
   return "[" + GetName() + "::" + to_string(id) + "]";
 }
 
-ostream &operator<<(ostream &stream, const GameObject &object)
+ostream &operator<<(ostream &stream, const WorldObject &object)
 {
   stream << (string)object;
   return stream;
 }
 
-bool GameObject::IsEnabled() const
+bool WorldObject::IsEnabled() const
 {
   if (enabled == false)
     return false;
@@ -769,7 +769,7 @@ bool GameObject::IsEnabled() const
   return InternalGetParent()->IsEnabled();
 }
 
-void GameObject::TriggerDelayedFunctions()
+void WorldObject::TriggerDelayedFunctions()
 {
   auto delayedFunctionEntryIterator = delayedFunctions.begin();
   while (delayedFunctionEntryIterator != delayedFunctions.end())
@@ -801,7 +801,7 @@ void GameObject::TriggerDelayedFunctions()
   }
 }
 
-int GameObject::DelayFunction(function<void()> procedure, float seconds)
+int WorldObject::DelayFunction(function<void()> procedure, float seconds)
 {
   // Get token id
   int tokenId = HashTwo(SDL_GetTicks(), RandomRange(0, 10000));
@@ -815,12 +815,12 @@ int GameObject::DelayFunction(function<void()> procedure, float seconds)
   return tokenId;
 }
 
-void GameObject::CancelDelayedFunction(int tokenId)
+void WorldObject::CancelDelayedFunction(int tokenId)
 {
   // Set it as not supposed to be called
   delayedFunctions[tokenId].second = false;
 }
 
-bool GameObject::DestroyRequested() const { return destroyRequested; }
+bool WorldObject::DestroyRequested() const { return destroyRequested; }
 
-void GameObject::RequestDestroy() { SetEnabled(false), destroyRequested = true; }
+void WorldObject::RequestDestroy() { SetEnabled(false), destroyRequested = true; }

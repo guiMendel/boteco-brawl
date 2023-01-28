@@ -3,11 +3,11 @@
 
 using namespace std;
 
-PlatformDrop::PlatformDrop(GameObject &associatedObject, shared_ptr<Rigidbody> body)
+PlatformDrop::PlatformDrop(WorldObject &associatedObject, shared_ptr<Rigidbody> body)
     : Component(associatedObject), weakBody(body)
 {
   // Get player input
-  auto playerInput = body->gameObject.RequireComponent<PlayerInput>();
+  auto playerInput = body->worldObject.RequireComponent<PlayerInput>();
 
   // Subscribe to fast falling, which is when we should whitelist platforms
   playerInput->OnFastFall.AddListener("whitelist-platform-effectors", [this]()
@@ -36,7 +36,7 @@ void PlatformDrop::OnTriggerCollisionEnter(TriggerCollisionData triggerData)
   LOCK(triggerData.weakOther, other);
 
   // Register this platform as in range
-  auto platform = other->gameObject.RequireComponent<PlatformEffector>();
+  auto platform = other->worldObject.RequireComponent<PlatformEffector>();
   platformsInRange[platform->id] = platform;
 }
 
@@ -45,7 +45,7 @@ void PlatformDrop::OnTriggerCollisionExit(TriggerCollisionData triggerData)
   LOCK(triggerData.weakOther, other);
 
   // Get platform
-  auto platform = other->gameObject.RequireComponent<PlatformEffector>();
+  auto platform = other->worldObject.RequireComponent<PlatformEffector>();
 
   // Get body
   LOCK(weakBody, body);

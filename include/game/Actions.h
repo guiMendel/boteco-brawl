@@ -26,7 +26,7 @@
     {                                                           \
       return animationName;                                     \
     }                                                           \
-    bool IsValid(GameObject &target) const override             \
+    bool IsValid(WorldObject &target) const override             \
     {                                                           \
       return target.RequireComponent<Movement>()->IsGrounded(); \
     }                                                           \
@@ -47,7 +47,7 @@
     {                                                                                        \
       return CharacterStateRecipes::AirAttacking(sharedAction);                              \
     }                                                                                        \
-    bool IsValid(GameObject &target) const override                                          \
+    bool IsValid(WorldObject &target) const override                                          \
     {                                                                                        \
       return target.RequireComponent<Movement>()->IsGrounded() == false;                     \
     }                                                                                        \
@@ -66,8 +66,8 @@ namespace Actions
 {
   struct Move : public Action
   {
-    void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
-    void StopHook(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
+    void Trigger(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
+    void StopHook(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
     std::unordered_set<std::string> GetFriendStates() const override { return {LANDING_STATE, JUMPING_STATE, AIR_ATTACKING_STATE}; }
 
     int GetPriority() const override { return MOVEMENT_PRIORITY; }
@@ -83,8 +83,8 @@ namespace Actions
 
   struct Dash : public Action
   {
-    void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
-    void StopHook(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
+    void Trigger(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
+    void StopHook(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
 
     int GetPriority() const override { return DASH_PRIORITY; }
 
@@ -103,7 +103,7 @@ namespace Actions
 
   struct TakeDamage : public Action
   {
-    void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
+    void Trigger(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
 
     int GetPriority() const override { return TAKE_DAMAGE_PRIORITY; }
 
@@ -171,7 +171,7 @@ namespace Actions
   // Triggered by a successful parry
   struct Riposte : public Action
   {
-    void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
+    void Trigger(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
 
     int GetPriority() const override { return ATTACK_PRIORITY; }
 
@@ -189,7 +189,7 @@ namespace Actions
   // Triggered by attacks that are meant to hit the ground
   struct LandingAttack : public Action
   {
-    void Trigger(GameObject &target, std::shared_ptr<CharacterState> actionState) override;
+    void Trigger(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
 
     int GetPriority() const override { return LAND_PRIORITY; }
 

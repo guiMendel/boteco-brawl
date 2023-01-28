@@ -8,7 +8,7 @@
 #include "ObjectRecipes.h"
 #include <iostream>
 
-#define CASCADE_OBJECTS(method, param) CascadeDown(rootObject, [param](GameObject &object) { object.method(param); });
+#define CASCADE_OBJECTS(method, param) CascadeDown(rootObject, [param](WorldObject &object) { object.method(param); });
 
 using namespace std;
 
@@ -18,7 +18,7 @@ GameState::GameState()
       particleSystem(*this),
       id(SupplyId()),
       inputManager(Game::GetInstance().GetInputManager()),
-      rootObject(new GameObject("Root", id, 0))
+      rootObject(new WorldObject("Root", id, 0))
 {
   // Set root object layer to default
   rootObject->physicsLayer = PhysicsLayer::Default;
@@ -30,7 +30,7 @@ GameState::~GameState()
   Resources::ClearAll();
 }
 
-void GameState::CascadeDown(shared_ptr<GameObject> object, function<void(GameObject &)> callback, bool topDown)
+void GameState::CascadeDown(shared_ptr<WorldObject> object, function<void(WorldObject &)> callback, bool topDown)
 {
   // Execute on this object
   if (topDown)
@@ -48,7 +48,7 @@ void GameState::CascadeDown(shared_ptr<GameObject> object, function<void(GameObj
 void GameState::DeleteObjects()
 {
   // Check for dead objects
-  vector<weak_ptr<GameObject>> deadObjects;
+  vector<weak_ptr<WorldObject>> deadObjects;
 
   // Collect them
   for (auto &objectPair : gameObjects)
@@ -210,27 +210,27 @@ void GameState::RemoveObject(int id)
   gameObjects.erase(id);
 }
 
-shared_ptr<GameObject> GameState::RegisterObject(shared_ptr<GameObject> gameObject)
+shared_ptr<WorldObject> GameState::RegisterObject(shared_ptr<WorldObject> worldObject)
 {
-  gameObjects[gameObject->id] = gameObject;
-  gameObject->gameStateId = id;
+  gameObjects[worldObject->id] = worldObject;
+  worldObject->gameStateId = id;
 
   if (awoke)
-    gameObject->Awake();
+    worldObject->Awake();
 
   if (started)
   {
     // Register this object's hierarchy to this new state
-    gameObject->RegisterToState();
-    gameObject->Start();
+    worldObject->RegisterToState();
+    worldObject->Start();
   }
 
-  return gameObject;
+  return worldObject;
 }
 
-shared_ptr<GameObject> GameState::RegisterObject(GameObject *gameObject) { return RegisterObject(shared_ptr<GameObject>(gameObject)); }
+shared_ptr<WorldObject> GameState::RegisterObject(WorldObject *worldObject) { return RegisterObject(shared_ptr<WorldObject>(worldObject)); }
 
-shared_ptr<GameObject> GameState::GetPointer(const GameObject *targetObject)
+shared_ptr<WorldObject> GameState::GetPointer(const WorldObject *targetObject)
 {
   // Find this pointer in the list
   auto foundObjectIterator = find_if(
@@ -261,7 +261,7 @@ void GameState::RegisterLayerRenderer(shared_ptr<Component> component)
   layer.emplace_back(component);
 }
 
-shared_ptr<GameObject> GameState::GetObject(int id)
+shared_ptr<WorldObject> GameState::GetObject(int id)
 {
   if (gameObjects.count(id) == 0)
     return nullptr;
@@ -269,7 +269,7 @@ shared_ptr<GameObject> GameState::GetObject(int id)
   return gameObjects.at(id);
 }
 
-shared_ptr<GameObject> GameState::RequireObject(int id)
+shared_ptr<WorldObject> GameState::RequireObject(int id)
 {
   auto object = GetObject(id);
 
@@ -294,9 +294,9 @@ list<shared_ptr<Camera>> GameState::GetCameras()
 
 int GameState::SupplyId() { return Game::GetInstance().SupplyId(); }
 
-vector<shared_ptr<GameObject>> GameState::GetObjectsToCarryOn()
+vector<shared_ptr<WorldObject>> GameState::GetObjectsToCarryOn()
 {
-  vector<shared_ptr<GameObject>> savedObjects;
+  vector<shared_ptr<WorldObject>> savedObjects;
 
   for (auto firstObject : GetRootObject()->GetChildren())
     if (firstObject->keepOnLoad)
@@ -314,7 +314,7 @@ shared_ptr<GameState> GameState::GetShared()
   return currentState;
 }
 
-shared_ptr<GameObject> GameState::FindObject(string name)
+shared_ptr<WorldObject> GameState::FindObject(string name)
 {
   for (auto [objectId, object] : gameObjects)
     if (object->GetName() == name)

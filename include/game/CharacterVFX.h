@@ -14,7 +14,7 @@ public:
   template <class T>
   using range = ParticleEmissionParameters::range<T>;
 
-  CharacterVFX(GameObject &associatedObject);
+  CharacterVFX(WorldObject &associatedObject);
   virtual ~CharacterVFX() {}
 
   void Awake() override;

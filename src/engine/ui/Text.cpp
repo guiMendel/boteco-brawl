@@ -5,7 +5,7 @@
 using namespace std;
 
 Text::Text(
-    GameObject &associatedObject, string text, string fontPath,
+    WorldObject &associatedObject, string text, string fontPath,
     int size, Style style, Color color)
     : Component(associatedObject), text(text), fontSize(size),
       style(style), color(color), fontPath(fontPath), font(Resources::GetFont(fontPath, size)), mainTexture(nullptr, SDL_DestroyTexture)
@@ -24,7 +24,7 @@ void Text::Render()
   // Get the real position
   // Offset coordinates to match anchor point
   Vector2 realPosition{
-      Camera::GetMain()->WorldToScreen(gameObject.GetPosition()) -
+      Camera::GetMain()->WorldToScreen(worldObject.GetPosition()) -
       Vector2((float)pixelWidth, (float)pixelHeight) * anchorPoint +
       offset};
 
@@ -39,7 +39,7 @@ void Text::Render()
       mainTexture.get(),
       &clipRect,
       &destinationRect,
-      Helper::RadiansToDegrees(gameObject.GetRotation()),
+      Helper::RadiansToDegrees(worldObject.GetRotation()),
       nullptr,
       SDL_FLIP_NONE);
 }

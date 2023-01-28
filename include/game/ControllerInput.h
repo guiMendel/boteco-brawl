@@ -8,7 +8,7 @@
 class ControllerInput : public PlayerInput
 {
 public:
-  ControllerInput(GameObject &associatedObject);
+  ControllerInput(WorldObject &associatedObject);
   virtual ~ControllerInput() {}
 
   void Start() override;

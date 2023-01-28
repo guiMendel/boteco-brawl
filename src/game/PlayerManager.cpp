@@ -7,7 +7,7 @@ using namespace std;
 // Set player colors
 const Color PlayerManager::playerColors[]{Color::Green(), Color::Yellow(), Color::Blue(), Color::Red()};
 
-PlayerManager::PlayerManager(GameObject &associatedObject)
+PlayerManager::PlayerManager(WorldObject &associatedObject)
     : Component(associatedObject)
 {
   // Add main player
@@ -22,7 +22,7 @@ shared_ptr<Player> PlayerManager::AddNewPlayer()
   Assert(players.size() < 4, "Tried adding more players than allowed");
 
   // Create and pick this player's color
-  auto newPlayer = gameObject.CreateChild(PLAYER_OBJECT_NAME)->AddComponent<Player>(*this, playerColors[players.size()]);
+  auto newPlayer = worldObject.CreateChild(PLAYER_OBJECT_NAME)->AddComponent<Player>(*this, playerColors[players.size()]);
 
   // If this is the only player, set it as main
   if (GetPlayers().size() == 1)
@@ -35,7 +35,7 @@ void PlayerManager::SetMainPlayer(shared_ptr<Player> player) { mainPlayerId = pl
 
 vector<shared_ptr<Player>> PlayerManager::GetPlayers() const
 {
-  return gameObject.GetComponentsInChildren<Player>();
+  return worldObject.GetComponentsInChildren<Player>();
 }
 
 shared_ptr<Player> PlayerManager::GetMainPlayer() const
@@ -44,7 +44,7 @@ shared_ptr<Player> PlayerManager::GetMainPlayer() const
 
   auto object = GetState()->GetObject(mainPlayerId);
 
-  Assert(object != nullptr, "Unexpectedly failed to find main player gameObject");
+  Assert(object != nullptr, "Unexpectedly failed to find main player worldObject");
 
   return object->RequireComponent<Player>();
 }

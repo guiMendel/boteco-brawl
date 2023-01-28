@@ -2,7 +2,7 @@
 #define __RIGIDBODY__
 
 #include "Vector2.h"
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "PhysicsSystem.h"
 #include <unordered_set>
@@ -23,7 +23,7 @@ class Rigidbody : public Component
 public:
   static const float defaultAirFriction;
 
-  Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity = 0, float friction = 0.8f);
+  Rigidbody(WorldObject &associatedObject, RigidbodyType type, float elasticity = 0, float friction = 0.8f);
 
   virtual ~Rigidbody() {}
 

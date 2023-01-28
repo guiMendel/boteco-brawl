@@ -1,7 +1,7 @@
 #ifndef __MOVEMENT__
 #define __MOVEMENT__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 
 class Rigidbody;
@@ -13,7 +13,7 @@ public:
   // Triggers when character touches the ground
   Event OnLand;
 
-  Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance);
+  Movement(WorldObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance);
   virtual ~Movement() {}
 
   void Start() override;
@@ -60,7 +60,7 @@ public:
 
   // === JUMPS
 
-  // How far from the gameObject center the feet are
+  // How far from the worldObject center the feet are
   float feetDistance;
 
   // Speed to be injected on jump

@@ -8,8 +8,8 @@ using namespace std;
 
 const float Rigidbody::defaultAirFriction{0.0f};
 
-Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity, float friction)
-    : Component(associatedObject), elasticity(elasticity), friction(friction), type(type), lastPosition(gameObject.GetPosition()) {}
+Rigidbody::Rigidbody(WorldObject &associatedObject, RigidbodyType type, float elasticity, float friction)
+    : Component(associatedObject), elasticity(elasticity), friction(friction), type(type), lastPosition(worldObject.GetPosition()) {}
 
 float Rigidbody::GetMass() const
 {
@@ -42,10 +42,10 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
   velocity += GetState()->physicsSystem.gravity * gravityScale * deltaTime;
 
   // Apply air friction
-  velocity = PhysicsSystem::ApplyFriction(velocity, airFriction, gameObject.GetTimeScale());
+  velocity = PhysicsSystem::ApplyFriction(velocity, airFriction, worldObject.GetTimeScale());
 
   // Update the last position variable
-  lastPosition = gameObject.GetPosition();
+  lastPosition = worldObject.GetPosition();
 
   KinematicBodyUpdate(deltaTime);
 }
@@ -53,7 +53,7 @@ void Rigidbody::DynamicBodyUpdate(float deltaTime)
 void Rigidbody::KinematicBodyUpdate(float deltaTime)
 {
   // Move according to velocity
-  gameObject.Translate(velocity * deltaTime);
+  worldObject.Translate(velocity * deltaTime);
 }
 
 void Rigidbody::UseAutoMass(bool value)
@@ -92,7 +92,7 @@ void Rigidbody::DeriveMassFromColliders()
 
   InternalSetMass(totalMass);
 
-  cout << gameObject << " calculated mass is " << totalMass << endl;
+  cout << worldObject << " calculated mass is " << totalMass << endl;
 }
 
 // Gets the list of colliders associated with this body
@@ -102,13 +102,13 @@ vector<shared_ptr<Collider>> Rigidbody::GetColliders() const
 
   PhysicsSystem::WeakColliders weakColliders;
   if (IsStatic())
-    weakColliders = physicsSystem.staticColliderStructure[gameObject.id];
+    weakColliders = physicsSystem.staticColliderStructure[worldObject.id];
   else if (IsKinematic())
-    weakColliders = physicsSystem.kinematicColliderStructure[gameObject.id];
+    weakColliders = physicsSystem.kinematicColliderStructure[worldObject.id];
   else
-    weakColliders = physicsSystem.dynamicColliderStructure[gameObject.id];
+    weakColliders = physicsSystem.dynamicColliderStructure[worldObject.id];
 
-  return physicsSystem.ValidateColliders(gameObject.id, weakColliders);
+  return physicsSystem.ValidateColliders(worldObject.id, weakColliders);
 }
 
 void Rigidbody::ApplyImpulse(Vector2 impulse)
@@ -126,7 +126,7 @@ bool Rigidbody::ShouldUseContinuousDetection() const
     return false;
 
   // Check that it's moved at least as much as it's smallest dimension
-  auto sqrDistance = (gameObject.GetPosition() - lastPosition).SqrMagnitude();
+  auto sqrDistance = (worldObject.GetPosition() - lastPosition).SqrMagnitude();
 
   float dimension = GetMinDimension();
 
@@ -136,7 +136,7 @@ bool Rigidbody::ShouldUseContinuousDetection() const
 
 Vector2 Rigidbody::GetFrameTrajectory()
 {
-  return gameObject.GetPosition() - lastPosition;
+  return worldObject.GetPosition() - lastPosition;
 }
 
 void Rigidbody::Render() {}
@@ -149,20 +149,20 @@ void Rigidbody::SetType(RigidbodyType newType)
     return;
 
   type = newType;
-  GetState()->physicsSystem.UnregisterColliders(gameObject.id);
+  GetState()->physicsSystem.UnregisterColliders(worldObject.id);
 
   // Re-register colliders
   for (auto collider : GetColliders())
-    GetState()->physicsSystem.RegisterCollider(collider, gameObject.id);
+    GetState()->physicsSystem.RegisterCollider(collider, worldObject.id);
 }
 
 bool Rigidbody::Raycast(float angle, float maxDistance, RaycastData &data)
 {
   // Create a filter of this own object
   CollisionFilter filter;
-  filter.ignoredObjects.insert(gameObject.id);
+  filter.ignoredObjects.insert(worldObject.id);
 
-  return GetState()->physicsSystem.Raycast(gameObject.GetPosition(), angle, maxDistance, data, filter);
+  return GetState()->physicsSystem.Raycast(worldObject.GetPosition(), angle, maxDistance, data, filter);
 }
 
 bool Rigidbody::Raycast(float angle, float maxDistance)
@@ -175,9 +175,9 @@ bool Rigidbody::ColliderCast(float angle, float maxDistance, ColliderCastData &d
 {
   // Create a filter of this own object
   CollisionFilter filter;
-  filter.ignoredObjects.insert(gameObject.id);
+  filter.ignoredObjects.insert(worldObject.id);
 
-  return GetState()->physicsSystem.ColliderCast(GetColliders(), gameObject.GetPosition(), angle, maxDistance, data, filter, scaleColliders);
+  return GetState()->physicsSystem.ColliderCast(GetColliders(), worldObject.GetPosition(), angle, maxDistance, data, filter, scaleColliders);
 }
 
 bool Rigidbody::ColliderCast(float angle, float maxDistance, float scaleColliders)

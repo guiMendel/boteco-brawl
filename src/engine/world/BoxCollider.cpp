@@ -6,12 +6,12 @@
 using namespace std;
 
 // Explicitly initialize box
-BoxCollider::BoxCollider(GameObject &associatedObject, Rectangle box, bool isTrigger, ColliderDensity density)
+BoxCollider::BoxCollider(WorldObject &associatedObject, Rectangle box, bool isTrigger, ColliderDensity density)
     : Collider(associatedObject, make_shared<Rectangle>(box), isTrigger, density) {}
 
 // Use sprite's box
 BoxCollider::BoxCollider(
-    GameObject &associatedObject, shared_ptr<Sprite> sprite, bool isTrigger, ColliderDensity density, Vector2 scale)
+    WorldObject &associatedObject, shared_ptr<Sprite> sprite, bool isTrigger, ColliderDensity density, Vector2 scale)
     : BoxCollider(
           associatedObject,
           Rectangle({0, 0}, sprite->GetWidth() * scale.x, sprite->GetHeight() * scale.y),
@@ -20,7 +20,7 @@ BoxCollider::BoxCollider(
 
 // Use sprite animator's initial animation sprite size
 BoxCollider::BoxCollider(
-    GameObject &associatedObject, shared_ptr<Animator> animator, bool isTrigger, ColliderDensity density, Vector2 scale)
+    WorldObject &associatedObject, shared_ptr<Animator> animator, bool isTrigger, ColliderDensity density, Vector2 scale)
     : BoxCollider(
           associatedObject,
           animator->BuildAnimation(animator->defaultAnimation)->GetFrame(0).GetSprite(),
@@ -30,7 +30,7 @@ BoxCollider::BoxCollider(
 
 // Use other BoxCollider::BoxCollider's box
 BoxCollider::BoxCollider(
-    GameObject &associatedObject, shared_ptr<BoxCollider> other, bool isTrigger, ColliderDensity density, Vector2 scale)
+    WorldObject &associatedObject, shared_ptr<BoxCollider> other, bool isTrigger, ColliderDensity density, Vector2 scale)
     : BoxCollider(
           associatedObject,
           Rectangle({0, 0}, other->GetBox().width * scale.x, other->GetBox().height * scale.y),

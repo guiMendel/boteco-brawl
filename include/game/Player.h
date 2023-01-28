@@ -1,7 +1,7 @@
 #ifndef __PLAYER__
 #define __PLAYER__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "ControllerDevice.h"
 
@@ -11,7 +11,7 @@ class PlayerManager;
 class Player : public Component
 {
 public:
-  Player(GameObject &associatedObject, PlayerManager &manager, Color color);
+  Player(WorldObject &associatedObject, PlayerManager &manager, Color color);
 
   virtual ~Player() {}
 

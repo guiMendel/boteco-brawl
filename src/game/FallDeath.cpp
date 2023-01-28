@@ -16,7 +16,7 @@ const float FallDeath::deathMargin{3};
 const float FallDeath::respawnDelay{2};
 const int FallDeath::startingLives{2};
 
-FallDeath::FallDeath(GameObject &associatedObject)
+FallDeath::FallDeath(WorldObject &associatedObject)
     : Component(associatedObject), weakArena(GetState()->FindObjectOfType<Arena>())
 {
   Assert(weakArena.expired() == false, "Failed to find an Arena component");
@@ -29,14 +29,14 @@ void FallDeath::Update(float)
   if (IsFallen())
   {
     // If respawn timer is up, respawn
-    if (gameObject.timer.Get(RESPAWN_TIMER) >= respawnDelay)
+    if (worldObject.timer.Get(RESPAWN_TIMER) >= respawnDelay)
       Respawn();
 
     return;
   }
 
   // Otherwise, check for death
-  auto position = gameObject.GetPosition();
+  auto position = worldObject.GetPosition();
 
   if (
       // Off left
@@ -59,10 +59,10 @@ void FallDeath::Fall()
   fallen = true;
 
   // Reset speed
-  gameObject.RequireComponent<Rigidbody>()->velocity = Vector2::Zero();
+  worldObject.RequireComponent<Rigidbody>()->velocity = Vector2::Zero();
 
   // Reset states
-  gameObject.RequireComponent<CharacterStateManager>()->RemoveStatesNotIn({});
+  worldObject.RequireComponent<CharacterStateManager>()->RemoveStatesNotIn({});
 
   // Disable character
   SetCharacterActive(false);
@@ -70,7 +70,7 @@ void FallDeath::Fall()
   // Discount life
   if (--lives > 0)
     // Start respawn timer
-    gameObject.timer.Start(RESPAWN_TIMER);
+    worldObject.timer.Start(RESPAWN_TIMER);
 
   // Raise death event
   else
@@ -89,37 +89,37 @@ void FallDeath::Respawn()
   fallen = false;
 
   // Reset timer
-  gameObject.timer.Reset(RESPAWN_TIMER, 0, false);
+  worldObject.timer.Reset(RESPAWN_TIMER, 0, false);
 
   // Get height
-  auto height = gameObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
+  auto height = worldObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
 
   // Set new position
-  gameObject.SetPosition({0, -arena->height / 2 - height / 2});
+  worldObject.SetPosition({0, -arena->height / 2 - height / 2});
 
   // Enable it
   SetCharacterActive(true);
 
-  auto body = gameObject.RequireComponent<Rigidbody>();
-  auto movement = gameObject.RequireComponent<Movement>();
-  auto input = gameObject.RequireComponent<PlayerInput>();
-  auto stateManager = gameObject.RequireComponent<CharacterStateManager>();
+  auto body = worldObject.RequireComponent<Rigidbody>();
+  auto movement = worldObject.RequireComponent<Movement>();
+  auto input = worldObject.RequireComponent<PlayerInput>();
+  auto stateManager = worldObject.RequireComponent<CharacterStateManager>();
 
   return;
 }
 
 void FallDeath::SetCharacterActive(bool active)
 {
-  gameObject.RequireComponent<SpriteRenderer>()->SetEnabled(active);
-  gameObject.RequireComponent<Animator>()->SetEnabled(active);
-  gameObject.RequireComponent<Rigidbody>()->SetEnabled(active);
-  gameObject.RequireComponent<Collider>()->SetEnabled(active);
-  gameObject.RequireComponent<Movement>()->SetEnabled(active);
-  gameObject.RequireComponent<PlayerInput>()->SetEnabled(active);
-  gameObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
-  gameObject.RequireComponent<CharacterController>()->SetEnabled(active);
-  gameObject.RequireComponentInChildren<CharacterRepelCollision>()->SetEnabled(active);
-  gameObject.RequireComponentInChildren<CharacterBadge>()->ShowBadge(active);
+  worldObject.RequireComponent<SpriteRenderer>()->SetEnabled(active);
+  worldObject.RequireComponent<Animator>()->SetEnabled(active);
+  worldObject.RequireComponent<Rigidbody>()->SetEnabled(active);
+  worldObject.RequireComponent<Collider>()->SetEnabled(active);
+  worldObject.RequireComponent<Movement>()->SetEnabled(active);
+  worldObject.RequireComponent<PlayerInput>()->SetEnabled(active);
+  worldObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
+  worldObject.RequireComponent<CharacterController>()->SetEnabled(active);
+  worldObject.RequireComponentInChildren<CharacterRepelCollision>()->SetEnabled(active);
+  worldObject.RequireComponentInChildren<CharacterBadge>()->ShowBadge(active);
 }
 
 bool FallDeath::IsFallen() const { return fallen; }
@@ -131,23 +131,23 @@ void FallDeath::PlayEffect() const
   LOCK(weakArena, arena);
 
   // Get radius
-  auto radius = gameObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
+  auto radius = worldObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
 
   // Get effect position
   Vector2 effectPosition{
-      Clamp(gameObject.GetPosition().x, -arena->width / 2 - radius, arena->width / 2 + radius),
-      Clamp(gameObject.GetPosition().y, -arena->height / 2 - radius, arena->height / 2 + radius)};
+      Clamp(worldObject.GetPosition().x, -arena->width / 2 - radius, arena->width / 2 + radius),
+      Clamp(worldObject.GetPosition().y, -arena->height / 2 - radius, arena->height / 2 + radius)};
 
   // Get effect direction
   Vector2 effectDirection;
-  if (gameObject.GetPosition().x < -arena->width / 2)
+  if (worldObject.GetPosition().x < -arena->width / 2)
     effectDirection.x = 1;
-  else if (gameObject.GetPosition().x > arena->width / 2)
+  else if (worldObject.GetPosition().x > arena->width / 2)
     effectDirection.x = -1;
 
-  if (gameObject.GetPosition().y < -arena->height / 2)
+  if (worldObject.GetPosition().y < -arena->height / 2)
     effectDirection.y = 1;
-  else if (gameObject.GetPosition().y > arena->height / 2)
+  else if (worldObject.GetPosition().y > arena->height / 2)
     effectDirection.y = -1;
 
   float effectAngle = effectDirection.Angle();

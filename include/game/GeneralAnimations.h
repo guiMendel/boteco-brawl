@@ -76,7 +76,7 @@
     return frame;                  \
   }
 
-#define BASE_DAMAGE animator.gameObject.RequireComponent<Character>()->GetBaseDamage()
+#define BASE_DAMAGE animator.worldObject.RequireComponent<Character>()->GetBaseDamage()
 
 class Animator;
 
@@ -284,7 +284,7 @@ namespace GeneralAnimations
 
     bool QuitLoopOnInputRelease() const override { return false; }
 
-    SET_DAMAGE(3.5f * BASE_DAMAGE, AttackImpulse(animator.gameObject.GetShared(), 6), 0.4)
+    SET_DAMAGE(3.5f * BASE_DAMAGE, AttackImpulse(animator.worldObject.GetShared(), 6), 0.4)
   };
 
   class SpecialNeutral : public StatefulAnimation
@@ -357,9 +357,9 @@ namespace GeneralAnimations
   class Projectile : public AttackAnimation
   {
   public:
-    std::weak_ptr<GameObject> weakParent;
+    std::weak_ptr<WorldObject> weakParent;
 
-    Projectile(Animator &animator, std::weak_ptr<GameObject> weakParent)
+    Projectile(Animator &animator, std::weak_ptr<WorldObject> weakParent)
         : AttackAnimation(animator), weakParent(weakParent) {}
     ~Projectile() {}
 
@@ -368,7 +368,7 @@ namespace GeneralAnimations
     void OnConnectAttack(std::shared_ptr<CharacterController>) override;
     void InternalOnStart() override;
 
-    SET_DAMAGE(1.8, AttackImpulse(animator.gameObject.GetShared(), 2), 0.2)
+    SET_DAMAGE(1.8, AttackImpulse(animator.worldObject.GetShared(), 2), 0.2)
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 

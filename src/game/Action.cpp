@@ -1,5 +1,5 @@
 #include "Action.h"
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Animator.h"
 #include "NewAnimationTypes.h"
 #include "CharacterStateManager.h"
@@ -12,7 +12,7 @@ using namespace std;
 bool Action::operator==(const Action &other) { return typeid(*this) == typeid(other); }
 bool Action::operator!=(const Action &other) { return !(*this == other); }
 
-void AnimationAction::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
+void AnimationAction::Trigger(WorldObject &target, shared_ptr<CharacterState> actionState)
 {
   // Store these info
   auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());
@@ -74,7 +74,7 @@ shared_ptr<CharacterState> AttackAction::NextState(shared_ptr<Action> sharedActi
   return CharacterStateRecipes::Attacking(sharedAction);
 }
 
-void AttackAction::Trigger(GameObject &target, shared_ptr<CharacterState> actionState)
+void AttackAction::Trigger(WorldObject &target, shared_ptr<CharacterState> actionState)
 {
   // Ensure character orientation is set to PlayerInput direction
   auto playerInput = target.RequireComponent<PlayerInput>();

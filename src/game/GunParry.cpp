@@ -1,7 +1,7 @@
 #include "GunParry.h"
 #include "Character.h"
 
-GunParry::GunParry(GameObject &associatedObject) : Parry(associatedObject) {}
+GunParry::GunParry(WorldObject &associatedObject) : Parry(associatedObject) {}
 
 bool GunParry::CanParry(Damage damage)
 {

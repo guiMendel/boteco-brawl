@@ -1,6 +1,6 @@
 #include "Damage.h"
 #include "Helper.h"
-#include "GameObject.h"
+#include "WorldObject.h"
 
 using namespace std;
 using namespace Helper;
@@ -11,10 +11,10 @@ AttackImpulse::AttackImpulse()
 AttackImpulse::AttackImpulse(Vector2 direction, float magnitude)
     : magnitude(magnitude), type(Directed), direction(direction.Normalized()) {}
 
-AttackImpulse::AttackImpulse(std::shared_ptr<GameObject> origin, float magnitude)
+AttackImpulse::AttackImpulse(std::shared_ptr<WorldObject> origin, float magnitude)
     : magnitude(magnitude), type(Repulsion), weakOrigin(origin) {}
 
-Vector2 AttackImpulse::DeriveImpulse(std::shared_ptr<GameObject> target) const
+Vector2 AttackImpulse::DeriveImpulse(std::shared_ptr<WorldObject> target) const
 {
   switch (type)
   {
@@ -29,7 +29,7 @@ Vector2 AttackImpulse::DeriveImpulse(std::shared_ptr<GameObject> target) const
   throw runtime_error("Trying to derive impulse with unrecognized type");
 }
 
-Damage DamageParameters::DeriveDamage(shared_ptr<GameObject> author) const
+Damage DamageParameters::DeriveDamage(shared_ptr<WorldObject> author) const
 {
   AttackImpulse damageImpulse{impulse};
   damageImpulse.mirrored = author->GetScale().x < 0;

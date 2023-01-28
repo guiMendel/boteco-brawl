@@ -7,8 +7,8 @@ using namespace std;
 
 const float CharacterBadge::textSizeMultiplierDecay{3};
 
-CharacterBadge::CharacterBadge(GameObject &associatedObject, shared_ptr<Character> character)
-    : Component(associatedObject), weakCharacter(character), weakText(gameObject.RequireComponent<Text>())
+CharacterBadge::CharacterBadge(WorldObject &associatedObject, shared_ptr<Character> character)
+    : Component(associatedObject), weakCharacter(character), weakText(worldObject.RequireComponent<Text>())
 {
   LOCK(weakText, text);
   originalTextSize = text->GetFontSize();
@@ -16,19 +16,19 @@ CharacterBadge::CharacterBadge(GameObject &associatedObject, shared_ptr<Characte
 
 void CharacterBadge::Start()
 {
-  gameObject.GetParent()->RequireComponent<Heat>()->OnHeatChange.AddListener("update-heat-display", [this](float newHeat, float oldHeat)
+  worldObject.GetParent()->RequireComponent<Heat>()->OnHeatChange.AddListener("update-heat-display", [this](float newHeat, float oldHeat)
                                                                              { UpdateDisplay(newHeat, oldHeat); });
 
-  gameObject.GetParent()->RequireComponent<FallDeath>()->OnFall.AddListener("update-heat-display", [this]()
+  worldObject.GetParent()->RequireComponent<FallDeath>()->OnFall.AddListener("update-heat-display", [this]()
                                                                             { UpdateDisplay(0, 0); });
 
   UpdateDisplay(0, 0);
 
   // Get player
-  auto player = gameObject.GetParent()->RequireComponent<CharacterController>()->GetPlayer();
+  auto player = worldObject.GetParent()->RequireComponent<CharacterController>()->GetPlayer();
 
   // Set badge color to player color
-  gameObject.RequireComponent<SpriteRenderer>()->SetColor(player->GetColor());
+  worldObject.RequireComponent<SpriteRenderer>()->SetColor(player->GetColor());
 }
 
 void CharacterBadge::Update(float deltaTime)

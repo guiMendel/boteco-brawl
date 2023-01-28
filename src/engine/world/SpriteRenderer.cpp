@@ -7,25 +7,25 @@
 using namespace std;
 using namespace Helper;
 
-SpriteRenderer::SpriteRenderer(GameObject &associatedObject, RenderLayer renderLayer, int renderOrder)
+SpriteRenderer::SpriteRenderer(WorldObject &associatedObject, RenderLayer renderLayer, int renderOrder)
     : Component(associatedObject), renderLayer(renderLayer), renderOrder(renderOrder)
 {
 }
 
 // Constructor with image file name
-SpriteRenderer::SpriteRenderer(GameObject &associatedObject, const string fileName, RenderLayer renderLayer, int renderOrder) : SpriteRenderer(associatedObject, renderLayer, renderOrder)
+SpriteRenderer::SpriteRenderer(WorldObject &associatedObject, const string fileName, RenderLayer renderLayer, int renderOrder) : SpriteRenderer(associatedObject, renderLayer, renderOrder)
 {
   sprite = Resources::GetSprite(fileName);
 }
 
-void SpriteRenderer::Render() { Render(gameObject.GetPosition()); }
+void SpriteRenderer::Render() { Render(worldObject.GetPosition()); }
 
 Vector2 SpriteRenderer::RenderPositionFor(Vector2 position, shared_ptr<Sprite> referenceSprite) const
 {
   // Apply offset
-  position += offset * gameObject.GetScale();
+  position += offset * worldObject.GetScale();
 
-  auto scale = gameObject.GetScale().GetAbsolute();
+  auto scale = worldObject.GetScale().GetAbsolute();
   auto sprite = referenceSprite == nullptr ? this->sprite : referenceSprite;
 
   Assert(sprite != nullptr, "Sprite renderer had no sprite set");
@@ -47,7 +47,7 @@ void SpriteRenderer::Render(Vector2 position)
 {
   position = RenderPositionFor(position);
 
-  auto scale = gameObject.GetScale().GetAbsolute();
+  auto scale = worldObject.GetScale().GetAbsolute();
 
   auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
 
@@ -66,8 +66,8 @@ void SpriteRenderer::Render(Vector2 position)
   }
 
   // Detect flips
-  SDL_RendererFlip horizontalFlip = gameObject.localScale.x < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
-  SDL_RendererFlip verticalFlip = gameObject.localScale.y < 0 ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;
+  SDL_RendererFlip horizontalFlip = worldObject.localScale.x < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
+  SDL_RendererFlip verticalFlip = worldObject.localScale.y < 0 ? SDL_FLIP_VERTICAL : SDL_FLIP_NONE;
 
   // Get source clip
   auto sourceRect = sprite->GetClip();
@@ -80,7 +80,7 @@ void SpriteRenderer::Render(Vector2 position)
         texture,
         &sourceRect,
         &destinationRect,
-        Helper::RadiansToDegrees(gameObject.GetRotation()),
+        Helper::RadiansToDegrees(worldObject.GetRotation()),
         nullptr,
         SDL_RendererFlip(horizontalFlip | verticalFlip));
   };

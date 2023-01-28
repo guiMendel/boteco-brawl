@@ -18,20 +18,20 @@
 
 class GameState;
 
-class GameObject
+class WorldObject
 {
   friend class GameState;
   friend class PhysicsSystem;
 
   // Constructor dedicated for a state's root object
   // Initialize with given state
-  GameObject(std::string name, int gameStateId, int id = -1);
+  WorldObject(std::string name, int gameStateId, int id = -1);
 
 public:
   // With dimensions
-  GameObject(
-      std::string name, Vector2 coordinates = Vector2(0, 0), double rotation = 0.0, std::shared_ptr<GameObject> parent = nullptr);
-  ~GameObject();
+  WorldObject(
+      std::string name, Vector2 coordinates = Vector2(0, 0), double rotation = 0.0, std::shared_ptr<WorldObject> parent = nullptr);
+  ~WorldObject();
 
   // =================================
   // FRAME EVENTS
@@ -77,10 +77,10 @@ public:
 
 private:
   // Unlinks from parent, destroys all children and destroys self
-  auto InternalDestroy() -> std::unordered_map<int, std::weak_ptr<GameObject>>::iterator;
+  auto InternalDestroy() -> std::unordered_map<int, std::weak_ptr<WorldObject>>::iterator;
 
   // Deletes reference to parent and paren't reference to self
-  auto UnlinkParent() -> std::unordered_map<int, std::weak_ptr<GameObject>>::iterator;
+  auto UnlinkParent() -> std::unordered_map<int, std::weak_ptr<WorldObject>>::iterator;
 
   // Whether is dead
   bool destroyRequested{false};
@@ -239,7 +239,7 @@ public:
   std::string GetName() const { return name; }
 
   // Returns this object's shared pointer
-  std::shared_ptr<GameObject> GetShared();
+  std::shared_ptr<WorldObject> GetShared();
 
   // Where this object exists in game space, in absolute coordinates
   Vector2 GetPosition();
@@ -270,7 +270,7 @@ public:
   // Object's rotation, in radians
   double localRotation{0};
 
-  // Object's unique name
+  // Object's unique identifier
   const int id;
 
   // This object's tag
@@ -286,39 +286,39 @@ public:
   // OBJECTS HIERARCHY
   // =================================
 public:
-  std::shared_ptr<GameObject> CreateChild(std::string name);
-  std::shared_ptr<GameObject> CreateChild(std::string name, Vector2 offset);
-  std::shared_ptr<GameObject> CreateChild(std::string name, Vector2 offset, float offsetRotation);
-  std::vector<std::shared_ptr<GameObject>> GetChildren();
-  std::shared_ptr<GameObject> GetChild(std::string name);
-  std::shared_ptr<GameObject> GetChild(int id);
-  std::shared_ptr<GameObject> RequireChild(std::string name);
-  std::shared_ptr<GameObject> RequireChild(int id);
+  std::shared_ptr<WorldObject> CreateChild(std::string name);
+  std::shared_ptr<WorldObject> CreateChild(std::string name, Vector2 offset);
+  std::shared_ptr<WorldObject> CreateChild(std::string name, Vector2 offset, float offsetRotation);
+  std::vector<std::shared_ptr<WorldObject>> GetChildren();
+  std::shared_ptr<WorldObject> GetChild(std::string name);
+  std::shared_ptr<WorldObject> GetChild(int id);
+  std::shared_ptr<WorldObject> RequireChild(std::string name);
+  std::shared_ptr<WorldObject> RequireChild(int id);
 
   // Get's pointer to parent, and ensures it's valid, unless this is the root object. If the parent is the root object, returns nullptr
-  std::shared_ptr<GameObject> GetParent() const;
+  std::shared_ptr<WorldObject> GetParent() const;
 
   // Set the parent
-  void SetParent(std::shared_ptr<GameObject> newParent);
+  void SetParent(std::shared_ptr<WorldObject> newParent);
 
-  // Check if this gameObject is in the descendant lineage of the other object
-  bool IsDescendantOf(const GameObject &other) const;
+  // Check if this worldObject is in the descendant lineage of the other object
+  bool IsDescendantOf(const WorldObject &other) const;
 
   // Check if either object is a descendent of each other
-  static bool SameLineage(const GameObject &first, const GameObject &second);
+  static bool SameLineage(const WorldObject &first, const WorldObject &second);
 
 private:
   // Whether this is the root object
   bool IsRoot() const { return id == 0; }
 
   // Get's pointer to parent, and ensures it's valid, unless this is the root object
-  std::shared_ptr<GameObject> InternalGetParent() const;
+  std::shared_ptr<WorldObject> InternalGetParent() const;
 
   // Child objects
-  std::unordered_map<int, std::weak_ptr<GameObject>> children;
+  std::unordered_map<int, std::weak_ptr<WorldObject>> children;
 
   // Parent object
-  std::weak_ptr<GameObject> weakParent;
+  std::weak_ptr<WorldObject> weakParent;
 
   // =================================
   // UTILITY
@@ -422,12 +422,12 @@ private:
   // OPERATORS
   // =================================
 public:
-  bool operator==(const GameObject &other) const;
+  bool operator==(const WorldObject &other) const;
 
   explicit operator std::string() const;
 };
 
-std::ostream &operator<<(std::ostream &stream, const GameObject &vector);
+std::ostream &operator<<(std::ostream &stream, const WorldObject &vector);
 
 #include "GameState.h"
 

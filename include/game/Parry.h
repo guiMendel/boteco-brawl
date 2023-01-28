@@ -7,7 +7,7 @@
 class Parry : public Component
 {
 public:
-  Parry(GameObject &associatedObject) : Component(associatedObject) {}
+  Parry(WorldObject &associatedObject) : Component(associatedObject) {}
   virtual ~Parry() {}
 
   // Whether a given attack damage can be parried right now

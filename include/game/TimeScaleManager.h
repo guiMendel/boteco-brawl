@@ -6,16 +6,16 @@
 class TimeScaleManager : public Component
 {
 public:
-  TimeScaleManager(GameObject &associatedObject);
+  TimeScaleManager(WorldObject &associatedObject);
   virtual ~TimeScaleManager() {}
 
   void OnBeforeDestroy() override;
 
   // Set the timescale for a given object, and revert it after the given interval
-  void AlterTimeScale(std::shared_ptr<GameObject> target, float newScale, float duration);
+  void AlterTimeScale(std::shared_ptr<WorldObject> target, float newScale, float duration);
 
   // Remove any previous time scale alterations on this object
-  void ResetTimeScale(std::shared_ptr<GameObject> target);
+  void ResetTimeScale(std::shared_ptr<WorldObject> target);
 
 private:
   // Remember for which objects time scale was altered, by their ids

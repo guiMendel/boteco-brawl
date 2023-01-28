@@ -1,7 +1,7 @@
 #ifndef __FALL_OFF_DEATH__
 #define __FALL_OFF_DEATH__
 
-#include "GameObject.h"
+#include "WorldObject.h"
 #include "Component.h"
 #include "Arena.h"
 
@@ -23,7 +23,7 @@ public:
   // Triggered when all lives are spent
   Event OnDeath;
 
-  FallDeath(GameObject &associatedObject);
+  FallDeath(WorldObject &associatedObject);
   virtual ~FallDeath() {}
 
   void Update(float) override;

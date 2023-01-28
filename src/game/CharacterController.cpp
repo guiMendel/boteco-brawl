@@ -18,13 +18,13 @@ using namespace std;
 
 const float CharacterController::totalDashCooldown{1};
 
-CharacterController::CharacterController(GameObject &associatedObject, shared_ptr<Player> player)
+CharacterController::CharacterController(WorldObject &associatedObject, shared_ptr<Player> player)
     : Component(associatedObject),
       weakPlayer(player),
-      stateManager(*gameObject.RequireComponent<CharacterStateManager>()),
-      movement(*gameObject.RequireComponent<Movement>()),
-      rigidbody(*gameObject.RequireComponent<Rigidbody>()),
-      animator(*gameObject.RequireComponent<Animator>()) {}
+      stateManager(*worldObject.RequireComponent<CharacterStateManager>()),
+      movement(*worldObject.RequireComponent<Movement>()),
+      rigidbody(*worldObject.RequireComponent<Rigidbody>()),
+      animator(*worldObject.RequireComponent<Animator>()) {}
 
 void CharacterController::PhysicsUpdate(float)
 {
@@ -88,7 +88,7 @@ void CharacterController::HandleMovementAnimation()
 void CharacterController::Start()
 {
   // For now, there must be player input. In the future there may be an AIInput instead
-  auto inputs = gameObject.GetComponents<PlayerInput>();
+  auto inputs = worldObject.GetComponents<PlayerInput>();
 
   Assert(inputs.empty() == false, "Character object had no input methods");
 
@@ -176,7 +176,7 @@ void CharacterController::AnnounceInputRelease(std::string targetState)
 
 void CharacterController::OnLand()
 {
-  cout << gameObject << " reaching ground with " << lastVelocity << endl;
+  cout << worldObject << " reaching ground with " << lastVelocity << endl;
   // cout << stateManager.IsBouncing() << " and " << (lastVelocity.y >= CharacterStateManager::minBounceSpeed) << endl;
   // cout << lastVelocity.y << " and " << CharacterStateManager::minBounceSpeed << endl;
 
@@ -197,7 +197,7 @@ void CharacterController::OnLand()
   }
 
   // Detect effector interception
-  if (auto effectors = gameObject.GetComponents<LandEffector>(); effectors.size() > 0)
+  if (auto effectors = worldObject.GetComponents<LandEffector>(); effectors.size() > 0)
   {
     // Check if one of them will override land
     for (auto effector : effectors)
@@ -249,7 +249,7 @@ void CharacterController::DispatchDash(Vector2 direction)
 
   // If no direction, use object's facing direction
   if (!direction)
-    direction = Vector2(gameObject.localScale.x, 0);
+    direction = Vector2(worldObject.localScale.x, 0);
 
   dashCooldown = totalDashCooldown;
 
@@ -261,7 +261,7 @@ void CharacterController::TakeHit(Damage damage, bool parryable)
   // Check if can parry
   if (parryable)
   {
-    auto parry = gameObject.GetComponent<Parry>();
+    auto parry = worldObject.GetComponent<Parry>();
 
     // If can parry, perform riposte
     if (parry != nullptr && parry->CanParry(damage))
