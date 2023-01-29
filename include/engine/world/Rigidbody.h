@@ -3,7 +3,7 @@
 
 #include "Vector2.h"
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "PhysicsSystem.h"
 #include <unordered_set>
 
@@ -16,14 +16,14 @@ enum class RigidbodyType
   Dynamic
 };
 
-class Rigidbody : public Component
+class Rigidbody : public WorldComponent
 {
   friend class PhysicsSystem;
 
 public:
   static const float defaultAirFriction;
 
-  Rigidbody(WorldObject &associatedObject, RigidbodyType type, float elasticity = 0, float friction = 0.8f);
+  Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity = 0, float friction = 0.8f);
 
   virtual ~Rigidbody() {}
 

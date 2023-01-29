@@ -6,21 +6,21 @@
 #include <SDL_image.h>
 #include "Helper.h"
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Sprite.h"
 #include "Color.h"
 
-class SpriteRenderer : public Component
+class SpriteRenderer : public WorldComponent
 {
 public:
   // Raised whenever offset changes
   EventI<Vector2> OnSetOffset;
 
   // Constructor with image file name
-  SpriteRenderer(WorldObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
+  SpriteRenderer(GameObject &associatedObject, const std::string fileName, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
 
   // Default constructor
-  SpriteRenderer(WorldObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
+  SpriteRenderer(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, int renderOrder = 0);
 
   virtual ~SpriteRenderer() {}
 

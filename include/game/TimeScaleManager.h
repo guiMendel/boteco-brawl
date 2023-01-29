@@ -1,12 +1,12 @@
 #ifndef __TIME_SCALE_MANAGER__
 #define __TIME_SCALE_MANAGER__
 
-#include "Component.h"
+#include "WorldComponent.h"
 
-class TimeScaleManager : public Component
+class TimeScaleManager : public WorldComponent
 {
 public:
-  TimeScaleManager(WorldObject &associatedObject);
+  TimeScaleManager(GameObject &associatedObject);
   virtual ~TimeScaleManager() {}
 
   void OnBeforeDestroy() override;

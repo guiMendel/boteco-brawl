@@ -1,7 +1,7 @@
 #ifndef __HEAT__
 #define __HEAT__
 
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Damage.h"
 #include "Rigidbody.h"
 #include "Movement.h"
@@ -10,7 +10,7 @@
 #include "CharacterStateManager.h"
 #include "CharacterController.h"
 
-struct Heat : public Component
+struct Heat : public WorldComponent
 {
 public:
   // How much characters get lifted from the ground when taking a blow
@@ -25,7 +25,7 @@ public:
   // When heat value changes
   EventII<float, float> OnHeatChange;
 
-  Heat(WorldObject &associatedObject, float armor);
+  Heat(GameObject &associatedObject, float armor);
   virtual ~Heat() {}
 
   void Awake() override;

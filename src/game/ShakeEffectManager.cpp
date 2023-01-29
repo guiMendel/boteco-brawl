@@ -3,7 +3,7 @@
 
 using namespace std;
 
-ShakeEffectManager::ShakeEffectManager(WorldObject &associatedObject) : Component(associatedObject) {}
+ShakeEffectManager::ShakeEffectManager(GameObject &associatedObject) : WorldComponent(associatedObject) {}
 
 void ShakeEffectManager::OnBeforeDestroy()
 {

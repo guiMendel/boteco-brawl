@@ -3,8 +3,8 @@
 
 using namespace std;
 
-PlayerInput::PlayerInput(WorldObject &associatedObject)
-    : Component(associatedObject), weakMovement(worldObject.RequireComponent<Movement>())
+PlayerInput::PlayerInput(GameObject &associatedObject)
+    : WorldComponent(associatedObject), weakMovement(worldObject.RequireComponent<Movement>())
 {
   auto reset = [this]()
   {

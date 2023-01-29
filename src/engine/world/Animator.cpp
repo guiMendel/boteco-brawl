@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Animator::Animator(WorldObject &associatedObject) : Component(associatedObject) {}
+Animator::Animator(GameObject &associatedObject) : WorldComponent(associatedObject) {}
 
 void Animator::OnBeforeDestroy()
 {

@@ -4,20 +4,21 @@
 // Name of worldObject which will contain this component
 #define ATTACK_OBJECT "Hitbox"
 
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Damage.h"
 #include "Character.h"
+#include <unordered_set>
 
 class CharacterController;
 
-struct Attack : public Component
+struct Attack : public WorldComponent
 {
 public:
   // Raised when attack connects
   EventI<std::shared_ptr<CharacterController>> OnConnect;
 
   // Initializes with the attack damage's parameters and an optional hit cooldown, which if set allows for multi-hits
-  Attack(WorldObject &associatedObject, DamageParameters damage, float hitSecondsCooldown = -1);
+  Attack(GameObject &associatedObject, DamageParameters damage, float hitSecondsCooldown = -1);
   virtual ~Attack() {}
 
   void OnTriggerCollisionEnter(TriggerCollisionData) override;

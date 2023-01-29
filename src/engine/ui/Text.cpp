@@ -5,9 +5,9 @@
 using namespace std;
 
 Text::Text(
-    WorldObject &associatedObject, string text, string fontPath,
+    GameObject &associatedObject, string text, string fontPath,
     int size, Style style, Color color)
-    : Component(associatedObject), text(text), fontSize(size),
+    : WorldComponent(associatedObject), text(text), fontSize(size),
       style(style), color(color), fontPath(fontPath), font(Resources::GetFont(fontPath, size)), mainTexture(nullptr, SDL_DestroyTexture)
 {
   // Load texture format through a sample texture

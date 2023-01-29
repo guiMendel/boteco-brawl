@@ -128,13 +128,13 @@ WORLD_OBJS = $(patsubst %,$(WORLD_OBJECT_DIRECTORY)\\%,$(_WORLD_OBJS))
 # === WORLD-UI
 
 # Header files
-_WORLD_UI_DEPS = Camera.h Component.h Debug.h Game.h WorldObject.h GameScene.h InputManager.h Resources.h Sprite.h Timer.h
+_WORLD_UI_DEPS = Camera.h Component.h Debug.h Game.h WorldObject.h GameScene.h InputManager.h Resources.h Sprite.h Timer.h GameObject.h WorldComponent.h
 
 # Generate header filepaths
 WORLD_UI_DEPS = $(patsubst %,$(WORLD_UI_INCLUDE_DIRECTORY)\\%,$(_WORLD_UI_DEPS))
 
 # Object files
-_WORLD_UI_OBJS = Camera.o Component.o Debug.o Game.o WorldObject.o GameScene.o InputManager.o Resources.o Sprite.o
+_WORLD_UI_OBJS = Camera.o Component.o Debug.o Game.o WorldObject.o GameScene.o InputManager.o Resources.o Sprite.o GameObject.o WorldComponent.o
 
 # Generate object filepaths
 WORLD_UI_OBJS = $(patsubst %,$(WORLD_UI_OBJECT_DIRECTORY)\\%,$(_WORLD_UI_OBJS))

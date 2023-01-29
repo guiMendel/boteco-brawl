@@ -19,7 +19,7 @@ ControllerDevice::ControllerDevice(int controllerIndex)
   cout << "Controller \"" << SDL_GameControllerName(controllerStruct.get()) << "\" added with instance ID " << GetId() << endl;
 
   // Associate to players searching for a controller, when available
-  auto playerManager = Game::GetInstance().GetScene()->FindObjectOfType<PlayerManager>();
+  auto playerManager = Game::GetInstance().GetScene()->FindComponent<PlayerManager>();
 
   if (playerManager == nullptr)
     cout << "WARNING: No PlayerManager instance was found, controller " << instanceId << " will never be used." << endl;
@@ -66,7 +66,7 @@ void ControllerDevice::MaybeAssociateToPlayer(std::shared_ptr<Player> player)
 
 void ControllerDevice::SearchPlayersForAssociation()
 {
-  auto playerManager = Game::GetInstance().GetScene()->FindObjectOfType<PlayerManager>();
+  auto playerManager = Game::GetInstance().GetScene()->FindComponent<PlayerManager>();
 
   if (playerManager == nullptr)
     return;

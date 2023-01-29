@@ -1,14 +1,14 @@
 #ifndef __LAND_EFFECTOR__
 #define __LAND_EFFECTOR__
 
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Action.h"
 
 // Allows for modifying which action is dispatched on land
-class LandEffector : public Component
+class LandEffector : public WorldComponent
 {
 public:
-  LandEffector(WorldObject &associatedObject) : Component(associatedObject) {}
+  LandEffector(GameObject &associatedObject) : WorldComponent(associatedObject) {}
   virtual ~LandEffector() {}
 
   // Which action to perform for landing

@@ -5,15 +5,15 @@
 #include "WorldObject.h"
 #include "Vector2.h"
 #include "Rectangle.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include <memory>
 
-class Camera : public Component
+class Camera : public WorldComponent
 {
 public:
   static std::shared_ptr<Camera> GetMain();
 
-  Camera(WorldObject &associatedObject, float size = 5);
+  Camera(GameObject &associatedObject, float size = 5);
 
   virtual ~Camera() {}
 

@@ -11,7 +11,7 @@ class CircleCollider : public Collider
 {
 public:
   // Explicitly initialize circle
-  CircleCollider(WorldObject &associatedObject, Circle circle, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default);
+  CircleCollider(GameObject &associatedObject, Circle circle, bool isTrigger = false, ColliderDensity density = ColliderDensity::Default);
 
   virtual ~CircleCollider() {}
 

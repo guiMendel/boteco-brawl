@@ -3,8 +3,8 @@
 
 using namespace std;
 
-Attack::Attack(WorldObject &associatedObject, DamageParameters damage, float hitSecondsCooldown)
-    : Component(associatedObject), damage(damage), hitCooldown(hitSecondsCooldown * 1000) {}
+Attack::Attack(GameObject &associatedObject, DamageParameters damage, float hitSecondsCooldown)
+    : WorldComponent(associatedObject), damage(damage), hitCooldown(hitSecondsCooldown * 1000) {}
 
 void Attack::Land(shared_ptr<CharacterController> targetController)
 {

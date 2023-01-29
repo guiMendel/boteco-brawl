@@ -129,7 +129,7 @@ for Script in ./include/**/*.h; do
   # Detect component scripts
 
   # Find the component class declaration line
-  Class=$(cat $Script | grep -oP "(?<=class )$CLabel(?= : public Component)")
+  Class=$(cat $Script | grep -oP "(?<=class )$CLabel(?= : public WorldComponent)")
 
   # If it exists
   if [[ -n "$Class" ]]

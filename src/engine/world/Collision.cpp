@@ -4,7 +4,7 @@
 #include "Circle.h"
 
 #define CAST_SHAPE(oldVar, newVar, NewType)            \
-  auto newVar = dynamic_pointer_cast<NewType>(oldVar); \
+  auto newVar = RequirePointerCast<NewType>(oldVar); \
   Assert(newVar != nullptr, "Failed to get " #NewType " pointer " #newVar " in distance finder call");
 
 #define SHAPE_ID(shape) string(typeid(shape).name())

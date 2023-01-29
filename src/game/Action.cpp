@@ -38,8 +38,7 @@ void AnimationAction::Trigger(WorldObject &target, shared_ptr<CharacterState> ac
   }
 
   // Get the animation and convert it to stateful
-  auto animation = dynamic_pointer_cast<StatefulAnimation>(animator->BuildAnimation(animationName));
-  Assert(animation != nullptr, "Action generated an animation which wasn't stateful");
+  auto animation = RequirePointerCast<StatefulAnimation>(animator->BuildAnimation(animationName));
 
   // Register the action's state to the animation
   animation->RegisterState(actionState);

@@ -2,8 +2,8 @@
 
 using namespace std;
 
-Character::Character(WorldObject &associatedObject)
-    : Component(associatedObject) {}
+Character::Character(GameObject &associatedObject)
+    : WorldComponent(associatedObject) {}
 
 int Character::TransformSequenceIndexFor(string animation, int index) const
 {

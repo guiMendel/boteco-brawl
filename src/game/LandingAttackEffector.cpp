@@ -3,7 +3,7 @@
 
 using namespace std;
 
-LandingAttackEffector::LandingAttackEffector(WorldObject &associatedObject, function<bool()> effectorCondition)
+LandingAttackEffector::LandingAttackEffector(GameObject &associatedObject, function<bool()> effectorCondition)
     : LandEffector(associatedObject), effectorCondition(effectorCondition) {}
 
 shared_ptr<Action> LandingAttackEffector::GetLandAction()

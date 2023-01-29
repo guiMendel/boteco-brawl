@@ -2,7 +2,7 @@
 #define __PARTICLE_EMITTER__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Circle.h"
 #include "Color.h"
 #include "ParticleSystem.h"
@@ -41,12 +41,12 @@ struct ParticleEmissionParameters
   ParticleEmissionParameters();
 };
 
-class ParticleEmitter : public Component
+class ParticleEmitter : public WorldComponent
 {
 public:
   Event OnStop;
 
-  ParticleEmitter(WorldObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float radius = 0.01, bool loop = false, float duration = 1);
+  ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float radius = 0.01, bool loop = false, float duration = 1);
 
   ~ParticleEmitter() {}
 

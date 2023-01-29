@@ -1,20 +1,20 @@
 #ifndef __CHARACTER_VFX__
 #define __CHARACTER_VFX__
 
-#include "Component.h"
+#include "WorldComponent.h"
 #include "ParticleEmitter.h"
 #include "ParticleFX.h"
 #include "Rigidbody.h"
 
 #define PARTICLE_EMITTER_OBJECT "ParticleEffects"
 
-class CharacterVFX : public Component
+class CharacterVFX : public WorldComponent
 {
 public:
   template <class T>
   using range = ParticleEmissionParameters::range<T>;
 
-  CharacterVFX(WorldObject &associatedObject);
+  CharacterVFX(GameObject &associatedObject);
   virtual ~CharacterVFX() {}
 
   void Awake() override;

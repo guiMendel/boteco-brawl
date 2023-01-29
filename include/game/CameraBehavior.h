@@ -1,11 +1,11 @@
 #ifndef __CAMERA_BEHAVIOR__
 #define __CAMERA_BEHAVIOR__
 
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Camera.h"
 #include "Arena.h"
 
-class CameraBehavior : public Component
+class CameraBehavior : public WorldComponent
 {
 public:
   // How much padding to add between characters and edges of the camera
@@ -29,7 +29,7 @@ public:
   // Minimum camera size
   static const float minSize;
 
-  CameraBehavior(WorldObject &associatedObject, std::shared_ptr<WorldObject> charactersParent);
+  CameraBehavior(GameObject &associatedObject, std::shared_ptr<WorldObject> charactersParent);
   virtual ~CameraBehavior() {}
 
   // Get current width and height of frame in units (dimensions of camera discounting padding)

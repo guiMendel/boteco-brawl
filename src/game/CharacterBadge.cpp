@@ -7,8 +7,8 @@ using namespace std;
 
 const float CharacterBadge::textSizeMultiplierDecay{3};
 
-CharacterBadge::CharacterBadge(WorldObject &associatedObject, shared_ptr<Character> character)
-    : Component(associatedObject), weakCharacter(character), weakText(worldObject.RequireComponent<Text>())
+CharacterBadge::CharacterBadge(GameObject &associatedObject, shared_ptr<Character> character)
+    : WorldComponent(associatedObject), weakCharacter(character), weakText(worldObject.RequireComponent<Text>())
 {
   LOCK(weakText, text);
   originalTextSize = text->GetFontSize();

@@ -1,16 +1,16 @@
 #ifndef __CHARACTER__
 #define __CHARACTER__
 
-#include "Component.h"
+#include "WorldComponent.h"
 
 // Base class for defining specific characteristics for each of the game's characters
-class Character : public Component
+class Character : public WorldComponent
 {
 public:
   using indexTransformer = std::function<int(int)>;
   using transformerMap = std::unordered_map<std::string, indexTransformer>;
 
-  Character(WorldObject &associatedObject);
+  Character(GameObject &associatedObject);
   virtual ~Character() {}
 
   // Transforms a sequence index for a given attack animation name

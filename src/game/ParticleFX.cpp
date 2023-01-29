@@ -3,13 +3,13 @@
 
 using namespace std;
 
-ParticleFX::ParticleFX(WorldObject &associatedObject)
-    : Component(associatedObject) {}
+ParticleFX::ParticleFX(GameObject &associatedObject)
+    : WorldComponent(associatedObject) {}
 
 void ParticleFX::EffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter)
 {
   // Find the instance
-  auto instance = Game::GetInstance().GetScene()->FindObjectOfType<ParticleFX>();
+  auto instance = Game::GetInstance().GetScene()->FindComponent<ParticleFX>();
 
   Assert(instance != nullptr, "Could not find ParticleFX instance");
 

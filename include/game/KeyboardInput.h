@@ -6,7 +6,7 @@
 class KeyboardInput : public PlayerInput
 {
 public:
-  KeyboardInput(WorldObject &associatedObject);
+  KeyboardInput(GameObject &associatedObject);
   virtual ~KeyboardInput() {}
 
   void Update(float deltaTime) override;

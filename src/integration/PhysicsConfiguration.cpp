@@ -31,7 +31,7 @@ void PhysicsLayerHandler::InitializeCollisionMatrix()
 // Allows for debug rendering
 void BoxCollider::Render()
 {
-  Debug::DrawBox(*dynamic_pointer_cast<Rectangle>(DeriveShape()));
+  Debug::DrawBox(*RequirePointerCast<Rectangle>(DeriveShape()));
 }
 
 // Allows for debug rendering
@@ -39,7 +39,7 @@ void CircleCollider::Render()
 {
   if (worldObject.GetName() == "Hitbox")
   {
-    auto circle = *dynamic_pointer_cast<Circle>(DeriveShape());
+    auto circle = *RequirePointerCast<Circle>(DeriveShape());
     auto attack = worldObject.RequireComponent<Attack>();
 
     float direction = GetSign(attack->worldObject.GetScale().x);
@@ -69,5 +69,5 @@ void CircleCollider::Render()
     return;
   }
 
-  Debug::DrawCircle(*dynamic_pointer_cast<Circle>(DeriveShape()));
+  Debug::DrawCircle(*RequirePointerCast<Circle>(DeriveShape()));
 }

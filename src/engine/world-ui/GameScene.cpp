@@ -8,7 +8,7 @@
 #include "ObjectRecipes.h"
 #include <iostream>
 
-#define CASCADE_OBJECTS(method, param) CascadeDown(rootObject, [param](WorldObject &object) { object.method(param); });
+#define CASCADE_OBJECTS(method, param) CascadeDown([param](GameObject &object) { object.method(param); });
 
 using namespace std;
 
@@ -30,25 +30,16 @@ GameScene::~GameScene()
   Resources::ClearAll();
 }
 
-void GameScene::CascadeDown(shared_ptr<WorldObject> object, function<void(WorldObject &)> callback, bool topDown)
+void GameScene::CascadeDown(function<void(GameObject &)> callback, bool topDown)
 {
-  // Execute on this object
-  if (topDown)
-    callback(*object);
-
-  // Execute on it's children
-  for (auto child : object->GetChildren())
-    CascadeDown(child, callback, topDown);
-
-  // Execute on this object (bottom up case)
-  if (topDown == false)
-    callback(*object);
+  // Cascade to root
+  GetRootObject()->CascadeDown(callback, topDown);
 }
 
-void GameScene::DeleteObjects()
+void GameScene::CollectDeadObjects()
 {
   // Check for dead objects
-  vector<weak_ptr<WorldObject>> deadObjects;
+  vector<weak_ptr<GameObject>> deadObjects;
 
   // Collect them
   for (auto &objectPair : gameObjects)
@@ -82,7 +73,7 @@ void GameScene::Update(float deltaTime)
   CASCADE_OBJECTS(Update, deltaTime);
 
   // Delete dead ones
-  DeleteObjects();
+  CollectDeadObjects();
 
   // cout << gameObjects.size() << endl;
 
@@ -108,7 +99,7 @@ void GameScene::Render()
   // Clear screen
   auto back = Camera::GetMain()->background;
   auto renderer = Game::GetInstance().GetRenderer();
-  
+
   SDL_SetRenderDrawColor(renderer, back.red, back.green, back.blue, 255);
   SDL_RenderClear(renderer);
 
@@ -145,7 +136,7 @@ void GameScene::Render()
   }
 }
 
-void GameScene::Sort(std::vector<std::weak_ptr<Component>> &components)
+void GameScene::Sort(vector<weak_ptr<Component>> &components)
 {
   // Component comparer
   // Must return true iff first parameter comes before second parameter
@@ -169,9 +160,6 @@ void GameScene::Start()
 {
   if (started)
     return;
-
-  // Load any assets
-  LoadAssets();
 
   // Create the initial objects
   InitializeObjects();
@@ -210,43 +198,25 @@ void GameScene::RemoveObject(int id)
   gameObjects.erase(id);
 }
 
-shared_ptr<WorldObject> GameScene::RegisterObject(shared_ptr<WorldObject> worldObject)
+shared_ptr<GameObject> GameScene::RegisterObject(shared_ptr<GameObject> gameObject)
 {
-  gameObjects[worldObject->id] = worldObject;
-  worldObject->gameSceneId = id;
+  gameObjects[gameObject->id] = gameObject;
+  gameObject->gameSceneId = id;
 
   if (awoke)
-    worldObject->Awake();
+    gameObject->Awake();
 
   if (started)
   {
     // Register this object's hierarchy to this new scene
-    worldObject->RegisterToScene();
-    worldObject->Start();
+    gameObject->RegisterToScene();
+    gameObject->Start();
   }
 
-  return worldObject;
+  return gameObject;
 }
 
-shared_ptr<WorldObject> GameScene::RegisterObject(WorldObject *worldObject) { return RegisterObject(shared_ptr<WorldObject>(worldObject)); }
-
-shared_ptr<WorldObject> GameScene::GetPointer(const WorldObject *targetObject)
-{
-  // Find this pointer in the list
-  auto foundObjectIterator = find_if(
-      gameObjects.begin(), gameObjects.end(),
-      [targetObject](const auto objectPair)
-      { return objectPair.second.get() == targetObject; });
-
-  // Catch nonexistent
-  if (foundObjectIterator == gameObjects.end())
-  {
-    // Return empty pointer
-    return nullptr;
-  }
-
-  return foundObjectIterator->second;
-}
+shared_ptr<GameObject> GameScene::RegisterObject(GameObject *gameObject) { return RegisterObject(shared_ptr<GameObject>(gameObject)); }
 
 void GameScene::RegisterLayerRenderer(shared_ptr<Component> component)
 {
@@ -261,7 +231,7 @@ void GameScene::RegisterLayerRenderer(shared_ptr<Component> component)
   layer.emplace_back(component);
 }
 
-shared_ptr<WorldObject> GameScene::GetObject(int id)
+shared_ptr<GameObject> GameScene::GetGameObject(int id)
 {
   if (gameObjects.count(id) == 0)
     return nullptr;
@@ -269,9 +239,9 @@ shared_ptr<WorldObject> GameScene::GetObject(int id)
   return gameObjects.at(id);
 }
 
-shared_ptr<WorldObject> GameScene::RequireObject(int id)
+shared_ptr<GameObject> GameScene::RequireGameObject(int id)
 {
-  auto object = GetObject(id);
+  auto object = GetGameObject(id);
 
   Assert(object != nullptr, "ERROR: Required an object with id " + to_string(id) + ", but couldn't find one");
 
@@ -294,9 +264,9 @@ list<shared_ptr<Camera>> GameScene::GetCameras()
 
 int GameScene::SupplyId() { return Game::GetInstance().SupplyId(); }
 
-vector<shared_ptr<WorldObject>> GameScene::GetObjectsToCarryOn()
+vector<shared_ptr<GameObject>> GameScene::GetObjectsToCarryOn()
 {
-  vector<shared_ptr<WorldObject>> savedObjects;
+  vector<shared_ptr<GameObject>> savedObjects;
 
   for (auto firstObject : GetRootObject()->GetChildren())
     if (firstObject->keepOnLoad)
@@ -314,7 +284,7 @@ shared_ptr<GameScene> GameScene::GetShared()
   return currentScene;
 }
 
-shared_ptr<WorldObject> GameScene::FindObject(string name)
+shared_ptr<GameObject> GameScene::GetGameObject(string name)
 {
   for (auto [objectId, object] : gameObjects)
     if (object->GetName() == name)
@@ -322,3 +292,46 @@ shared_ptr<WorldObject> GameScene::FindObject(string name)
 
   return nullptr;
 }
+
+void GameScene::RemoveObject(std::shared_ptr<GameObject> gameObject) { RemoveObject(gameObject->id); }
+
+std::shared_ptr<WorldObject> GameScene::GetWorldObject(int id)
+{
+  auto gameObject = GetGameObject(id);
+
+  if (gameObject == nullptr)
+    return nullptr;
+
+  return RequirePointerCast<WorldObject>(gameObject);
+}
+
+std::shared_ptr<WorldObject> GameScene::GetWorldObject(std::string name)
+{
+  auto gameObject = GetGameObject(name);
+
+  if (gameObject == nullptr)
+    return nullptr;
+
+  return RequirePointerCast<WorldObject>(gameObject);
+}
+
+std::shared_ptr<GameObject> GameScene::RequireGameObject(std::string name)
+{
+  auto gameObject = GetGameObject(name);
+
+  Assert(gameObject != nullptr, "ERROR: Required an object with name " + name + ", but couldn't find one");
+
+  return gameObject;
+}
+
+std::shared_ptr<WorldObject> GameScene::RequireWorldObject(int id)
+{
+  return RequirePointerCast<WorldObject>(RequireGameObject(id));
+}
+
+std::shared_ptr<WorldObject> GameScene::RequireWorldObject(std::string name)
+{
+  return RequirePointerCast<WorldObject>(RequireGameObject(name));
+}
+
+std::shared_ptr<WorldObject> GameScene::GetRootObject() { return rootObject; }

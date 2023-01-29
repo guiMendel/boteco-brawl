@@ -28,8 +28,8 @@ static const float alignTolerance{DegreesToRadians(35)};
 // Aspect ratio of game screen
 static const float screenRatio = Game::screenWidth / Game::screenHeight;
 
-CameraBehavior::CameraBehavior(WorldObject &associatedObject, shared_ptr<WorldObject> charactersParent)
-    : Component(associatedObject), weakCharactersParent(charactersParent) {}
+CameraBehavior::CameraBehavior(GameObject &associatedObject, shared_ptr<WorldObject> charactersParent)
+    : WorldComponent(associatedObject), weakCharactersParent(charactersParent) {}
 
 void CameraBehavior::Awake()
 {
@@ -42,7 +42,7 @@ void CameraBehavior::Awake()
   targetPosition = worldObject.GetPosition();
 
   // Get arena
-  auto arena = GetScene()->FindObjectOfType<Arena>();
+  auto arena = GetScene()->FindComponent<Arena>();
   weakArena = arena;
 
   // Calculate arena dependent params

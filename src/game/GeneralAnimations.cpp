@@ -83,7 +83,7 @@ void Horizontal::InternalOnStart()
 {
   if (sequencePhase == SequencePhase::InLoop)
   {
-    animator.GetScene()->FindObjectOfType<ShakeEffectManager>()->Shake(
+    animator.GetScene()->FindComponent<ShakeEffectManager>()->Shake(
         animator.worldObject.GetShared(),
         0,
         {0, 0.15},
@@ -109,7 +109,7 @@ vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
   // Stop shake
   auto stopShake = [](WorldObject &target)
   {
-    target.GetScene()->FindObjectOfType<ShakeEffectManager>()->StopShake(
+    target.GetScene()->FindComponent<ShakeEffectManager>()->StopShake(
         target.GetShared());
   };
   frames[0].AddCallback(stopShake);
@@ -203,7 +203,7 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
 
     ParticleFX::EffectAt(shotPosition, 0.01, 0.01, sparks, 1);
 
-    auto projectile = animator.GetScene()->CreateObject(
+    auto projectile = animator.GetScene()->CreateWorldObject(
         "Projectile",
         ObjectRecipes::Projectile({8 * mirrorFactor, 0}, animator.worldObject.GetShared(), {0, 0}),
         shotPosition);

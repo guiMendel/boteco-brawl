@@ -2,19 +2,20 @@
 #define __CHARACTER_CONTROLLER__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Movement.h"
 #include "Player.h"
 #include "CharacterStateManager.h"
 #include "Action.h"
 #include "Damage.h"
+#include "Animator.h"
 #include <unordered_set>
 
 // Maps input from some source (player or AI) to the the creation and dispatch of the corresponding actions
-class CharacterController : public Component
+class CharacterController : public WorldComponent
 {
 public:
-  CharacterController(WorldObject &associatedObject, std::shared_ptr<Player> player);
+  CharacterController(GameObject &associatedObject, std::shared_ptr<Player> player);
   virtual ~CharacterController() {}
 
   // Get player associated to this character

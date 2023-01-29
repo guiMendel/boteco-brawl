@@ -1,18 +1,18 @@
 #ifndef __CHARACTER_BADGE__
 #define __CHARACTER_BADGE__
 
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Character.h"
 #include "Text.h"
 #include "Heat.h"
 
-class CharacterBadge : public Component
+class CharacterBadge : public WorldComponent
 {
 public:
   // How quickly the text size multiplier decays back to 1
   static const float textSizeMultiplierDecay;
 
-  CharacterBadge(WorldObject &associatedObject, std::shared_ptr<Character> character);
+  CharacterBadge(GameObject &associatedObject, std::shared_ptr<Character> character);
   virtual ~CharacterBadge() {}
 
   void Start() override;

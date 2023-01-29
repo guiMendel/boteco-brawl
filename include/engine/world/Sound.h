@@ -5,14 +5,14 @@
 #include <iostream>
 #include <functional>
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Helper.h"
 
-class Sound : public Component
+class Sound : public WorldComponent
 {
 public:
   // Constructor with sound file name
-  Sound(WorldObject &associatedObject, const std::string fileName, bool playOnStart = true);
+  Sound(GameObject &associatedObject, const std::string fileName, bool playOnStart = true);
 
   // Ensure sound stops if destroyed
   virtual ~Sound() { Stop(); }

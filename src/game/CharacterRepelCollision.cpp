@@ -6,8 +6,8 @@ using namespace std;
 const float CharacterRepelCollision::maxSlideAcceleration{0.15};
 const float CharacterRepelCollision::slideAccelerationDecay{0.05};
 
-CharacterRepelCollision::CharacterRepelCollision(WorldObject &associatedObject, shared_ptr<Rigidbody> body)
-    : Component(associatedObject), weakBody(body), weakStateManager(body->worldObject.RequireComponent<CharacterStateManager>()) {}
+CharacterRepelCollision::CharacterRepelCollision(GameObject &associatedObject, shared_ptr<Rigidbody> body)
+    : WorldComponent(associatedObject), weakBody(body), weakStateManager(body->worldObject.RequireComponent<CharacterStateManager>()) {}
 
 void CharacterRepelCollision::OnTriggerCollision(TriggerCollisionData triggerData)
 {

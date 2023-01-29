@@ -6,7 +6,7 @@
 class TestCharacter : public Character
 {
 public:
-  TestCharacter(WorldObject &associatedObject);
+  TestCharacter(GameObject &associatedObject);
   virtual ~TestCharacter() {}
 
   float GetBaseDamage() const override;

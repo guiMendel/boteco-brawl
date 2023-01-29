@@ -2,13 +2,13 @@
 #define __TEXT__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Color.h"
 #include <SDL_ttf.h>
 #include <SDL_image.h>
 #include <memory>
 
-class Text : public Component
+class Text : public WorldComponent
 {
 public:
   // Style of text
@@ -23,7 +23,7 @@ public:
   };
 
   Text(
-      WorldObject &associatedObject, std::string text, std::string fontPath,
+      GameObject &associatedObject, std::string text, std::string fontPath,
       int size = 10, Style style = Style::Solid, Color color = Color::White());
 
   virtual ~Text() {}

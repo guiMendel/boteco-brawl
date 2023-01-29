@@ -3,10 +3,10 @@
 
 using namespace std;
 
-CircleCollider::CircleCollider(WorldObject &associatedObject, Circle circle, bool isTrigger, ColliderDensity density)
+CircleCollider::CircleCollider(GameObject &associatedObject, Circle circle, bool isTrigger, ColliderDensity density)
     : Collider(associatedObject, make_shared<Circle>(circle), isTrigger, density) {}
 
-Circle CircleCollider::GetCircle() const { return *dynamic_pointer_cast<Circle>(shape); }
+Circle CircleCollider::GetCircle() const { return *RequirePointerCast<Circle>(shape); }
 
 void CircleCollider::SetCircle(const Circle &circle) { shape = make_shared<Circle>(circle); }
 

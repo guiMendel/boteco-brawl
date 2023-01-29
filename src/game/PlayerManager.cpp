@@ -7,8 +7,8 @@ using namespace std;
 // Set player colors
 const Color PlayerManager::playerColors[]{Color::Green(), Color::Yellow(), Color::Blue(), Color::Red()};
 
-PlayerManager::PlayerManager(WorldObject &associatedObject)
-    : Component(associatedObject)
+PlayerManager::PlayerManager(GameObject &associatedObject)
+    : WorldComponent(associatedObject)
 {
   // Add main player
   AddNewPlayer();
@@ -42,9 +42,5 @@ shared_ptr<Player> PlayerManager::GetMainPlayer() const
 {
   Assert(mainPlayerId >= 0, "Tried to get main player when it's never been set");
 
-  auto object = GetScene()->GetObject(mainPlayerId);
-
-  Assert(object != nullptr, "Unexpectedly failed to find main player worldObject");
-
-  return object->RequireComponent<Player>();
+  return GetScene()->RequireWorldObject(mainPlayerId)->RequireComponent<Player>();
 }

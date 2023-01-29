@@ -353,7 +353,7 @@ void Game::Frame()
   framesThisSecond++;
 #endif
   // Objects to add to scene
-  vector<shared_ptr<WorldObject>> objectsToAdd;
+  vector<shared_ptr<GameObject>> objectsToAdd;
 
   // Check if scene needs to be popped
   // Throws when it's the last scene (and no nextScene is set)

@@ -148,8 +148,7 @@ void Riposte::Trigger(WorldObject &target, shared_ptr<CharacterState> actionStat
   auto animator = target.RequireComponent<Animator>();
 
   // Get riposte animation
-  auto animation = dynamic_pointer_cast<GeneralAnimations::Riposte>(animator->BuildAnimation("riposte"));
-  Assert(animation != nullptr, "Animator built a riposte animation which isn't of the Riposte animation type");
+  auto animation = RequirePointerCast<GeneralAnimations::Riposte>(animator->BuildAnimation("riposte"));
 
   animation->damage = parry->Riposte(parriedDamage);
 
@@ -187,8 +186,7 @@ void LandingAttack::Trigger(WorldObject &target, shared_ptr<CharacterState> acti
   auto animator = target.RequireComponent<Animator>();
 
   // Get landing attack animation
-  auto animation = dynamic_pointer_cast<GeneralAnimations::LandingAttack>(animator->BuildAnimation("landingAttack"));
-  Assert(animation != nullptr, "Animator built a landing attack animation which isn't of the LandingAttack animation type");
+  auto animation = RequirePointerCast<GeneralAnimations::LandingAttack>(animator->BuildAnimation("landingAttack"));
 
   animation->landingSpeed = landingSpeed;
 

@@ -11,7 +11,6 @@ class MainScene : public GameScene
 public:
   virtual ~MainScene() {}
 
-  void LoadAssets() override;
   void InitializeObjects() override;
   void OnUpdate(float) override;
 

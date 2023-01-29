@@ -212,7 +212,7 @@ shared_ptr<Attack> AttackAnimation::GetAttack() const
 
 InnerLoopAnimation::InnerLoopAnimation(Animator &animator) : AttackAnimation(animator)
 {
-  auto weakAnimator{weak_ptr(dynamic_pointer_cast<Animator>(animator.GetShared()))};
+  auto weakAnimator{weak_ptr(RequirePointerCast<Animator>(animator.GetShared()))};
 
   auto maybeRaisedOnSequenceStop = [this, weakAnimator]()
   {
@@ -286,7 +286,7 @@ shared_ptr<StatefulAnimation> InnerLoopAnimation::GetNextStateful()
     return nullptr;
 
   // Build an instance of the first phase animation
-  auto next = dynamic_pointer_cast<InnerLoopAnimation>(animator.BuildAnimation(Phase1Name()));
+  auto next = RequirePointerCast<InnerLoopAnimation>(animator.BuildAnimation(Phase1Name()));
 
   // Give it our listeners
   next->OnCycleEnd.CopyListeners(OnCycleEnd);

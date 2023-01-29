@@ -11,8 +11,8 @@ const float Heat::maxHeat{200};
 const float Heat::inverseMaxHeat{1.0f / maxHeat};
 const float Heat::blowLift{0.25f};
 
-Heat::Heat(WorldObject &associatedObject, float armor)
-    : Component(associatedObject), heat(100) { SetArmor(armor); }
+Heat::Heat(GameObject &associatedObject, float armor)
+    : WorldComponent(associatedObject), heat(100) { SetArmor(armor); }
 
 void Heat::Awake()
 {
@@ -20,8 +20,8 @@ void Heat::Awake()
   weakMovement = worldObject.RequireComponent<Movement>();
   weakStateManager = worldObject.RequireComponent<CharacterStateManager>();
   weakCharacterController = worldObject.RequireComponent<CharacterController>();
-  weakTimeScaleManager = GetScene()->RequireObjectOfType<TimeScaleManager>();
-  weakShakeManager = GetScene()->RequireObjectOfType<ShakeEffectManager>();
+  weakTimeScaleManager = GetScene()->RequireFindComponent<TimeScaleManager>();
+  weakShakeManager = GetScene()->RequireFindComponent<ShakeEffectManager>();
 }
 
 void Heat::Start()

@@ -5,7 +5,7 @@
 // Minimum speed to start emitting smoke
 static const float minSmokeSpeed{6};
 
-CharacterVFX::CharacterVFX(WorldObject &associatedObject) : Component(associatedObject) {}
+CharacterVFX::CharacterVFX(GameObject &associatedObject) : WorldComponent(associatedObject) {}
 
 void CharacterVFX::Awake()
 {

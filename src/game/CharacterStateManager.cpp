@@ -15,8 +15,8 @@ const float CharacterStateManager::maxActionDelay{1};
 // Elasticity applied to rigidbody when character is bouncing
 static const float bounceElasticity{0.9};
 
-CharacterStateManager::CharacterStateManager(WorldObject &associatedObject)
-    : Component(associatedObject) {}
+CharacterStateManager::CharacterStateManager(GameObject &associatedObject)
+    : WorldComponent(associatedObject) {}
 
 void CharacterStateManager::StartBouncing()
 {
@@ -328,5 +328,5 @@ bool CharacterStateManager::IsBouncing() const
 
 shared_ptr<CharacterStateManager> CharacterStateManager::GetSharedCasted() const
 {
-  return dynamic_pointer_cast<CharacterStateManager>(GetShared());
+  return RequirePointerCast<CharacterStateManager>(GetShared());
 }

@@ -5,8 +5,8 @@
 using namespace std;
 
 CharacterLifeDisplay::CharacterLifeDisplay(
-    WorldObject &associatedObject, shared_ptr<FallDeath> fallDeath, float lifeSize, std::string spritePath)
-    : Component(associatedObject), weakFallDeath(fallDeath), lifeSizeRealPixels(lifeSize), spritePath(spritePath)
+    GameObject &associatedObject, shared_ptr<FallDeath> fallDeath, float lifeSize, std::string spritePath)
+    : WorldComponent(associatedObject), weakFallDeath(fallDeath), lifeSizeRealPixels(lifeSize), spritePath(spritePath)
 {
   color = fallDeath->worldObject.RequireComponent<CharacterController>()->GetPlayer()->GetColor();
 }

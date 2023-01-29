@@ -2,17 +2,17 @@
 #define __PLATFORM_DROP__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "PlayerInput.h"
 #include "PlatformEffector.h"
 #include <unordered_map>
 
 class Rigidbody;
 
-class PlatformDrop : public Component
+class PlatformDrop : public WorldComponent
 {
 public:
-  PlatformDrop(WorldObject &associatedObject, std::shared_ptr<Rigidbody> body);
+  PlatformDrop(GameObject &associatedObject, std::shared_ptr<Rigidbody> body);
   virtual ~PlatformDrop() {}
 
   // Register platform as a platform which is in range

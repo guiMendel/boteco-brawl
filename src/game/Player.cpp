@@ -5,8 +5,8 @@
 
 using namespace std;
 
-Player::Player(WorldObject &associatedObject, PlayerManager &manager, Color color)
-    : Component(associatedObject), color(color), playerManager(manager) {}
+Player::Player(GameObject &associatedObject, PlayerManager &manager, Color color)
+    : WorldComponent(associatedObject), color(color), playerManager(manager) {}
 
 // Is searching when need a controller but has no controller
 bool Player::SearchingForController() const { return usingController && weakController.expired(); }
@@ -39,7 +39,7 @@ void Player::SearchForController()
 
   usingController = true;
   weakController.reset();
-  playerManager.OnPlayerSearchForController.Invoke(dynamic_pointer_cast<Player>(GetShared()));
+  playerManager.OnPlayerSearchForController.Invoke(RequirePointerCast<Player>(GetShared()));
 }
 
 bool Player::IsMain() const { return playerManager.GetMainPlayer()->id == id; }

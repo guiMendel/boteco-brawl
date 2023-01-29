@@ -2,14 +2,14 @@
 #define __CHARACTER_SLIDE_COLLISION__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Rigidbody.h"
 #include "CharacterStateManager.h"
 
-class CharacterRepelCollision : public Component
+class CharacterRepelCollision : public WorldComponent
 {
 public:
-  CharacterRepelCollision(WorldObject &associatedObject, std::shared_ptr<Rigidbody> body);
+  CharacterRepelCollision(GameObject &associatedObject, std::shared_ptr<Rigidbody> body);
   virtual ~CharacterRepelCollision() {}
 
   void OnTriggerCollision(TriggerCollisionData triggerData) override;

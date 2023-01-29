@@ -2,7 +2,7 @@
 #define __COLLIDER__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Vector2.h"
 #include "Shape.h"
 #include "Rigidbody.h"
@@ -11,12 +11,12 @@
 class SpriteRenderer;
 class Animator;
 
-class Collider : public Component
+class Collider : public WorldComponent
 {
 public:
   // Explicitly initialize shape
   Collider(
-      WorldObject &associatedObject,
+      GameObject &associatedObject,
       std::shared_ptr<Shape> shape,
       bool isTrigger = false,
       ColliderDensity density = ColliderDensity::Default);
@@ -30,6 +30,7 @@ public:
 
   // Allows for debug rendering
   virtual void Render() override {}
+  void OnBeforeDestroy() override;
 
   // Get density value
   float GetDensity() const;

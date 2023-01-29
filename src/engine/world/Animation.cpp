@@ -9,7 +9,7 @@ int Animation::idGenerator{0};
 
 Animation::Animation(Animator &animator) : animator(animator)
 {
-  auto weakAnimator{weak_ptr(dynamic_pointer_cast<Animator>(animator.GetShared()))};
+  auto weakAnimator{weak_ptr(RequirePointerCast<Animator>(animator.GetShared()))};
 
   // Link it's event types to this animation's
   OnCycleEnd.AddListener("animator-propagation", [this, weakAnimator]()

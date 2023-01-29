@@ -14,8 +14,8 @@ const float groundedRange{0.2f};
 
 const float Movement::totalCoyoteTime{0.2f};
 
-Movement::Movement(WorldObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance)
-    : Component(associatedObject),
+Movement::Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance)
+    : WorldComponent(associatedObject),
       acceleration(acceleration),
       defaultSpeed(defaultSpeed),
       feetDistance(feetDistance),

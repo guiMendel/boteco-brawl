@@ -18,8 +18,8 @@ using namespace std;
 
 const float CharacterController::totalDashCooldown{1};
 
-CharacterController::CharacterController(WorldObject &associatedObject, shared_ptr<Player> player)
-    : Component(associatedObject),
+CharacterController::CharacterController(GameObject &associatedObject, shared_ptr<Player> player)
+    : WorldComponent(associatedObject),
       weakPlayer(player),
       stateManager(*worldObject.RequireComponent<CharacterStateManager>()),
       movement(*worldObject.RequireComponent<Movement>()),

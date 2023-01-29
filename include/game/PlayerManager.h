@@ -2,14 +2,14 @@
 #define __PLAYER_MANAGER__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Player.h"
 #include "Event.h"
 #include <memory>
 #include <vector>
 
 // Handles human players connected to the game
-class PlayerManager : public Component
+class PlayerManager : public WorldComponent
 {
 public:
   // Raised when a player starts searching for a new controller
@@ -18,7 +18,7 @@ public:
   // Colors of each player
   static const Color playerColors[];
 
-  PlayerManager(WorldObject &associatedObject);
+  PlayerManager(GameObject &associatedObject);
 
   virtual ~PlayerManager() {}
 

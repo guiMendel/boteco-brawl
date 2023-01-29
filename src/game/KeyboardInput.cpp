@@ -2,7 +2,7 @@
 #include "Movement.h"
 #include "InputManager.h"
 
-KeyboardInput::KeyboardInput(WorldObject &associatedObject) : PlayerInput(associatedObject) {}
+KeyboardInput::KeyboardInput(GameObject &associatedObject) : PlayerInput(associatedObject) {}
 
 Vector2 KeyboardInput::GetInputDirection() const
 {

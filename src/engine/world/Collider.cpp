@@ -7,8 +7,8 @@
 
 using namespace std;
 
-Collider::Collider(WorldObject &associatedObject, shared_ptr<Shape> shape, bool isTrigger, ColliderDensity density)
-    : Component(associatedObject), isTrigger(isTrigger), density(density), shape(shape) {}
+Collider::Collider(GameObject &associatedObject, shared_ptr<Shape> shape, bool isTrigger, ColliderDensity density)
+    : WorldComponent(associatedObject), isTrigger(isTrigger), density(density), shape(shape) {}
 
 void Collider::RegisterToScene()
 {
@@ -44,7 +44,7 @@ void Collider::RegisterToScene()
 
   // Subscribe, if managed to find a valid id
   if (ownerId >= 0)
-    GetScene()->physicsSystem.RegisterCollider(dynamic_pointer_cast<Collider>(GetShared()), ownerId);
+    GetScene()->physicsSystem.RegisterCollider(RequirePointerCast<Collider>(GetShared()), ownerId);
   else
     cout << "WARNING: Object " << worldObject.GetName() << " has a non-trigger collider, but has no Rigidbody attached" << endl;
 }
@@ -113,5 +113,10 @@ int Collider::GetOwnerId() const { return ownerId; }
 
 shared_ptr<WorldObject> Collider::GetOwner() const
 {
-  return GetScene()->GetObject(GetOwnerId());
+  return GetScene()->RequireWorldObject(GetOwnerId());
+}
+
+void Collider::OnBeforeDestroy()
+{
+  worldObject.HandleColliderDestruction(RequirePointerCast<Collider>(GetShared()));
 }

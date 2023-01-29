@@ -2,10 +2,10 @@
 #define __FALL_OFF_DEATH__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Arena.h"
 
-class FallDeath : public Component
+class FallDeath : public WorldComponent
 {
 public:
   // How far from the screen edge the character dies
@@ -23,7 +23,7 @@ public:
   // Triggered when all lives are spent
   Event OnDeath;
 
-  FallDeath(WorldObject &associatedObject);
+  FallDeath(GameObject &associatedObject);
   virtual ~FallDeath() {}
 
   void Update(float) override;

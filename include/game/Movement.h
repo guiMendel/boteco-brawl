@@ -2,18 +2,18 @@
 #define __MOVEMENT__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 
 class Rigidbody;
 class CharacterStateManager;
 
-class Movement : public Component
+class Movement : public WorldComponent
 {
 public:
   // Triggers when character touches the ground
   Event OnLand;
 
-  Movement(WorldObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance);
+  Movement(GameObject &associatedObject, float acceleration, float defaultSpeed, float feetDistance);
   virtual ~Movement() {}
 
   void Start() override;

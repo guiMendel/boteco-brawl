@@ -1,14 +1,14 @@
 #ifndef __CHARACTER_LIFE_DISPLAY__
 #define __CHARACTER_LIFE_DISPLAY__
 
-#include "Component.h"
+#include "WorldComponent.h"
 #include "FallDeath.h"
 
 // Maps input from some source (player or AI) to the the creation and dispatch of the corresponding actions
-class CharacterLifeDisplay : public Component
+class CharacterLifeDisplay : public WorldComponent
 {
 public:
-  CharacterLifeDisplay(WorldObject &associatedObject, std::shared_ptr<FallDeath> fallDeath, float lifeSize, std::string spritePath);
+  CharacterLifeDisplay(GameObject &associatedObject, std::shared_ptr<FallDeath> fallDeath, float lifeSize, std::string spritePath);
   virtual ~CharacterLifeDisplay() {}
 
   void Start() override;

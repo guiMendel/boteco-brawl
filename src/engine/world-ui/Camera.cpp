@@ -21,15 +21,15 @@ shared_ptr<Camera> Camera::GetMain()
   return cameras.front();
 }
 
-Camera::Camera(WorldObject &associatedObject, float size)
-    : Component(associatedObject)
+Camera::Camera(GameObject &associatedObject, float size)
+    : WorldComponent(associatedObject)
 {
   SetSize(size);
 }
 
 void Camera::RegisterToScene()
 {
-  GetScene()->RegisterCamera(dynamic_pointer_cast<Camera>(GetShared()));
+  GetScene()->RegisterCamera(RequirePointerCast<Camera>(GetShared()));
 }
 
 // Get how many units occupy half the camera's height

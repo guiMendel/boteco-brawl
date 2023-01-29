@@ -1,24 +1,15 @@
 #ifndef __WORLD_OBJECT__
 #define __WORLD_OBJECT__
 
-#include <typeinfo>
-#include <string>
-#include <vector>
-#include <memory>
-#include <algorithm>
-#include <utility>
-#include "Component.h"
-#include "Vector2.h"
-#include "Helper.h"
+#include "GameObject.h"
 #include "PhysicsLayer.h"
-#include "Tag.h"
-#include "Timer.h"
 #include "PhysicsSystem.h"
 #include "TriggerCollisionData.h"
 
 class GameScene;
 
-class WorldObject
+// A specific kind of GameObject which exists in the in-game world, has a scale, rotation, and physical interactions
+class WorldObject : public GameObject
 {
   friend class GameScene;
   friend class PhysicsSystem;
@@ -28,36 +19,21 @@ class WorldObject
   WorldObject(std::string name, int gameSceneId, int id = -1);
 
 public:
-  // With dimensions
+  // With properties
   WorldObject(
       std::string name, Vector2 coordinates = Vector2(0, 0), double rotation = 0.0, std::shared_ptr<WorldObject> parent = nullptr);
+
   ~WorldObject();
 
   // =================================
   // FRAME EVENTS
   // =================================
 public:
-  // Initialize
-  void Awake();
-  void Start();
+  // Add: Confine objects to limited game space
+  void Update(float deltaTime) override;
 
-  // Called once per frame
-  void Update(float deltaTime);
-  void PhysicsUpdate(float deltaTime);
-
-  void OnScenePause();
-  void OnSceneResume();
-
-private:
-  // Allows for registering to the scene's variables
-  void RegisterToScene();
-
-  // Whether has already run started
-  bool started{false};
-  bool awoke{false};
-
-  // Id of last scene to which this object has execute RegisterToScene()
-  int lastSceneRegisteredTo{-1};
+  // Add: Detect collision exits
+  void PhysicsUpdate(float deltaTime) override;
 
   // =================================
   // DESTRUCTION
@@ -66,93 +42,22 @@ public:
   // How far from origin an object can get in either coordinates before being destroyed
   static const float objectCollectionRange;
 
-  // Whether is dead
-  bool DestroyRequested() const;
-
-  // Destroys the object
-  void RequestDestroy();
-
-  // Whether to keep this object when loading next scene (only works for root objects)
-  void DontDestroyOnLoad(bool value = true);
+protected:
+  // Calls DestroySelf and ignores returned value
+  void InternalDestroy() override;
 
 private:
-  // Unlinks from parent, destroys all children and destroys self
-  auto InternalDestroy() -> std::unordered_map<int, std::weak_ptr<WorldObject>>::iterator;
+  // Destroys children, calls GameObject::InternalDestroy, then unlinks from parent
+  // Returns a valid iterator for the parent's new children after unlinking
+  auto DestroySelf() -> std::unordered_map<int, std::weak_ptr<WorldObject>>::iterator;
 
-  // Deletes reference to parent and paren't reference to self
+  // Deletes reference to parent and parent's reference to self
   auto UnlinkParent() -> std::unordered_map<int, std::weak_ptr<WorldObject>>::iterator;
-
-  // Whether is dead
-  bool destroyRequested{false};
-
-  // Whether to keep this object when loading next scene
-  bool keepOnLoad{false};
 
   // =================================
   // COMPONENT HANDLING
   // =================================
-private:
-  // Map with all components of this object, indexed by the component's ids
-  std::unordered_map<int, std::shared_ptr<Component>> components;
-
 public:
-  // Adds a new component
-  template <class T, typename... Args>
-  auto AddComponent(Args &&...args) -> std::shared_ptr<T>
-  {
-    auto component = std::make_shared<T>(*this, std::forward<Args>(args)...);
-
-    components.insert({component->id, component});
-
-    if (awoke)
-      component->Awake();
-
-    // Start it
-    if (started)
-    {
-      component->RegisterToSceneWithLayer();
-      component->SafeStart();
-    }
-
-    return component;
-  }
-
-  // Removes an existing component
-  decltype(components)::iterator RemoveComponent(std::shared_ptr<Component> component);
-
-  // Gets pointer to a component of the given type
-  // Needs to be in header file so the compiler knows how to build the necessary methods
-  template <class T>
-  auto GetComponent() -> std::shared_ptr<T>
-  {
-    // Find the position of the component that is of the requested type
-    auto componentIterator = std::find_if(
-        components.begin(), components.end(), [](std::pair<int, std::shared_ptr<Component>> componentEntry)
-        { return dynamic_cast<T *>(componentEntry.second.get()) != nullptr; });
-
-    // Detect if not present
-    if (componentIterator == components.end())
-      return nullptr;
-
-    return std::dynamic_pointer_cast<T>(componentIterator->second);
-  }
-
-  // Gets pointer to a component of the given type
-  // Needs to be in header file so the compiler knows how to build the necessary methods
-  template <class T>
-  auto GetComponents() -> std::vector<std::shared_ptr<T>>
-  {
-    std::vector<std::shared_ptr<T>> foundComponents;
-
-    for (auto [componentId, component] : components)
-    {
-      if (dynamic_cast<T *>(component.get()) != nullptr)
-        foundComponents.push_back(std::dynamic_pointer_cast<T>(component));
-    }
-
-    return foundComponents;
-  }
-
   // Gets pointer to a component of the given type
   // Needs to be in header file so the compiler knows how to build the necessary methods
   template <class T>
@@ -196,23 +101,6 @@ public:
     return component;
   }
 
-  // Like GetComponent, but raises if it's not present
-  template <class T>
-  auto RequireComponent() -> std::shared_ptr<T>
-  {
-    auto component = GetComponent<T>();
-
-    if (!component)
-    {
-      throw std::runtime_error(std::string("Required component was not found.\nRequired component typeid name: ") + typeid(T).name());
-    }
-
-    return component;
-  }
-
-  auto GetComponent(const Component *componentPointer) -> std::shared_ptr<Component>;
-  auto RequireComponent(const Component *componentPointer) -> std::shared_ptr<Component>;
-
 private:
   // Gets pointer to a component of the given type
   // Needs to be in header file so the compiler knows how to build the necessary methods
@@ -236,13 +124,11 @@ private:
   // OBJECT PROPERTIES
   // =================================
 public:
-  std::string GetName() const { return name; }
-
   // Returns this object's shared pointer
   std::shared_ptr<WorldObject> GetShared();
 
-  // Where this object exists in game space, in absolute coordinates
-  Vector2 GetPosition();
+  // Where this object exists in game space relative to world origin, in units
+  Vector2 GetPosition() override;
   void SetPosition(const Vector2 newPosition);
   void Translate(const Vector2 translation);
 
@@ -258,29 +144,14 @@ public:
   PhysicsLayer GetPhysicsLayer();
   void SetPhysicsLayer(PhysicsLayer);
 
-  void SetEnabled(bool enabled) { this->enabled = enabled; }
-  bool IsEnabled() const;
-
   // Where this object exists in game space, relative to it's parent's position
   Vector2 localPosition;
 
-  // Scale of the object
+  // Scale of the object relative to parent
   Vector2 localScale{1, 1};
 
-  // Object's rotation, in radians
+  // Object's rotation relative to parent, in radians
   double localRotation{0};
-
-  // Object's unique identifier
-  const int id;
-
-  // This object's tag
-  Tag tag{Tag::None};
-
-  // The world object's name (not necessarily unique)
-  std::string name;
-
-  // Whether this object is enabled (updating & rendering)
-  bool enabled{true};
 
   // =================================
   // OBJECTS HIERARCHY
@@ -302,48 +173,28 @@ public:
   void SetParent(std::shared_ptr<WorldObject> newParent);
 
   // Check if this worldObject is in the descendant lineage of the other object
-  bool IsDescendantOf(const WorldObject &other) const;
+  bool IsDescendantOf(std::shared_ptr<WorldObject> other) const;
 
   // Check if either object is a descendent of each other
-  static bool SameLineage(const WorldObject &first, const WorldObject &second);
+  static bool SameLineage(
+      std::shared_ptr<WorldObject> first, std::shared_ptr<WorldObject> second);
+
+  // Executes the given function for this object and then cascades it down to any children it has
+  void CascadeDown(std::function<void(GameObject &)> callback, bool topDown = true) override;
+
+protected:
+  // Gets pointer to parent, and ensures it's valid. Raises when called from root object
+  std::shared_ptr<GameObject> InternalGetParent() const override;
+
+  // Gets pointer to parent, cast to world object
+  std::shared_ptr<WorldObject> InternalGetWorldParent() const;
 
 private:
-  // Whether this is the root object
-  bool IsRoot() const { return id == 0; }
-
-  // Get's pointer to parent, and ensures it's valid, unless this is the root object
-  std::shared_ptr<WorldObject> InternalGetParent() const;
-
   // Child objects
   std::unordered_map<int, std::weak_ptr<WorldObject>> children;
 
   // Parent object
   std::weak_ptr<WorldObject> weakParent;
-
-  // =================================
-  // UTILITY
-  // =================================
-public:
-  std::shared_ptr<GameScene> GetScene();
-
-  // Allows for delaying a function execution
-  // Returns a token id that can be used to cancel execution
-  int DelayFunction(std::function<void()> procedure, float seconds);
-
-  void CancelDelayedFunction(int tokenId);
-
-  // A timer helper. Stored values are increased each frame
-  Timer timer;
-
-private:
-  // Trigger delayed functions whose timers are up
-  void TriggerDelayedFunctions();
-
-  // Scene reference id
-  int gameSceneId;
-
-  // Functions currently waiting to be executed (bool indicates if they are still supposed to be called)
-  std::unordered_map<int, std::pair<std::function<void()>, bool>> delayedFunctions;
 
   // =================================
   // PHYSICS
@@ -377,13 +228,13 @@ public:
   bool TriggerCollisionDealtWith(TriggerCollisionData triggerData);
   bool TriggerCollisionDealtWithLastFrame(TriggerCollisionData triggerData);
 
+  // Raises all Exit messages on both sides of the collider's current interactions
+  // Should be called when the given collider is about to be destroyed
+  void HandleColliderDestruction(std::shared_ptr<Collider> collider);
+
 private:
   // Verifies which collisions & triggers have exited this frame and raises them
   void DetectCollisionExits();
-
-  // Should be called when the given component is about to be destroyed
-  // Checks if the given component is a collider, and if so, raises all Exit messages on both sides
-  void HandleColliderDestruction(std::shared_ptr<Component> component);
 
   // This object's physics layer
   PhysicsLayer physicsLayer{PhysicsLayer::None};
@@ -402,32 +253,7 @@ private:
 
   // Keeps track of all triggers registered last frame
   decltype(frameTriggers) lastFrameTriggers;
-
-  // =================================
-  // MODIFIERS
-  // =================================
-public:
-  // Sets the delta time modifier for this object
-  // It will be applied to delta times before they are passed down to components and children
-  void SetTimeScale(float newScale);
-
-  // What the current time scale is
-  float GetTimeScale() const;
-
-private:
-  // Current value of time scale
-  float localTimeScale{1};
-
-  // =================================
-  // OPERATORS
-  // =================================
-public:
-  bool operator==(const WorldObject &other) const;
-
-  explicit operator std::string() const;
 };
-
-std::ostream &operator<<(std::ostream &stream, const WorldObject &vector);
 
 #include "GameScene.h"
 

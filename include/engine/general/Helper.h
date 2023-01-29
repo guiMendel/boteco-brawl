@@ -11,6 +11,21 @@
 #include <utility>
 #include <SDL.h>
 
+#define IF_LOCK(weak, shared) if (auto shared = weak.lock(); shared)
+
+#define IF_NOT_LOCK(weak, shared) \
+  auto shared = weak.lock();      \
+  if (shared == nullptr)
+
+#define LOCK(weak, shared)          \
+  auto shared = weak.lock();        \
+  Helper::Assert(shared != nullptr, \
+                 "Unexpectedly failed to lock shared pointer at " __FILE__ ":" + std::to_string(__LINE__) + " ");
+
+#define LOCK_MESSAGE(weak, shared, message) \
+  auto shared = weak.lock();                \
+  Helper::Assert(shared != nullptr, message);
+
 #define RAD2DEG (180 / M_PI)
 
 namespace Helper
@@ -150,6 +165,18 @@ namespace Helper
 
   // Apply Szudzik's hash function (https://stackoverflow.com/questions/919612/mapping-two-integers-to-one-in-a-unique-and-deterministic-way)
   size_t HashTwo(size_t a, size_t b);
+
+  // Applies dynamic pointer cast and ensure result is not nullptr
+  template <typename T, typename U>
+  std::shared_ptr<T> RequirePointerCast(std::shared_ptr<U> targetPointer)
+  {
+    auto castedPointer = std::dynamic_pointer_cast<T>(targetPointer);
+
+    Assert(castedPointer != nullptr, "Failed required pointer cast");
+
+    return castedPointer;
+  }
+
 }
 
 #endif

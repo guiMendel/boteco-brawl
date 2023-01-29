@@ -7,13 +7,13 @@
 using namespace std;
 using namespace Helper;
 
-SpriteRenderer::SpriteRenderer(WorldObject &associatedObject, RenderLayer renderLayer, int renderOrder)
-    : Component(associatedObject), renderLayer(renderLayer), renderOrder(renderOrder)
+SpriteRenderer::SpriteRenderer(GameObject &associatedObject, RenderLayer renderLayer, int renderOrder)
+    : WorldComponent(associatedObject), renderLayer(renderLayer), renderOrder(renderOrder)
 {
 }
 
 // Constructor with image file name
-SpriteRenderer::SpriteRenderer(WorldObject &associatedObject, const string fileName, RenderLayer renderLayer, int renderOrder) : SpriteRenderer(associatedObject, renderLayer, renderOrder)
+SpriteRenderer::SpriteRenderer(GameObject &associatedObject, const string fileName, RenderLayer renderLayer, int renderOrder) : SpriteRenderer(associatedObject, renderLayer, renderOrder)
 {
   sprite = Resources::GetSprite(fileName);
 }

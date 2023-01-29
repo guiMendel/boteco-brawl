@@ -2,16 +2,16 @@
 #define __PLAYER__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "ControllerDevice.h"
 
 class PlayerManager;
 
 // Defines a player that is connected to the game
-class Player : public Component
+class Player : public WorldComponent
 {
 public:
-  Player(WorldObject &associatedObject, PlayerManager &manager, Color color);
+  Player(GameObject &associatedObject, PlayerManager &manager, Color color);
 
   virtual ~Player() {}
 

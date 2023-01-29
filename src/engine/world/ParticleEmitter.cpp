@@ -13,8 +13,8 @@ ParticleEmissionParameters::ParticleEmissionParameters()
       lifetime({1, 2}),
       gravityModifier({Vector2::Zero(), Vector2::Zero()}) {}
 
-ParticleEmitter::ParticleEmitter(WorldObject &associatedObject, RenderLayer renderLayer, float radius, bool loop, float duration)
-    : Component(associatedObject),
+ParticleEmitter::ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer, float radius, bool loop, float duration)
+    : WorldComponent(associatedObject),
       duration(duration),
       loop(loop),
       origin(radius),

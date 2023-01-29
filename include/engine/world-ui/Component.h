@@ -3,39 +3,30 @@
 
 #include "InputManager.h"
 #include "Vector2.h"
+// TODO: remove render logic from component and bring it to it's own interface called Renderable
+// TODO: remove event hooks and bring them to their own interface
 #include "RenderLayer.h"
 #include "ComponentParameter.h"
-#include "Collision.h"
-#include "TriggerCollisionData.h"
+#include "Color.h"
 #include <string>
 #include <memory>
-#include <map>
-
-#define IF_LOCK(weak, shared) if (auto shared = weak.lock(); shared)
-
-#define IF_NOT_LOCK(weak, shared) \
-  auto shared = weak.lock();      \
-  if (shared == nullptr)
-
-#define LOCK(weak, shared)   \
-  auto shared = weak.lock(); \
-  Helper::Assert(shared != nullptr,  \
-         "Unexpectedly failed to lock shared pointer at " __FILE__ ":" + std::to_string(__LINE__) + " ");
-
-#define LOCK_MESSAGE(weak, shared, message) \
-  auto shared = weak.lock();                \
-  Helper::Assert(shared != nullptr, message);
 
 class WorldObject;
+class GameObject;
 class GameScene;
+
+// We don't care it's recommended against doing this — we only want our lives to be easier
+using namespace Helper;
 
 class Component
 {
+  friend GameObject;
   friend WorldObject;
   friend GameScene;
 
 public:
-  Component(WorldObject &associatedObject);
+  Component(GameObject &associatedObject);
+
   virtual ~Component();
 
   // In which render layer this component is
@@ -45,10 +36,7 @@ public:
   // The order in which to render this component in it's layer (higher numbers are shown on top)
   virtual int GetRenderOrder() { return 0; }
 
-  // Returns this component's shared pointer
-  std::shared_ptr<Component> GetShared() const;
-
-  void SetEnabled(bool enabled) { this->enabled = enabled; }
+  void SetEnabled(bool value);
   bool IsEnabled() const;
 
   // The associated game scene
@@ -57,11 +45,12 @@ public:
   bool HasCalledStart() const;
 
   bool operator==(const Component &other) const;
+  bool operator!=(const Component &other) const;
 
   explicit operator std::string() const;
 
-  // The associated world object
-  WorldObject &worldObject;
+  // The associated game object
+  GameObject &gameObject;
 
   // Whether the component is active
   bool enabled{true};
@@ -87,21 +76,14 @@ protected:
   // Called on the frame it is destroyed, right before being destroyed
   virtual void OnBeforeDestroy() {}
 
-  // Allows for reacting to collision
-  virtual void OnCollision(Collision::Data) {}
-  virtual void OnCollisionEnter(Collision::Data) {}
-  virtual void OnCollisionExit(Collision::Data) {}
-
-  // Allows for reacting to trigger collision
-  virtual void OnTriggerCollision(TriggerCollisionData) {}
-  virtual void OnTriggerCollisionEnter(TriggerCollisionData) {}
-  virtual void OnTriggerCollisionExit(TriggerCollisionData) {}
-
   // Reference to input manager
   InputManager &inputManager;
 
 private:
+  // Registers this component's render layer if it is not None
   void RegisterLayer();
+
+  // Ensures Start never gets called more than once
   void SafeStart();
 
   // Allows for registering to the state's variables
@@ -112,12 +94,5 @@ private:
 };
 
 std::ostream &operator<<(std::ostream &stream, const Component &vector);
-
-#include "WorldObject.h"
-// #include "GameScene.h"
-#include "Helper.h"
-
-// We don't care it's recommended against doing this — we only want our lives to be easier
-using namespace Helper;
 
 #endif

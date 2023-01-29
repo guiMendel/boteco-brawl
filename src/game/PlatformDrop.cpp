@@ -3,8 +3,8 @@
 
 using namespace std;
 
-PlatformDrop::PlatformDrop(WorldObject &associatedObject, shared_ptr<Rigidbody> body)
-    : Component(associatedObject), weakBody(body)
+PlatformDrop::PlatformDrop(GameObject &associatedObject, shared_ptr<Rigidbody> body)
+    : WorldComponent(associatedObject), weakBody(body)
 {
   // Get player input
   auto playerInput = body->worldObject.RequireComponent<PlayerInput>();

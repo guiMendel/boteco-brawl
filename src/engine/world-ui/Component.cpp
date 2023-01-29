@@ -1,29 +1,21 @@
-#include "WorldObject.h"
-#include "Component.h"
+#include "GameObject.h"
+#include "WorldComponent.h"
 #include "Game.h"
 
 using namespace std;
 
-Component::Component(WorldObject &associatedObject)
-    : worldObject(associatedObject), id(GetScene()->SupplyId()), inputManager(Game::GetInstance().GetInputManager()) {}
+Component::Component(GameObject &associatedObject)
+    : gameObject(associatedObject),
+      id(GetScene()->SupplyId()),
+      inputManager(Game::GetInstance().GetInputManager()) {}
 
 Component::~Component() {}
 
-shared_ptr<Component> Component::GetShared() const
-{
-  try
-  {
-    return worldObject.RequireComponent(this);
-  }
-  catch (runtime_error &)
-  {
-    throw runtime_error("Component failed to get own shared pointer: it was not found in it's worldObject list");
-  }
-}
+void Component::SetEnabled(bool value) { enabled = value; }
 
-bool Component::IsEnabled() const { return enabled && worldObject.IsEnabled(); }
+bool Component::IsEnabled() const { return enabled && gameObject.IsEnabled(); }
 
-shared_ptr<GameScene> Component::GetScene() const { return worldObject.GetScene(); }
+shared_ptr<GameScene> Component::GetScene() const { return gameObject.GetScene(); }
 
 void Component::RegisterToSceneWithLayer()
 {
@@ -35,7 +27,7 @@ void Component::RegisterLayer()
 {
   if (GetRenderLayer() != RenderLayer::None)
   {
-    Game::GetInstance().GetScene()->RegisterLayerRenderer(GetShared());
+    Game::GetInstance().GetScene()->RegisterLayerRenderer(gameObject.RequireComponent(this));
   }
 }
 
@@ -52,10 +44,11 @@ void Component::SafeStart()
 bool Component::HasCalledStart() const { return started; }
 
 bool Component::operator==(const Component &other) const { return id == other.id; }
+bool Component::operator!=(const Component &other) const { return !(*this == other); }
 
 Component::operator std::string() const
 {
-  return "(" + string(typeid(*this).name()) + "::" + to_string(id) + ")>" + (string)worldObject;
+  return "(" + string(typeid(*this).name()) + "::" + to_string(id) + ")>" + (string)gameObject;
 }
 
 ostream &operator<<(ostream &stream, const Component &component)

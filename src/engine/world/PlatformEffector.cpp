@@ -4,8 +4,8 @@ using namespace std;
 
 const pair<float, float> PlatformEffector::defaultPassThroughArc{-0.1f, -M_PI + 0.1f};
 
-PlatformEffector::PlatformEffector(WorldObject &associatedObject, pair<float, float> passThroughArc)
-    : Component(associatedObject), passThroughArc(passThroughArc) {}
+PlatformEffector::PlatformEffector(GameObject &associatedObject, pair<float, float> passThroughArc)
+    : WorldComponent(associatedObject), passThroughArc(passThroughArc) {}
 
 void PlatformEffector::PhysicsUpdate(float)
 {

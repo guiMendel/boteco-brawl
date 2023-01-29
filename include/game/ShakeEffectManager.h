@@ -1,7 +1,8 @@
 #ifndef __SHAKE_EFFECT_MANAGER__
 #define __SHAKE_EFFECT_MANAGER__
 
-#include "Component.h"
+#include "WorldComponent.h"
+#include "SpriteRenderer.h"
 
 class ShakeEffectManager;
 
@@ -75,12 +76,12 @@ struct ShakeEffect
   bool destroyRequested{false};
 };
 
-class ShakeEffectManager : public Component
+class ShakeEffectManager : public WorldComponent
 {
   friend struct ShakeEffect;
 
 public:
-  ShakeEffectManager(WorldObject &associatedObject);
+  ShakeEffectManager(GameObject &associatedObject);
   virtual ~ShakeEffectManager() {}
 
   void Update(float) override;

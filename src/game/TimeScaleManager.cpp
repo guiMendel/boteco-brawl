@@ -2,7 +2,7 @@
 
 using namespace std;
 
-TimeScaleManager::TimeScaleManager(WorldObject &associatedObject) : Component(associatedObject) {}
+TimeScaleManager::TimeScaleManager(GameObject &associatedObject) : WorldComponent(associatedObject) {}
 
 void TimeScaleManager::OnBeforeDestroy()
 {
@@ -52,7 +52,7 @@ auto TimeScaleManager::ResetTimeScale(int targetId) -> decltype(alteredObjects):
     return alteredObjects.end();
 
   // Reset the timescale
-  auto target = GetScene()->GetObject(targetId);
+  auto target = GetScene()->GetGameObject(targetId);
   if (target != nullptr)
     target->SetTimeScale(1);
 

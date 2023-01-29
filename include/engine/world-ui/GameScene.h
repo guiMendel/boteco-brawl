@@ -8,6 +8,7 @@
 #include <iostream>
 #include <list>
 #include <SDL.h>
+#include "GameObject.h"
 #include "WorldObject.h"
 #include "SpriteRenderer.h"
 #include "Music.h"
@@ -26,6 +27,7 @@ class GameScene
 {
   friend class Collider;
   friend class Camera;
+  friend class GameObject;
   friend class WorldObject;
   friend class Game;
 
@@ -34,14 +36,12 @@ public:
 
   virtual ~GameScene();
 
-  // Whether the game should exit
-  bool QuitRequested() { return quitRequested; }
-
-  // Whether to remove this scene from the queue
-  bool PopRequested() { return popRequested; }
-
+  // =================================
+  // FRAME EVENTS
+  // =================================
+public:
   void Update(float deltaTime);
-  virtual void OnUpdate(float) {}
+
   virtual void PhysicsUpdate(float deltaTime);
 
   virtual void Render();
@@ -52,82 +52,20 @@ public:
 
   virtual void Resume();
 
-  // Removes an object from the object list
-  void RemoveObject(int id);
+protected:
+  // Allows for child class scenes to hook behavior to the update loop
+  virtual void OnUpdate(float) {}
 
-  void RemoveObject(std::shared_ptr<WorldObject> worldObject) { RemoveObject(worldObject->id); }
+  // Whether the scene has executed the start method
+  bool started{false};
 
-  std::shared_ptr<WorldObject> RegisterObject(WorldObject *worldObject);
-  std::shared_ptr<WorldObject> RegisterObject(std::shared_ptr<WorldObject> worldObject);
+  // Whether the scene has executed the awake method
+  bool awoke{false};
 
-  // Creates a new world object
-  template <typename... Args>
-  std::shared_ptr<WorldObject> CreateObject(
-      std::string name, std::function<void(std::shared_ptr<WorldObject>)> recipe = nullptr, Args &&...args)
-  {
-    // Create the object, which automatically registers it's pointer to the scene's list
-    int objectId = (new WorldObject(name, std::forward<Args>(args)...))->id;
-    auto object = gameObjects[objectId];
-
-    // Initialize it
-    if (recipe)
-      recipe(object);
-
-    return object;
-  }
-
-  std::shared_ptr<WorldObject> GetPointer(const WorldObject *worldObject);
-
-  std::shared_ptr<WorldObject> GetObject(int id);
-
-  // Throws if this object doesn't exist
-  std::shared_ptr<WorldObject> RequireObject(int id);
-
-  std::shared_ptr<GameScene> GetShared();
-
-  template <class T>
-  auto FindObjectOfType() -> std::shared_ptr<T>
-  {
-    // Find the position of the object that is of the requested type
-    for (auto &objectPair : gameObjects)
-    {
-      auto component = objectPair.second->GetComponent<T>();
-
-      if (component != nullptr)
-        return component;
-    }
-
-    return nullptr;
-  }
-
-  template <class T>
-  auto RequireObjectOfType() -> std::shared_ptr<T>
-  {
-    auto object = FindObjectOfType<T>();
-
-    Helper::Assert(object != nullptr, "Required object type was not present in game scene");
-
-    return object;
-  }
-
-  std::shared_ptr<WorldObject> FindObject(std::string name);
-
-  // Initializes the scene's objects
-  virtual void InitializeObjects() = 0;
-
-  // Preloads all the assets so that they are ready when required
-  virtual void LoadAssets() {}
-
-  // Supplies a valid unique id for a world object or a component
-  int SupplyId();
-
-  void RegisterLayerRenderer(std::shared_ptr<Component> component);
-
-  // Sorts the layer by the components render order
-  void Sort(std::vector<std::weak_ptr<Component>> &components);
-
-  std::list<std::shared_ptr<Camera>> GetCameras();
-
+  // =================================
+  // SCENE PROPERTIES
+  // =================================
+public:
   // The scene's own physics system instance
   PhysicsSystem physicsSystem;
 
@@ -144,43 +82,166 @@ protected:
   // Reference to input manager
   InputManager &inputManager;
 
-  // Array with all of the scene's objects
-  std::unordered_map<int, std::shared_ptr<WorldObject>> gameObjects;
+  // =================================
+  // GAME SCENE HANDLING
+  // =================================
+public:
+  // Whether to remove this scene from the queue
+  bool PopRequested() { return popRequested; }
 
-  // Root object reference
-  std::shared_ptr<WorldObject> rootObject;
+  // Whether the game should exit
+  bool QuitRequested() { return quitRequested; }
 
+protected:
   // Indicates that the scene mus tbe removed from queue
   bool popRequested{false};
 
   // Indicates that the game must exit
   bool quitRequested{false};
 
+  // =================================
+  // SCENE'S GAME OBJECTS
+  // =================================
+public:
+  // Registers an object to this scene
+  std::shared_ptr<GameObject> RegisterObject(GameObject *gameObject);
+
+  // Registers an object to this scene
+  std::shared_ptr<GameObject> RegisterObject(std::shared_ptr<GameObject> gameObject);
+
+  // Removes an object given it's id
+  void RemoveObject(int id);
+
+  // Removes an object given it's shared pointer
+  void RemoveObject(std::shared_ptr<GameObject> gameObject);
+
+  // Creates a new world object
+  template <typename... Args>
+  std::shared_ptr<WorldObject> CreateWorldObject(
+      std::string name, std::function<void(std::shared_ptr<WorldObject>)> recipe = nullptr, Args &&...args)
+  {
+    // Create the object, which automatically registers itself to the scene
+    int objectId = (new WorldObject(name, std::forward<Args>(args)...))->id;
+    auto object = GetWorldObject(objectId);
+
+    Helper::Assert(object != nullptr, "Failed to retrieve world object which was just created");
+
+    // Initialize it
+    if (recipe)
+      recipe(object);
+
+    return object;
+  }
+
+  // Gets a game object by it's id
+  std::shared_ptr<GameObject> GetGameObject(int id);
+
+  // Finds an object by it's name
+  std::shared_ptr<GameObject> GetGameObject(std::string name);
+
+  // Gets a world object by it's id
+  std::shared_ptr<WorldObject> GetWorldObject(int id);
+
+  // Gets a world object by it's name
+  std::shared_ptr<WorldObject> GetWorldObject(std::string name);
+
+  // Throws if this object doesn't exist
+  std::shared_ptr<GameObject> RequireGameObject(int id);
+
+  // Throws if this object doesn't exist
+  std::shared_ptr<GameObject> RequireGameObject(std::string name);
+
+  // Throws if this world object doesn't exist
+  std::shared_ptr<WorldObject> RequireWorldObject(int id);
+
+  // Throws if this world object doesn't exist
+  std::shared_ptr<WorldObject> RequireWorldObject(std::string name);
+
+  // Finds a component in this scene's hierarchy
+  template <class T>
+  auto FindComponent() -> std::shared_ptr<T>
+  {
+    // Find the position of the object that is of the requested type
+    for (auto &objectPair : gameObjects)
+    {
+      auto component = objectPair.second->GetComponent<T>();
+
+      if (component != nullptr)
+        return component;
+    }
+
+    return nullptr;
+  }
+
+  // Finds a component in this scene's hierarchy and throws if it's not found
+  template <class T>
+  auto RequireFindComponent() -> std::shared_ptr<T>
+  {
+    auto object = FindComponent<T>();
+
+    Helper::Assert(object != nullptr, "Required object type was not present in game scene");
+
+    return object;
+  }
+
+  // Initializes the scene's objects
+  virtual void InitializeObjects() = 0;
+
+protected:
+  // All of the scene's objects
+  std::unordered_map<int, std::shared_ptr<GameObject>> gameObjects;
+
+  // Root object reference
+  std::shared_ptr<WorldObject> rootObject;
+
 private:
-  std::shared_ptr<WorldObject> GetRootObject() { return rootObject; }
+  // Gets the root object
+  std::shared_ptr<WorldObject> GetRootObject();
 
-  // Gets all objects which must be carried on to the next frame
-  std::vector<std::shared_ptr<WorldObject>> GetObjectsToCarryOn();
-
-  void RegisterCamera(std::shared_ptr<Camera> camera);
+  // Gets all objects which must be carried on to the next scene
+  std::vector<std::shared_ptr<GameObject>> GetObjectsToCarryOn();
 
   // Executes this function for each object, cascading down the hierarchy
-  void CascadeDown(std::shared_ptr<WorldObject> object, std::function<void(WorldObject &)> callback, bool topDown = true);
-  void DeleteObjects();
+  void CascadeDown(std::function<void(GameObject &)> callback, bool topDown = true);
 
-  // Whether the scene has executed the start method
-  bool started{false};
-  bool awoke{false};
+  // Deletes all objects which have requested for destruction
+  void CollectDeadObjects();
+
+  // =================================
+  // RENDERING
+  // =================================
+public:
+  // Registers the given Renderable to be rendered on future Render calls
+  // TODO: implement Renderable class
+  void RegisterLayerRenderer(std::shared_ptr<Component> component);
+
+  // Sorts the layer by the components render order
+  void Sort(std::vector<std::weak_ptr<Component>> &components);
+
+  // Gets all available cameras in this scene
+  std::list<std::shared_ptr<Camera>> GetCameras();
+
+private:
+  void RegisterCamera(std::shared_ptr<Camera> camera);
 
   // Stores it's cameras
   std::list<std::weak_ptr<Camera>> camerasWeak;
 
-  // Structure that maps each render layer to the components set to render in it
-  std::unordered_map<RenderLayer, std::vector<std::weak_ptr<Component>>>
-      layerStructure;
+  // Structure that maps each render layer to the Renderables in it
+  std::unordered_map<RenderLayer, std::vector<std::weak_ptr<Component>>> layerStructure;
+
+  // =================================
+  // UTILITY
+  // =================================
+public:
+  // Gets this scene's shared pointer
+  std::shared_ptr<GameScene> GetShared();
+
+  // Supplies a valid unique id for a game object or a component
+  int SupplyId();
 };
 
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Collider.h"
 
 #endif

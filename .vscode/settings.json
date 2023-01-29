@@ -18,6 +18,8 @@
     "MOUSEBUTTONDOWN",
     "MOUSEBUTTONUP",
     "pfps",
+    "Renderable",
+    "Renderables",
     "RIGHTSHOULDER",
     "RIGHTX",
     "SDLK",

@@ -2,7 +2,7 @@
 #define __PLATFORM_EFFECTOR__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include <utility>
 #include <memory>
 #include <unordered_set>
@@ -10,10 +10,10 @@
 class Rigidbody;
 
 // Allows for one-side collision
-class PlatformEffector : public Component
+class PlatformEffector : public WorldComponent
 {
 public:
-  PlatformEffector(WorldObject &associatedObject, std::pair<float, float> passThroughArc = defaultPassThroughArc);
+  PlatformEffector(GameObject &associatedObject, std::pair<float, float> passThroughArc = defaultPassThroughArc);
 
   virtual ~PlatformEffector() {}
 

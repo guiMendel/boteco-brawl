@@ -2,7 +2,7 @@
 #define __CHARACTER_STATE_MANAGER__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "CharacterState.h"
 #include "CharacterStateRecipes.h"
 #include "Rigidbody.h"
@@ -11,10 +11,10 @@
 #include <unordered_set>
 
 // An arena character that have multiple states, such as moving and jumping
-class CharacterStateManager : public Component
+class CharacterStateManager : public WorldComponent
 {
 public:
-  CharacterStateManager(WorldObject &associatedObject);
+  CharacterStateManager(GameObject &associatedObject);
   virtual ~CharacterStateManager() {}
 
   void Awake() override;

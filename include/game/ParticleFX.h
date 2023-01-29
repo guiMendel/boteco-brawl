@@ -2,14 +2,14 @@
 #define __PARTICLE_FX__
 
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "ParticleEmitter.h"
 #include <unordered_map>
 
-class ParticleFX : public Component
+class ParticleFX : public WorldComponent
 {
 public:
-  ParticleFX(WorldObject &associatedObject);
+  ParticleFX(GameObject &associatedObject);
   virtual ~ParticleFX() {}
 
   // Spawns a particle emitter to play the given effect, discards the emitter object after duration + destroyAfter seconds

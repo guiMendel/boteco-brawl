@@ -1,16 +1,16 @@
 #ifndef __PLAYER_CONTROLLER__
 #define __PLAYER_CONTROLLER__
 
-#include "Component.h"
+#include "WorldComponent.h"
 #include "Event.h"
 #include "Movement.h"
 
 class Movement;
 
-class PlayerInput : public Component
+class PlayerInput : public WorldComponent
 {
 public:
-  PlayerInput(WorldObject &associatedObject);
+  PlayerInput(GameObject &associatedObject);
   virtual ~PlayerInput() {}
 
   // Raised on movement input

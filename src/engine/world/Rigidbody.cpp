@@ -8,8 +8,8 @@ using namespace std;
 
 const float Rigidbody::defaultAirFriction{0.0f};
 
-Rigidbody::Rigidbody(WorldObject &associatedObject, RigidbodyType type, float elasticity, float friction)
-    : Component(associatedObject), elasticity(elasticity), friction(friction), type(type), lastPosition(worldObject.GetPosition()) {}
+Rigidbody::Rigidbody(GameObject &associatedObject, RigidbodyType type, float elasticity, float friction)
+    : WorldComponent(associatedObject), elasticity(elasticity), friction(friction), type(type), lastPosition(worldObject.GetPosition()) {}
 
 float Rigidbody::GetMass() const
 {

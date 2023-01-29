@@ -6,7 +6,7 @@
 class GunParry : public Parry
 {
 public:
-  GunParry(WorldObject &associatedObject);
+  GunParry(GameObject &associatedObject);
   virtual ~GunParry() {}
 
   // Whether a given attack damage can be parried right now

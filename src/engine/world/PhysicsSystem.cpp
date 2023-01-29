@@ -154,8 +154,8 @@ void PhysicsSystem::HandleCollisions()
     for (auto colliders : dynamicColliders)
     {
       if (WorldObject::SameLineage(
-              *gameScene.GetObject(triggerCollider->GetOwnerId()),
-              *gameScene.GetObject(colliders.at(0)->GetOwnerId())))
+              gameScene.RequireWorldObject(triggerCollider->GetOwnerId()),
+              gameScene.RequireWorldObject(colliders.at(0)->GetOwnerId())))
         continue;
 
       if (CheckForCollision(colliders, {triggerCollider}, collisionData))
@@ -167,8 +167,8 @@ void PhysicsSystem::HandleCollisions()
     for (auto colliders : nonDynamicTargets)
     {
       if (WorldObject::SameLineage(
-              *gameScene.GetObject(triggerCollider->GetOwnerId()),
-              *gameScene.GetObject(colliders.at(0)->GetOwnerId())))
+              gameScene.RequireWorldObject(triggerCollider->GetOwnerId()),
+              gameScene.RequireWorldObject(colliders.at(0)->GetOwnerId())))
         continue;
 
       if (CheckForCollision(colliders, {triggerCollider}, collisionData))
@@ -186,8 +186,8 @@ void PhysicsSystem::HandleCollisions()
       auto otherTriggerBody = otherTriggerCollider->rigidbodyWeak.lock();
 
       if (WorldObject::SameLineage(
-              *gameScene.GetObject(triggerCollider->GetOwnerId()),
-              *gameScene.GetObject(otherTriggerCollider->GetOwnerId())))
+              gameScene.RequireWorldObject(triggerCollider->GetOwnerId()),
+              gameScene.RequireWorldObject(otherTriggerCollider->GetOwnerId())))
         continue;
 
       // Ignore it if both are static
@@ -279,7 +279,7 @@ void PhysicsSystem::DetectObjectBetweenFramesCollision(vector<ValidatedColliders
 
 vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id, WeakColliders &weakColliders)
 {
-  if (gameScene.GetObject(id) == nullptr)
+  if (gameScene.RequireWorldObject(id) == nullptr)
     return {};
 
   // Will hold verified colliders
@@ -310,7 +310,7 @@ vector<shared_ptr<Collider>> PhysicsSystem::ValidateColliders(int id, WeakCollid
   if (colliderWasRemoved)
   {
     // If it has a rigidbody with auto mass on, derive its new mass
-    auto rigidbody = gameScene.GetObject(id)->GetComponent<Rigidbody>();
+    auto rigidbody = gameScene.RequireWorldObject(id)->GetComponent<Rigidbody>();
 
     if (rigidbody != nullptr)
     {
@@ -419,10 +419,10 @@ void PhysicsSystem::RegisterCollider(shared_ptr<Collider> collider, int objectId
 
   // cout << "After registration:" << endl;
   // for (auto [id, colliders] : dynamicColliderStructure)
-  //   cout << "  Dynamic Object " << gameScene.GetObject(id)->GetName() << " has " << colliders.size() << ", first is expired: " << colliders.at(0).expired() << endl;
+  //   cout << "  Dynamic Object " << gameScene.RequireWorldObject(id)->GetName() << " has " << colliders.size() << ", first is expired: " << colliders.at(0).expired() << endl;
 
   // for (auto [id, colliders] : staticColliderStructure)
-  //   cout << "  Static Object " << gameScene.GetObject(id)->GetName() << " has " << colliders.size() << endl;
+  //   cout << "  Static Object " << gameScene.RequireWorldObject(id)->GetName() << " has " << colliders.size() << endl;
   // cout << "Done." << endl;
 }
 

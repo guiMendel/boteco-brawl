@@ -6,14 +6,14 @@
 #include <string>
 #include <functional>
 #include "WorldObject.h"
-#include "Component.h"
+#include "WorldComponent.h"
 #include "SpriteRenderer.h"
 #include "Vector2.h"
 #include "Event.h"
 
 class Animation;
 
-class Animator : public Component
+class Animator : public WorldComponent
 {
   friend class Animation;
 
@@ -22,7 +22,7 @@ public:
   typedef std::function<std::shared_ptr<Animation>()> animation_builder;
   typedef std::unordered_map<std::string, animation_builder> animation_map;
 
-  Animator(WorldObject &associatedObject);
+  Animator(GameObject &associatedObject);
 
   virtual ~Animator() {}
 
