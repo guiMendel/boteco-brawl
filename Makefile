@@ -114,13 +114,13 @@ SDL_LIBRARY = -LC:\TDM-GCC-32\sdl2\lib
 # === WORLD
 
 # Header files
-_WORLD_DEPS = Animation.h AnimationFrame.h Animator.h BoxCollider.h CameraFollower.h CircleCollider.h Collider.h Collision.h Music.h Particle.h ParticleEmitter.h ParticleSystem.h PhysicsLayerHandler.h PhysicsSystem.h PlatformEffector.h Rigidbody.h Sound.h SpriteRenderer.h TriggerCollisionData.h
+_WORLD_DEPS = Animation.h AnimationFrame.h Animator.h BoxCollider.h CameraFollower.h CircleCollider.h Collider.h Collision.h Music.h Particle.h ParticleEmitter.h ParticleSystem.h PhysicsLayerHandler.h PhysicsSystem.h PlatformEffector.h Rigidbody.h Sound.h SpriteRenderer.h TriggerCollisionData.h WorldComponent.h WorldObject.h 
 
 # Generate header filepaths
 WORLD_DEPS = $(patsubst %,$(WORLD_INCLUDE_DIRECTORY)\\%,$(_WORLD_DEPS))
 
 # Object files
-_WORLD_OBJS = Animation.o AnimationFrame.o Animator.o BoxCollider.o CircleCollider.o Collider.o Collision.o Music.o Particle.o ParticleEmitter.o ParticleSystem.o PhysicsLayerHandler.o PhysicsSystem.o PlatformEffector.o Rigidbody.o Sound.o SpriteRenderer.o TriggerCollisionData.o
+_WORLD_OBJS = Animation.o AnimationFrame.o Animator.o BoxCollider.o CircleCollider.o Collider.o Collision.o Music.o Particle.o ParticleEmitter.o ParticleSystem.o PhysicsLayerHandler.o PhysicsSystem.o PlatformEffector.o Rigidbody.o Sound.o SpriteRenderer.o TriggerCollisionData.o WorldObject.o WorldComponent.o
 
 # Generate object filepaths
 WORLD_OBJS = $(patsubst %,$(WORLD_OBJECT_DIRECTORY)\\%,$(_WORLD_OBJS))
@@ -128,13 +128,13 @@ WORLD_OBJS = $(patsubst %,$(WORLD_OBJECT_DIRECTORY)\\%,$(_WORLD_OBJS))
 # === WORLD-UI
 
 # Header files
-_WORLD_UI_DEPS = Camera.h Component.h Debug.h Game.h WorldObject.h GameScene.h InputManager.h Resources.h Sprite.h Timer.h GameObject.h WorldComponent.h
+_WORLD_UI_DEPS = Camera.h Component.h Debug.h Game.h GameScene.h InputManager.h Resources.h Sprite.h Timer.h GameObject.h 
 
 # Generate header filepaths
 WORLD_UI_DEPS = $(patsubst %,$(WORLD_UI_INCLUDE_DIRECTORY)\\%,$(_WORLD_UI_DEPS))
 
 # Object files
-_WORLD_UI_OBJS = Camera.o Component.o Debug.o Game.o WorldObject.o GameScene.o InputManager.o Resources.o Sprite.o GameObject.o WorldComponent.o
+_WORLD_UI_OBJS = Camera.o Component.o Debug.o Game.o GameScene.o InputManager.o Resources.o Sprite.o GameObject.o 
 
 # Generate object filepaths
 WORLD_UI_OBJS = $(patsubst %,$(WORLD_UI_OBJECT_DIRECTORY)\\%,$(_WORLD_UI_OBJS))
