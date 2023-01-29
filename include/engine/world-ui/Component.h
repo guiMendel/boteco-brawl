@@ -3,11 +3,10 @@
 
 #include "InputManager.h"
 #include "Vector2.h"
-// TODO: remove render logic from component and bring it to it's own interface called Renderable
-// TODO: remove event hooks and bring them to their own interface
 #include "RenderLayer.h"
 #include "ComponentParameter.h"
 #include "Color.h"
+#include "Renderable.h"
 #include <string>
 #include <memory>
 
@@ -18,7 +17,7 @@ class GameScene;
 // We don't care it's recommended against doing this — we only want our lives to be easier
 using namespace Helper;
 
-class Component
+class Component : public Renderable
 {
   friend GameObject;
   friend WorldObject;
@@ -28,13 +27,6 @@ public:
   Component(GameObject &associatedObject);
 
   virtual ~Component();
-
-  // In which render layer this component is
-  // If None, then it's Render method will never be called
-  virtual RenderLayer GetRenderLayer() { return RenderLayer::None; }
-
-  // The order in which to render this component in it's layer (higher numbers are shown on top)
-  virtual int GetRenderOrder() { return 0; }
 
   void SetEnabled(bool value);
   bool IsEnabled() const;
@@ -67,9 +59,6 @@ protected:
   virtual void Update(float) {}
   virtual void PhysicsUpdate(float) {}
 
-  // Called once per frame to render to the screen
-  virtual void Render() {}
-
   virtual void OnSceneResume() {}
   virtual void OnScenePause() {}
 
@@ -81,7 +70,9 @@ protected:
 
 private:
   // Registers this component's render layer if it is not None
-  void RegisterLayer();
+  void RegisterLayer() override;
+
+  bool ShouldRender() override;
 
   // Ensures Start never gets called more than once
   void SafeStart();

@@ -56,3 +56,5 @@ ostream &operator<<(ostream &stream, const Component &component)
   stream << (string)component;
   return stream;
 }
+
+bool Component::ShouldRender() { return IsEnabled(); }

@@ -106,41 +106,41 @@ void GameScene::Render()
   // Foreach layer
   for (int layer{0}; layer != (int)RenderLayer::None; layer++)
   {
-    // Get the layer's components
-    auto &components = layerStructure[(RenderLayer)layer];
+    // Get the layer's Renderables
+    auto &renderables = layerStructure[(RenderLayer)layer];
 
     // Sort them
-    Sort(components);
+    Sort(renderables);
 
-    // For each component in this layer
-    auto componentIterator{components.begin()};
+    // For each Renderable in this layer
+    auto renderableIterator{renderables.begin()};
 
-    while (componentIterator != components.end())
+    while (renderableIterator != renderables.end())
     {
-      // Lock the component
-      if (auto component = componentIterator->lock())
+      // Lock the Renderable
+      if (auto renderable = renderableIterator->lock())
       {
         // Render it
-        if (component->IsEnabled())
-          component->Render();
+        if (renderable->ShouldRender())
+          renderable->Render();
 
         // Advance
-        componentIterator++;
+        renderableIterator++;
       }
       // If lock fails, it was erased, so remove it
       else
       {
-        componentIterator = components.erase(componentIterator);
+        renderableIterator = renderables.erase(renderableIterator);
       }
     }
   }
 }
 
-void GameScene::Sort(vector<weak_ptr<Component>> &components)
+void GameScene::Sort(vector<weak_ptr<Renderable>> &renderables)
 {
-  // Component comparer
+  // Renderable comparer
   // Must return true iff first parameter comes before second parameter
-  auto comparer = [](weak_ptr<Component> comp1Weak, weak_ptr<Component> comp2Weak)
+  auto comparer = [](weak_ptr<Renderable> comp1Weak, weak_ptr<Renderable> comp2Weak)
   {
     auto comp1 = comp1Weak.lock();
     auto comp2 = comp2Weak.lock();
@@ -153,7 +153,7 @@ void GameScene::Sort(vector<weak_ptr<Component>> &components)
   };
 
   // Sort it
-  sort(components.begin(), components.end(), comparer);
+  sort(renderables.begin(), renderables.end(), comparer);
 }
 
 void GameScene::Start()
@@ -171,7 +171,7 @@ void GameScene::Start()
 
   started = true;
 
-  // Register components to scene
+  // Register renderables to scene
   CASCADE_OBJECTS(RegisterToScene, );
 
   // Start objects
@@ -218,17 +218,17 @@ shared_ptr<GameObject> GameScene::RegisterObject(shared_ptr<GameObject> gameObje
 
 shared_ptr<GameObject> GameScene::RegisterObject(GameObject *gameObject) { return RegisterObject(shared_ptr<GameObject>(gameObject)); }
 
-void GameScene::RegisterLayerRenderer(shared_ptr<Component> component)
+void GameScene::RegisterLayerRenderer(shared_ptr<Renderable> renderable)
 {
   // Simply ignore invalid requests
-  if (!component)
+  if (!renderable)
     return;
 
   // Get it's layer
-  auto &layer = layerStructure[component->GetRenderLayer()];
+  auto &layer = layerStructure[renderable->GetRenderLayer()];
 
   // Add it's entry
-  layer.emplace_back(component);
+  layer.emplace_back(renderable);
 }
 
 shared_ptr<GameObject> GameScene::GetGameObject(int id)

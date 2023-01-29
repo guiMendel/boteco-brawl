@@ -16,6 +16,7 @@
 #include "Vector2.h"
 #include "PhysicsSystem.h"
 #include "ParticleSystem.h"
+#include "Renderable.h"
 
 class Component;
 class Collider;
@@ -212,23 +213,23 @@ private:
   // =================================
 public:
   // Registers the given Renderable to be rendered on future Render calls
-  // TODO: implement Renderable class
-  void RegisterLayerRenderer(std::shared_ptr<Component> component);
+  void RegisterLayerRenderer(std::shared_ptr<Renderable> component);
 
-  // Sorts the layer by the components render order
-  void Sort(std::vector<std::weak_ptr<Component>> &components);
+  // Sorts the render layer by the members render order
+  void Sort(std::vector<std::weak_ptr<Renderable>> &components);
 
   // Gets all available cameras in this scene
   std::list<std::shared_ptr<Camera>> GetCameras();
 
 private:
+  // Registers a camera to the scene
   void RegisterCamera(std::shared_ptr<Camera> camera);
 
   // Stores it's cameras
   std::list<std::weak_ptr<Camera>> camerasWeak;
 
   // Structure that maps each render layer to the Renderables in it
-  std::unordered_map<RenderLayer, std::vector<std::weak_ptr<Component>>> layerStructure;
+  std::unordered_map<RenderLayer, std::vector<std::weak_ptr<Renderable>>> layerStructure;
 
   // =================================
   // UTILITY
