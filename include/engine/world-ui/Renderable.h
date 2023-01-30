@@ -18,15 +18,16 @@ public:
   // The order in which to render this component in it's layer (higher numbers are shown on top)
   virtual int GetRenderOrder() { return 0; }
 
+protected:
+  // Registers this component's render layer if it is not None
+  virtual void RegisterLayer() = 0;
+
 private:
   // Whether this data type should be rendered at the moment of this call
   virtual bool ShouldRender() { return true; }
 
   // Called once per frame to render to the screen
   virtual void Render() {}
-
-  // Registers this component's render layer if it is not None
-  virtual void RegisterLayer() = 0;
 };
 
 #endif

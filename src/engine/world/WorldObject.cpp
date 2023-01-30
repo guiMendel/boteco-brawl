@@ -308,95 +308,6 @@ shared_ptr<WorldObject> WorldObject::CreateChild(string name, Vector2 offset, fl
   return GetScene()->RequireWorldObject(childId);
 }
 
-vector<shared_ptr<WorldObject>> WorldObject::GetChildren()
-{
-  vector<shared_ptr<WorldObject>> verifiedChildren;
-
-  // For each child entry
-  auto childEntryIterator = children.begin();
-  while (childEntryIterator != children.end())
-  {
-    // If it's expired
-    if (childEntryIterator->second.expired())
-    {
-      // Remove it
-      childEntryIterator = children.erase(childEntryIterator);
-
-      continue;
-    }
-
-    // Otherwise lock it and add it
-    verifiedChildren.push_back(childEntryIterator->second.lock());
-
-    // Advance
-    childEntryIterator++;
-  }
-
-  return verifiedChildren;
-}
-
-shared_ptr<WorldObject> WorldObject::RequireChild(int id)
-{
-  auto child = GetChild(id);
-
-  // cout << "Children:" << endl;
-  // for (auto child : children)
-  //   cout << *child.second.lock() << endl;
-
-  Assert(child != nullptr, "Required child of id " + to_string(id) + " was not found in object " + string(*this));
-
-  return child;
-}
-
-shared_ptr<WorldObject> WorldObject::RequireChild(string name)
-{
-  auto child = GetChild(name);
-
-  Assert(child != nullptr, "Required child of name \"" + name + "\" was not found in object " + string(*this));
-
-  return child;
-}
-
-shared_ptr<WorldObject> WorldObject::GetChild(int id)
-{
-  if (children.count(id) == 0)
-    return nullptr;
-
-  auto child = children[id].lock();
-
-  if (child == nullptr)
-    children.erase(id);
-
-  return child;
-}
-
-shared_ptr<WorldObject> WorldObject::GetChild(string name)
-{
-  // For each child entry
-  auto childEntryIterator = children.begin();
-  while (childEntryIterator != children.end())
-  {
-    // If it's expired
-    if (childEntryIterator->second.expired())
-    {
-      // Remove it
-      childEntryIterator = children.erase(childEntryIterator);
-
-      continue;
-    }
-
-    // Otherwise check if this is it
-    auto child = childEntryIterator->second.lock();
-    if (child->GetName() == name)
-      return child;
-
-    // Advance
-    childEntryIterator++;
-  }
-
-  return nullptr;
-}
-
 void WorldObject::InternalDestroy() { DestroySelf(); }
 
 auto WorldObject::DestroySelf() -> std::unordered_map<int, std::weak_ptr<WorldObject>>::iterator
@@ -578,17 +489,4 @@ bool WorldObject::TriggerCollisionDealtWithLastFrame(TriggerCollisionData trigge
   return lastFrameTriggers.count(triggerData.GetHash()) > 0;
 }
 
-void WorldObject::CascadeDown(function<void(GameObject &)> callback, bool topDown)
-{
-  // Execute on this object
-  if (topDown)
-    callback(*this);
-
-  // Execute on it's children
-  for (auto child : GetChildren())
-    child->CascadeDown(callback, topDown);
-
-  // Execute on this object (bottom up case)
-  if (topDown == false)
-    callback(*this);
-}
+void WorldObject::CascadeDown(function<void(GameObject &)> callback, bool topDown) { return CascadeDownChildren(callback, topDown); }

@@ -5,11 +5,12 @@
 #include "PhysicsLayer.h"
 #include "PhysicsSystem.h"
 #include "TriggerCollisionData.h"
+#include "Parent.h"
 
 class GameScene;
 
-// A specific kind of GameObject which exists in the in-game world, has a scale, rotation, and physical interactions
-class WorldObject : public GameObject
+// A specific kind of GameObject which exists in the in-game world, has a scale, rotation, physical interactions, a parent and children World Objects
+class WorldObject : public GameObject, public Parent<WorldObject>
 {
   friend class GameScene;
   friend class PhysicsSystem;
@@ -23,7 +24,7 @@ public:
   WorldObject(
       std::string name, Vector2 coordinates = Vector2(0, 0), double rotation = 0.0, std::shared_ptr<WorldObject> parent = nullptr);
 
-  ~WorldObject();
+  virtual ~WorldObject();
 
   // =================================
   // FRAME EVENTS
@@ -53,72 +54,6 @@ private:
 
   // Deletes reference to parent and parent's reference to self
   auto UnlinkParent() -> std::unordered_map<int, std::weak_ptr<WorldObject>>::iterator;
-
-  // =================================
-  // COMPONENT HANDLING
-  // =================================
-public:
-  // Gets pointer to a component of the given type
-  // Needs to be in header file so the compiler knows how to build the necessary methods
-  template <class T>
-  auto GetComponentsInChildren() -> std::vector<std::shared_ptr<T>>
-  {
-    return InternalGetComponentsInChildren<T>({});
-  }
-
-  // Gets pointer to a component of the given type
-  // Needs to be in header file so the compiler knows how to build the necessary methods
-  template <class T>
-  auto GetComponentInChildren() -> std::shared_ptr<T>
-  {
-    // Try to get in this object
-    auto component = GetComponent<T>();
-
-    // If found, return it
-    if (component != nullptr)
-      return component;
-
-    // For each child
-    for (auto child : GetChildren())
-    {
-      auto component = child->GetComponentInChildren<T>();
-      if (component != nullptr)
-        return component;
-    }
-
-    return nullptr;
-  }
-
-  // Like GetComponentInChildren, but raises if it's not present
-  template <class T>
-  auto RequireComponentInChildren() -> std::shared_ptr<T>
-  {
-    auto component = GetComponentInChildren<T>();
-
-    if (!component)
-      throw std::runtime_error(std::string("Required component was not found in children.\nRequired component typeid name: ") + typeid(T).name());
-
-    return component;
-  }
-
-private:
-  // Gets pointer to a component of the given type
-  // Needs to be in header file so the compiler knows how to build the necessary methods
-  template <class T>
-  auto InternalGetComponentsInChildren(std::vector<std::shared_ptr<T>> foundComponents) -> std::vector<std::shared_ptr<T>>
-  {
-    // For each child
-    for (auto child : GetChildren())
-      foundComponents = child->InternalGetComponentsInChildren<T>(foundComponents);
-
-    auto newComponents = GetComponents<T>();
-
-    // Merge
-    if (newComponents.size() > 0)
-      foundComponents.insert(foundComponents.end(), newComponents.begin(), newComponents.end());
-
-    return foundComponents;
-  }
 
   // =================================
   // OBJECT PROPERTIES
@@ -160,11 +95,6 @@ public:
   std::shared_ptr<WorldObject> CreateChild(std::string name);
   std::shared_ptr<WorldObject> CreateChild(std::string name, Vector2 offset);
   std::shared_ptr<WorldObject> CreateChild(std::string name, Vector2 offset, float offsetRotation);
-  std::vector<std::shared_ptr<WorldObject>> GetChildren();
-  std::shared_ptr<WorldObject> GetChild(std::string name);
-  std::shared_ptr<WorldObject> GetChild(int id);
-  std::shared_ptr<WorldObject> RequireChild(std::string name);
-  std::shared_ptr<WorldObject> RequireChild(int id);
 
   // Get's pointer to parent, and ensures it's valid, unless this is the root object. If the parent is the root object, returns nullptr
   std::shared_ptr<WorldObject> GetParent() const;
@@ -190,9 +120,6 @@ protected:
   std::shared_ptr<WorldObject> InternalGetWorldParent() const;
 
 private:
-  // Child objects
-  std::unordered_map<int, std::weak_ptr<WorldObject>> children;
-
   // Parent object
   std::weak_ptr<WorldObject> weakParent;
 

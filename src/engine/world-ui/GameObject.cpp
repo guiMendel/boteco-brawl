@@ -160,7 +160,10 @@ void GameObject::SetTimeScale(float newScale)
   Assert(newScale > 0, "Time must flow forward");
 
   if (IsRoot())
+  {
     localTimeScale = newScale;
+    return;
+  }
 
   float parentTimeScale{InternalGetParent()->GetTimeScale()};
 

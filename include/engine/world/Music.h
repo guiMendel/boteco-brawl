@@ -13,6 +13,9 @@ public:
   // Construct from music filename
   Music(const std::string filename) : musicPath(filename) {}
 
+  // Declare custom destructor
+  virtual ~Music();
+
   // Plays the given music (-1 loops forever)
   void Play(const int times = -1);
 
@@ -24,9 +27,6 @@ public:
 
   // Fades out the currently playing music. Thw fade out window is in ms
   void FadeOut([[maybe_unused]] const int fadeWindow = 1500) { Mix_HaltMusic(); }
-
-  // Declare custom destructor
-  ~Music();
 
 private:
   // The currently loaded music track

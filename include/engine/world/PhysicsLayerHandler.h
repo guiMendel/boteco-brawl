@@ -14,7 +14,7 @@ class PhysicsLayerHandler
 public:
   PhysicsLayerHandler();
 
-  ~PhysicsLayerHandler() {}
+  virtual ~PhysicsLayerHandler() {}
 
   // Responsible for initializing definitions of which layers should collide
   // By default, all layers collide

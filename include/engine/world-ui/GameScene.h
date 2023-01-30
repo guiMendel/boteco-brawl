@@ -140,23 +140,55 @@ public:
   // Finds an object by it's name
   std::shared_ptr<GameObject> GetGameObject(std::string name);
 
-  // Gets a world object by it's id
-  std::shared_ptr<WorldObject> GetWorldObject(int id);
-
-  // Gets a world object by it's name
-  std::shared_ptr<WorldObject> GetWorldObject(std::string name);
-
   // Throws if this object doesn't exist
   std::shared_ptr<GameObject> RequireGameObject(int id);
 
   // Throws if this object doesn't exist
   std::shared_ptr<GameObject> RequireGameObject(std::string name);
 
+  // Gets a world object by it's id
+  std::shared_ptr<WorldObject> GetWorldObject(int id);
+
+  // Gets a world object by it's name
+  std::shared_ptr<WorldObject> GetWorldObject(std::string name);
+
   // Throws if this world object doesn't exist
   std::shared_ptr<WorldObject> RequireWorldObject(int id);
 
   // Throws if this world object doesn't exist
   std::shared_ptr<WorldObject> RequireWorldObject(std::string name);
+
+  // Gets a ui object by it's id. Throws if cast to the provided class fails.
+  template <class T>
+  std::shared_ptr<T> GetUIObject(int id)
+  {
+    auto gameObject = GetGameObject(id);
+
+    if (gameObject == nullptr)
+      return nullptr;
+
+    return RequirePointerCast<T>(gameObject);
+  }
+
+  // Gets a ui object by it's name. Throws if cast to the provided class fails.
+  template <class T>
+  std::shared_ptr<T> GetUIObject(std::string name)
+  {
+    auto gameObject = GetGameObject(name);
+
+    if (gameObject == nullptr)
+      return nullptr;
+
+    return RequirePointerCast<T>(gameObject);
+  }
+
+  // Throws if this ui object doesn't exist. Throws if cast to the provided class fails.
+  template <class T>
+  std::shared_ptr<T> RequireUIObject(int id) { return RequirePointerCast<T>(RequireGameObject(id)); }
+
+  // Throws if this ui object doesn't exist. Throws if cast to the provided class fails.
+  template <class T>
+  std::shared_ptr<T> RequireUIObject(std::string name) { return RequirePointerCast<T>(RequireGameObject(name)); }
 
   // Finds a component in this scene's hierarchy
   template <class T>

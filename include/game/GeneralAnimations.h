@@ -361,7 +361,7 @@ namespace GeneralAnimations
 
     Projectile(Animator &animator, std::weak_ptr<WorldObject> weakParent)
         : AttackAnimation(animator), weakParent(weakParent) {}
-    ~Projectile() {}
+    virtual ~Projectile() {}
 
     DEF_NAME("projectile")
     DELCARE_FRAMES

@@ -17,7 +17,7 @@ struct ShakeEffect
               float effectDuration,
               float stopDuration);
 
-  ~ShakeEffect();
+  virtual ~ShakeEffect();
 
   void Update(float);
 

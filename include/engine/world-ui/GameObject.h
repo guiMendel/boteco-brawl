@@ -29,7 +29,7 @@ public:
   // Default constructor
   GameObject(std::string name);
 
-  ~GameObject();
+  virtual ~GameObject();
 
   // =================================
   // FRAME EVENTS

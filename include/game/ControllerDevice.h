@@ -18,7 +18,7 @@ public:
   // Requires an index of a connected controller
   ControllerDevice(int controllerIndex);
 
-  ~ControllerDevice();
+  virtual ~ControllerDevice();
 
   // Gets shared pointer of this device
   std::shared_ptr<ControllerDevice> GetShared() const;

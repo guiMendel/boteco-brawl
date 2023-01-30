@@ -163,6 +163,35 @@ namespace Helper
     return finalList;
   }
 
+  // Iterates through each weak pointer, removing those that are expired, and collecting the rest in a shared ptr collection
+  template <typename T, typename U>
+  std::vector<std::shared_ptr<U>> WeakMapToVector(std::unordered_map<T, std::weak_ptr<U>> &weakMap)
+  {
+    std::vector<std::shared_ptr<U>> verifiedObjects;
+
+    // For each entry
+    auto entryIterator = weakMap.begin();
+    while (entryIterator != weakMap.end())
+    {
+      // If it's expired
+      if (entryIterator->second.expired())
+      {
+        // Remove it
+        entryIterator = weakMap.erase(entryIterator);
+
+        continue;
+      }
+
+      // Otherwise lock it and add it
+      verifiedObjects.push_back(entryIterator->second.lock());
+
+      // Advance
+      entryIterator++;
+    }
+
+    return verifiedObjects;
+  }
+
   // Apply Szudzik's hash function (https://stackoverflow.com/questions/919612/mapping-two-integers-to-one-in-a-unique-and-deterministic-way)
   size_t HashTwo(size_t a, size_t b);
 
@@ -175,6 +204,14 @@ namespace Helper
     Assert(castedPointer != nullptr, "Failed required pointer cast");
 
     return castedPointer;
+  }
+
+  // Obtains the shared pointer from a weak pointer and throws if it's invalid
+  template <typename T>
+  std::shared_ptr<T> Lock(std::weak_ptr<T> weak)
+  {
+    LOCK(weak, shared);
+    return shared;
   }
 
 }

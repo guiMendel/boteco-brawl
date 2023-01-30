@@ -60,7 +60,7 @@ public:
   int SupplyId() { return nextId++; }
 
   // Explicit destructor
-  ~Game();
+  virtual ~Game();
 
   // Path to engine's default font
   static const std::string defaultFontPath;

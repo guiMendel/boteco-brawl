@@ -152,8 +152,8 @@ void GameScene::Sort(vector<weak_ptr<Renderable>> &renderables)
     return comp1->GetRenderOrder() < comp2->GetRenderOrder();
   };
 
-  // Sort it
-  sort(renderables.begin(), renderables.end(), comparer);
+  // Sort it, preserving layer register order for equivalent members
+  stable_sort(renderables.begin(), renderables.end(), comparer);
 }
 
 void GameScene::Start()
