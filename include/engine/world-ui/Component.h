@@ -11,6 +11,7 @@
 #include <memory>
 
 class WorldObject;
+class ComponentOwner;
 class GameObject;
 class GameScene;
 
@@ -19,6 +20,7 @@ using namespace Helper;
 
 class Component : public Renderable
 {
+  friend ComponentOwner;
   friend GameObject;
   friend WorldObject;
   friend GameScene;

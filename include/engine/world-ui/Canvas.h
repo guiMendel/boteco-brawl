@@ -2,7 +2,8 @@
 #define __CANVAS__
 
 #include "WorldComponent.h"
-#include "UIRoot.h"
+
+class UIContainer;
 
 // Creates a space onto which UI can be inserted
 class Canvas : public WorldComponent
@@ -34,7 +35,9 @@ public:
   Vector2 size;
 
   // The root UI Object
-  UIRoot root;
+  std::shared_ptr<UIContainer> root;
 };
+
+#include "UIContainer.h"
 
 #endif

@@ -113,38 +113,6 @@ void GameObject::OnSceneResume()
     component->OnSceneResume();
 }
 
-decltype(GameObject::components)::iterator GameObject::RemoveComponent(shared_ptr<Component> component)
-{
-  // Detect not present
-  if (components.count(component->id) == 0)
-    return components.end();
-
-  // Wrap it up
-  component->OnBeforeDestroy();
-
-  // Remove it
-  return components.erase(components.find(component->id));
-}
-
-auto GameObject::GetComponent(const Component *componentPointer) -> shared_ptr<Component>
-{
-  if (components.count(componentPointer->id) == 0)
-    return nullptr;
-
-  return components[componentPointer->id];
-}
-
-auto GameObject::RequireComponent(const Component *componentPointer) -> shared_ptr<Component>
-{
-  auto component = GetComponent(componentPointer);
-
-  if (!component)
-  {
-    throw runtime_error(string("Required component was not found"));
-  }
-
-  return component;
-}
 
 // Absolute scale of the object
 float GameObject::GetTimeScale() const

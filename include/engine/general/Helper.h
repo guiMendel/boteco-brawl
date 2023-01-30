@@ -9,6 +9,7 @@
 #include <string>
 #include <iostream>
 #include <utility>
+#include <unordered_map>
 #include <SDL.h>
 
 #define IF_LOCK(weak, shared) if (auto shared = weak.lock(); shared)

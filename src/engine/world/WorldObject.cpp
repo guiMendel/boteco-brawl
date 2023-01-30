@@ -489,4 +489,17 @@ bool WorldObject::TriggerCollisionDealtWithLastFrame(TriggerCollisionData trigge
   return lastFrameTriggers.count(triggerData.GetHash()) > 0;
 }
 
-void WorldObject::CascadeDown(function<void(GameObject &)> callback, bool topDown) { return CascadeDownChildren(callback, topDown); }
+void WorldObject::CascadeDown(function<void(GameObject &)> callback, bool topDown)
+{
+  // Execute on this object
+  if (topDown)
+    callback(*this);
+
+  // Execute on it's children
+  for (auto child : GetChildren())
+    child->CascadeDown(callback, topDown);
+
+  // Execute on this object (bottom up case)
+  if (topDown == false)
+    callback(*this);
+}

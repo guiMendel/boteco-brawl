@@ -7,6 +7,7 @@
 #include <memory>
 #include <algorithm>
 #include <utility>
+#include "ComponentOwner.h"
 #include "Component.h"
 #include "Vector2.h"
 #include "Helper.h"
@@ -16,7 +17,7 @@
 class GameScene;
 
 // A type of data that can have Components as building blocks, a unique identifier, and a name
-class GameObject
+class GameObject : virtual public ComponentOwner
 {
   friend class GameScene;
 
@@ -84,10 +85,6 @@ private:
   // =================================
   // COMPONENT HANDLING
   // =================================
-protected:
-  // Map with all components of this object, indexed by the component's ids
-  std::unordered_map<int, std::shared_ptr<Component>> components;
-
 public:
   // Adds a new component
   template <class T, typename... Args>
@@ -109,59 +106,6 @@ public:
 
     return component;
   }
-
-  // Removes an existing component
-  decltype(components)::iterator RemoveComponent(std::shared_ptr<Component> component);
-
-  // Gets pointer to a component of the given type
-  // Needs to be in header file so the compiler knows how to build the necessary methods
-  template <class T>
-  auto GetComponent() -> std::shared_ptr<T>
-  {
-    // Find the position of the component that is of the requested type
-    auto componentIterator = std::find_if(
-        components.begin(), components.end(), [](std::pair<int, std::shared_ptr<Component>> componentEntry)
-        { return dynamic_cast<T *>(componentEntry.second.get()) != nullptr; });
-
-    // Detect if not present
-    if (componentIterator == components.end())
-      return nullptr;
-
-    return RequirePointerCast<T>(componentIterator->second);
-  }
-
-  // Gets pointer to a component of the given type
-  // Needs to be in header file so the compiler knows how to build the necessary methods
-  template <class T>
-  auto GetComponents() -> std::vector<std::shared_ptr<T>>
-  {
-    std::vector<std::shared_ptr<T>> foundComponents;
-
-    for (auto [componentId, component] : components)
-    {
-      if (dynamic_cast<T *>(component.get()) != nullptr)
-        foundComponents.push_back(RequirePointerCast<T>(component));
-    }
-
-    return foundComponents;
-  }
-
-  // Like GetComponent, but raises if it's not present
-  template <class T>
-  auto RequireComponent() -> std::shared_ptr<T>
-  {
-    auto component = GetComponent<T>();
-
-    if (!component)
-    {
-      throw std::runtime_error(std::string("Required component was not found.\nRequired component typeid name: ") + typeid(T).name());
-    }
-
-    return component;
-  }
-
-  auto GetComponent(const Component *componentPointer) -> std::shared_ptr<Component>;
-  auto RequireComponent(const Component *componentPointer) -> std::shared_ptr<Component>;
 
   // =================================
   // OBJECT PROPERTIES

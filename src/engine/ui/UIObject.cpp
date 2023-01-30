@@ -4,7 +4,7 @@
 
 using namespace std;
 
-UIObject::UIObject(Canvas &canvas, string name, int gameSceneId, int id = -1)
+UIObject::UIObject(Canvas &canvas, string name, int gameSceneId, int id)
     : GameObject(name, gameSceneId, id),
       width(UIDimension::Horizontal, GetShared()),
       height(UIDimension::Vertical, GetShared()),
@@ -12,13 +12,26 @@ UIObject::UIObject(Canvas &canvas, string name, int gameSceneId, int id = -1)
       margin(GetShared()),
       canvas(canvas) {}
 
-UIObject::UIObject(Canvas &canvas, string name, shared_ptr<UIContainer> parent = nullptr)
+UIObject::UIObject(Canvas &canvas, string name, shared_ptr<UIContainer> parent)
     : GameObject(name),
       width(UIDimension::Horizontal, GetShared()),
       height(UIDimension::Vertical, GetShared()),
       padding(GetShared()),
       margin(GetShared()),
-      canvas(canvas) {}
+      canvas(canvas)
+{
+  // If no parent, add canvas root as parent (unless this is the first object to be added)
+  if (parent == nullptr && canvas.root != nullptr)
+    parent = canvas.root;
+
+  // Add reference to parent
+  this->weakParent = parent;
+
+  // If not canvas root
+  if (IsCanvasRoot() == false)
+    // Give parent a reference to self
+    parent->children[id] = weak_ptr(GetShared());
+}
 
 UIObject::~UIObject() {}
 
@@ -26,7 +39,7 @@ Vector2 UIObject::GetPosition() { return updatedPosition; }
 
 UIDimension &UIObject::GetSize(UIDimension::Axis axis) { return axis == UIDimension::Horizontal ? width : height; }
 
-bool UIObject::IsCanvasRoot() const { return canvas.root.id == id; }
+bool UIObject::IsCanvasRoot() const { return canvas.root->id == id; }
 
 shared_ptr<UIContainer> UIObject::GetParent() const
 {
@@ -36,7 +49,12 @@ shared_ptr<UIContainer> UIObject::GetParent() const
   return Lock(weakParent);
 }
 
-void UIObject::SetParent(shared_ptr<UIContainer> newParent) { weakParent = newParent; }
+void UIObject::SetParent(shared_ptr<UIContainer> newParent)
+{
+  Assert(IsCanvasRoot() == false, "Canvas root can't have its parent set");
+
+  weakParent = newParent;
+}
 
 bool UIObject::IsDescendantOf(shared_ptr<UIContainer> other) const
 {

@@ -2,6 +2,7 @@
 #define __PARENT__
 
 #include "Helper.h"
+#include "ComponentOwner.h"
 #include <unordered_map>
 #include <functional>
 #include <string>
@@ -9,7 +10,7 @@
 class Component;
 
 template <typename ChildClass>
-class Parent
+class Parent : virtual public ComponentOwner
 {
   // =================================
   // OBJECT HIERARCHY
@@ -57,23 +58,6 @@ public:
     return child;
   }
 
-protected:
-  // Executes the given function for this object and then cascades it down to any children it has
-  void CascadeDownChildren(std::function<void(ChildClass &)> callback, bool topDown = true)
-  {
-    // Execute on this object
-    if (topDown)
-      callback(*this);
-
-    // Execute on it's children
-    for (auto child : GetChildren())
-      child->CascadeDown(callback, topDown);
-
-    // Execute on this object (bottom up case)
-    if (topDown == false)
-      callback(*this);
-  }
-
   // Child objects
   std::unordered_map<int, std::weak_ptr<ChildClass>> children;
 
@@ -95,7 +79,7 @@ public:
   auto GetComponentInChildren() -> std::shared_ptr<T>
   {
     // Try to get in this object
-    std::shared_ptr<T> component = InternalGetComponent<T>();
+    std::shared_ptr<T> component = GetComponent<T>();
 
     // If found, return it
     if (component != nullptr)
@@ -109,7 +93,7 @@ public:
 
       if (childAsParent)
       {
-        component = childAsParent->GetComponentInChildren();
+        component = childAsParent->Parent<ChildClass>::GetComponentInChildren<T>();
 
         if (component != nullptr)
           return component;
@@ -118,7 +102,7 @@ public:
       // If it has no children
       else
       {
-        component = child->InternalGetComponent();
+        component = child->ComponentOwner::GetComponent<T>();
 
         if (component != nullptr)
           return component;
@@ -140,45 +124,6 @@ public:
     return component;
   }
 
-protected:
-  // Gets all components of this object
-  virtual std::vector<std::shared_ptr<Component>> GetAllComponents() const = 0;
-
-  // Gets pointer to a component of the given type
-  // Needs to be in header file so the compiler knows how to build the necessary methods
-  template <class T>
-  auto InternalGetComponent() -> std::shared_ptr<T>
-  {
-    auto components = GetAllComponents();
-
-    // Find the position of the component that is of the requested type
-    auto componentIterator = std::find_if(
-        components.begin(), components.end(), [](std::shared_ptr<Component> component)
-        { return dynamic_cast<T *>(component.get()) != nullptr; });
-
-    // Detect if not present
-    if (componentIterator == components.end())
-      return nullptr;
-
-    return RequirePointerCast<T>(*componentIterator);
-  }
-
-  // Gets pointer to a component of the given type
-  // Needs to be in header file so the compiler knows how to build the necessary methods
-  template <class T>
-  auto InternalGetComponents() -> std::vector<std::shared_ptr<T>>
-  {
-    auto components = GetAllComponents();
-
-    std::vector<std::shared_ptr<T>> foundComponents;
-
-    for (auto component : components)
-      if (dynamic_cast<T *>(component.get()) != nullptr)
-        foundComponents.push_back(RequirePointerCast<T>(component));
-
-    return foundComponents;
-  }
-
 private:
   // Gets pointer to a component of the given type
   // Needs to be in header file so the compiler knows how to build the necessary methods
@@ -197,7 +142,7 @@ private:
       // If it has no children
       else
       {
-        std::vector<std::shared_ptr<T>> newComponents = child->InternalGetComponents();
+        std::vector<std::shared_ptr<T>> newComponents = child->ComponentOwner::GetComponents<T>();
 
         // Merge
         if (newComponents.size() > 0)
@@ -206,7 +151,7 @@ private:
     }
 
     // Merge own components
-    std::vector<std::shared_ptr<T>> newComponents = InternalGetComponents();
+    std::vector<std::shared_ptr<T>> newComponents = GetComponents<T>();
 
     // Merge
     if (newComponents.size() > 0)

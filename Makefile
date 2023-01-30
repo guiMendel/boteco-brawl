@@ -128,13 +128,13 @@ WORLD_OBJS = $(patsubst %,$(WORLD_OBJECT_DIRECTORY)\\%,$(_WORLD_OBJS))
 # === WORLD-UI
 
 # Header files
-_WORLD_UI_DEPS = Camera.h Component.h Debug.h Game.h GameScene.h InputManager.h Resources.h Sprite.h Timer.h GameObject.h 
+_WORLD_UI_DEPS = Camera.h Component.h Debug.h Game.h GameScene.h InputManager.h Resources.h Sprite.h Timer.h GameObject.h Canvas.h
 
 # Generate header filepaths
 WORLD_UI_DEPS = $(patsubst %,$(WORLD_UI_INCLUDE_DIRECTORY)\\%,$(_WORLD_UI_DEPS))
 
 # Object files
-_WORLD_UI_OBJS = Camera.o Component.o Debug.o Game.o GameScene.o InputManager.o Resources.o Sprite.o GameObject.o 
+_WORLD_UI_OBJS = Camera.o Component.o Debug.o Game.o GameScene.o InputManager.o Resources.o Sprite.o GameObject.o Canvas.o
 
 # Generate object filepaths
 WORLD_UI_OBJS = $(patsubst %,$(WORLD_UI_OBJECT_DIRECTORY)\\%,$(_WORLD_UI_OBJS))
@@ -142,13 +142,13 @@ WORLD_UI_OBJS = $(patsubst %,$(WORLD_UI_OBJECT_DIRECTORY)\\%,$(_WORLD_UI_OBJS))
 # === UI
 
 # Header files
-_UI_DEPS = Text.h
+_UI_DEPS = Text.h UIComponent.h UIContainer.h UIContent.h UIDimension.h UIObject.h
 
 # Generate header filepaths
 UI_DEPS = $(patsubst %,$(UI_INCLUDE_DIRECTORY)\\%,$(_UI_DEPS))
 
 # Object files
-_UI_OBJS = Text.o
+_UI_OBJS = Text.o UIComponent.o UIContainer.o UIContent.o UIDimension.o UIObject.o
 
 # Generate object filepaths
 UI_OBJS = $(patsubst %,$(UI_OBJECT_DIRECTORY)\\%,$(_UI_OBJS))
@@ -156,13 +156,13 @@ UI_OBJS = $(patsubst %,$(UI_OBJECT_DIRECTORY)\\%,$(_UI_OBJS))
 # === GENERAL
 
 # Header files
-_GENERAL_DEPS = Circle.h Color.h Event.h Helper.h Rectangle.h Shape.h Vector2.h
+_GENERAL_DEPS = Circle.h Color.h Event.h Helper.h Rectangle.h Shape.h Vector2.h ComponentOwner.h Parent.h
 
 # Generate header filepaths
 GENERAL_DEPS = $(patsubst %,$(GENERAL_INCLUDE_DIRECTORY)\\%,$(_GENERAL_DEPS))
 
 # Object files
-_GENERAL_OBJS = Circle.o Color.o Helper.o Rectangle.o Shape.o Vector2.o main.o
+_GENERAL_OBJS = Circle.o Color.o Helper.o Rectangle.o Shape.o Vector2.o main.o ComponentOwner.o
 
 # Generate object filepaths
 GENERAL_OBJS = $(patsubst %,$(GENERAL_OBJECT_DIRECTORY)\\%,$(_GENERAL_OBJS))

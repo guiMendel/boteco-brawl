@@ -7,7 +7,7 @@ UIDimension::UIDimension(Axis axis, shared_ptr<UIObject> owner, UnitType type, f
 
 size_t UIDimension::AsRealPixels() const { return AsRealPixels(Default); }
 
-size_t UIDimension::AsRealPixels(Calculation configuration) const
+size_t UIDimension::AsRealPixels(Calculation) const
 {
   // Catch happy case
   if (type == RealPixels)

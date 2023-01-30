@@ -4,10 +4,10 @@
 #include "GameObject.h"
 #include "Renderable.h"
 #include "UIDimension.h"
-#include "Canvas.h"
 
 class GameScene;
 class UIContainer;
+class Canvas;
 
 // A specific kind of GameObject which exists in the ui dimension, has 2D dimensions, has a style, and reacts to user input events
 class UIObject : public GameObject, public Renderable
@@ -88,5 +88,6 @@ private:
 };
 
 #include "GameScene.h"
+#include "Canvas.h"
 
 #endif

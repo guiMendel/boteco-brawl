@@ -9,4 +9,4 @@ UIContent::UIContent(Canvas &canvas, string name, int gameSceneId, int id)
 UIContent::UIContent(Canvas &canvas, string name, shared_ptr<UIContainer> parent)
     : UIObject(canvas, name, parent) {}
 
-void UIContent::CascadeDown(function<void(GameObject &)> callback, bool topDown = true) { callback(*this); }
+void UIContent::CascadeDown(function<void(GameObject &)> callback, bool) { callback(*this); }
