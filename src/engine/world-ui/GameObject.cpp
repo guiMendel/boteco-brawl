@@ -164,7 +164,7 @@ void GameObject::DontDestroyOnLoad(bool value)
   keepOnLoad = value;
 }
 
-shared_ptr<GameScene> GameObject::GetScene()
+shared_ptr<GameScene> GameObject::GetScene() const
 {
   auto currentScene = Game::GetInstance().GetScene();
 

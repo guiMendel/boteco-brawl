@@ -154,7 +154,7 @@ protected:
   // =================================
 public:
   // Returns reference to the scene this object exists in
-  std::shared_ptr<GameScene> GetScene();
+  std::shared_ptr<GameScene> GetScene() const;
 
   // Allows for delaying a function execution
   // Returns a token id that can be used to cancel execution

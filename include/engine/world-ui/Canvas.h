@@ -2,12 +2,15 @@
 #define __CANVAS__
 
 #include "WorldComponent.h"
+#include "Camera.h"
 
 class UIContainer;
 
 // Creates a space onto which UI can be inserted
 class Canvas : public WorldComponent
 {
+  friend class UIContainer;
+
 public:
   // Different types of canvas
   enum class Space
@@ -23,9 +26,31 @@ public:
   };
 
   // Explicitly initialize shape
-  Canvas(GameObject &associatedObject, Space space);
+  Canvas(GameObject &associatedObject, Space space, Vector2 size = Vector2::Zero());
 
   virtual ~Canvas() {}
+
+  // Cascade these hooks down the canvas object tree
+  void CascadeDown(std::function<void(GameObject &)> callback, bool topDown = true) override;
+
+  // Add a UI Object to the canvas object tree as child of root canvas object
+  template <class T, typename... Args>
+  std::shared_ptr<T> AddChild(std::string objectName, Args &&...args)
+  {
+    return InsertInto<T>(nullptr, objectName, std::forward<Args>(args)...);
+  }
+
+  // Converts from real pixels relative to canvas top-left to world units
+  Vector2 CanvasToWorld(Vector2 position, std::shared_ptr<Camera> camera = Camera::GetMain()) const;
+
+  // Converts from world units to real pixels relative to canvas top-left
+  Vector2 WorldToCanvas(Vector2 position, std::shared_ptr<Camera> camera = Camera::GetMain()) const;
+
+  // Converts from real pixels relative to canvas top-left to
+  Vector2 CanvasToScreen(Vector2 position, std::shared_ptr<Camera> camera = Camera::GetMain()) const;
+
+  // Converts from real pixels relative to camera's top left to real pixels relative to canvas top-left
+  Vector2 ScreenToCanvas(Vector2 position, std::shared_ptr<Camera> camera = Camera::GetMain()) const;
 
   // How the canvas is related to the world
   Space space;
@@ -36,6 +61,21 @@ public:
 
   // The root UI Object
   std::shared_ptr<UIContainer> root;
+
+private:
+  // Get top-left position of the canvas in world units
+  Vector2 GetTopLeft() const;
+
+  // Initialize the inheritable properties of the root object
+  void InitializeRootStyle();
+
+  // Add a UI Object to the canvas object tree, as a child of the given UI Object (nullptr for child of canvas root)
+  template <class T, typename... Args>
+  std::shared_ptr<T> InsertInto(std::shared_ptr<UIContainer> parent, std::string objectName, Args &&...args)
+  {
+    int objectId = (new T(*this, parent, objectName, std::forward<Args>(args)...))->id;
+    return GetScene()->RequireUIObject<T>(objectId);
+  }
 };
 
 #include "UIContainer.h"

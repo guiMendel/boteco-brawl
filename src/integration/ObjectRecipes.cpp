@@ -1,3 +1,4 @@
+#include "Canvas.h"
 #include "ObjectRecipes.h"
 #include "Resources.h"
 #include "CharacterVFX.h"
@@ -7,8 +8,8 @@
 #include "FallDeath.h"
 #include "PlatformEffector.h"
 #include "TestCharacter.h"
-#include "Text.h"
-#include "CharacterBadge.h"
+#include "UIText.h"
+#include "UIImage.h"
 #include "PlatformDrop.h"
 #include "CameraFollower.h"
 #include "Animator.h"
@@ -32,7 +33,7 @@
 #include "Heat.h"
 #include "GunParry.h"
 #include "CameraBehavior.h"
-#include "CharacterLifeDisplay.h"
+#include "CharacterUIManager.h"
 #include <iostream>
 
 #define JUMP_RANGE 0.2f
@@ -134,7 +135,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // === DYING FROM FALLING OFF
 
-    auto fallDeath =character->AddComponent<FallDeath>();
+    auto fallDeath = character->AddComponent<FallDeath>();
 
     // === MOVEMENT CONTROL
 
@@ -202,34 +203,58 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     // === HEAT DISPLAY
 
     // Add display in a separate child
-    auto display = character->CreateChild(CHARACTER_BADGE_OBJECT, {0, -collider->GetBox().height / 2 - 0.2f});
+    auto display = character->CreateChild(CHARACTER_UI_OBJECT, {0, -collider->GetBox().height / 2 - 0.2f});
 
-    // Real pixels per virtual pixel in badge UI
-    float realPerVirtualPixels{5};
+    // Give it a canvas
+    auto canvas = display->AddComponent<Canvas>(Canvas::Space::WorldFixedSize, Vector2{35, 50});
 
-    string badgePath{"./assets/sprites/badge.png"};
-    string lifePath{"./assets/sprites/life.png"};
+    // Give this UI a container
+    auto container = canvas->AddChild<UIContainer>("BadgeContainer");
+    container->width.Set(UIDimension::RealPixels, 35);
+    container->height.Set(UIDimension::RealPixels, 50);
+    container->style->textBorderSize.Set(2);
+    container->style->imageScaling.Set(10);
 
-    float badgeSize = Resources::GetSprite(badgePath)->GetUnscaledWidth() * realPerVirtualPixels;
-    float lifeSize = Resources::GetSprite(lifePath)->GetUnscaledWidth() * realPerVirtualPixels;
+    // TODO: add a default image size scaler to the uiObjects style as inheritable
 
-    // Add text
-    auto badgeText = display->AddComponent<Text>("0.0", "./assets/engine/fonts/PixelOperator.ttf", 30);
-    badgeText->SetBorderSize(3);
-    badgeText->SetOffset({0, -30});
-    badgeText->SetAnchorPoint({0.5, 1});
+    // Add heat text
+    auto heatText = container->AddChild<UIText>("HeatDisplay", "0.0");
 
-    // Add badge sprite
-    auto badgeSprite = display->AddComponent<SpriteRenderer>(badgePath, RenderLayer::UI);
-    badgeSprite->OverrideWidthPixels(badgeSize);
-    badgeSprite->SetAnchorPoint({0.5, 1});
+    // Add life icon container
+    container->AddChild<UIContainer>("LifeIcons");
 
-    // Add life display object manager
-    auto lifeDisplay = display->CreateChild(CHARACTER_LIFE_OBJECT, {0, -0.3f});
-    lifeDisplay->AddComponent<CharacterLifeDisplay>(fallDeath, lifeSize, lifePath);
+    // Add player indicator
+    container->AddChild<UIImage>("PlayerIndicator", "./assets/sprites/badge.png");
 
-    // Add the badge
-    display->AddComponent<CharacterBadge>(selectedCharacter);
+    // Create life icon image object
+    auto lifeIcon = make_shared<UIImage>(*canvas, "LifeIcon", "./assets/sprites/life.png");
+
+    // Add a display manager
+    container->AddComponent<CharacterUIManager>(fallDeath, heatText, lifeIcon);
+
+    // // Real pixels per virtual pixel in badge UI
+    // float realPerVirtualPixels{5};
+
+    // string badgePath{"./assets/sprites/badge.png"};
+    // string lifePath{"./assets/sprites/life.png"};
+
+    // float badgeSize = Resources::GetSprite(badgePath)->GetUnscaledWidth() * realPerVirtualPixels;
+    // float lifeSize = Resources::GetSprite(lifePath)->GetUnscaledWidth() * realPerVirtualPixels;
+
+    // // Add text
+    // auto badgeText = display->AddComponent<Text>("0.0", "./assets/engine/fonts/PixelOperator.ttf", 30);
+    // badgeText->SetBorderSize(3);
+    // badgeText->SetOffset({0, -30});
+    // badgeText->SetAnchorPoint({0.5, 1});
+
+    // // Add badge sprite
+    // auto badgeSprite = display->AddComponent<SpriteRenderer>(badgePath, RenderLayer::UI);
+    // badgeSprite->OverrideWidthPixels(badgeSize);
+    // badgeSprite->SetAnchorPoint({0.5, 1});
+
+    // // Add life display object manager
+    // auto lifeDisplay = display->CreateChild(CHARACTER_LIFE_OBJECT, {0, -0.3f});
+    // lifeDisplay->AddComponent<CharacterUIManager>(fallDeath, lifeSize, lifePath);
   };
 }
 

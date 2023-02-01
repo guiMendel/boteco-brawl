@@ -2,6 +2,32 @@
 
 using namespace std;
 
+UIDirectedDimension::UIDirectedDimension(std::shared_ptr<UIObject> owner)
+    : top(UIDimension::Vertical, owner),
+      right(UIDimension::Horizontal, owner),
+      bottom(UIDimension::Vertical, owner),
+      left(UIDimension::Horizontal, owner) {}
+
+void UIDirectedDimension::Set(UIDimension::UnitType type, float value)
+{
+  top.Set(type, value);
+  right.Set(type, value);
+  bottom.Set(type, value);
+  left.Set(type, value);
+}
+
+void UIDirectedDimension::SetHorizontal(UIDimension::UnitType type, float value)
+{
+  right.Set(type, value);
+  left.Set(type, value);
+}
+
+void UIDirectedDimension::SetVertical(UIDimension::UnitType type, float value)
+{
+  top.Set(type, value);
+  bottom.Set(type, value);
+}
+
 UIDimension::UIDimension(Axis axis, shared_ptr<UIObject> owner, UnitType type, float value)
     : axis(axis), value(value), type(type), weakOwner(owner) {}
 
@@ -58,8 +84,8 @@ float UIDimension::RealPixelsTo(size_t valuePixels, UnitType requestedType) cons
   throw runtime_error("ERROR: unrecognized UIDimension unit type");
 }
 
-DirectedDimension::DirectedDimension(std::shared_ptr<UIObject> owner)
-    : top(UIDimension::Vertical, owner),
-      right(UIDimension::Horizontal, owner),
-      bottom(UIDimension::Vertical, owner),
-      left(UIDimension::Horizontal, owner) {}
+void UIDimension::Set(UnitType newType, float newValue)
+{
+  type = newType;
+  value = newValue;
+}

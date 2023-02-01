@@ -14,6 +14,8 @@ class WorldObject;
 class ComponentOwner;
 class GameObject;
 class GameScene;
+class UIContainer;
+class UIContent;
 
 // We don't care it's recommended against doing this — we only want our lives to be easier
 using namespace Helper;
@@ -24,6 +26,8 @@ class Component : public Renderable
   friend GameObject;
   friend WorldObject;
   friend GameScene;
+  friend UIContainer;
+  friend UIContent;
 
 public:
   Component(GameObject &associatedObject);
@@ -66,6 +70,9 @@ protected:
 
   // Called on the frame it is destroyed, right before being destroyed
   virtual void OnBeforeDestroy() {}
+
+  // CAlled when the owner calls CascadeDown
+  virtual void CascadeDown(std::function<void(GameObject &)>, bool) {}
 
   // Reference to input manager
   InputManager &inputManager;

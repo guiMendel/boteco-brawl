@@ -11,14 +11,14 @@ class UIContent : public UIObject
   friend class GameScene;
   friend class UIDimension;
 
-protected:
-  // Constructor dedicated for a scene's root object
-  // Initialize with given scene
-  UIContent(Canvas &canvas, std::string name, int gameSceneId, int id = -1);
-
 public:
-  // With properties
-  UIContent(Canvas &canvas, std::string name, std::shared_ptr<UIContainer> parent = nullptr);
+  // With parent
+  UIContent(Canvas &canvas, std::shared_ptr<UIContainer> parent, std::string name);
+
+  // Without parent
+  UIContent(Canvas &canvas, std::string name);
+
+  virtual ~UIContent() {}
 
   // =================================
   // OBJECTS HIERARCHY
@@ -26,6 +26,11 @@ public:
 public:
   // Executes the given function for this object and then cascades it down to any children it has
   void CascadeDown(std::function<void(GameObject &)> callback, bool topDown = true) override;
+
+protected:
+  std::shared_ptr<GameObject> InternalGetParent() const override;
 };
+
+#include "UIInheritable.h"
 
 #endif

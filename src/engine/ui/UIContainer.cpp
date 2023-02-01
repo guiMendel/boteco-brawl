@@ -2,11 +2,11 @@
 
 using namespace std;
 
-UIContainer::UIContainer(Canvas &canvas, string name, int gameSceneId, int id)
-    : UIObject(canvas, name, gameSceneId, id) {}
+UIContainer::UIContainer(Canvas &canvas, shared_ptr<UIContainer> parent, string name)
+    : UIObject(canvas, parent, name) {}
 
-UIContainer::UIContainer(Canvas &canvas, string name, shared_ptr<UIContainer> parent)
-    : UIObject(canvas, name, parent) {}
+UIContainer::UIContainer(Canvas &canvas, string name)
+    : UIObject(canvas, name) {}
 
 void UIContainer::CascadeDown(function<void(GameObject &)> callback, bool topDown)
 {
@@ -18,6 +18,10 @@ void UIContainer::CascadeDown(function<void(GameObject &)> callback, bool topDow
   for (auto child : GetChildren())
     child->CascadeDown(callback, topDown);
 
+  // Execute on it's components
+  for (auto [componentId, component] : components)
+    component->CascadeDown(callback, topDown);
+
   // Execute on this object (bottom up case)
   if (topDown == false)
     callback(*this);
@@ -26,15 +30,9 @@ void UIContainer::CascadeDown(function<void(GameObject &)> callback, bool topDow
 std::shared_ptr<GameObject> UIContainer::InternalGetParent() const
 {
   if (IsCanvasRoot())
-    return RequirePointerCast<GameObject>(canvas.GetShared());
+    return GetScene()->RequireGameObject(canvas.gameObject.id);
 
   return GetParent();
 }
 
-void UIContainer::RegisterLayer()
-{
-  if (GetRenderLayer() != RenderLayer::None)
-  {
-    GetScene()->RegisterLayerRenderer(GetScene()->RequireUIObject<Renderable>(id));
-  }
-}
+std::shared_ptr<UIContainer> UIContainer::GetShared() { return GetScene()->RequireUIObject<UIContainer>(id); }

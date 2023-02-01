@@ -50,6 +50,7 @@ public:
   Rectangle WorldToScreen(const Rectangle &worldRectangle) const;
 
   float GetRealPixelsPerUnit() const { return realPixelsPerUnit; }
+  float GetUnitsPerRealPixel() const { return unitsPerRealPixel; }
 
   // Generates a rectangle with the camera's global position and dimensions in game units
   Rectangle ToRectangle() const;
@@ -60,6 +61,9 @@ public:
 private:
   // Current unit resolution of camera
   float realPixelsPerUnit;
+
+  // Used in math operations
+  float unitsPerRealPixel;
 };
 
 #endif

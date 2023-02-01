@@ -34,9 +34,7 @@ public:
   void Render(Vector2 position);
 
   void Update(float) override {}
-
   RenderLayer GetRenderLayer() override { return renderLayer; }
-
   int GetRenderOrder() override { return renderOrder; }
 
   Vector2 GetOffset() const;

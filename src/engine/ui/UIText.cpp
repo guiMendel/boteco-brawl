@@ -1,32 +1,20 @@
-#include "Text.h"
+#include "UIText.h"
 #include "Resources.h"
 #include "Camera.h"
 
 using namespace std;
 
-Text::Text(
-    GameObject &associatedObject, string text, string fontPath,
-    int size, Style style, Color color)
-    : WorldComponent(associatedObject), text(text), fontSize(size),
-      style(style), color(color), fontPath(fontPath), font(Resources::GetFont(fontPath, size)), mainTexture(nullptr, SDL_DestroyTexture)
-{
-  // Load texture format through a sample texture
-  auto sampleTexture = GetTextureWithColor(Color::White());
+UIText::UIText(Canvas &canvas, shared_ptr<UIContainer> parent, string name, string text)
+    : UIContent(canvas, parent, name), text(text), mainTexture(nullptr, SDL_DestroyTexture) {}
 
-  SDL_QueryTexture(sampleTexture.get(), &textureFormat, nullptr, nullptr, nullptr);
+UIText::UIText(Canvas &canvas, string name, string text)
+    : UIContent(canvas, name), text(text), mainTexture(nullptr, SDL_DestroyTexture) {}
 
-  // Initialize texture
-  RemakeTexture();
-}
-
-void Text::Render()
+void UIText::Render()
 {
   // Get the real position
   // Offset coordinates to match anchor point
-  Vector2 realPosition{
-      Camera::GetMain()->WorldToScreen(worldObject.GetPosition()) -
-      Vector2((float)pixelWidth, (float)pixelHeight) * anchorPoint +
-      offset};
+  Vector2 realPosition{canvas.CanvasToScreen(GetPosition())};
 
   SDL_Rect destinationRect{int(realPosition.x), int(realPosition.y), pixelWidth, pixelHeight};
 
@@ -34,56 +22,32 @@ void Text::Render()
   SDL_Rect clipRect{0, 0, pixelWidth, pixelHeight};
 
   // Put the texture in the renderer
-  SDL_RenderCopyEx(
+  SDL_RenderCopy(
       Game::GetInstance().GetRenderer(),
       mainTexture.get(),
       &clipRect,
-      &destinationRect,
-      Helper::RadiansToDegrees(worldObject.GetRotation()),
-      nullptr,
-      SDL_FLIP_NONE);
+      &destinationRect);
 }
 
-void Text::SetText(string text)
+void UIText::SetText(string text)
 {
   this->text = text;
   RemakeTexture();
 }
 
-void Text::SetColor(Color color)
+auto_unique_ptr<SDL_Texture> UIText::GetTextureWithColor(Color targetColor)
 {
-  this->color = color;
-  RemakeTexture();
-}
-
-void Text::SetStyle(Style style)
-{
-  this->style = style;
-  RemakeTexture();
-}
-
-void Text::SetFontSize(int fontSize)
-{
-  if (fontSize == this->fontSize)
-    return;
-
-  this->fontSize = fontSize;
-  this->font = Resources::GetFont(fontPath, fontSize);
-  RemakeTexture();
-}
-
-auto_unique_ptr<SDL_Texture> Text::GetTextureWithColor(Color targetColor)
-{
+  // Get font properties
+  auto fontPath = style->fontPath.Get();
+  auto fontSize = style->fontSize.Get();
+  
+  // Get font
+  auto font = Resources::GetFont(fontPath, fontSize);
+  
   // Will hold the generated surface
-  auto_unique_ptr<SDL_Surface> surface(nullptr, SDL_FreeSurface);
-
-  // Use the appropriate method to load this
-  if (style == Style::Solid)
-    surface.reset(TTF_RenderText_Solid(font.get(), text.c_str(), targetColor));
-  else if (style == Style::Shaded)
-    surface.reset(TTF_RenderText_Shaded(font.get(), text.c_str(), targetColor, Color::Black()));
-  else
-    surface.reset(TTF_RenderText_Blended(font.get(), text.c_str(), targetColor));
+  auto_unique_ptr<SDL_Surface> surface(
+      TTF_RenderText_Solid(font.get(), text.c_str(), targetColor),
+      SDL_FreeSurface);
 
   // Ensure it's loaded
   Assert(surface != nullptr, "Failed to generate surface from font");
@@ -94,8 +58,13 @@ auto_unique_ptr<SDL_Texture> Text::GetTextureWithColor(Color targetColor)
       SDL_DestroyTexture};
 }
 
-void Text::RemakeTexture()
+void UIText::RemakeTexture()
 {
+  // Get properties
+  auto color = style->textColor.Get();
+  auto borderPixels = style->textBorderSize.Get();
+  auto borderColor = style->textBorderColor.Get();
+  
   // Pick texture color according to necessity of border
   Color firstColor = borderPixels == 0 ? color : borderColor;
 
@@ -166,36 +135,4 @@ void Text::RemakeTexture()
   SDL_SetRenderTarget(renderer, nullptr);
 }
 
-void Text::SetFontFile(const string fontPath)
-{
-  if (fontPath == this->fontPath)
-    return;
-
-  this->fontPath = fontPath;
-  this->font = Resources::GetFont(fontPath, fontSize);
-
-  RemakeTexture();
-}
-
-void Text::SetBorderSize(int borderSize)
-{
-  this->borderPixels = borderSize;
-  RemakeTexture();
-}
-
-void Text::SetBorderColor(Color borderColor)
-{
-  this->borderColor = borderColor;
-  RemakeTexture();
-}
-
-string Text::GetText() { return text; }
-Color Text::GetColor() { return color; }
-Text::Style Text::GetStyle() { return style; }
-int Text::GetFontSize() { return fontSize; }
-int Text::GetBorderSize() { return borderPixels; }
-Color Text::GetBorderColor() { return borderColor; }
-
-void Text::SetAnchorPoint(Vector2 point) { anchorPoint = point; }
-
-void Text::SetOffset(Vector2 newOffset) { offset = newOffset; }
+string UIText::GetText() { return text; }

@@ -33,11 +33,12 @@ void Camera::RegisterToScene()
 }
 
 // Get how many units occupy half the camera's height
-float Camera::GetSize() const { return Game::screenHeight / realPixelsPerUnit / 2; }
+float Camera::GetSize() const { return Game::screenHeight * unitsPerRealPixel / 2; }
 
 void Camera::SetSize(float newSize)
 {
   realPixelsPerUnit = Game::screenHeight / 2 / newSize;
+  unitsPerRealPixel = 1 / realPixelsPerUnit;
 }
 
 Vector2 Camera::GetTopLeft() const
@@ -73,7 +74,7 @@ void Camera::SetTopLeft(Vector2 newPosition)
 // Convert coordinates
 Vector2 Camera::ScreenToWorld(const Vector2 &screenCoordinates) const
 {
-  return screenCoordinates / realPixelsPerUnit + GetTopLeft();
+  return screenCoordinates * unitsPerRealPixel + GetTopLeft();
 }
 
 // Convert coordinates
@@ -85,7 +86,7 @@ Vector2 Camera::WorldToScreen(const Vector2 &worldCoordinates) const
 // Convert coordinates & dimensions (screen pixels to game units)
 Rectangle Camera::ScreenToWorld(const Rectangle &screenRectangle) const
 {
-  return screenRectangle / realPixelsPerUnit + GetTopLeft();
+  return screenRectangle * unitsPerRealPixel + GetTopLeft();
 }
 
 // Convert coordinates & dimensions (game units to screen pixels)

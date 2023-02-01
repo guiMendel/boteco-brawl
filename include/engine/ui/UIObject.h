@@ -8,6 +8,7 @@
 class GameScene;
 class UIContainer;
 class Canvas;
+class UIInheritable;
 
 // A specific kind of GameObject which exists in the ui dimension, has 2D dimensions, has a style, and reacts to user input events
 class UIObject : public GameObject, public Renderable
@@ -15,14 +16,12 @@ class UIObject : public GameObject, public Renderable
   friend class GameScene;
   friend class UIDimension;
 
-protected:
-  // Constructor dedicated for a scene's root object
-  // Initialize with given scene
-  UIObject(Canvas &canvas, std::string name, int gameSceneId, int id = -1);
-
 public:
-  // With properties
-  UIObject(Canvas &canvas, std::string name, std::shared_ptr<UIContainer> parent = nullptr);
+  // With a parent
+  UIObject(Canvas &canvas, std::shared_ptr<UIContainer> parent, std::string name);
+
+  // Without a parent (will be disconnected from canvas object tree until manually inserted as child of another object)
+  UIObject(Canvas &canvas, std::string name);
 
   virtual ~UIObject();
 
@@ -30,7 +29,7 @@ public:
   // OBJECT PROPERTIES
   // =================================
 public:
-  // Returns the real pixel displacement between the top-left of the Canvas and this object's anchor point
+  // Returns the real pixel displacement between the top-left of the Canvas and this object's top-left
   Vector2 GetPosition() override;
 
   // Width of the object
@@ -40,16 +39,19 @@ public:
   UIDimension height;
 
   // Minimum space between this object's edges and it's content box
-  DirectedDimension padding;
+  UIDirectedDimension padding;
 
   // Minimum space between this object's edges and anything else on the outside
-  DirectedDimension margin;
+  UIDirectedDimension margin;
+
+  // Defines all properties of the object that can be inherited from it's parent
+  std::unique_ptr<UIInheritable> style;
 
 private:
   // Gets either width or height, depending on the provided axis
   UIDimension &GetSize(UIDimension::Axis axis);
 
-  // Last calculate value of position in real pixels
+  // Last calculated value of position in real pixels
   Vector2 updatedPosition;
 
   // =================================
@@ -64,6 +66,9 @@ public:
 
   // Set the parent
   void SetParent(std::shared_ptr<UIContainer> newParent);
+
+  // Destroys relation to parent (becomes unassociated to the canvas object tree)
+  void UnlinkParent();
 
   // Check if this uiObject is in the descendant lineage of the other object
   bool IsDescendantOf(std::shared_ptr<UIContainer> other) const;
@@ -85,6 +90,21 @@ public:
 
 private:
   std::shared_ptr<UIObject> GetShared();
+
+  // =================================
+  // RENDERING
+  // =================================
+public:
+  // Use value from style
+  RenderLayer GetRenderLayer() final override;
+
+  // Use value from style
+  int GetRenderOrder() final override;
+
+protected:
+  void RegisterLayer() final override;
+
+  void RegisterToScene() final override;
 };
 
 #include "GameScene.h"

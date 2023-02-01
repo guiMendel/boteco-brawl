@@ -499,6 +499,10 @@ void WorldObject::CascadeDown(function<void(GameObject &)> callback, bool topDow
   for (auto child : GetChildren())
     child->CascadeDown(callback, topDown);
 
+  // Execute on it's components
+  for (auto [componentId, component] : components)
+    component->CascadeDown(callback, topDown);
+
   // Execute on this object (bottom up case)
   if (topDown == false)
     callback(*this);

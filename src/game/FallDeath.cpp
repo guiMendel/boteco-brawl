@@ -1,5 +1,5 @@
 #include "FallDeath.h"
-#include "CharacterBadge.h"
+#include "CharacterUIManager.h"
 #include "CharacterRepelCollision.h"
 #include "Animator.h"
 #include "Movement.h"
@@ -119,7 +119,7 @@ void FallDeath::SetCharacterActive(bool active)
   worldObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
   worldObject.RequireComponent<CharacterController>()->SetEnabled(active);
   worldObject.RequireComponentInChildren<CharacterRepelCollision>()->SetEnabled(active);
-  worldObject.RequireComponentInChildren<CharacterBadge>()->ShowBadge(active);
+  // worldObject.RequireComponentInChildren<CharacterUIManager>()->ShowHeatDisplay(active);
 }
 
 bool FallDeath::IsFallen() const { return fallen; }

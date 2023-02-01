@@ -4,11 +4,11 @@
 #include <memory>
 #include "WorldObject.h"
 #include "Player.h"
-#include "Text.h"
+#include "UIText.h"
 
 #define CHARACTER_SLIDE_BOX_OBJECT "RepelBox"
 #define CHARACTER_PLATFORM_DROP_OBJECT "PlatformDropDetector"
-#define CHARACTER_BADGE_OBJECT "CharacterBadge"
+#define CHARACTER_UI_OBJECT "CharacterUI"
 #define CHARACTER_LIFE_OBJECT "CharacterLife"
 
 class ObjectRecipes
