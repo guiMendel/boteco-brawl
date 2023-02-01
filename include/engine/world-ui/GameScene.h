@@ -87,6 +87,9 @@ protected:
   // GAME SCENE HANDLING
   // =================================
 public:
+  // Called right before scene is popped
+  void Destroy();
+
   // Whether to remove this scene from the queue
   bool PopRequested() { return popRequested; }
 
@@ -231,8 +234,8 @@ private:
   // Gets the root object
   std::shared_ptr<WorldObject> GetRootObject();
 
-  // Gets all objects which must be carried on to the next scene
-  std::vector<std::shared_ptr<GameObject>> GetObjectsToCarryOn();
+  // Gets all objects which must be carried on to the next scene, and removes them from this scene (without destroying them)
+  std::vector<std::shared_ptr<GameObject>> ExtractObjectsToCarryOn();
 
   // Executes this function for each object, cascading down the hierarchy
   void CascadeDown(std::function<void(GameObject &)> callback, bool topDown = true);

@@ -18,7 +18,7 @@ CharacterUIManager::CharacterUIManager(
       playerColor(fallDeath->worldObject.RequireComponent<CharacterController>()->GetPlayer()->GetColor())
 {
   LOCK(weakText, text);
-  // originalTextSize = text->GetFontSize();
+  originalTextSize = text->style->fontSize.Get();
 }
 
 void CharacterUIManager::Start()
@@ -57,7 +57,7 @@ void CharacterUIManager::Update(float deltaTime)
     // Apply new multiplier
     LOCK(weakText, text);
 
-    // text->SetFontSize(round(originalTextSize * textSizeModifier));
+    text->style->fontSize.Set(originalTextSize * textSizeModifier);
   }
 }
 
@@ -108,15 +108,15 @@ void CharacterUIManager::UpdateHeatDisplay(float newHeat, float oldHeat)
   text->SetText(damageString.str());
 
   // Give it an appropriate render order
-  // text->renderOrder = SDL_GetTicks();
+  text->style->renderOrder.Set(SDL_GetTicks());
 
   // Set a size pop effect
   textSizeModifier = min(textSizeModifier + log10f(abs(newHeat - oldHeat) + 5), 5.0f);
 
   // Give it a color proportional to heat
-  // float heatProportion = newHeat / 100.0f;
-  // text->SetColor(Lerp(Color::White(), Color::Red(), heatProportion));
-  // text->SetBorderColor(Lerp(Color::Black(), Color(70, 0, 0), heatProportion));
+  float heatProportion = newHeat / 100.0f;
+  text->style->textColor.Set(Lerp(Color::White(), Color::Red(), heatProportion));
+  text->style->textBorderColor.Set(Lerp(Color::Black(), Color(70, 0, 0), heatProportion));
 }
 
 void CharacterUIManager::ShowHeatDisplay(bool show)

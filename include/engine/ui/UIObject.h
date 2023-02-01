@@ -15,12 +15,10 @@ class UIObject : public GameObject, public Renderable
 {
   friend class GameScene;
   friend class UIDimension;
+  friend class UIContainer;
 
 public:
-  // With a parent
-  UIObject(Canvas &canvas, std::shared_ptr<UIContainer> parent, std::string name);
-
-  // Without a parent (will be disconnected from canvas object tree until manually inserted as child of another object)
+  // Will be disconnected from canvas object tree until manually inserted as child of another object
   UIObject(Canvas &canvas, std::string name);
 
   virtual ~UIObject();
@@ -67,9 +65,6 @@ public:
   // Set the parent
   void SetParent(std::shared_ptr<UIContainer> newParent);
 
-  // Destroys relation to parent (becomes unassociated to the canvas object tree)
-  void UnlinkParent();
-
   // Check if this uiObject is in the descendant lineage of the other object
   bool IsDescendantOf(std::shared_ptr<UIContainer> other) const;
 
@@ -80,6 +75,20 @@ public:
 private:
   // Parent object
   std::weak_ptr<UIContainer> weakParent;
+
+  // =================================
+  // DESTRUCTION
+  // =================================
+protected:
+  // Calls DestroySelf and ignores returned value
+  void InternalDestroy() override;
+
+  // Destroys children, calls GameObject::InternalDestroy, then unlinks from parent
+  // Returns a valid iterator for the parent's new children after unlinking
+  virtual auto DestroySelf() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator;
+
+  // Destroys relation to parent (becomes unassociated to the canvas object tree)
+  auto UnlinkParent() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator;
 
   // =================================
   // UTILITY
@@ -100,6 +109,8 @@ public:
 
   // Use value from style
   int GetRenderOrder() final override;
+
+  void Render() override;
 
 protected:
   void RegisterLayer() final override;

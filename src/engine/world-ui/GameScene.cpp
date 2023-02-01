@@ -26,8 +26,7 @@ GameScene::GameScene()
 
 GameScene::~GameScene()
 {
-  // Clear unused resources
-  Resources::ClearAll();
+  Assert(gameObjects.size() == 0, "Failed to destroy all scene's objects before reaching it's destructor");
 }
 
 void GameScene::CascadeDown(function<void(GameObject &)> callback, bool topDown)
@@ -195,6 +194,8 @@ void GameScene::Resume()
 
 void GameScene::RemoveObject(int id)
 {
+  Assert(id != 0, "Cannot destroy root object with this method");
+
   gameObjects.erase(id);
 }
 
@@ -264,13 +265,23 @@ list<shared_ptr<Camera>> GameScene::GetCameras()
 
 int GameScene::SupplyId() { return Game::GetInstance().SupplyId(); }
 
-vector<shared_ptr<GameObject>> GameScene::GetObjectsToCarryOn()
+vector<shared_ptr<GameObject>> GameScene::ExtractObjectsToCarryOn()
 {
   vector<shared_ptr<GameObject>> savedObjects;
 
-  for (auto firstObject : GetRootObject()->GetChildren())
-    if (firstObject->keepOnLoad)
-      savedObjects.push_back(firstObject);
+  // Direct root children are the only ones that can be carried on
+  for (auto child : GetRootObject()->GetChildren())
+    if (child->keepOnLoad)
+    {
+      // Keep it's pointer to return it
+      savedObjects.push_back(child);
+
+      // Unlink it from root
+      child->UnlinkParent();
+
+      // Remove it's scene reference
+      RemoveObject(child->id);
+    }
 
   return savedObjects;
 }
@@ -335,3 +346,30 @@ std::shared_ptr<WorldObject> GameScene::RequireWorldObject(std::string name)
 }
 
 std::shared_ptr<WorldObject> GameScene::GetRootObject() { return rootObject; }
+
+void GameScene::Destroy()
+{
+  cout << "About to destroy scene. Current objects:" << endl;
+  for (auto [objectId, object] : gameObjects)
+    cout << *object << endl;
+
+  // Destroy root object
+  rootObject->InternalDestroy();
+
+  // Individually collect each stray object which wasn't part of a tree
+  vector<int> strayIds;
+
+  // Collect them
+  for (auto [objectId, object] : gameObjects)
+    strayIds.push_back(objectId);
+
+  // Delete each
+  for (auto strayId : strayIds)
+  {
+    auto gameObject = RequireGameObject(strayId);
+    gameObject->InternalDestroy();
+  }
+
+  // Clear unused resources
+  Resources::ClearAll();
+}

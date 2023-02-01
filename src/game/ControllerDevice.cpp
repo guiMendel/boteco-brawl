@@ -8,7 +8,11 @@ using namespace std;
 SDL_GameController *OpenController(int index)
 {
   auto controller = SDL_GameControllerOpen(index);
-  Assert(controller != nullptr, "Failed to open connected controller");
+
+  // Throw if failed to get a controller
+  if (controller == nullptr)
+    throw invalid_controller_error("Failed to open connected controller: " + string(SDL_GetError()));
+
   return controller;
 }
 

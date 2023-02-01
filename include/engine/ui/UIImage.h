@@ -7,10 +7,6 @@
 class UIImage : public UIContent
 {
 public:
-  // With parent
-  UIImage(Canvas &canvas, std::shared_ptr<UIContainer> parent, std::string name, std::string imagePath);
-
-  // Without parent
   UIImage(Canvas &canvas, std::string name, std::string imagePath);
 
   virtual ~UIImage() {}

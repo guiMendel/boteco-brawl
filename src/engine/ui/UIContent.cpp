@@ -3,9 +3,6 @@
 
 using namespace std;
 
-UIContent::UIContent(Canvas &canvas, shared_ptr<UIContainer> parent, string name)
-    : UIObject(canvas, parent, name) {}
-
 UIContent::UIContent(Canvas &canvas, string name)
     : UIObject(canvas, name) {}
 

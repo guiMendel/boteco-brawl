@@ -3,9 +3,6 @@
 
 using namespace std;
 
-UIImage::UIImage(Canvas &canvas, shared_ptr<UIContainer> parent, string name, string imagePath)
-    : UIContent(canvas, parent, name) { SetImagePath(imagePath); }
-
 UIImage::UIImage(Canvas &canvas, string name, string imagePath)
     : UIContent(canvas, name) { SetImagePath(imagePath); }
 
@@ -66,6 +63,9 @@ void UIImage::Render()
 
   // Apply render procedure
   UseTexture(render);
+
+  // Debug render
+  UIObject::Render();
 }
 
 void UIImage::ReloadTextureDimensions()

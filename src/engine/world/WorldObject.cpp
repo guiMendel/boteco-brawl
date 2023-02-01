@@ -180,6 +180,9 @@ void WorldObject::HandleColliderDestruction(shared_ptr<Collider> collider)
 
 shared_ptr<WorldObject> WorldObject::GetShared()
 {
+  if (IsRoot())
+    return GetScene()->GetRootObject();
+
   return GetScene()->RequireWorldObject(id);
 }
 
@@ -308,7 +311,11 @@ shared_ptr<WorldObject> WorldObject::CreateChild(string name, Vector2 offset, fl
   return GetScene()->RequireWorldObject(childId);
 }
 
-void WorldObject::InternalDestroy() { DestroySelf(); }
+void WorldObject::InternalDestroy()
+{
+  cout << "Yaaay" << endl;
+  DestroySelf();
+}
 
 auto WorldObject::DestroySelf() -> std::unordered_map<int, std::weak_ptr<WorldObject>>::iterator
 {
@@ -339,7 +346,7 @@ auto WorldObject::DestroySelf() -> std::unordered_map<int, std::weak_ptr<WorldOb
   // Remove this object's reference from it's parent
   unordered_map<int, weak_ptr<WorldObject>>::iterator iterator;
 
-  if (IsRoot() == false)
+  if (IsRoot() == false && weakParent.expired() == false)
     iterator = UnlinkParent();
 
   // Ensure no more references to self than the one in this function and the one which called this function

@@ -1,4 +1,5 @@
 #include "UIObject.h"
+#include "Debug.h"
 #include "UIContainer.h"
 #include "Canvas.h"
 
@@ -13,19 +14,13 @@ UIObject::UIObject(Canvas &canvas, string name)
       style(make_unique<UIInheritable>(*this)),
       canvas(canvas) {}
 
-UIObject::UIObject(Canvas &canvas, shared_ptr<UIContainer> parent, string name)
-    : UIObject(canvas, name)
-{
-  SetParent(parent);
-}
-
 UIObject::~UIObject() {}
 
 Vector2 UIObject::GetPosition() { return updatedPosition; }
 
 UIDimension &UIObject::GetSize(UIDimension::Axis axis) { return axis == UIDimension::Horizontal ? width : height; }
 
-bool UIObject::IsCanvasRoot() const { return canvas.root != nullptr && canvas.root->id == id; }
+bool UIObject::IsCanvasRoot() const { return (canvas.root != nullptr) && (canvas.root->id == id); }
 
 shared_ptr<UIContainer> UIObject::GetParent() const
 {
@@ -80,21 +75,9 @@ bool UIObject::SameLineage(shared_ptr<UIObject> first, shared_ptr<UIObject> seco
   return false;
 }
 
-std::shared_ptr<UIObject> UIObject::GetShared() { return GetScene()->RequireUIObject<UIObject>(id); }
-
-void UIObject::UnlinkParent()
+std::shared_ptr<UIObject> UIObject::GetShared()
 {
-  Assert(IsCanvasRoot() == false, "Canvas root has no parent to unlink");
-
-  // Get parent
-  auto parent = GetParent();
-
-  // Get own iterator
-  auto iterator = parent->children.find(id);
-
-  // Remove it
-  parent->children.erase(iterator);
-  weakParent.reset();
+  return GetScene()->RequireUIObject<UIObject>(id);
 }
 
 RenderLayer UIObject::GetRenderLayer()
@@ -124,3 +107,63 @@ void UIObject::RegisterToScene()
   // Register self
   RegisterLayer();
 }
+
+void UIObject::Render()
+{
+  auto camera = Camera::GetMain();
+
+  auto color = Color::Pink();
+  color.alpha = 170;
+
+  Debug::DrawBox(Rectangle(
+                     Rectangle::TopLeftInitialize,
+                     canvas.CanvasToWorld(GetPosition()),
+                     width.AsRealPixels() * camera->GetUnitsPerRealPixel(),
+                     height.AsRealPixels() * camera->GetUnitsPerRealPixel()),
+                 color);
+}
+
+auto UIObject::DestroySelf() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator
+{
+  cout << "Destroying " << *this << endl;
+
+  // Store pointer to self for later
+  auto shared = GetShared();
+
+  cout << shared.use_count() << endl;
+
+  // Call base destroy method to clean up components & remove reference from scene
+  GameObject::InternalDestroy();
+
+  // Remove this object's reference from it's parent
+  unordered_map<int, weak_ptr<UIObject>>::iterator iterator;
+
+  if (IsCanvasRoot())
+    canvas.root.reset();
+  else if (weakParent.expired() == false)
+    iterator = UnlinkParent();
+
+  // Ensure no more references to self than the one in this function and the one which called this function
+  Assert(shared.use_count() <= 2, "Found " + to_string(shared.use_count() - 2) + " leaked references to world object " + GetName() + " when trying to destroy it");
+
+  return iterator;
+}
+
+auto UIObject::UnlinkParent() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator
+{
+  Assert(IsCanvasRoot() == false, "Canvas root has no parent to unlink");
+
+  // Get parent
+  auto parent = GetParent();
+
+  // Get own iterator
+  auto iterator = parent->children.find(id);
+
+  // Remove it
+  iterator = parent->children.erase(iterator);
+  weakParent.reset();
+
+  return iterator;
+}
+
+void UIObject::InternalDestroy() { DestroySelf(); }

@@ -4,9 +4,6 @@
 
 using namespace std;
 
-UIText::UIText(Canvas &canvas, shared_ptr<UIContainer> parent, string name, string text)
-    : UIContent(canvas, parent, name), text(text), mainTexture(nullptr, SDL_DestroyTexture) {}
-
 UIText::UIText(Canvas &canvas, string name, string text)
     : UIContent(canvas, name), text(text), mainTexture(nullptr, SDL_DestroyTexture) {}
 
@@ -27,6 +24,9 @@ void UIText::Render()
       mainTexture.get(),
       &clipRect,
       &destinationRect);
+
+  // Debug render
+  UIObject::Render();
 }
 
 void UIText::SetText(string text)
@@ -40,10 +40,10 @@ auto_unique_ptr<SDL_Texture> UIText::GetTextureWithColor(Color targetColor)
   // Get font properties
   auto fontPath = style->fontPath.Get();
   auto fontSize = style->fontSize.Get();
-  
+
   // Get font
   auto font = Resources::GetFont(fontPath, fontSize);
-  
+
   // Will hold the generated surface
   auto_unique_ptr<SDL_Surface> surface(
       TTF_RenderText_Solid(font.get(), text.c_str(), targetColor),
@@ -64,7 +64,7 @@ void UIText::RemakeTexture()
   auto color = style->textColor.Get();
   auto borderPixels = style->textBorderSize.Get();
   auto borderColor = style->textBorderColor.Get();
-  
+
   // Pick texture color according to necessity of border
   Color firstColor = borderPixels == 0 ? color : borderColor;
 

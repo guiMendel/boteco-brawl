@@ -56,7 +56,10 @@ public:
   Rectangle ToRectangle() const;
 
   // Color of camera's background
-  Color background{40, 100, 207};
+  Color background{defaultBackground};
+
+  // Default camera background
+  static const Color defaultBackground;
 
 private:
   // Current unit resolution of camera

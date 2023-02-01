@@ -10,6 +10,8 @@ using namespace std;
 #define LENGTH(array) sizeof(array) / sizeof(array[0])
 #define CLAMP(value, minValue, maxValue) min(max(value, minValue), maxValue)
 
+const Color Camera::defaultBackground{0, 30, 137};
+
 Vector2 screenQuarter = Vector2(-Game::screenWidth / 2.0f, -Game::screenHeight / 2.0f);
 
 shared_ptr<Camera> Camera::GetMain()

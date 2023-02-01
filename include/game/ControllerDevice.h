@@ -4,10 +4,20 @@
 #include "SDL_gamecontroller.h"
 #include "Helper.h"
 #include <memory>
+#include <string>
 
 class Player;
 class ControllerInput;
 class PlayerManager;
+
+// Thrown when opening a controller fails
+class invalid_controller_error : std::runtime_error
+{
+public:
+  invalid_controller_error(std::string message) : runtime_error(message) {}
+
+  operator std::string() const { return what(); }
+};
 
 // Class that is responsible for a connected game controller device
 class ControllerDevice

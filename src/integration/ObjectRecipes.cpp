@@ -224,10 +224,12 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     container->AddChild<UIContainer>("LifeIcons");
 
     // Add player indicator
-    container->AddChild<UIImage>("PlayerIndicator", "./assets/sprites/badge.png");
+    auto badgeImage = container->AddChild<UIImage>("PlayerIndicator", "./assets/sprites/badge.png");
+    badgeImage->width.Set(UIDimension::RealPixels, 35);
+    badgeImage->height.Set(UIDimension::RealPixels, 20);
 
     // Create life icon image object
-    auto lifeIcon = make_shared<UIImage>(*canvas, "LifeIcon", "./assets/sprites/life.png");
+    auto lifeIcon = canvas->NewUIObject<UIImage>("LifeIcon", "./assets/sprites/life.png");
 
     // Add a display manager
     container->AddComponent<CharacterUIManager>(fallDeath, heatText, lifeIcon);

@@ -72,9 +72,12 @@ private:
   // Calculates the delta time
   void CalculateDeltaTime(int &start, float &deltaTime);
 
-  // Removes current scene from stack
+  // Calls destroy scene and resumes next scene
   // Throws if stack is left empty
   void PopScene();
+
+  // Removes current scene from stack and destroys it
+  void DestroyScene();
 
   // Actually pushes the next scene to stack
   void PushNextScene();

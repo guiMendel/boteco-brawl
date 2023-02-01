@@ -336,7 +336,7 @@ void Game::GameLoop()
 
   // Make sure scene pile is empty
   while (loadedScenes.size() > 0)
-    loadedScenes.pop();
+    DestroyScene();
 
   // Clear resources
   Resources::ClearAll();
@@ -359,7 +359,7 @@ void Game::Frame()
   // Throws when it's the last scene (and no nextScene is set)
   if (GetScene()->PopRequested())
   {
-    objectsToAdd = GetScene()->GetObjectsToCarryOn();
+    objectsToAdd = GetScene()->ExtractObjectsToCarryOn();
     PopScene();
   }
 
@@ -468,7 +468,7 @@ void Game::PushNextScene()
 void Game::PopScene()
 {
   // Remove the scene
-  loadedScenes.pop();
+  DestroyScene();
 
   // If this is the last scene
   if (loadedScenes.size() == 0)
@@ -482,4 +482,13 @@ void Game::PopScene()
 
   // Resume next scene
   GetScene()->Resume();
+}
+
+void Game::DestroyScene()
+{
+  // Wrap scene up
+  GetScene()->Destroy();
+
+  // Remove it
+  loadedScenes.pop();
 }

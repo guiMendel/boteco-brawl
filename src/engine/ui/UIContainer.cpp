@@ -2,9 +2,6 @@
 
 using namespace std;
 
-UIContainer::UIContainer(Canvas &canvas, shared_ptr<UIContainer> parent, string name)
-    : UIObject(canvas, parent, name) {}
-
 UIContainer::UIContainer(Canvas &canvas, string name)
     : UIObject(canvas, name) {}
 
@@ -27,7 +24,7 @@ void UIContainer::CascadeDown(function<void(GameObject &)> callback, bool topDow
     callback(*this);
 }
 
-std::shared_ptr<GameObject> UIContainer::InternalGetParent() const
+shared_ptr<GameObject> UIContainer::InternalGetParent() const
 {
   if (IsCanvasRoot())
     return GetScene()->RequireGameObject(canvas.gameObject.id);
@@ -35,4 +32,28 @@ std::shared_ptr<GameObject> UIContainer::InternalGetParent() const
   return GetParent();
 }
 
-std::shared_ptr<UIContainer> UIContainer::GetShared() { return GetScene()->RequireUIObject<UIContainer>(id); }
+shared_ptr<UIContainer> UIContainer::GetShared() { return GetScene()->RequireUIObject<UIContainer>(id); }
+
+void UIContainer::InternalDestroy() { DestroySelf(); }
+
+auto UIContainer::DestroySelf() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator
+{
+  cout << *this << "'s children: " << endl;
+  for (auto [childId, weakChild] : children)
+  {
+    LOCK(weakChild, child);
+
+    cout << "Child " << *child << endl;
+  }
+
+  // Remove all children
+  auto pairIterator = children.begin();
+  while (pairIterator != children.end())
+  {
+    LOCK(pairIterator->second, child);
+
+    pairIterator = child->DestroySelf();
+  }
+
+  return UIObject::DestroySelf();
+}

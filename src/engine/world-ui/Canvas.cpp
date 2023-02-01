@@ -1,4 +1,5 @@
 #include "Canvas.h"
+#include "Debug.h"
 
 using namespace std;
 
@@ -6,9 +7,14 @@ Canvas::Canvas(GameObject &associatedObject, Space space, Vector2 size)
     : WorldComponent(associatedObject),
       space(space),
       size(size),
-      root(make_shared<UIContainer>(*this, "UIRoot"))
+      root(GetScene()->RequireUIObject<UIContainer>((new UIContainer(*this, "UIRoot"))->id))
 {
   InitializeRootStyle();
+}
+
+Canvas::~Canvas()
+{
+  cout << "Root deleted: " << (root == nullptr) << endl;
 }
 
 Vector2 Canvas::GetTopLeft() const
@@ -65,4 +71,33 @@ void Canvas::InitializeRootStyle()
   root->style->textBorderColor.Set(Color::Black());
   root->style->textBorderSize.Set(0);
   root->style->textColor.Set(Color::White());
+}
+
+void Canvas::Render()
+{
+  auto camera = Camera::GetMain();
+
+  Vector2 position = space == Space::World
+                         ? camera->ScreenToWorld({Game::screenWidth / 2.0f, Game::screenHeight / 2.0f})
+                         : gameObject.GetPosition();
+
+  Vector2 drawSize;
+
+  if (space == Space::World)
+    drawSize = Vector2{float(Game::screenWidth), float(Game::screenHeight)} * camera->GetUnitsPerRealPixel();
+  else if (space == Space::WorldFixedSize)
+    drawSize = size * camera->GetUnitsPerRealPixel();
+  else
+    drawSize = size;
+
+  auto color = Color::Cyan();
+  color.alpha = 70;
+
+  Debug::DrawBox(Rectangle(position, drawSize.x, drawSize.y), color);
+}
+
+void Canvas::OnBeforeDestroy()
+{
+  // Destroy canvas object tree
+  root->InternalDestroy();
 }

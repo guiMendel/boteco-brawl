@@ -119,7 +119,10 @@ void FallDeath::SetCharacterActive(bool active)
   worldObject.RequireComponent<CharacterStateManager>()->SetEnabled(active);
   worldObject.RequireComponent<CharacterController>()->SetEnabled(active);
   worldObject.RequireComponentInChildren<CharacterRepelCollision>()->SetEnabled(active);
-  // worldObject.RequireComponentInChildren<CharacterUIManager>()->ShowHeatDisplay(active);
+
+  // Changes to canvas
+  auto canvasRoot = worldObject.RequireComponentInChildren<Canvas>()->root;
+  canvasRoot->RequireComponentInChildren<CharacterUIManager>()->ShowHeatDisplay(active);
 }
 
 bool FallDeath::IsFallen() const { return fallen; }

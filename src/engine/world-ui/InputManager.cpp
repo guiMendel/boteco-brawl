@@ -108,7 +108,15 @@ float InputManager::Update()
     {
       cout << "Controller connected. Device index: " << event.cdevice.which << endl;
 
-      OpenController(event.cdevice.which);
+      // Try to open it
+      try
+      {
+        OpenController(event.cdevice.which);
+      }
+      catch (const invalid_controller_error &error)
+      {
+        cout << "WARNING: " << string(error) << endl;
+      }
     }
 
     // On controller disconnected

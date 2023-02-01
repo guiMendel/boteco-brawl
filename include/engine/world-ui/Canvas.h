@@ -28,10 +28,20 @@ public:
   // Explicitly initialize shape
   Canvas(GameObject &associatedObject, Space space, Vector2 size = Vector2::Zero());
 
-  virtual ~Canvas() {}
+  virtual ~Canvas();
+
+  void OnBeforeDestroy() override;
 
   // Cascade these hooks down the canvas object tree
   void CascadeDown(std::function<void(GameObject &)> callback, bool topDown = true) override;
+
+  // Create a UI Object but don't add it to the canvas object tree
+  template <class T, typename... Args>
+  std::shared_ptr<T> NewUIObject(std::string objectName, Args &&...args)
+  {
+    int objectId = (new T(*this, objectName, std::forward<Args>(args)...))->id;
+    return GetScene()->RequireUIObject<T>(objectId);
+  }
 
   // Add a UI Object to the canvas object tree as child of root canvas object
   template <class T, typename... Args>
@@ -62,6 +72,9 @@ public:
   // The root UI Object
   std::shared_ptr<UIContainer> root;
 
+  RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
+  void Render() override;
+
 private:
   // Get top-left position of the canvas in world units
   Vector2 GetTopLeft() const;
@@ -73,8 +86,9 @@ private:
   template <class T, typename... Args>
   std::shared_ptr<T> InsertInto(std::shared_ptr<UIContainer> parent, std::string objectName, Args &&...args)
   {
-    int objectId = (new T(*this, parent, objectName, std::forward<Args>(args)...))->id;
-    return GetScene()->RequireUIObject<T>(objectId);
+    auto newObject = NewUIObject<T>(objectName, std::forward<Args>(args)...);
+    newObject->SetParent(parent);
+    return newObject;
   }
 };
 

@@ -113,7 +113,6 @@ void GameObject::OnSceneResume()
     component->OnSceneResume();
 }
 
-
 // Absolute scale of the object
 float GameObject::GetTimeScale() const
 {
@@ -150,7 +149,10 @@ void GameObject::InternalDestroy()
     ;
 
   // Delete self from scene's list
-  GetScene()->RemoveObject(id);
+  if (IsRoot())
+    GetScene()->rootObject = nullptr;
+  else
+    GetScene()->RemoveObject(id);
 }
 
 void GameObject::DontDestroyOnLoad(bool value)

@@ -33,6 +33,9 @@ struct UIInheritableProperty
   // It will be available for inheritance by any children down the canvas object tree
   void Set(T newValue) { property = std::make_shared<T>(newValue); }
 
+  // Erases a previously set value, allowing the property to be inherited
+  void Unset() { property = nullptr; }
+
 private:
   // The property itself
   // Can be null, in which case it should be inherited when read

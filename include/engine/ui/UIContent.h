@@ -12,10 +12,6 @@ class UIContent : public UIObject
   friend class UIDimension;
 
 public:
-  // With parent
-  UIContent(Canvas &canvas, std::shared_ptr<UIContainer> parent, std::string name);
-
-  // Without parent
   UIContent(Canvas &canvas, std::string name);
 
   virtual ~UIContent() {}

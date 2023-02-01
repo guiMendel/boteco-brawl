@@ -9,12 +9,9 @@ class UIContainer : public UIObject, public Parent<UIObject>
 {
   friend class GameScene;
   friend class UIDimension;
+  friend class Canvas;
 
 public:
-  // With properties
-  UIContainer(Canvas &canvas, std::shared_ptr<UIContainer> parent, std::string name);
-
-  // Without parent
   UIContainer(Canvas &canvas, std::string name);
 
   virtual ~UIContainer() {}
@@ -35,6 +32,18 @@ public:
 
 protected:
   std::shared_ptr<GameObject> InternalGetParent() const override;
+
+  // =================================
+  // DESTRUCTION
+  // =================================
+protected:
+  // Calls DestroySelf and ignores returned value
+  void InternalDestroy() override;
+
+private:
+  // Destroys children, calls GameObject::InternalDestroy, then unlinks from parent
+  // Returns a valid iterator for the parent's new children after unlinking
+  auto DestroySelf() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator override;
 
   // =================================
   // UTILITY
