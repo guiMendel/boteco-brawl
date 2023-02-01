@@ -7,6 +7,17 @@ using namespace std;
 UIText::UIText(Canvas &canvas, string name, string text)
     : UIContent(canvas, name), text(text), mainTexture(nullptr, SDL_DestroyTexture) {}
 
+void UIText::Start()
+{
+  // Load texture format through a sample texture
+  auto sampleTexture = GetTextureWithColor(Color::White());
+
+  SDL_QueryTexture(sampleTexture.get(), &textureFormat, nullptr, nullptr, nullptr);
+
+  // Initialize texture
+  RemakeTexture();
+}
+
 void UIText::Render()
 {
   // Get the real position

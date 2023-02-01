@@ -349,10 +349,6 @@ std::shared_ptr<WorldObject> GameScene::GetRootObject() { return rootObject; }
 
 void GameScene::Destroy()
 {
-  cout << "About to destroy scene. Current objects:" << endl;
-  for (auto [objectId, object] : gameObjects)
-    cout << *object << endl;
-
   // Destroy root object
   rootObject->InternalDestroy();
 

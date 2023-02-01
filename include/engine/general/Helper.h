@@ -1,6 +1,9 @@
 #ifndef __HELPER__
 #define __HELPER__
 
+// Use a different name to simplify searching for actual debug logs
+#define MESSAGE cout
+
 #include <cmath>
 #include <stdexcept>
 #include <vector>

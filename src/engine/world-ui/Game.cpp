@@ -404,7 +404,7 @@ void Game::Frame()
   SDL_RenderPresent(GetRenderer());
 
 #ifdef PRINT_FRAME_DURATION
-  cout << "Frame took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
+  MESSAGE << "Frame took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
 #endif
 }
 
@@ -422,13 +422,11 @@ void Game::PhysicsFrame()
   // Calculate physics frame's delta time
   CalculateDeltaTime(physicsFrameStart, physicsDeltaTime);
 
-  // cout << "Physics delta time: " << physicsDeltaTime << endl;
-
   // Update the scene
   GetScene()->PhysicsUpdate(physicsDeltaTime);
 
 #ifdef PRINT_FRAME_DURATION
-  cout << "Physics took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
+  MESSAGE << "Physics took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
 #endif
 }
 
@@ -443,7 +441,7 @@ void Game::PushScene(shared_ptr<GameScene> &&scene)
 {
   // Alert if next is overridden
   if (nextScene != nullptr)
-    cout << "WARNING: call to " << __FUNCTION__ << " will override previous call in the same frame" << endl;
+    MESSAGE << "WARNING: call to " << __FUNCTION__ << " will override previous call in the same frame" << endl;
 
   // Store this scene for next frame
   nextScene = move(scene);

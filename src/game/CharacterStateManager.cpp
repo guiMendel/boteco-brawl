@@ -167,7 +167,6 @@ void CharacterStateManager::SetActionSequenceIndex(shared_ptr<Action> action)
   for (auto state : states)
   {
     // Check if this state's parent action is the same
-    // cout << "Comparing actions " << typeid(*state->parentAction).name() << " and " << typeid(*action).name() << ": " << (*state->parentAction == *action) << endl;
     if (*state->parentAction == *action)
     {
       // Check if the sequence index for this action will be higher than the current one

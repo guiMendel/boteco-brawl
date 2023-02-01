@@ -14,7 +14,6 @@ Canvas::Canvas(GameObject &associatedObject, Space space, Vector2 size)
 
 Canvas::~Canvas()
 {
-  cout << "Root deleted: " << (root == nullptr) << endl;
 }
 
 Vector2 Canvas::GetTopLeft() const

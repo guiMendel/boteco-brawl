@@ -13,7 +13,7 @@ ControllerInput::ControllerInput(GameObject &associatedObject)
 {
   LOCK(weakPlayer, player);
 
-  cout << "Using controller for player " << player->PlayerId() << endl;
+  MESSAGE << "Using controller for player " << player->PlayerId() << endl;
 
   // Make sure this player is using a controller
   player->UseController();

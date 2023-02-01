@@ -20,13 +20,13 @@ ControllerDevice::ControllerDevice(int controllerIndex)
     : controllerStruct(OpenController(controllerIndex), SDL_GameControllerClose),
       instanceId(SDL_JoystickInstanceID(SDL_GameControllerGetJoystick(controllerStruct.get())))
 {
-  cout << "Controller \"" << SDL_GameControllerName(controllerStruct.get()) << "\" added with instance ID " << GetId() << endl;
+  MESSAGE << "Controller \"" << SDL_GameControllerName(controllerStruct.get()) << "\" added with instance ID " << GetId() << endl;
 
   // Associate to players searching for a controller, when available
   auto playerManager = Game::GetInstance().GetScene()->FindComponent<PlayerManager>();
 
   if (playerManager == nullptr)
-    cout << "WARNING: No PlayerManager instance was found, controller " << instanceId << " will never be used." << endl;
+    MESSAGE << "WARNING: No PlayerManager instance was found, controller " << instanceId << " will never be used." << endl;
 
   else
     playerManager->OnPlayerSearchForController.AddListener(
@@ -38,7 +38,7 @@ ControllerDevice::~ControllerDevice() { LosePlayer(); }
 
 void ControllerDevice::AssociateToPlayer(std::shared_ptr<Player> player)
 {
-  cout << "Associating controller " << GetId() << " to player " << player->PlayerId() << endl;
+  MESSAGE << "Associating controller " << GetId() << " to player " << player->PlayerId() << endl;
 
   player->AssociateController(GetShared());
   weakAssociationPlayer = player;

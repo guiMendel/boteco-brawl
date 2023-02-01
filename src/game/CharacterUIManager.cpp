@@ -76,8 +76,6 @@ void CharacterUIManager::UpdateLifeCounter() const
   if (fallDeath->GetLives() == 0)
     return;
 
-  cout << "Current lives: " << fallDeath->GetLives() << endl;
-
   // How many units to space lives out with
   // const float livesGap{0.1};
 

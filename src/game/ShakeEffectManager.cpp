@@ -96,8 +96,6 @@ ShakeEffect::ShakeEffect(shared_ptr<WorldObject> target,
 
 ShakeEffect::~ShakeEffect()
 {
-  cout << "Effect collected" << endl;
-
   IF_LOCK(weakRenderer, renderer)
   {
     // Clean up listener

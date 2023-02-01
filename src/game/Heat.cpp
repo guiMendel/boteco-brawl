@@ -82,9 +82,9 @@ void Heat::TakeDamage(Damage damage)
       body->worldObject.localScale.x = -impulseDirection;
   }
 
-  // cout << worldObject << " taking damage: " << damage.heatDamage << " heatDamage, " << impulse.Magnitude() << " impulse." << endl;
-  // cout << "Inverse Armor: " << inverseArmor << ", Heat: " << heat << ", Inverse Max Heat: " << inverseMaxHeat << ", Heat multiplier: " << heatMultiplier << endl;
-  // cout << "Resulting damage: " << inverseArmor * damage.heatDamage << ", Resulting velocity add: " << (impulse * heatMultiplier * body->GetInverseMass()).Magnitude() << endl;
+  // MESSAGE << worldObject << " taking damage: " << damage.heatDamage << " heatDamage, " << impulse.Magnitude() << " impulse." << endl;
+  // MESSAGE << "Inverse Armor: " << inverseArmor << ", Heat: " << heat << ", Inverse Max Heat: " << inverseMaxHeat << ", Heat multiplier: " << heatMultiplier << endl;
+  // MESSAGE << "Resulting damage: " << inverseArmor * damage.heatDamage << ", Resulting velocity add: " << (impulse * heatMultiplier * body->GetInverseMass()).Magnitude() << endl;
 
   // Update damage heat
   damage.heatDamage *= inverseArmor;
@@ -122,7 +122,6 @@ float Heat::TriggerHitEffect(Damage damage)
 
   // Calculate duration
   float duration = Clamp(impulseFactor * damage.impulse.magnitude, damage.minHitStop, maxDuration);
-  // cout << "duration " << duration << endl;
 
   // Apply to self
   timeScaleManager->AlterTimeScale(worldObject.GetShared(), 0.00001, duration);

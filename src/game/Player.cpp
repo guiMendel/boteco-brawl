@@ -35,7 +35,7 @@ void Player::UseController()
 
 void Player::SearchForController()
 {
-  cout << "Player " << PlayerId() << " searching for controller" << endl;
+  MESSAGE << "Player " << PlayerId() << " searching for controller" << endl;
 
   usingController = true;
   weakController.reset();

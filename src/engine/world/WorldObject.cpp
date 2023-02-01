@@ -52,7 +52,7 @@ void WorldObject::Update(float deltaTime)
 
   if (absolutePosition.x > objectCollectionRange || absolutePosition.y > objectCollectionRange)
   {
-    cout << "Collecting " << *this << " for exceeding collection range" << endl;
+    MESSAGE << "Collecting " << *this << " for exceeding collection range" << endl;
 
     RequestDestroy();
   }
@@ -311,11 +311,7 @@ shared_ptr<WorldObject> WorldObject::CreateChild(string name, Vector2 offset, fl
   return GetScene()->RequireWorldObject(childId);
 }
 
-void WorldObject::InternalDestroy()
-{
-  cout << "Yaaay" << endl;
-  DestroySelf();
-}
+void WorldObject::InternalDestroy() { DestroySelf(); }
 
 auto WorldObject::DestroySelf() -> std::unordered_map<int, std::weak_ptr<WorldObject>>::iterator
 {

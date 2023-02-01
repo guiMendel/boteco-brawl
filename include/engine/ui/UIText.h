@@ -14,6 +14,7 @@ public:
 
   virtual ~UIText() {}
 
+  void Start() override;
   void Render() override;
 
   // Sets new text content

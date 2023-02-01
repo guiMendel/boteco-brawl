@@ -38,13 +38,13 @@ void UIContainer::InternalDestroy() { DestroySelf(); }
 
 auto UIContainer::DestroySelf() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator
 {
-  cout << *this << "'s children: " << endl;
-  for (auto [childId, weakChild] : children)
-  {
-    LOCK(weakChild, child);
+  // cout << *this << "'s children: " << endl;
+  // for (auto [childId, weakChild] : children)
+  // {
+  //   LOCK(weakChild, child);
 
-    cout << "Child " << *child << endl;
-  }
+  //   cout << "Child " << *child << endl;
+  // }
 
   // Remove all children
   auto pairIterator = children.begin();

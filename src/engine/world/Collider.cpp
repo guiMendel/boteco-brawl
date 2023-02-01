@@ -46,7 +46,7 @@ void Collider::RegisterToScene()
   if (ownerId >= 0)
     GetScene()->physicsSystem.RegisterCollider(RequirePointerCast<Collider>(GetShared()), ownerId);
   else
-    cout << "WARNING: Object " << worldObject.GetName() << " has a non-trigger collider, but has no Rigidbody attached" << endl;
+    MESSAGE << "WARNING: Object " << worldObject.GetName() << " has a non-trigger collider, but has no Rigidbody attached" << endl;
 }
 
 float Collider::GetDensity() const

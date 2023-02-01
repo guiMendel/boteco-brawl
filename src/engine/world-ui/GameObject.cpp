@@ -22,12 +22,12 @@ GameObject::GameObject(string name)
 
 GameObject::~GameObject()
 {
-  cout << "In destructor of " << GetName() << endl;
+  MESSAGE << "In destructor of " << GetName() << endl;
 
   // Detect leaked components
   for (auto [componentId, component] : components)
     if (component.use_count() != 2)
-      cout << "WARNING: Component " << typeid(*component).name() << " has " << component.use_count() - 2 << " leaked references" << endl;
+      MESSAGE << "WARNING: Component " << typeid(*component).name() << " has " << component.use_count() - 2 << " leaked references" << endl;
 }
 
 void GameObject::Start()
@@ -159,7 +159,7 @@ void GameObject::DontDestroyOnLoad(bool value)
 {
   if (InternalGetParent()->IsRoot() == false)
   {
-    cout << "WARNING: Tried to set non-root object to not destroy on load" << endl;
+    MESSAGE << "WARNING: Tried to set non-root object to not destroy on load" << endl;
     return;
   }
 

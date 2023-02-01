@@ -125,12 +125,10 @@ void UIObject::Render()
 
 auto UIObject::DestroySelf() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator
 {
-  cout << "Destroying " << *this << endl;
+  // cout << "Destroying " << *this << endl;
 
   // Store pointer to self for later
   auto shared = GetShared();
-
-  cout << shared.use_count() << endl;
 
   // Call base destroy method to clean up components & remove reference from scene
   GameObject::InternalDestroy();

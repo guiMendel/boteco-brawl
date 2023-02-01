@@ -53,7 +53,7 @@ float InputManager::Update()
     // Quit on quit event
     if (event.type == SDL_QUIT)
     {
-      cout << "Quit" << endl;
+      MESSAGE << "Quit" << endl;
       quitRequested = true;
     }
 
@@ -106,7 +106,7 @@ float InputManager::Update()
     // On controller connected
     else if (event.type == SDL_CONTROLLERDEVICEADDED)
     {
-      cout << "Controller connected. Device index: " << event.cdevice.which << endl;
+      MESSAGE << "Controller connected. Device index: " << event.cdevice.which << endl;
 
       // Try to open it
       try
@@ -115,14 +115,14 @@ float InputManager::Update()
       }
       catch (const invalid_controller_error &error)
       {
-        cout << "WARNING: " << string(error) << endl;
+        MESSAGE << "WARNING: " << string(error) << endl;
       }
     }
 
     // On controller disconnected
     else if (event.type == SDL_CONTROLLERDEVICEREMOVED)
     {
-      cout << "Controller disconnected. Instance id: " << event.cdevice.which << endl;
+      MESSAGE << "Controller disconnected. Instance id: " << event.cdevice.which << endl;
 
       // Remove this entry
       controllers.erase(event.cdevice.which);
@@ -130,7 +130,7 @@ float InputManager::Update()
 
     // On controller remapped
     else if (event.type == SDL_CONTROLLERDEVICEREMAPPED)
-      cout << "Controller remapped. Instance id: " << event.cdevice.which << endl;
+      MESSAGE << "Controller remapped. Instance id: " << event.cdevice.which << endl;
 
     // On controller button press
     else if (event.type == SDL_CONTROLLERBUTTONDOWN)
@@ -167,7 +167,6 @@ float InputManager::Update()
     if (analog != lastLeftControllerAnalogs[instanceId])
     {
       // If they are different, raise
-      // cout << "Left analog: " << analog << endl;
       OnControllerLeftAnalog.Invoke(analog, instanceId);
     }
   }
@@ -177,7 +176,6 @@ float InputManager::Update()
     if (analog != lastRightControllerAnalogs[instanceId])
     {
       // If they are different, raise
-      // cout << "Right analog: " << analog << endl;
       OnControllerRightAnalog.Invoke(analog, instanceId);
     }
   }

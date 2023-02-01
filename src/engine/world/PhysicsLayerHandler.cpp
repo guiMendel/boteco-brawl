@@ -115,7 +115,7 @@ void PhysicsLayerHandler::PrintMatrix()
 
   // === HEADER
 
-  cout << CenterFill(header, lineLength, "=") << endl;
+  MESSAGE << CenterFill(header, lineLength, "=") << endl;
 
   // === SECTIONS
 
@@ -130,14 +130,14 @@ void PhysicsLayerHandler::PrintMatrix()
   for (int section = 0; section < sectionCount; section++)
   {
     // Print first line empty space
-    cout << Pad(cellLength + padding);
+    MESSAGE << Pad(cellLength + padding);
 
     // Print this section's column labels
     for (int layer = section * COLUMNS_PER_SECTION;
          layer < section * COLUMNS_PER_SECTION + COLUMNS_PER_SECTION && layer < PHYSICS_LAYER_COUNT;
          layer++)
-      cout << LabelCell(layer) + (layer == section + COLUMNS_PER_SECTION - 1 ? "" : Pad(gap));
-    cout << endl;
+      MESSAGE << LabelCell(layer) + (layer == section + COLUMNS_PER_SECTION - 1 ? "" : Pad(gap));
+    MESSAGE << endl;
 
     // === ROWS
 
@@ -145,18 +145,18 @@ void PhysicsLayerHandler::PrintMatrix()
     for (int rowLayer = 0; rowLayer < PHYSICS_LAYER_COUNT; rowLayer++)
     {
       // Print row's layer label
-      cout << LabelCell(rowLayer, true) << Pad(padding);
+      MESSAGE << LabelCell(rowLayer, true) << Pad(padding);
 
       // Print each column layer's value
       for (int columnLayer = section * COLUMNS_PER_SECTION;
            columnLayer < section * COLUMNS_PER_SECTION + COLUMNS_PER_SECTION && columnLayer < PHYSICS_LAYER_COUNT;
            columnLayer++)
-        cout << ValueCell(rowLayer, columnLayer) << (columnLayer == PHYSICS_LAYER_COUNT - 1 ? "" : Pad(gap));
-      cout << endl;
+        MESSAGE << ValueCell(rowLayer, columnLayer) << (columnLayer == PHYSICS_LAYER_COUNT - 1 ? "" : Pad(gap));
+      MESSAGE << endl;
     }
 
     // Draw bottom line
-    cout << Fill(lineLength, "=") << endl;
+    MESSAGE << Fill(lineLength, "=") << endl;
   }
 }
 

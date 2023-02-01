@@ -74,7 +74,7 @@ void Rigidbody::SetMass(float newMass)
 {
   if (useAutoMass)
   {
-    cout << "WARNING: tried setting mass when useAutoMass is set to true" << endl;
+    MESSAGE << "WARNING: tried setting mass when useAutoMass is set to true" << endl;
     return;
   }
 
@@ -92,7 +92,7 @@ void Rigidbody::DeriveMassFromColliders()
 
   InternalSetMass(totalMass);
 
-  cout << worldObject << " calculated mass is " << totalMass << endl;
+  MESSAGE << worldObject << " calculated mass is " << totalMass << endl;
 }
 
 // Gets the list of colliders associated with this body

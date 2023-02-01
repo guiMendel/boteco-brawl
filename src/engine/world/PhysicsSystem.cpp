@@ -239,7 +239,7 @@ void PhysicsSystem::DetectObjectBetweenFramesCollision(vector<ValidatedColliders
   // Get object body
   auto objectBody = collidersIterator->at(0)->RequireRigidbody();
 
-  cout << "Using continuous detection for " << objectBody->worldObject.GetName() << endl;
+  MESSAGE << "Using continuous detection for " << objectBody->worldObject.GetName() << endl;
 
   // Get trajectory info
   auto trajectory = objectBody->GetFrameTrajectory();
@@ -267,7 +267,7 @@ void PhysicsSystem::DetectObjectBetweenFramesCollision(vector<ValidatedColliders
     return;
 
   LOCK(castData.collision.weakOther, otherCollider);
-  cout << "Detected between frames collision with " << otherCollider->worldObject.GetName() << endl;
+  MESSAGE << "Detected between frames collision with " << otherCollider->worldObject.GetName() << endl;
 
   // Move the body to where collision happened
   objectBody->worldObject.SetPosition(
