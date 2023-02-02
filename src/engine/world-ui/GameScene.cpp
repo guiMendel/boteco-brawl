@@ -5,6 +5,7 @@
 #include "Sound.h"
 #include "Camera.h"
 #include "Resources.h"
+#include "Parent.h"
 #include "ObjectRecipes.h"
 #include <iostream>
 
@@ -204,6 +205,9 @@ shared_ptr<GameObject> GameScene::RegisterObject(shared_ptr<GameObject> gameObje
   gameObjects[gameObject->id] = gameObject;
   gameObject->gameSceneId = id;
 
+  // Ensure it's parent has a reference to it
+  gameObject->InternalSetParent(gameObject->InternalGetParent());
+
   if (awoke)
     gameObject->Awake();
 
@@ -352,19 +356,8 @@ void GameScene::Destroy()
   // Destroy root object
   rootObject->InternalDestroy();
 
-  // Individually collect each stray object which wasn't part of a tree
-  vector<int> strayIds;
-
-  // Collect them
-  for (auto [objectId, object] : gameObjects)
-    strayIds.push_back(objectId);
-
-  // Delete each
-  for (auto strayId : strayIds)
-  {
-    auto gameObject = RequireGameObject(strayId);
-    gameObject->InternalDestroy();
-  }
+  // Ensure they were all destroyed
+  Assert(gameObjects.size() == 0, "Failed to destroy all objects before destroying scene");
 
   // Clear unused resources
   Resources::ClearAll();

@@ -35,14 +35,6 @@ public:
   // Cascade these hooks down the canvas object tree
   void CascadeDown(std::function<void(GameObject &)> callback, bool topDown = true) override;
 
-  // Create a UI Object but don't add it to the canvas object tree
-  template <class T, typename... Args>
-  std::shared_ptr<T> NewUIObject(std::string objectName, Args &&...args)
-  {
-    int objectId = (new T(*this, objectName, std::forward<Args>(args)...))->id;
-    return GetScene()->RequireUIObject<T>(objectId);
-  }
-
   // Add a UI Object to the canvas object tree as child of root canvas object
   template <class T, typename... Args>
   std::shared_ptr<T> AddChild(std::string objectName, Args &&...args)
@@ -86,8 +78,12 @@ private:
   template <class T, typename... Args>
   std::shared_ptr<T> InsertInto(std::shared_ptr<UIContainer> parent, std::string objectName, Args &&...args)
   {
-    auto newObject = NewUIObject<T>(objectName, std::forward<Args>(args)...);
-    newObject->SetParent(parent);
+    // Create the UI Object
+    auto newObject = GetScene()->NewObject<T>(*this, objectName, parent, std::forward<Args>(args)...);
+
+    // Initialize it's dimensions
+    newObject->InitializeDimensions();
+    
     return newObject;
   }
 };

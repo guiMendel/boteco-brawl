@@ -10,7 +10,7 @@
 class UIText : public UIContent
 {
 public:
-  UIText(Canvas &canvas, std::string name, std::string text = "");
+  UIText(Canvas &canvas, std::string name, std::shared_ptr<UIContainer> parent, std::string text = "");
 
   virtual ~UIText() {}
 

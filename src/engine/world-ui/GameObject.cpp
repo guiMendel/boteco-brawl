@@ -14,11 +14,7 @@ GameObject::GameObject(string name, int gameSceneId, int id)
 
 // Default constructor
 GameObject::GameObject(string name)
-    : GameObject(name, Game::GetInstance().GetScene()->id)
-{
-  // Register to scene
-  GetScene()->RegisterObject(this);
-}
+    : GameObject(name, Game::GetInstance().GetScene()->id) {}
 
 GameObject::~GameObject()
 {

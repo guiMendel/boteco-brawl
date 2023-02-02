@@ -5,14 +5,23 @@
 
 using namespace std;
 
-UIObject::UIObject(Canvas &canvas, string name)
+UIObject::UIObject(Canvas &canvas, string name, std::shared_ptr<UIContainer> parent)
     : GameObject(name),
-      width(UIDimension::Horizontal, GetShared()),
-      height(UIDimension::Vertical, GetShared()),
-      padding(GetShared()),
-      margin(GetShared()),
+      width(UIDimension::Horizontal),
+      height(UIDimension::Vertical),
       style(make_unique<UIInheritable>(*this)),
-      canvas(canvas) {}
+      canvas(canvas)
+{
+  if (IsCanvasRoot() == false)
+  {
+    // Treat no parent as child of canvas root
+    if (parent == nullptr)
+      parent = canvas.root;
+
+    // Register parent
+    weakParent = parent;
+  }
+}
 
 UIObject::~UIObject() {}
 
@@ -20,7 +29,8 @@ Vector2 UIObject::GetPosition() { return updatedPosition; }
 
 UIDimension &UIObject::GetSize(UIDimension::Axis axis) { return axis == UIDimension::Horizontal ? width : height; }
 
-bool UIObject::IsCanvasRoot() const { return (canvas.root != nullptr) && (canvas.root->id == id); }
+// If there is no root, then this object must be the root under construction
+bool UIObject::IsCanvasRoot() const { return (canvas.root == nullptr) || (canvas.root->id == id); }
 
 shared_ptr<UIContainer> UIObject::GetParent() const
 {
@@ -48,7 +58,7 @@ void UIObject::SetParent(shared_ptr<UIContainer> newParent)
   // If not canvas root
   if (IsCanvasRoot() == false)
     // Give parent a reference to self
-    newParent->children[id] = weak_ptr(GetShared());
+    newParent->children[id] = GetShared();
 }
 
 bool UIObject::IsDescendantOf(shared_ptr<UIContainer> other) const
@@ -91,7 +101,9 @@ int UIObject::GetRenderOrder() { return style->renderOrder.Get(); }
 void UIObject::RegisterLayer()
 {
   if (GetRenderLayer() != RenderLayer::None)
+  {
     GetScene()->RegisterLayerRenderer(GetScene()->RequireUIObject<Renderable>(id));
+  }
 }
 
 void UIObject::RegisterToScene()
@@ -110,6 +122,10 @@ void UIObject::RegisterToScene()
 
 void UIObject::Render()
 {
+  // Don't render root
+  if (IsCanvasRoot())
+    return;
+
   auto camera = Camera::GetMain();
 
   auto color = Color::Pink();
@@ -158,10 +174,28 @@ auto UIObject::UnlinkParent() -> std::unordered_map<int, std::weak_ptr<UIObject>
   auto iterator = parent->children.find(id);
 
   // Remove it
-  iterator = parent->children.erase(iterator);
+  if (iterator != parent->children.end())
+    iterator = parent->children.erase(iterator);
   weakParent.reset();
 
   return iterator;
 }
 
 void UIObject::InternalDestroy() { DestroySelf(); }
+
+void UIObject::InternalSetParent(std::shared_ptr<GameObject> newParent)
+{
+  // Ignore this if canvas root
+  if (IsCanvasRoot())
+    return;
+
+  SetParent(RequirePointerCast<UIContainer>(newParent));
+}
+
+void UIObject::InitializeDimensions()
+{
+  width.SetOwner(GetShared());
+  height.SetOwner(GetShared());
+  padding.SetOwner(GetShared());
+  margin.SetOwner(GetShared());
+}

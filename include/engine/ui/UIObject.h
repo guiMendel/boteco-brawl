@@ -16,10 +16,11 @@ class UIObject : public GameObject, public Renderable
   friend class GameScene;
   friend class UIDimension;
   friend class UIContainer;
+  friend class Canvas;
 
 public:
   // Will be disconnected from canvas object tree until manually inserted as child of another object
-  UIObject(Canvas &canvas, std::string name);
+  UIObject(Canvas &canvas, std::string name, std::shared_ptr<UIContainer> parent);
 
   virtual ~UIObject();
 
@@ -49,6 +50,9 @@ private:
   // Gets either width or height, depending on the provided axis
   UIDimension &GetSize(UIDimension::Axis axis);
 
+  // Gives all dimensions this object's shared pointer
+  void InitializeDimensions();
+
   // Last calculated value of position in real pixels
   Vector2 updatedPosition;
 
@@ -71,6 +75,9 @@ public:
   // Check if either object is a descendent of each other
   static bool SameLineage(
       std::shared_ptr<UIObject> first, std::shared_ptr<UIObject> second);
+
+protected:
+  void InternalSetParent(std::shared_ptr<GameObject> newParent) override;
 
 private:
   // Parent object

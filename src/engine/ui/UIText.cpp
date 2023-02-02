@@ -4,8 +4,8 @@
 
 using namespace std;
 
-UIText::UIText(Canvas &canvas, string name, string text)
-    : UIContent(canvas, name), text(text), mainTexture(nullptr, SDL_DestroyTexture) {}
+UIText::UIText(Canvas &canvas, string name, std::shared_ptr<UIContainer> parent, string text)
+    : UIContent(canvas, name, parent), text(text), mainTexture(nullptr, SDL_DestroyTexture) {}
 
 void UIText::Start()
 {

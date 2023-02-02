@@ -149,6 +149,9 @@ protected:
   // Gets pointer to parent, and ensures it's valid. Raises when called from root object
   virtual std::shared_ptr<GameObject> InternalGetParent() const = 0;
 
+  // Sets a new parent
+  virtual void InternalSetParent(std::shared_ptr<GameObject> newParent) = 0;
+
   // =================================
   // UTILITY
   // =================================

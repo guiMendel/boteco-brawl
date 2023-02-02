@@ -203,7 +203,7 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
 
     ParticleFX::EffectAt(shotPosition, 0.01, 0.01, sparks, 1);
 
-    auto projectile = animator.GetScene()->CreateWorldObject(
+    auto projectile = animator.GetScene()->Instantiate(
         "Projectile",
         ObjectRecipes::Projectile({8 * mirrorFactor, 0}, animator.worldObject.GetShared(), {0, 0}),
         shotPosition);

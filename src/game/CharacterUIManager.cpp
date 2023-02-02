@@ -1,6 +1,7 @@
 #include "CharacterUIManager.h"
 #include "CharacterController.h"
 #include "Camera.h"
+#include "ObjectRecipes.h"
 #include "Heat.h"
 #include <sstream>
 #include <iomanip>
@@ -10,12 +11,13 @@ using namespace std;
 const float CharacterUIManager::textSizeMultiplierDecay{3};
 
 CharacterUIManager::CharacterUIManager(
-    GameObject &associatedObject, shared_ptr<FallDeath> fallDeath, shared_ptr<UIText> heatText, shared_ptr<UIImage> lifeIcon)
+    GameObject &associatedObject, shared_ptr<FallDeath> fallDeath, shared_ptr<UIText> heatText, function<void()> addLifeIcon)
     : UIComponent(associatedObject),
       weakFallDeath(fallDeath),
-      lifeIcon(lifeIcon),
+      addLifeIcon(addLifeIcon),
       weakText(heatText),
-      playerColor(fallDeath->worldObject.RequireComponent<CharacterController>()->GetPlayer()->GetColor())
+      playerColor(fallDeath->worldObject.RequireComponent<CharacterController>()->GetPlayer()->GetColor()),
+      uiContainer(*GetScene()->RequireUIObject<UIContainer>(uiObject.id))
 {
   LOCK(weakText, text);
   originalTextSize = text->style->fontSize.Get();
@@ -24,6 +26,9 @@ CharacterUIManager::CharacterUIManager(
 void CharacterUIManager::Start()
 {
   LOCK(weakFallDeath, fallDeath);
+
+  // Get life container
+  weakLifeContainer = RequirePointerCast<UIContainer>(uiContainer.RequireChild(CHARACTER_LIFE_OBJECT));
 
   // Update life counter on fall
   fallDeath->OnFall.AddListener("update-lives", [this]()
@@ -63,6 +68,8 @@ void CharacterUIManager::Update(float deltaTime)
 
 void CharacterUIManager::EraseLives() const
 {
+  for (auto lifeIcon : Lock(weakLifeContainer)->GetChildren())
+    lifeIcon->RequestDestroy();
 }
 
 void CharacterUIManager::UpdateLifeCounter() const
@@ -72,26 +79,15 @@ void CharacterUIManager::UpdateLifeCounter() const
   // Erase current lives
   EraseLives();
 
+  cout << "adding lives: " << fallDeath->GetLives() << endl;
+
   // If no more, stop
   if (fallDeath->GetLives() == 0)
     return;
 
-  // How many units to space lives out with
-  // const float livesGap{0.1};
-
-  // Offset of first life
-  // float lifeSizeUnits = lifeSizeRealPixels / Camera::GetMain()->GetRealPixelsPerUnit();
-  // const float firstOffset{(livesGap + lifeSizeUnits) * (fallDeath->GetLives() - 1) / 2};
-
-  // // For each life
-  // for (int life{0}; life < fallDeath->GetLives(); life++)
-  // {
-  //   auto lifeRenderer = worldObject.AddComponent<SpriteRenderer>(spritePath, RenderLayer::UI);
-  //   lifeRenderer->OverrideWidthPixels(lifeSizeRealPixels);
-  //   lifeRenderer->SetAnchorPoint({0.5, 1});
-  //   lifeRenderer->SetOffset({-firstOffset + life * (livesGap + lifeSizeUnits), 0});
-  //   lifeRenderer->SetColor(color);
-  // }
+  // For each life, add an icon
+  for (int life{0}; life < fallDeath->GetLives(); life++)
+    addLifeIcon();
 }
 
 void CharacterUIManager::UpdateHeatDisplay(float newHeat, float oldHeat)

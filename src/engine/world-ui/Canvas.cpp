@@ -3,11 +3,12 @@
 
 using namespace std;
 
+// TODO fix this
 Canvas::Canvas(GameObject &associatedObject, Space space, Vector2 size)
     : WorldComponent(associatedObject),
       space(space),
       size(size),
-      root(GetScene()->RequireUIObject<UIContainer>((new UIContainer(*this, "UIRoot"))->id))
+      root(GetScene()->NewObject<UIContainer>(*this, "UIRoot", nullptr))
 {
   InitializeRootStyle();
 }

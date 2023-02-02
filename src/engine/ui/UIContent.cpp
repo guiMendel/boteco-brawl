@@ -3,8 +3,8 @@
 
 using namespace std;
 
-UIContent::UIContent(Canvas &canvas, string name)
-    : UIObject(canvas, name) {}
+UIContent::UIContent(Canvas &canvas, string name, std::shared_ptr<UIContainer> parent)
+    : UIObject(canvas, name, parent) {}
 
 void UIContent::CascadeDown(function<void(GameObject &)> callback, bool topDown)
 {

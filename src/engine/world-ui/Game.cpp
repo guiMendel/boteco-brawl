@@ -244,7 +244,7 @@ Game &Game::GetInstance()
   if (gameInstance == nullptr)
   {
     // Create it
-    gameInstance.reset(new Game("GuilhermeMendel-170143970", screenWidth, screenHeight));
+    gameInstance.reset(new Game("Risca Faca — Rinhas", screenWidth, screenHeight));
 
     // Set a starting scene as next scene
     gameInstance->PushScene(gameInstance->GetInitialScene());

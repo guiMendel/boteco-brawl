@@ -119,16 +119,26 @@ public:
   // Removes an object given it's shared pointer
   void RemoveObject(std::shared_ptr<GameObject> gameObject);
 
-  // Creates a new world object
+  // Creates an empty game object and registers it to the scene
+  template <class T, typename... Args>
+  std::shared_ptr<T> NewObject(Args &&...args)
+  {
+    // Create the object, which automatically registers itself to the scene
+    auto object = std::make_shared<T>(std::forward<Args>(args)...);
+
+    // Request it's registration
+    RegisterObject(object);
+
+    return object;
+  }
+
+  // Creates a new world object using a recipe
   template <typename... Args>
-  std::shared_ptr<WorldObject> CreateWorldObject(
+  std::shared_ptr<WorldObject> Instantiate(
       std::string name, std::function<void(std::shared_ptr<WorldObject>)> recipe = nullptr, Args &&...args)
   {
     // Create the object, which automatically registers itself to the scene
-    int objectId = (new WorldObject(name, std::forward<Args>(args)...))->id;
-    auto object = GetWorldObject(objectId);
-
-    Helper::Assert(object != nullptr, "Failed to retrieve world object which was just created");
+    auto object = NewObject<WorldObject>(name, std::forward<Args>(args)...);
 
     // Initialize it
     if (recipe)

@@ -2,11 +2,11 @@
 
 using namespace std;
 
-UIDirectedDimension::UIDirectedDimension(std::shared_ptr<UIObject> owner)
-    : top(UIDimension::Vertical, owner),
-      right(UIDimension::Horizontal, owner),
-      bottom(UIDimension::Vertical, owner),
-      left(UIDimension::Horizontal, owner) {}
+UIDirectedDimension::UIDirectedDimension()
+    : top(UIDimension::Vertical),
+      right(UIDimension::Horizontal),
+      bottom(UIDimension::Vertical),
+      left(UIDimension::Horizontal) {}
 
 void UIDirectedDimension::Set(UIDimension::UnitType type, float value)
 {
@@ -28,13 +28,22 @@ void UIDirectedDimension::SetVertical(UIDimension::UnitType type, float value)
   bottom.Set(type, value);
 }
 
-UIDimension::UIDimension(Axis axis, shared_ptr<UIObject> owner, UnitType type, float value)
-    : axis(axis), value(value), type(type), weakOwner(owner) {}
+void UIDirectedDimension::SetOwner(std::shared_ptr<UIObject> owner)
+{
+  top.SetOwner(owner);
+  right.SetOwner(owner);
+  bottom.SetOwner(owner);
+  left.SetOwner(owner);
+}
+
+UIDimension::UIDimension(Axis axis) : axis(axis), type(RealPixels) {}
 
 size_t UIDimension::AsRealPixels() const { return AsRealPixels(Default); }
 
 size_t UIDimension::AsRealPixels(Calculation) const
 {
+  Assert(weakOwner.expired() == false, "Tried reading value of UI Dimensions without first giving it an owner");
+
   // Catch happy case
   if (type == RealPixels)
     return value;
@@ -65,6 +74,8 @@ size_t UIDimension::AsRealPixels(Calculation) const
 
 float UIDimension::As(UnitType requestedType) const
 {
+  Assert(weakOwner.expired() == false, "Tried reading value of UI Dimensions without first giving it an owner");
+
   // Catch happy case
   if (type == requestedType)
     return value;
@@ -89,3 +100,5 @@ void UIDimension::Set(UnitType newType, float newValue)
   type = newType;
   value = newValue;
 }
+
+void UIDimension::SetOwner(std::shared_ptr<UIObject> owner) { weakOwner = owner; }

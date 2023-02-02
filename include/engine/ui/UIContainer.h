@@ -12,7 +12,7 @@ class UIContainer : public UIObject, public Parent<UIObject>
   friend class Canvas;
 
 public:
-  UIContainer(Canvas &canvas, std::string name);
+  UIContainer(Canvas &canvas, std::string name, std::shared_ptr<UIContainer> parent);
 
   virtual ~UIContainer() {}
 

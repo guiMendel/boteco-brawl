@@ -214,6 +214,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     container->height.Set(UIDimension::RealPixels, 50);
     container->style->textBorderSize.Set(2);
     container->style->imageScaling.Set(10);
+    container->style->imageColor.Set(player->GetColor());
 
     // TODO: add a default image size scaler to the uiObjects style as inheritable
 
@@ -221,18 +222,23 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     auto heatText = container->AddChild<UIText>("HeatDisplay", "0.0");
 
     // Add life icon container
-    container->AddChild<UIContainer>("LifeIcons");
+    weak_ptr<UIContainer> weakLifeContainer = container->AddChild<UIContainer>(CHARACTER_LIFE_OBJECT);
 
     // Add player indicator
-    auto badgeImage = container->AddChild<UIImage>("PlayerIndicator", "./assets/sprites/badge.png");
-    badgeImage->width.Set(UIDimension::RealPixels, 35);
-    badgeImage->height.Set(UIDimension::RealPixels, 20);
+    // auto badgeImage = container->AddChild<UIImage>("PlayerIndicator", "./assets/sprites/badge.png");
+    // badgeImage->width.Set(UIDimension::RealPixels, 35);
+    // badgeImage->height.Set(UIDimension::RealPixels, 20);
 
-    // Create life icon image object
-    auto lifeIcon = canvas->NewUIObject<UIImage>("LifeIcon", "./assets/sprites/life.png");
+    // Creates life icon image object and adds it to it's container
+    auto addLifeIcon = [weakLifeContainer]()
+    {
+      auto lifeIcon = Lock(weakLifeContainer)->AddChild<UIImage>("LifeIcon", "./assets/sprites/life.png");
+      lifeIcon->width.Set(UIDimension::RealPixels, 20);
+      lifeIcon->height.Set(UIDimension::RealPixels, 20);
+    };
 
     // Add a display manager
-    container->AddComponent<CharacterUIManager>(fallDeath, heatText, lifeIcon);
+    container->AddComponent<CharacterUIManager>(fallDeath, heatText, addLifeIcon);
 
     // // Real pixels per virtual pixel in badge UI
     // float realPerVirtualPixels{5};

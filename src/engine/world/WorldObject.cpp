@@ -15,22 +15,18 @@ WorldObject::WorldObject(string name, int gameSceneId, int id) : GameObject(name
 WorldObject::WorldObject(string name, Vector2 coordinates, double rotation, shared_ptr<WorldObject> parent)
     : GameObject(name)
 {
-  // Get pointers
-  auto scene = GetScene();
-  auto shared = GetShared();
-
   // Only add a parent if not the root object
   if (IsRoot() == false)
   {
     // If no parent, add root as parent
     if (parent == nullptr)
-      parent = scene->GetRootObject();
+      parent = GetScene()->GetRootObject();
 
     // Add reference to parent
     this->weakParent = parent;
 
-    // Give parent a reference to self
-    parent->children[id] = weak_ptr(shared);
+    // Parent will get reference to this object upon it's registration to the scene
+    // That's because this object's shared pointer hasn't been created yet!
   }
 
   // Inherit parent's layer (don't use SetPhysicsLayer here, as we don't want to set inheritedPhysicsLayer to false)
@@ -218,7 +214,8 @@ auto WorldObject::UnlinkParent() -> unordered_map<int, weak_ptr<WorldObject>>::i
   auto iterator = parent->children.find(id);
 
   // Remove it
-  iterator = parent->children.erase(iterator);
+  if (iterator != parent->children.end())
+    iterator = parent->children.erase(iterator);
   weakParent.reset();
 
   return iterator;
@@ -233,6 +230,7 @@ void WorldObject::SetParent(shared_ptr<WorldObject> newParent)
 
   // Set new parent
   weakParent = newParent;
+  newParent->children[id] = GetShared();
 
   // Inherit this new parent's layer if necessary
   if (inheritedPhysicsLayer)
@@ -307,8 +305,7 @@ shared_ptr<WorldObject> WorldObject::CreateChild(string name, Vector2 offset)
 
 shared_ptr<WorldObject> WorldObject::CreateChild(string name, Vector2 offset, float offsetRotation)
 {
-  auto childId = (new WorldObject(name, GetPosition() + offset, GetRotation() + offsetRotation, GetShared()))->id;
-  return GetScene()->RequireWorldObject(childId);
+  return GetScene()->NewObject<WorldObject>(name, GetPosition() + offset, GetRotation() + offsetRotation, GetShared());
 }
 
 void WorldObject::InternalDestroy() { DestroySelf(); }
@@ -509,4 +506,9 @@ void WorldObject::CascadeDown(function<void(GameObject &)> callback, bool topDow
   // Execute on this object (bottom up case)
   if (topDown == false)
     callback(*this);
+}
+
+void WorldObject::InternalSetParent(std::shared_ptr<GameObject> newParent)
+{
+  SetParent(RequirePointerCast<WorldObject>(newParent));
 }

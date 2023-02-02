@@ -2,8 +2,8 @@
 
 using namespace std;
 
-UIContainer::UIContainer(Canvas &canvas, string name)
-    : UIObject(canvas, name) {}
+UIContainer::UIContainer(Canvas &canvas, string name, shared_ptr<UIContainer> parent)
+    : UIObject(canvas, name, parent) {}
 
 void UIContainer::CascadeDown(function<void(GameObject &)> callback, bool topDown)
 {
@@ -36,7 +36,7 @@ shared_ptr<UIContainer> UIContainer::GetShared() { return GetScene()->RequireUIO
 
 void UIContainer::InternalDestroy() { DestroySelf(); }
 
-auto UIContainer::DestroySelf() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator
+auto UIContainer::DestroySelf() -> unordered_map<int, weak_ptr<UIObject>>::iterator
 {
   // cout << *this << "'s children: " << endl;
   // for (auto [childId, weakChild] : children)

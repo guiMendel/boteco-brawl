@@ -3,18 +3,18 @@
 
 using namespace std;
 
-UIImage::UIImage(Canvas &canvas, string name, string imagePath)
-    : UIContent(canvas, name) { SetImagePath(imagePath); }
+UIImage::UIImage(Canvas &canvas, string name, shared_ptr<UIContainer> parent, string imagePath)
+    : UIContent(canvas, name, parent) { SetImagePath(imagePath); }
 
-void UIImage::SetImagePath(std::string imagePath)
+void UIImage::SetImagePath(string imagePath)
 {
   this->imagePath = imagePath;
   ReloadTextureDimensions();
 }
 
-std::string UIImage::GetImagePath() { return imagePath; }
+string UIImage::GetImagePath() { return imagePath; }
 
-void UIImage::UseTexture(std::function<void(SDL_Texture *)> procedure)
+void UIImage::UseTexture(function<void(SDL_Texture *)> procedure)
 {
   // Get image texture
   auto texture = Resources::GetTexture(imagePath);

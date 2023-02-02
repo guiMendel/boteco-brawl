@@ -12,7 +12,7 @@ class UIContent : public UIObject
   friend class UIDimension;
 
 public:
-  UIContent(Canvas &canvas, std::string name);
+  UIContent(Canvas &canvas, std::string name, std::shared_ptr<UIContainer> parent);
 
   virtual ~UIContent() {}
 

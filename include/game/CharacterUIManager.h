@@ -5,6 +5,7 @@
 #include "FallDeath.h"
 #include "UIImage.h"
 #include "UIText.h"
+#include "UIContainer.h"
 
 // Maps input from some source (player or AI) to the the creation and dispatch of the corresponding actions
 class CharacterUIManager : public UIComponent
@@ -17,7 +18,7 @@ public:
       GameObject &associatedObject,
       std::shared_ptr<FallDeath> fallDeath,
       std::shared_ptr<UIText> heatText,
-      std::shared_ptr<UIImage> lifeIcon);
+      std::function<void()> addLifeIcon);
   virtual ~CharacterUIManager() {}
 
   void Start() override;
@@ -38,8 +39,11 @@ private:
   // Fall death component reference
   std::weak_ptr<FallDeath> weakFallDeath;
 
-  // Icons to represent how many lives character still has
-  std::shared_ptr<UIImage> lifeIcon;
+  // Adds an icon to represent how many lives character still has
+  std::function<void()> addLifeIcon;
+
+  // Container of life icons
+  std::weak_ptr<UIContainer> weakLifeContainer;
 
   // Reference to text
   std::weak_ptr<UIText> weakText;
@@ -52,6 +56,9 @@ private:
 
   // Color of the character's player
   Color playerColor;
+
+  // Reference to object as container
+  UIContainer &uiContainer;
 };
 
 #endif

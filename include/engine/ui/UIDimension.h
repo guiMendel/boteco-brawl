@@ -30,9 +30,12 @@ public:
   };
 
   // Default constructor
-  UIDimension(Axis axis, std::shared_ptr<UIObject> owner, UnitType type = RealPixels, float value = 0);
+  UIDimension(Axis axis);
 
   virtual ~UIDimension() {}
+
+  // Sets the owner
+  void SetOwner(std::shared_ptr<UIObject> weakOwner);
 
   // Set a new value for this dimension
   void Set(UnitType type, float value = 0);
@@ -66,13 +69,13 @@ private:
   float RealPixelsTo(size_t valuePixels, UnitType requestedType) const;
 
   // Internal dimension's value
-  float value;
+  float value{0};
 
   // Internal dimension's unit type
   UnitType type;
 
   // Owner of this dimension
-  const std::weak_ptr<UIObject> weakOwner;
+  std::weak_ptr<UIObject> weakOwner;
 };
 
 // Defines a kind of dimension that has 4 values, directed towards the top, right, bottom or left
@@ -83,16 +86,19 @@ struct UIDirectedDimension
   UIDimension bottom;
   UIDimension left;
 
-  UIDirectedDimension(std::shared_ptr<UIObject> owner);
+  UIDirectedDimension();
 
   // Sets value for all directions
   void Set(UIDimension::UnitType type, float value = 0);
-  
+
   // Sets value for horizontal directions
   void SetHorizontal(UIDimension::UnitType type, float value = 0);
 
   // Sets value for vertical directions
   void SetVertical(UIDimension::UnitType type, float value = 0);
+
+  // Sets the owner
+  void SetOwner(std::shared_ptr<UIObject> weakOwner);
 };
 
 #include "UIObject.h"
