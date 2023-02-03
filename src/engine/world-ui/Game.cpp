@@ -123,6 +123,9 @@ unique_ptr<Game> Game::gameInstance = nullptr;
 // Path to engine's default font
 const string Game::defaultFontPath{"assets/engine/fonts/PixelOperator.ttf"};
 
+unsigned long Game::currentFrame{0};
+unsigned long Game::currentPhysicsFrame{0};
+
 // === PRIVATE METHODS =======================================
 
 Game::Game(string title, int width, int height)
@@ -406,6 +409,9 @@ void Game::Frame()
 #ifdef PRINT_FRAME_DURATION
   MESSAGE << "Frame took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
 #endif
+
+  // Increment counter
+  currentFrame++;
 }
 
 void Game::PhysicsFrame()
@@ -428,6 +434,9 @@ void Game::PhysicsFrame()
 #ifdef PRINT_FRAME_DURATION
   MESSAGE << "Physics took " << float(SDL_GetTicks()) - startMs << " ms" << endl;
 #endif
+
+  // Increment counter
+  currentPhysicsFrame++;
 }
 
 shared_ptr<GameScene> Game::GetScene()

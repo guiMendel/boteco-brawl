@@ -243,9 +243,6 @@ Vector2 WorldObject::GetPosition()
   if (IsRoot())
     return localPosition;
 
-  // if (GetName() == "DashParticles")
-  //   cout << localPosition << endl;
-
   return InternalGetParent()->GetPosition() + localPosition;
 }
 void WorldObject::SetPosition(const Vector2 newPosition)

@@ -3,6 +3,20 @@
 
 #include "UIObject.h"
 #include "Parent.h"
+#include "UIChildrenBox.h"
+
+// Defines the properties of a flexbox container
+struct UIFlexboxProperties
+{
+  // Gets a hash to identify this configuration set
+  size_t GetHash() const;
+
+  // Defines the main axis of the flexbox
+  UIDimension::Axis mainAxis{UIDimension::Horizontal};
+
+  // Whether to revert render direction within the box's groups
+  bool reverseDirection{false};
+};
 
 // A UI Object which can contain children UI Objects
 class UIContainer : public UIObject, public Parent<UIObject>
@@ -10,11 +24,19 @@ class UIContainer : public UIObject, public Parent<UIObject>
   friend class GameScene;
   friend class UIDimension;
   friend class Canvas;
+  friend class UIChildrenBox;
+  friend class UIObject;
 
 public:
-  UIContainer(Canvas &canvas, std::string name, std::shared_ptr<UIContainer> parent);
+  UIContainer(Canvas &canvas,
+              std::string name,
+              std::shared_ptr<UIContainer> parent,
+              UIFlexboxProperties properties = UIFlexboxProperties());
 
   virtual ~UIContainer() {}
+
+  void Awake() override;
+  void Update(float) override;
 
   // =================================
   // OBJECTS HIERARCHY
@@ -30,8 +52,43 @@ public:
   // Executes the given function for this object and then cascades it down to any children it has
   void CascadeDown(std::function<void(GameObject &)> callback, bool topDown = true) override;
 
+  // Adds arrangement order sorting
+  std::vector<std::shared_ptr<UIObject>> GetChildren() override;
+
 protected:
   std::shared_ptr<GameObject> InternalGetParent() const override;
+
+  // Generator for arrangement order of children
+  size_t arrangeOrderGenerator{0};
+
+  // =================================
+  // CHILDREN BOX
+  // =================================
+public:
+  // Allows access to the current flexbox properties of this container
+  UIFlexboxProperties &Flexbox();
+
+protected:
+  // Detects whether children box recalculation is necessary and performs it if so
+  void DetectRecalculation();
+
+  // Recalculates the children box
+  void RecalculateChildrenBox();
+
+  // Flexbox properties for the container
+  UIFlexboxProperties properties;
+
+  // Currently calculated children box
+  UIChildrenBox childrenBox;
+
+  // Last hash value of properties
+  size_t lastPropertiesHash;
+
+  // Whether should check if the properties have changed since last frame
+  bool checkPropertyChange{false};
+
+  // Force children box recalculation in next update frame
+  bool forceRecalculation{false};
 
   // =================================
   // DESTRUCTION

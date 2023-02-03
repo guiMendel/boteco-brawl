@@ -215,19 +215,24 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     container->style->textBorderSize.Set(2);
     container->style->imageScaling.Set(10);
     container->style->imageColor.Set(player->GetColor());
+    container->Flexbox().mainAxis = UIDimension::Vertical;
 
     // TODO: add a default image size scaler to the uiObjects style as inheritable
 
     // Add heat text
     auto heatText = container->AddChild<UIText>("HeatDisplay", "0.0");
+    heatText->height.Set(UIDimension::RealPixels, 20);
 
     // Add life icon container
-    weak_ptr<UIContainer> weakLifeContainer = container->AddChild<UIContainer>(CHARACTER_LIFE_OBJECT);
+    auto lifeContainer = container->AddChild<UIContainer>(CHARACTER_LIFE_OBJECT);
+    lifeContainer->width.Set(UIDimension::RealPixels, 40);
+    lifeContainer->height.Set(UIDimension::RealPixels, 20);
+    weak_ptr<UIContainer> weakLifeContainer = lifeContainer;
 
     // Add player indicator
-    // auto badgeImage = container->AddChild<UIImage>("PlayerIndicator", "./assets/sprites/badge.png");
-    // badgeImage->width.Set(UIDimension::RealPixels, 35);
-    // badgeImage->height.Set(UIDimension::RealPixels, 20);
+    auto badgeImage = container->AddChild<UIImage>("PlayerIndicator", "./assets/sprites/badge.png");
+    badgeImage->width.Set(UIDimension::RealPixels, 35);
+    badgeImage->height.Set(UIDimension::RealPixels, 20);
 
     // Creates life icon image object and adds it to it's container
     auto addLifeIcon = [weakLifeContainer]()

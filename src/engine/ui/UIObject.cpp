@@ -12,6 +12,20 @@ UIObject::UIObject(Canvas &canvas, string name, std::shared_ptr<UIContainer> par
       style(make_unique<UIInheritable>(*this)),
       canvas(canvas)
 {
+  // Subscribe to own dimension change
+  auto alertParent = [this](size_t, size_t)
+  {
+    LOCK(weakParent, parent);
+
+    parent->forceRecalculation = true;
+  };
+
+  width.OnRealPixelSizeChange.AddListener("alert-UIContainer-parent", alertParent);
+  height.OnRealPixelSizeChange.AddListener("alert-UIContainer-parent", alertParent);
+  margin.OnRealPixelSizeChange.AddListener("alert-UIContainer-parent", [alertParent]()
+                                           { alertParent(0, 0); });
+  //  Padding size change is already included in width and height
+
   if (IsCanvasRoot() == false)
   {
     // Treat no parent as child of canvas root
@@ -25,9 +39,18 @@ UIObject::UIObject(Canvas &canvas, string name, std::shared_ptr<UIContainer> par
 
 UIObject::~UIObject() {}
 
-Vector2 UIObject::GetPosition() { return updatedPosition; }
+Vector2 UIObject::GetPosition()
+{
+  if (IsCanvasRoot())
+    return localPosition;
 
-UIDimension &UIObject::GetSize(UIDimension::Axis axis) { return axis == UIDimension::Horizontal ? width : height; }
+  return Lock(weakParent)->GetPosition() + localPosition;
+}
+
+UIDimension &UIObject::GetSize(UIDimension::Axis axis)
+{
+  return axis == UIDimension::Horizontal ? width : height;
+}
 
 // If there is no root, then this object must be the root under construction
 bool UIObject::IsCanvasRoot() const { return (canvas.root == nullptr) || (canvas.root->id == id); }
@@ -57,8 +80,13 @@ void UIObject::SetParent(shared_ptr<UIContainer> newParent)
 
   // If not canvas root
   if (IsCanvasRoot() == false)
+  {
+    // Get arrange order for this parent
+    arrangeOrder = newParent->arrangeOrderGenerator++;
+
     // Give parent a reference to self
     newParent->children[id] = GetShared();
+  }
 }
 
 bool UIObject::IsDescendantOf(shared_ptr<UIContainer> other) const
@@ -170,6 +198,9 @@ auto UIObject::UnlinkParent() -> std::unordered_map<int, std::weak_ptr<UIObject>
   // Get parent
   auto parent = GetParent();
 
+  // Warn it to recalculate children box
+  parent->forceRecalculation = true;
+
   // Get own iterator
   auto iterator = parent->children.find(id);
 
@@ -198,4 +229,39 @@ void UIObject::InitializeDimensions()
   height.SetOwner(GetShared());
   padding.SetOwner(GetShared());
   margin.SetOwner(GetShared());
+}
+
+size_t UIObject::GetRealPixelsAlong(UIDimension::Axis axis, bool includeMargin)
+{
+  size_t marginBonus{0};
+
+  if (includeMargin)
+    marginBonus = UIDimension::Horizontal
+                      ? margin.left.AsRealPixels() + margin.right.AsRealPixels()
+                      : margin.top.AsRealPixels() + margin.bottom.AsRealPixels();
+
+  return GetSize(axis).AsRealPixels() + marginBonus;
+}
+
+void UIObject::SetLocalPositionAlong(UIDimension::Axis axis, size_t mainSize, size_t crossSize)
+{
+  if (axis == UIDimension::Horizontal)
+  {
+    localPosition.x = float(mainSize);
+    localPosition.y = float(crossSize);
+  }
+  else
+  {
+    localPosition.y = float(mainSize);
+    localPosition.x = float(crossSize);
+  }
+  cout << "Setting " << *this << " to x: " << localPosition.x << ", y: " << localPosition.y << endl;
+}
+
+void UIObject::PrecalculateDimensions()
+{
+  width.PrecalculateDefault();
+  height.PrecalculateDefault();
+  margin.PrecalculateDefault();
+  padding.PrecalculateDefault();
 }

@@ -142,13 +142,13 @@ WORLD_UI_OBJS = $(patsubst %,$(WORLD_UI_OBJECT_DIRECTORY)\\%,$(_WORLD_UI_OBJS))
 # === UI
 
 # Header files
-_UI_DEPS = UIText.h UIComponent.h UIContainer.h UIContent.h UIDimension.h UIObject.h UIImage.h UIInheritable.h
+_UI_DEPS = UIText.h UIComponent.h UIContainer.h UIContent.h UIDimension.h UIObject.h UIImage.h UIInheritable.h UIChildrenBox.h
 
 # Generate header filepaths
 UI_DEPS = $(patsubst %,$(UI_INCLUDE_DIRECTORY)\\%,$(_UI_DEPS))
 
 # Object files
-_UI_OBJS = UIText.o UIComponent.o UIContainer.o UIContent.o UIDimension.o UIObject.o UIImage.o
+_UI_OBJS = UIText.o UIComponent.o UIContainer.o UIContent.o UIDimension.o UIObject.o UIImage.o UIChildrenBox.o
 
 # Generate object filepaths
 UI_OBJS = $(patsubst %,$(UI_OBJECT_DIRECTORY)\\%,$(_UI_OBJS))

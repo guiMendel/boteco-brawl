@@ -10,7 +10,9 @@ Canvas::Canvas(GameObject &associatedObject, Space space, Vector2 size)
       size(size),
       root(GetScene()->NewObject<UIContainer>(*this, "UIRoot", nullptr))
 {
+  // Initialize root
   InitializeRootStyle();
+  root->InitializeDimensions();
 }
 
 Canvas::~Canvas()

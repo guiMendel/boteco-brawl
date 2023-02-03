@@ -2,8 +2,25 @@
 
 using namespace std;
 
-UIContainer::UIContainer(Canvas &canvas, string name, shared_ptr<UIContainer> parent)
-    : UIObject(canvas, name, parent) {}
+size_t UIFlexboxProperties::GetHash() const
+{
+  // Dont' take reverse into consideration, as it doesn't affect the content box calculation
+  return size_t(mainAxis);
+}
+
+UIContainer::UIContainer(
+    Canvas &canvas,
+    string name,
+    shared_ptr<UIContainer> parent,
+    UIFlexboxProperties properties)
+    : UIObject(canvas, name, parent),
+      properties(properties),
+      lastPropertiesHash(properties.GetHash()) {}
+
+void UIContainer::Awake()
+{
+  childrenBox.SetOwner(GetShared());
+}
 
 void UIContainer::CascadeDown(function<void(GameObject &)> callback, bool topDown)
 {
@@ -56,4 +73,72 @@ auto UIContainer::DestroySelf() -> unordered_map<int, weak_ptr<UIObject>>::itera
   }
 
   return UIObject::DestroySelf();
+}
+
+void UIContainer::RecalculateChildrenBox()
+{
+  // Perform recalculation
+  childrenBox.Recalculate();
+
+  // Update children's positions
+  childrenBox.RepositionChildren();
+}
+
+UIFlexboxProperties &UIContainer::Flexbox()
+{
+  checkPropertyChange = true;
+  return properties;
+}
+
+void UIContainer::Update(float deltaTime)
+{
+  // For root's update
+  if (IsCanvasRoot())
+  {
+    // Precalculate the dimensions of the whole tree
+    auto precalculate = [](GameObject &object)
+    {
+      auto shared = object.GetScene()->RequireUIObject<UIObject>(object.id);
+
+      shared->PrecalculateDimensions();
+    };
+
+    // Run through tree bottom up
+    CascadeDown(precalculate, false);
+  }
+
+  // Detect if recalculation of children box is necessary
+  DetectRecalculation();
+}
+
+void UIContainer::DetectRecalculation()
+{
+  if (
+      // Either force is toggled
+      forceRecalculation ||
+      // Or properties have changed
+      (checkPropertyChange && lastPropertiesHash != properties.GetHash()))
+  {
+    RecalculateChildrenBox();
+    checkPropertyChange = false;
+    lastPropertiesHash = properties.GetHash();
+    forceRecalculation = false;
+  }
+}
+
+vector<shared_ptr<UIObject>> UIContainer::GetChildren()
+{
+  // Get children
+  auto children = Parent::GetChildren();
+
+  // Must return true iff first parameter comes before second parameter
+  auto comparer = [](shared_ptr<UIObject> object1, shared_ptr<UIObject> object2)
+  {
+    return object1->arrangeOrder < object2->arrangeOrder;
+  };
+
+  // Sort them
+  sort(children.begin(), children.end(), comparer);
+
+  return children;
 }

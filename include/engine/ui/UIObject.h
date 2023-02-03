@@ -31,10 +31,20 @@ public:
   // Returns the real pixel displacement between the top-left of the Canvas and this object's top-left
   Vector2 GetPosition() override;
 
-  // Width of the object
+  // Gets either width or height, depending on the provided axis
+  // Second argument tells whether to include margin
+  UIDimension &GetSize(UIDimension::Axis axis);
+
+  // Gets real pixel size along an axis
+  size_t GetRealPixelsAlong(UIDimension::Axis axis, bool includeMargin = false);
+
+  // Set local position, where the first value is along the given axis and the second is along the other axis
+  void SetLocalPositionAlong(UIDimension::Axis axis, size_t mainSize, size_t crossSize);
+
+  // Width of the object (padding + content)
   UIDimension width;
 
-  // Height of the object
+  // Height of the object (padding + content)
   UIDimension height;
 
   // Minimum space between this object's edges and it's content box
@@ -47,14 +57,14 @@ public:
   std::unique_ptr<UIInheritable> style;
 
 private:
-  // Gets either width or height, depending on the provided axis
-  UIDimension &GetSize(UIDimension::Axis axis);
-
   // Gives all dimensions this object's shared pointer
   void InitializeDimensions();
 
-  // Last calculated value of position in real pixels
-  Vector2 updatedPosition;
+  // Precalculates the dimensions real pixel values for this frame
+  void PrecalculateDimensions();
+
+  // The real pixel displacement between the top-left of the parent and this object's top-left
+  Vector2 localPosition;
 
   // =================================
   // OBJECTS HIERARCHY
@@ -75,6 +85,9 @@ public:
   // Check if either object is a descendent of each other
   static bool SameLineage(
       std::shared_ptr<UIObject> first, std::shared_ptr<UIObject> second);
+
+  // Arrangement order priority within parent container
+  size_t arrangeOrder{0};
 
 protected:
   void InternalSetParent(std::shared_ptr<GameObject> newParent) override;

@@ -16,7 +16,7 @@ class Parent : virtual public ComponentOwner
   // OBJECT HIERARCHY
   // =================================
 public:
-  std::vector<std::shared_ptr<ChildClass>> GetChildren() { return Helper::WeakMapToVector(children); }
+  virtual std::vector<std::shared_ptr<ChildClass>> GetChildren() { return Helper::WeakMapToVector(children); }
 
   std::shared_ptr<ChildClass> GetChild(std::string name)
   {

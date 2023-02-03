@@ -2,11 +2,17 @@
 #define __UI_DIMENSION__
 
 #include <memory>
+#include "Event.h"
+#include "Helper.h"
 
 class UIObject;
+class UIDirectedDimension;
 
 class UIDimension
 {
+  friend class UIDirectedDimension;
+  friend class UIObject;
+
 public:
   // Defines the possible axis for a dimension
   enum Axis
@@ -29,25 +35,29 @@ public:
     // Percent
   };
 
+  // Raised when the real pixel size of this dimensions changes
+  // Provides new and old values for the size
+  EventII<size_t, size_t> OnRealPixelSizeChange;
+
   // Default constructor
   UIDimension(Axis axis);
 
   virtual ~UIDimension() {}
 
-  // Sets the owner
-  void SetOwner(std::shared_ptr<UIObject> weakOwner);
-
   // Set a new value for this dimension
   void Set(UnitType type, float value = 0);
 
   // Get this dimensions specifically as real pixels
-  size_t AsRealPixels() const;
+  size_t AsRealPixels();
 
   // Get this dimension in the specified type
-  float As(UnitType requestedType) const;
+  float As(UnitType requestedType);
 
   // Axis of this dimension
   const Axis axis;
+
+  // Returns the opposite axis
+  static Axis GetCrossAxis(Axis axis);
 
 private:
   // Defines compatible configurations for the calculation of dimensions
@@ -63,10 +73,26 @@ private:
 
   // Get this dimensions specifically as real pixels
   // Allows configuring how calculation is done
-  size_t AsRealPixels(Calculation configuration) const;
+  size_t AsRealPixels(Calculation configuration);
 
   // Converts a value in real pixels to the requested value
   float RealPixelsTo(size_t valuePixels, UnitType requestedType) const;
+
+  // Sets the owner
+  void SetOwner(std::shared_ptr<UIObject> weakOwner);
+
+  // Calculates dimension in real pixels
+  size_t CalculateRealPixelSize(Calculation configuration) const;
+
+  // Calculates and stores real pixel size with default configuration
+  // Raises event if size change is detected from last calculation
+  void PrecalculateDefault();
+
+  // Last calculated real pixel size
+  size_t lastRealPixelSize{0};
+
+  // Frame in which lastRealPixelSize was calculated
+  unsigned long precalculationFrame{0};
 
   // Internal dimension's value
   float value{0};
@@ -81,10 +107,15 @@ private:
 // Defines a kind of dimension that has 4 values, directed towards the top, right, bottom or left
 struct UIDirectedDimension
 {
+  friend class UIObject;
+
   UIDimension top;
   UIDimension right;
   UIDimension bottom;
   UIDimension left;
+
+  // Raised when the real pixel size of one of the dimensions changes
+  Event OnRealPixelSizeChange;
 
   UIDirectedDimension();
 
@@ -97,10 +128,13 @@ struct UIDirectedDimension
   // Sets value for vertical directions
   void SetVertical(UIDimension::UnitType type, float value = 0);
 
+private:
   // Sets the owner
   void SetOwner(std::shared_ptr<UIObject> weakOwner);
-};
 
-#include "UIObject.h"
+  // Calculates and stores real pixel size with default configuration
+  // Raises event if size change is detected from last calculation
+  void PrecalculateDefault();
+};
 
 #endif

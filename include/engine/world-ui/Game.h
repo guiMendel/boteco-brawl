@@ -31,6 +31,9 @@ public:
   // Default pixels per unit
   static const int defaultVirtualPixelsPerUnit;
 
+  // Path to engine's default font
+  static const std::string defaultFontPath;
+
   // === FUNCTIONS
 
   // Gets the game instance if it exists or creates one if it doesn't
@@ -62,8 +65,11 @@ public:
   // Explicit destructor
   virtual ~Game();
 
-  // Path to engine's default font
-  static const std::string defaultFontPath;
+  // How many frames have elapsed
+  static unsigned long currentFrame;
+
+  // How many physics frames have elapsed
+  static unsigned long currentPhysicsFrame;
 
 private:
   // Singleton constructor
