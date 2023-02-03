@@ -19,7 +19,7 @@ Canvas::~Canvas()
 {
 }
 
-Vector2 Canvas::GetTopLeft() const
+Vector2 Canvas::GetAnchorPosition() const
 {
   switch (space)
   {
@@ -27,10 +27,10 @@ Vector2 Canvas::GetTopLeft() const
     return Camera::GetMain()->ScreenToWorld({0, 0});
 
   case Space::WorldFixedSize:
-    return gameObject.GetPosition() - Camera::GetMain()->GetUnitsPerRealPixel() * size / 2;
+    return gameObject.GetPosition() - Camera::GetMain()->GetUnitsPerRealPixel() * size * anchorPoint;
 
   case Space::World:
-    return gameObject.GetPosition() - size / 2;
+    return gameObject.GetPosition() - size * anchorPoint;
   }
 
   throw runtime_error("ERROR: Unrecognized canvas space");
@@ -38,22 +38,22 @@ Vector2 Canvas::GetTopLeft() const
 
 Vector2 Canvas::CanvasToWorld(Vector2 position, shared_ptr<Camera> camera) const
 {
-  return GetTopLeft() + position * camera->GetUnitsPerRealPixel();
+  return GetAnchorPosition() + position * camera->GetUnitsPerRealPixel();
 }
 
 Vector2 Canvas::WorldToCanvas(Vector2 position, shared_ptr<Camera> camera) const
 {
-  return (position - GetTopLeft()) * camera->GetRealPixelsPerUnit();
+  return (position - GetAnchorPosition()) * camera->GetRealPixelsPerUnit();
 }
 
 Vector2 Canvas::CanvasToScreen(Vector2 position, shared_ptr<Camera> camera) const
 {
-  return camera->WorldToScreen(GetTopLeft()) + position;
+  return camera->WorldToScreen(GetAnchorPosition()) + position;
 }
 
 Vector2 Canvas::ScreenToCanvas(Vector2 position, shared_ptr<Camera> camera) const
 {
-  return position - camera->WorldToScreen(GetTopLeft());
+  return position - camera->WorldToScreen(GetAnchorPosition());
 }
 
 void Canvas::CascadeDown(function<void(GameObject &)> callback, bool topDown)
@@ -79,10 +79,6 @@ void Canvas::Render()
 {
   auto camera = Camera::GetMain();
 
-  Vector2 position = space == Space::World
-                         ? camera->ScreenToWorld({Game::screenWidth / 2.0f, Game::screenHeight / 2.0f})
-                         : gameObject.GetPosition();
-
   Vector2 drawSize;
 
   if (space == Space::World)
@@ -91,6 +87,19 @@ void Canvas::Render()
     drawSize = size * camera->GetUnitsPerRealPixel();
   else
     drawSize = size;
+
+  Vector2 position;
+
+  if (space == Space::Global)
+    position = camera->ScreenToWorld({Game::screenWidth / 2.0f, Game::screenHeight / 2.0f});
+  else
+  {
+    Vector2 anchorDisplacement{
+        Lerp(-size.x / 2, size.x / 2, anchorPoint.x),
+        Lerp(-size.y / 2, size.y / 2, anchorPoint.y)};
+
+    position = gameObject.GetPosition() + anchorDisplacement;
+  }
 
   auto color = Color::Cyan();
   color.alpha = 70;

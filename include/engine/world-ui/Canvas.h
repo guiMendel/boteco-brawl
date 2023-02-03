@@ -61,6 +61,11 @@ public:
   // Ignored when Global space, in real pixels when WorldFixedSize space, and in world units when World space
   Vector2 size;
 
+  // Defines the point inside the canvas that will be displayed at it's position
+  // Ignored on global canvas type
+  // Values be in range [0, 1]
+  Vector2 anchorPoint{0.5, 0.5};
+
   // The root UI Object
   std::shared_ptr<UIContainer> root;
 
@@ -68,8 +73,8 @@ public:
   void Render() override;
 
 private:
-  // Get top-left position of the canvas in world units
-  Vector2 GetTopLeft() const;
+  // Get position of the anchor point in world units
+  Vector2 GetAnchorPosition() const;
 
   // Initialize the inheritable properties of the root object
   void InitializeRootStyle();
@@ -83,7 +88,7 @@ private:
 
     // Initialize it's dimensions
     newObject->InitializeDimensions();
-    
+
     return newObject;
   }
 };

@@ -207,6 +207,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // Give it a canvas
     auto canvas = display->AddComponent<Canvas>(Canvas::Space::WorldFixedSize, Vector2{35, 50});
+    canvas->anchorPoint = {0.5, 1};
 
     // Give this UI a container
     auto container = canvas->AddChild<UIContainer>("BadgeContainer");
