@@ -71,7 +71,7 @@ private:
   Vector2 targetPosition;
 
   // Size to change camera to
-  float targetSize;
+  float targetSize{5};
 
   // Current velocity
   Vector2 velocity;
@@ -86,10 +86,10 @@ private:
   float currentlyUnframedSpace{0};
 
   // Aspect ratio of arena
-  float arenaAspectRatio;
+  float arenaAspectRatio{1};
 
   // Max size of camera, dictated by arena size
-  float maxSize;
+  float maxSize{std::numeric_limits<float>::max()};
 
   std::weak_ptr<Camera> weakCamera;
   std::weak_ptr<Arena> weakArena;

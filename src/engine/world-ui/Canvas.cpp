@@ -95,10 +95,10 @@ void Canvas::Render()
   else
   {
     Vector2 anchorDisplacement{
-        Lerp(-size.x / 2, size.x / 2, anchorPoint.x),
-        Lerp(-size.y / 2, size.y / 2, anchorPoint.y)};
+        Lerp(-drawSize.x / 2, drawSize.x / 2, anchorPoint.x),
+        Lerp(-drawSize.y / 2, drawSize.y / 2, anchorPoint.y)};
 
-    position = gameObject.GetPosition() + anchorDisplacement;
+    position = gameObject.GetPosition() - anchorDisplacement;
   }
 
   auto color = Color::Cyan();

@@ -70,14 +70,14 @@ void CameraBehavior::Update(float deltaTime)
   LOCK(weakCamera, camera);
 
   // Calculate new targets
-  // UpdateTargets();
+  UpdateTargets();
 
-  // // Move camera position and size towards targets
-  // ApplyTargetPosition(deltaTime);
-  // ApplyTargetSize(deltaTime);
+  // Move camera position and size towards targets
+  ApplyTargetPosition(deltaTime);
+  ApplyTargetSize(deltaTime);
 
-  // // Adjust values to ensure camera is valid
-  // SetPosition(ConfineToArena(worldObject.GetPosition(), camera->GetSize()));
+  // Adjust values to ensure camera is valid
+  SetPosition(ConfineToArena(worldObject.GetPosition(), camera->GetSize()));
 }
 
 void CameraBehavior::UpdateTargets()

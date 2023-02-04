@@ -206,7 +206,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     auto display = character->CreateChild(CHARACTER_UI_OBJECT, {0, -collider->GetBox().height / 2 - 0.2f});
 
     // Give it a canvas
-    auto canvas = display->AddComponent<Canvas>(Canvas::Space::WorldFixedSize, Vector2{35, 50});
+    auto canvas = display->AddComponent<Canvas>(Canvas::Space::WorldFixedSize, Vector2{60, 90});
     canvas->anchorPoint = {0.5, 1};
 
     // Give this UI a container
