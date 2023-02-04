@@ -22,7 +22,7 @@ void UIText::Render()
 {
   // Get the real position
   // Offset coordinates to match anchor point
-  Vector2 realPosition{canvas.CanvasToScreen(GetPosition())};
+  Vector2 realPosition{canvas.CanvasToScreen(GetContentPosition())};
 
   SDL_Rect destinationRect{int(realPosition.x), int(realPosition.y), pixelWidth, pixelHeight};
 

@@ -6,13 +6,14 @@
 
 struct UIFlexboxProperties;
 struct UIContainer;
+class UIChildrenBox;
 
 // One main axis aligned group where the children within which the children will actually be distributed
 struct UIChildrenGroup
 {
   using ChildIterator = std::vector<std::shared_ptr<UIObject>>::iterator;
 
-  UIChildrenGroup(UIDimension::Axis mainAxis);
+  UIChildrenGroup(UIChildrenBox &box);
 
   // Course through the given iterator as long as the children still fit in this group
   // Update the group with the allocated children
@@ -32,8 +33,8 @@ struct UIChildrenGroup
   std::vector<size_t> childrenPositions{};
 
 private:
-  UIDimension::Axis mainAxis;
-  UIDimension::Axis crossAxis;
+  // Reference to owner box
+  UIChildrenBox &box;
 };
 
 // An abstract representation of the box that bounds a UI Container's children, which holds all groups with children
@@ -48,6 +49,8 @@ public:
 
   // Reposition the owner's children according to the current value of this box
   void RepositionChildren();
+
+  std::shared_ptr<UIContainer> GetOwner() const;
 
 private:
   // Real pixel size of the box along the container's main axis

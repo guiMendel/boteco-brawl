@@ -31,15 +31,22 @@ public:
   // Returns the real pixel displacement between the top-left of the Canvas and this object's top-left
   Vector2 GetPosition() override;
 
+  // Returns top-left position after counting in the padding
+  Vector2 GetContentPosition();
+
   // Gets either width or height, depending on the provided axis
   // Second argument tells whether to include margin
-  UIDimension &GetSize(UIDimension::Axis axis);
+  UIDimension &GetDimension(UIDimension::Axis axis);
 
-  // Gets real pixel size along an axis
+  // Gets real pixel size along an axis (size + padding [and possibly + margin])
   size_t GetRealPixelsAlong(UIDimension::Axis axis, bool includeMargin = false);
 
   // Set local position, where the first value is along the given axis and the second is along the other axis
   void SetLocalPositionAlong(UIDimension::Axis axis, size_t mainSize, size_t crossSize);
+
+  size_t GetPaddedWidth();
+
+  size_t GetPaddedHeight();
 
   // Width of the object (padding + content)
   UIDimension width;
@@ -48,20 +55,20 @@ public:
   UIDimension height;
 
   // Minimum space between this object's edges and it's content box
-  UIDirectedDimension padding;
+  UIDimension4 padding;
 
   // Minimum space between this object's edges and anything else on the outside
-  UIDirectedDimension margin;
+  UIDimension4 margin;
 
   // Defines all properties of the object that can be inherited from it's parent
   std::unique_ptr<UIInheritable> style;
 
 private:
   // Gives all dimensions this object's shared pointer
-  void InitializeDimensions();
+  virtual void InitializeDimensions();
 
   // Precalculates the dimensions real pixel values for this frame
-  void PrecalculateDimensions();
+  virtual void PrecalculateDimensions();
 
   // The real pixel displacement between the top-left of the parent and this object's top-left
   Vector2 localPosition;

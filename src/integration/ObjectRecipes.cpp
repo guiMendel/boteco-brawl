@@ -213,10 +213,12 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     auto container = canvas->AddChild<UIContainer>("BadgeContainer");
     container->width.Set(UIDimension::RealPixels, 35);
     container->height.Set(UIDimension::RealPixels, 50);
+    container->padding.Set(UIDimension::RealPixels, 10);
     container->style->textBorderSize.Set(2);
     container->style->imageScaling.Set(10);
     container->style->imageColor.Set(player->GetColor());
     container->Flexbox().mainAxis = UIDimension::Vertical;
+    container->Flexbox().gap.Set(UIDimension::RealPixels, 10);
 
     // TODO: add a default image size scaler to the uiObjects style as inheritable
 
@@ -241,6 +243,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
       auto lifeIcon = Lock(weakLifeContainer)->AddChild<UIImage>("LifeIcon", "./assets/sprites/life.png");
       lifeIcon->width.Set(UIDimension::RealPixels, 20);
       lifeIcon->height.Set(UIDimension::RealPixels, 20);
+      // lifeIcon->margin.Set(UIDimension::RealPixels, 5);
     };
 
     // Add a display manager

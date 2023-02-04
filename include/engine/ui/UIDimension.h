@@ -6,12 +6,17 @@
 #include "Helper.h"
 
 class UIObject;
-class UIDirectedDimension;
+class UIContainer;
+class UIFlexboxProperties;
+class UIDimension2;
+class UIDimension4;
 
 class UIDimension
 {
-  friend class UIDirectedDimension;
+  friend class UIDimension2;
+  friend class UIDimension4;
   friend class UIObject;
+  friend class UIContainer;
 
 public:
   // Defines the possible axis for a dimension
@@ -92,7 +97,7 @@ private:
   size_t lastRealPixelSize{0};
 
   // Frame in which lastRealPixelSize was calculated
-  unsigned long precalculationFrame{0};
+  unsigned long precalculationFrame{std::numeric_limits<long>::max()};
 
   // Internal dimension's value
   float value{0};
@@ -104,8 +109,34 @@ private:
   std::weak_ptr<UIObject> weakOwner;
 };
 
+// Defines a kind of dimension that has 2 values, horizontal and vertical
+struct UIDimension2
+{
+  friend class UIObject;
+  friend class UIFlexboxProperties;
+
+  UIDimension x;
+  UIDimension y;
+
+  UIDimension2();
+
+  // Sets value for all directions
+  void Set(UIDimension::UnitType type, float value = 0);
+
+  // Get value of an axis
+  UIDimension &Along(UIDimension::Axis axis);
+
+private:
+  // Sets the owner
+  void SetOwner(std::shared_ptr<UIObject> owner);
+
+  // Calculates and stores real pixel size with default configuration
+  // Raises event if size change is detected from last calculation
+  void PrecalculateDefault();
+};
+
 // Defines a kind of dimension that has 4 values, directed towards the top, right, bottom or left
-struct UIDirectedDimension
+struct UIDimension4
 {
   friend class UIObject;
 
@@ -117,7 +148,7 @@ struct UIDirectedDimension
   // Raised when the real pixel size of one of the dimensions changes
   Event OnRealPixelSizeChange;
 
-  UIDirectedDimension();
+  UIDimension4();
 
   // Sets value for all directions
   void Set(UIDimension::UnitType type, float value = 0);
@@ -127,6 +158,12 @@ struct UIDirectedDimension
 
   // Sets value for vertical directions
   void SetVertical(UIDimension::UnitType type, float value = 0);
+
+  // Get values along an axis (top and left come first)
+  std::pair<UIDimension &, UIDimension &> Along(UIDimension::Axis axis);
+
+  // Get summed real pixel values along an axis
+  size_t SumAlong(UIDimension::Axis axis);
 
 private:
   // Sets the owner

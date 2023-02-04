@@ -8,6 +8,8 @@ size_t UIFlexboxProperties::GetHash() const
   return size_t(mainAxis);
 }
 
+void UIFlexboxProperties::SetOwner(std::shared_ptr<UIObject> owner) { gap.SetOwner(owner); }
+
 UIContainer::UIContainer(
     Canvas &canvas,
     string name,
@@ -90,7 +92,7 @@ UIFlexboxProperties &UIContainer::Flexbox()
   return properties;
 }
 
-void UIContainer::Update(float deltaTime)
+void UIContainer::Update(float)
 {
   // For root's update
   if (IsCanvasRoot())
@@ -131,9 +133,15 @@ vector<shared_ptr<UIObject>> UIContainer::GetChildren()
   // Get children
   auto children = Parent::GetChildren();
 
+  // Whether to revert order
+  bool revert = properties.reverseDirection;
+
   // Must return true iff first parameter comes before second parameter
-  auto comparer = [](shared_ptr<UIObject> object1, shared_ptr<UIObject> object2)
+  auto comparer = [revert](shared_ptr<UIObject> object1, shared_ptr<UIObject> object2)
   {
+    if (revert)
+      return object1->arrangeOrder > object2->arrangeOrder;
+
     return object1->arrangeOrder < object2->arrangeOrder;
   };
 
@@ -141,4 +149,19 @@ vector<shared_ptr<UIObject>> UIContainer::GetChildren()
   sort(children.begin(), children.end(), comparer);
 
   return children;
+}
+
+void UIContainer::InitializeDimensions()
+{
+  UIObject::InitializeDimensions();
+
+  properties.SetOwner(GetShared());
+}
+
+void UIContainer::PrecalculateDimensions()
+{
+  UIObject::PrecalculateDimensions();
+
+  properties.gap.x.PrecalculateDefault();
+  properties.gap.y.PrecalculateDefault();
 }

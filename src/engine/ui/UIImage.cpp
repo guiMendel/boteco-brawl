@@ -46,7 +46,7 @@ void UIImage::Render()
   size_t targetHeight = height.AsRealPixels();
 
   auto camera = Camera::GetMain();
-  auto pixelPosition = canvas.CanvasToScreen(GetPosition());
+  auto pixelPosition = canvas.CanvasToScreen(GetContentPosition());
 
   SDL_Rect destinationRect = {int(pixelPosition.x), int(pixelPosition.y), int(targetWidth), int(targetHeight)};
   SDL_Rect sourceRect = {0, 0, textureWidth, textureHeight};

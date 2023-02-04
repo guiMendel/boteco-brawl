@@ -11,8 +11,14 @@ struct UIFlexboxProperties
   // Gets a hash to identify this configuration set
   size_t GetHash() const;
 
+  // Sets dimensions owners
+  void SetOwner(std::shared_ptr<UIObject> owner);
+
   // Defines the main axis of the flexbox
   UIDimension::Axis mainAxis{UIDimension::Horizontal};
+
+  // Minimum empty space between container's items
+  UIDimension2 gap;
 
   // Whether to revert render direction within the box's groups
   bool reverseDirection{false};
@@ -37,6 +43,14 @@ public:
 
   void Awake() override;
   void Update(float) override;
+
+  // =================================
+  // OBJECT PROPERTIES
+  // =================================
+private:
+  void InitializeDimensions() override;
+
+  void PrecalculateDimensions() override;
 
   // =================================
   // OBJECTS HIERARCHY

@@ -44,10 +44,15 @@ Vector2 UIObject::GetPosition()
   if (IsCanvasRoot())
     return localPosition;
 
-  return Lock(weakParent)->GetPosition() + localPosition;
+  return Lock(weakParent)->GetContentPosition() + localPosition;
 }
 
-UIDimension &UIObject::GetSize(UIDimension::Axis axis)
+Vector2 UIObject::GetContentPosition()
+{
+  return GetPosition() + Vector2{float(padding.left.AsRealPixels()), float(padding.top.AsRealPixels())};
+}
+
+UIDimension &UIObject::GetDimension(UIDimension::Axis axis)
 {
   return axis == UIDimension::Horizontal ? width : height;
 }
@@ -162,8 +167,8 @@ void UIObject::Render()
   Debug::DrawBox(Rectangle(
                      Rectangle::TopLeftInitialize,
                      canvas.CanvasToWorld(GetPosition()),
-                     width.AsRealPixels() * camera->GetUnitsPerRealPixel(),
-                     height.AsRealPixels() * camera->GetUnitsPerRealPixel()),
+                     GetPaddedWidth() * camera->GetUnitsPerRealPixel(),
+                     GetPaddedHeight() * camera->GetUnitsPerRealPixel()),
                  color);
 }
 
@@ -233,14 +238,14 @@ void UIObject::InitializeDimensions()
 
 size_t UIObject::GetRealPixelsAlong(UIDimension::Axis axis, bool includeMargin)
 {
-  size_t marginBonus{0};
+  // Add padding
+  size_t bonus = padding.SumAlong(axis);
 
+  // Add margin
   if (includeMargin)
-    marginBonus = UIDimension::Horizontal
-                      ? margin.left.AsRealPixels() + margin.right.AsRealPixels()
-                      : margin.top.AsRealPixels() + margin.bottom.AsRealPixels();
+    bonus += margin.SumAlong(axis);
 
-  return GetSize(axis).AsRealPixels() + marginBonus;
+  return GetDimension(axis).AsRealPixels() + bonus;
 }
 
 void UIObject::SetLocalPositionAlong(UIDimension::Axis axis, size_t mainSize, size_t crossSize)
@@ -265,3 +270,7 @@ void UIObject::PrecalculateDimensions()
   margin.PrecalculateDefault();
   padding.PrecalculateDefault();
 }
+
+size_t UIObject::GetPaddedWidth() { return width.AsRealPixels() + padding.SumAlong(UIDimension::Horizontal); }
+
+size_t UIObject::GetPaddedHeight() { return height.AsRealPixels() + padding.SumAlong(UIDimension::Vertical); }

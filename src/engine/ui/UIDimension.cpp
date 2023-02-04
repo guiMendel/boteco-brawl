@@ -4,7 +4,7 @@
 using namespace std;
 using namespace Helper;
 
-UIDirectedDimension::UIDirectedDimension()
+UIDimension4::UIDimension4()
     : top(UIDimension::Vertical),
       right(UIDimension::Horizontal),
       bottom(UIDimension::Vertical),
@@ -21,27 +21,29 @@ UIDirectedDimension::UIDirectedDimension()
   left.OnRealPixelSizeChange.AddListener("directed-dimension", raiseOwn);
 }
 
-void UIDirectedDimension::Set(UIDimension::UnitType type, float value)
+void UIDimension4::Set(UIDimension::UnitType type, float value)
 {
   top.Set(type, value);
   right.Set(type, value);
   bottom.Set(type, value);
   left.Set(type, value);
+
+  cout << "top and left: " << top.AsRealPixels() << ", " << left.AsRealPixels() << endl;
 }
 
-void UIDirectedDimension::SetHorizontal(UIDimension::UnitType type, float value)
+void UIDimension4::SetHorizontal(UIDimension::UnitType type, float value)
 {
   right.Set(type, value);
   left.Set(type, value);
 }
 
-void UIDirectedDimension::SetVertical(UIDimension::UnitType type, float value)
+void UIDimension4::SetVertical(UIDimension::UnitType type, float value)
 {
   top.Set(type, value);
   bottom.Set(type, value);
 }
 
-void UIDirectedDimension::SetOwner(std::shared_ptr<UIObject> owner)
+void UIDimension4::SetOwner(std::shared_ptr<UIObject> owner)
 {
   top.SetOwner(owner);
   right.SetOwner(owner);
@@ -49,12 +51,55 @@ void UIDirectedDimension::SetOwner(std::shared_ptr<UIObject> owner)
   left.SetOwner(owner);
 }
 
-void UIDirectedDimension::PrecalculateDefault()
+void UIDimension4::PrecalculateDefault()
 {
   top.PrecalculateDefault();
   right.PrecalculateDefault();
   bottom.PrecalculateDefault();
   left.PrecalculateDefault();
+}
+
+std::pair<UIDimension &, UIDimension &> UIDimension4::Along(UIDimension::Axis axis)
+{
+  if (axis == UIDimension::Horizontal)
+    return {left, right};
+
+  return {top, bottom};
+}
+
+size_t UIDimension4::SumAlong(UIDimension::Axis axis)
+{
+  auto margins = Along(axis);
+  return margins.first.AsRealPixels() + margins.second.AsRealPixels();
+}
+
+UIDimension2::UIDimension2()
+    : x(UIDimension::Horizontal),
+      y(UIDimension::Vertical) {}
+
+void UIDimension2::Set(UIDimension::UnitType type, float value)
+{
+  x.Set(type, value);
+  y.Set(type, value);
+
+  cout << "x and y: " << x.AsRealPixels() << ", " << y.AsRealPixels() << endl;
+}
+
+void UIDimension2::SetOwner(std::shared_ptr<UIObject> owner)
+{
+  x.SetOwner(owner);
+  y.SetOwner(owner);
+}
+
+void UIDimension2::PrecalculateDefault()
+{
+  x.PrecalculateDefault();
+  y.PrecalculateDefault();
+}
+
+UIDimension &UIDimension2::Along(UIDimension::Axis axis)
+{
+  return axis == UIDimension::Horizontal ? x : y;
 }
 
 UIDimension::UIDimension(Axis axis) : axis(axis), type(RealPixels) {}
