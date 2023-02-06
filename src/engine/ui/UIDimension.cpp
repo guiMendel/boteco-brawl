@@ -27,8 +27,6 @@ void UIDimension4::Set(UIDimension::UnitType type, float value)
   right.Set(type, value);
   bottom.Set(type, value);
   left.Set(type, value);
-
-  cout << "top and left: " << top.AsRealPixels() << ", " << left.AsRealPixels() << endl;
 }
 
 void UIDimension4::SetHorizontal(UIDimension::UnitType type, float value)
@@ -81,8 +79,6 @@ void UIDimension2::Set(UIDimension::UnitType type, float value)
 {
   x.Set(type, value);
   y.Set(type, value);
-
-  cout << "x and y: " << x.AsRealPixels() << ", " << y.AsRealPixels() << endl;
 }
 
 void UIDimension2::SetOwner(std::shared_ptr<UIObject> owner)
@@ -206,4 +202,13 @@ void UIDimension::PrecalculateDefault()
 
   // Record current frame
   precalculationFrame = Game::currentFrame;
+}
+
+size_t UIDimension::GetHash() const { return HashTwo(size_t(axis), size_t(value * 100)); }
+size_t UIDimension2::GetHash() const { return HashTwo(x.GetHash(), y.GetHash()); }
+size_t UIDimension4::GetHash() const { return HashMany(top.GetHash(), right.GetHash(), bottom.GetHash(), left.GetHash()); }
+
+float UIDimension::VectorAxis(Vector2 vector, Axis axis)
+{
+  return axis == Horizontal ? vector.x : vector.y;
 }

@@ -34,19 +34,19 @@ void UIChildrenGroup::AllocateChild(ChildIterator childIterator)
   auto mainAxis = properties.mainAxis;
   auto crossAxis = UIDimension::GetCrossAxis(mainAxis);
 
-  cout << *box.GetOwner() << " gap: " << properties.gap.Along(mainAxis).AsRealPixels() << endl;
-
   // Get child
   auto child = (*childIterator);
 
+  auto childCrossSize = child->GetRealPixelsAlong(crossAxis, true, true);
+
   // Allocate it to current position
-  childrenPositions.push_back(mainSize);
+  items.push_back({mainSize, childCrossSize});
 
   // Update main size with this object's size + margin + gap
-  mainSize += child->GetRealPixelsAlong(mainAxis, true) + properties.gap.Along(mainAxis).AsRealPixels();
+  mainSize += child->GetRealPixelsAlong(mainAxis, true, true) + properties.gap.Along(mainAxis).AsRealPixels();
 
   // Keep biggest cross size
-  crossSize = max(crossSize, child->GetRealPixelsAlong(crossAxis, true));
+  crossSize = max(crossSize, childCrossSize);
 }
 
 void UIChildrenBox::SetOwner(shared_ptr<UIContainer> owner) { weakOwner = owner; }
@@ -92,12 +92,21 @@ void UIChildrenBox::RepositionChildren()
 {
   LOCK(weakOwner, owner);
 
-  // Get the children
-  auto children = owner->GetChildren();
-
   // Get main axis
   auto mainAxis = owner->properties.mainAxis;
   auto crossAxis = UIDimension::GetCrossAxis(mainAxis);
+
+  // Get children box position relative to container's unpadded size
+  // int mainBoxOffset = 0;
+  // int crossBoxOffset = 0;
+  int mainBoxOffset = owner->GetRealPixelsAlong(mainAxis, false);
+  int crossBoxOffset = owner->GetRealPixelsAlong(crossAxis, false) - crossSize;
+
+  // Get the children
+  auto children = owner->GetChildren();
+
+  // Get item alignment
+  auto alignment = owner->properties.placeItems;
 
   // Get an iterator for the children
   auto childIterator = children.begin();
@@ -108,11 +117,18 @@ void UIChildrenBox::RepositionChildren()
   // For each group
   for (auto &group : groups)
   {
+    // Get group empty space before first item
+    int mainEmptyOffset = int(mainBoxOffset - group.mainSize) * UIDimension::VectorAxis(alignment, mainAxis);
+    // cout << UIDimension::VectorAxis(alignment, mainAxis) << endl;
+
     // For each child position
-    for (size_t mainPosition : group.childrenPositions)
+    for (auto [mainPosition, itemCrossSize] : group.items)
     {
       // Ensure iterator is valid
       Assert(childIterator != children.end(), "UI Children Box found less children than it had expected");
+
+      // Get empty space of item in cross axis
+      int crossEmptyOffset = int(crossBoxOffset + group.crossSize - itemCrossSize) * UIDimension::VectorAxis(alignment, crossAxis);
 
       // Get child
       auto child = *childIterator++;
@@ -122,7 +138,9 @@ void UIChildrenBox::RepositionChildren()
       auto crossMargin = child->margin.Along(crossAxis).first.AsRealPixels();
 
       // Set it's position and increment iterator
-      child->SetLocalPositionAlong(mainAxis, mainPosition + mainMargin, crossPosition + crossMargin);
+      child->SetLocalPositionAlong(mainAxis,
+                                   mainPosition + mainMargin + mainEmptyOffset,
+                                   crossPosition + crossMargin + crossEmptyOffset);
     }
 
     // Increment cross position

@@ -39,10 +39,10 @@ public:
   UIDimension &GetDimension(UIDimension::Axis axis);
 
   // Gets real pixel size along an axis (size + padding [and possibly + margin])
-  size_t GetRealPixelsAlong(UIDimension::Axis axis, bool includeMargin = false);
+  size_t GetRealPixelsAlong(UIDimension::Axis axis, bool includePadding = true, bool includeMargin = false);
 
   // Set local position, where the first value is along the given axis and the second is along the other axis
-  void SetLocalPositionAlong(UIDimension::Axis axis, size_t mainSize, size_t crossSize);
+  void SetLocalPositionAlong(UIDimension::Axis axis, int mainSize, int crossSize);
 
   size_t GetPaddedWidth();
 

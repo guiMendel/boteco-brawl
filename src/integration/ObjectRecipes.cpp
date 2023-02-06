@@ -218,7 +218,8 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     container->style->imageScaling.Set(10);
     container->style->imageColor.Set(player->GetColor());
     container->Flexbox().mainAxis = UIDimension::Vertical;
-    container->Flexbox().gap.Set(UIDimension::RealPixels, 10);
+    container->Flexbox().gap.Set(UIDimension::RealPixels, 5);
+    container->Flexbox().placeItems = {0.5, 0.5};
 
     // TODO: add a default image size scaler to the uiObjects style as inheritable
 
@@ -230,6 +231,8 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     auto lifeContainer = container->AddChild<UIContainer>(CHARACTER_LIFE_OBJECT);
     lifeContainer->width.Set(UIDimension::RealPixels, 40);
     lifeContainer->height.Set(UIDimension::RealPixels, 20);
+    lifeContainer->Flexbox().gap.Set(UIDimension::RealPixels, 6);
+    lifeContainer->Flexbox().placeItems = {0.5, 0.5};
     weak_ptr<UIContainer> weakLifeContainer = lifeContainer;
 
     // Add player indicator

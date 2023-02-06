@@ -29,8 +29,8 @@ struct UIChildrenGroup
   // Real pixel size of the group along the container's cross axis
   size_t crossSize{0};
 
-  // Position of this group's items along the main axis, in real pixels
-  std::vector<size_t> childrenPositions{};
+  // Guards position in main axis & size in cross axis of each item inside this group (real pixels)
+  std::vector<std::pair<size_t, size_t>> items{};
 
 private:
   // Reference to owner box

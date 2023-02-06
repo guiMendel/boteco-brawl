@@ -199,6 +199,15 @@ namespace Helper
   // Apply Szudzik's hash function (https://stackoverflow.com/questions/919612/mapping-two-integers-to-one-in-a-unique-and-deterministic-way)
   size_t HashTwo(size_t a, size_t b);
 
+  template <typename... Args>
+  size_t HashMany(size_t a) { return a; }
+
+  template <typename... Args>
+  size_t HashMany(size_t a, size_t b, Args &&...args)
+  {
+    return HashMany(HashTwo(a, b), std::forward<Args>(args)...);
+  }
+
   // Applies dynamic pointer cast and ensure result is not nullptr
   template <typename T, typename U>
   std::shared_ptr<T> RequirePointerCast(std::shared_ptr<U> targetPointer)

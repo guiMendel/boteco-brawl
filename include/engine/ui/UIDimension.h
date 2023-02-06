@@ -4,6 +4,7 @@
 #include <memory>
 #include "Event.h"
 #include "Helper.h"
+#include "Vector2.h"
 
 class UIObject;
 class UIContainer;
@@ -58,11 +59,17 @@ public:
   // Get this dimension in the specified type
   float As(UnitType requestedType);
 
+  // Returns the opposite axis
+  static Axis GetCrossAxis(Axis axis);
+
+  // Returns the Vector2 value corresponding to the provided axis
+  static float VectorAxis(Vector2 vector, Axis axis);
+
   // Axis of this dimension
   const Axis axis;
 
-  // Returns the opposite axis
-  static Axis GetCrossAxis(Axis axis);
+  // Gets value that uniquely identifies this dimension's configuration
+  size_t GetHash() const;
 
 private:
   // Defines compatible configurations for the calculation of dimensions
@@ -126,6 +133,9 @@ struct UIDimension2
   // Get value of an axis
   UIDimension &Along(UIDimension::Axis axis);
 
+  // Gets value that uniquely identifies this dimension's configuration
+  size_t GetHash() const;
+
 private:
   // Sets the owner
   void SetOwner(std::shared_ptr<UIObject> owner);
@@ -164,6 +174,9 @@ struct UIDimension4
 
   // Get summed real pixel values along an axis
   size_t SumAlong(UIDimension::Axis axis);
+
+  // Gets value that uniquely identifies this dimension's configuration
+  size_t GetHash() const;
 
 private:
   // Sets the owner

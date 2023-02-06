@@ -236,10 +236,13 @@ void UIObject::InitializeDimensions()
   margin.SetOwner(GetShared());
 }
 
-size_t UIObject::GetRealPixelsAlong(UIDimension::Axis axis, bool includeMargin)
+size_t UIObject::GetRealPixelsAlong(UIDimension::Axis axis, bool includePadding, bool includeMargin)
 {
+  size_t bonus{0};
+
   // Add padding
-  size_t bonus = padding.SumAlong(axis);
+  if (includePadding)
+    bonus = padding.SumAlong(axis);
 
   // Add margin
   if (includeMargin)
@@ -248,7 +251,7 @@ size_t UIObject::GetRealPixelsAlong(UIDimension::Axis axis, bool includeMargin)
   return GetDimension(axis).AsRealPixels() + bonus;
 }
 
-void UIObject::SetLocalPositionAlong(UIDimension::Axis axis, size_t mainSize, size_t crossSize)
+void UIObject::SetLocalPositionAlong(UIDimension::Axis axis, int mainSize, int crossSize)
 {
   if (axis == UIDimension::Horizontal)
   {
@@ -260,7 +263,6 @@ void UIObject::SetLocalPositionAlong(UIDimension::Axis axis, size_t mainSize, si
     localPosition.y = float(mainSize);
     localPosition.x = float(crossSize);
   }
-  cout << "Setting " << *this << " to x: " << localPosition.x << ", y: " << localPosition.y << endl;
 }
 
 void UIObject::PrecalculateDimensions()
