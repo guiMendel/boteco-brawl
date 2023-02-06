@@ -42,7 +42,9 @@ public:
   size_t GetRealPixelsAlong(UIDimension::Axis axis, bool includePadding = true, bool includeMargin = false);
 
   // Gets real pixel size along an axis of this object's content (whatever is inside of it)
-  virtual size_t GetContentRealPixelsAlong(UIDimension::Axis axis) = 0;
+  virtual size_t GetContentRealPixelsAlong(
+      UIDimension::Axis axis,
+      UIDimension::Calculation config = UIDimension::Calculation::Default) = 0;
 
   // Set local position, where the first value is along the given axis and the second is along the other axis
   void SetLocalPositionAlong(UIDimension::Axis axis, int mainSize, int crossSize);

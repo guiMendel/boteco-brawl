@@ -77,7 +77,7 @@ void UIImage::ReloadTextureDimensions()
   SDL_QueryTexture(texture.get(), nullptr, nullptr, &textureWidth, &textureHeight);
 }
 
-size_t UIImage::GetContentRealPixelsAlong(UIDimension::Axis axis)
+size_t UIImage::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::Calculation)
 {
   return (axis == UIDimension::Horizontal ? textureWidth : textureHeight) * style->imageScaling.Get();
 }

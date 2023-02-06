@@ -17,7 +17,10 @@ void UIChildrenGroup::AllocateChildren(ChildIterator &childIterator, ChildIterat
 
   // Allocate at least one child
   do
-    AllocateChild(childIterator++);
+  {
+    AllocateChild(childIterator);
+    childIterator = box.FindIndependent(++childIterator, endIterator);
+  }
   while (
       // Check if there are more children
       childIterator != endIterator &&
@@ -96,11 +99,7 @@ void UIChildrenBox::Recalculate()
 
   // Get children iterator
   auto children = owner->GetChildren();
-  auto childIterator = children.begin();
-
-  // Stop if no children
-  if (children.empty())
-    return;
+  auto childIterator = FindIndependent(children.begin(), children.end());
 
   // Construct groups as they are filled
   while (childIterator != children.end())
@@ -188,4 +187,26 @@ size_t UIChildrenBox::GetRealPixelsAlong(UIDimension::Axis axis)
     return mainSize;
   else
     return crossSize;
+}
+
+UIChildrenBox::ChildIterator UIChildrenBox::FindIndependent(ChildIterator childIterator, ChildIterator endIterator)
+{
+  auto mainAxis = Lock(weakOwner)->Flexbox().mainAxis;
+  auto crossAxis = UIDimension::GetCrossAxis(mainAxis);
+
+  auto isDependent = [this, mainAxis, crossAxis](shared_ptr<UIObject> child)
+  {
+    if (ignoreDependentChildrenMain && child->GetDimension(mainAxis).GetType() == UIDimension::Percent)
+      return true;
+
+    if (ignoreDependentChildrenCross && child->GetDimension(crossAxis).GetType() == UIDimension::Percent)
+      return true;
+
+    return false;
+  };
+
+  while (childIterator != endIterator && isDependent(*childIterator))
+    childIterator++;
+
+  return childIterator;
 }

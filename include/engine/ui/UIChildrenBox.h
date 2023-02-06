@@ -43,7 +43,12 @@ private:
 // An abstract representation of the box that bounds a UI Container's children, which holds all groups with children
 class UIChildrenBox
 {
+  friend struct UIContainer;
+  friend struct UIChildrenGroup;
+
 public:
+  using ChildIterator = UIChildrenGroup::ChildIterator;
+
   // Sets the owner of this box
   void SetOwner(std::shared_ptr<UIContainer> owner);
 
@@ -59,11 +64,17 @@ public:
   std::shared_ptr<UIContainer> GetOwner() const;
 
 private:
+  // Returns the next iterator that points to a child that doesn't depend on it's paren't size
+  ChildIterator FindIndependent(ChildIterator childIterator, ChildIterator endIterator);
+
   // Real pixel size of the box along the container's main axis
   size_t mainSize{0};
 
   // Real pixel size of the box along the container's cross axis
   size_t crossSize{0};
+
+  // Whether to ignore owner's children that depend on it's size
+  bool ignoreDependentChildrenMain{false}, ignoreDependentChildrenCross{false};
 
   // All groups which together compose this box
   std::vector<UIChildrenGroup> groups{};

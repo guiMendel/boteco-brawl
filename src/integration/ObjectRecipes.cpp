@@ -206,18 +206,19 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     auto display = character->CreateChild(CHARACTER_UI_OBJECT, {0, -collider->GetBox().height / 2 - 0.2f});
 
     // Give it a canvas
-    auto canvas = display->AddComponent<Canvas>(Canvas::Space::WorldFixedSize, Vector2{60, 90});
+    auto canvas = display->AddComponent<Canvas>(Canvas::Space::WorldFixedSize, Vector2{100, 90});
     canvas->anchorPoint = {0.5, 1};
 
     // Give this UI a container
     auto container = canvas->AddChild<UIContainer>("BadgeContainer");
-    container->padding.Set(UIDimension::RealPixels, 10);
+    container->width.Set(UIDimension::Percent, 100);
+    container->height.Set(UIDimension::Percent, 100);
     container->style->textBorderSize.Set(2);
     container->style->imageScaling.Set(6);
     container->style->imageColor.Set(player->GetColor());
     container->Flexbox().mainAxis = UIDimension::Vertical;
     container->Flexbox().gap.Set(UIDimension::RealPixels, 5);
-    container->Flexbox().placeItems = {0.5, 0.5};
+    container->Flexbox().placeItems = {0.5, 1};
 
     // Add heat text
     auto heatText = container->AddChild<UIText>("HeatDisplay", "0.0");

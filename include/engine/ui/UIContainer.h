@@ -53,7 +53,13 @@ public:
   // =================================
 public:
   // Is the size of the children box
-  size_t GetContentRealPixelsAlong(UIDimension::Axis axis) override;
+  size_t GetContentRealPixelsAlong(
+      UIDimension::Axis axis,
+      UIDimension::Calculation config = UIDimension::Calculation::Default) override;
+
+  // Calculates the size of the children box treating those who depend on this container's size as 0
+  // Returns horizontal size first
+  size_t GetIndependentContentRealPixels(UIDimension::Axis axis, UIDimension::Calculation config) const;
 
 private:
   void InitializeDimensions() override;
@@ -128,7 +134,7 @@ private:
   // UTILITY
   // =================================
 public:
-  std::shared_ptr<UIContainer> GetShared();
+  std::shared_ptr<UIContainer> GetShared() const;
 };
 
 #include "UIInheritable.h"

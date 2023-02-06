@@ -148,7 +148,7 @@ void UIText::RemakeTexture()
 
 string UIText::GetText() { return text; }
 
-size_t UIText::GetContentRealPixelsAlong(UIDimension::Axis axis)
+size_t UIText::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::Calculation)
 {
   return axis == UIDimension::Horizontal ? pixelWidth : pixelHeight;
 }

@@ -47,11 +47,11 @@ public:
     RealPixels,
 
     // World units size
-    WorldUnits
+    WorldUnits,
 
-    // Size that depends on parent's size for this dimension
+    // Size that depends on parent's size for this axis
     // Is calculated based on the parent's size BEFORE it grows on account of children that depend on it's size (such as this one)
-    // Percent
+    Percent
   };
 
   // Raised when the real pixel size of this dimensions changes
@@ -87,18 +87,19 @@ public:
   // Gets value that uniquely identifies this dimension's configuration
   size_t GetHash() const;
 
-private:
   // Defines compatible configurations for the calculation of dimensions
   enum Calculation
   {
     // Default calculation
-    Default = 0b00
+    Default = 0b00,
 
-    // When calculating with a type that depends on the children's sizes of the same dimension,
+    // When calculating with a type that depends on the children's sizes,
     // will consider any children's size that depend on THIS object's size as 0
-    // IgnoreDependentChildren = 0b01
+    IgnoreDependentChildrenX = 0b01,
+    IgnoreDependentChildrenY = 0b10
   };
 
+private:
   // Get this dimensions specifically as real pixels
   // Allows configuring how calculation is done
   size_t AsRealPixels(Calculation configuration);

@@ -54,7 +54,7 @@ shared_ptr<GameObject> UIContainer::InternalGetParent() const
   return GetParent();
 }
 
-shared_ptr<UIContainer> UIContainer::GetShared() { return GetScene()->RequireUIObject<UIContainer>(id); }
+shared_ptr<UIContainer> UIContainer::GetShared() const { return GetScene()->RequireUIObject<UIContainer>(id); }
 
 void UIContainer::InternalDestroy() { DestroySelf(); }
 
@@ -169,7 +169,41 @@ void UIContainer::PrecalculateDimensions()
   properties.gap.y.PrecalculateDefault();
 }
 
-size_t UIContainer::GetContentRealPixelsAlong(UIDimension::Axis axis)
+size_t UIContainer::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::Calculation config)
 {
-  return childrenBox.GetRealPixelsAlong(axis);
+  if (config == UIDimension::Calculation::Default)
+    return childrenBox.GetRealPixelsAlong(axis);
+
+  return GetIndependentContentRealPixels(axis, config);
+}
+
+size_t UIContainer::GetIndependentContentRealPixels(UIDimension::Axis axis, UIDimension::Calculation config) const
+{
+  // Create a children box to calculate separately
+  UIChildrenBox box;
+
+  // Give it a reference to this container
+  box.SetOwner(GetShared());
+
+  // Set it to ignore dependent children
+  if (config & UIDimension::Calculation::IgnoreDependentChildrenX)
+  {
+    if (properties.mainAxis == UIDimension::Horizontal)
+      box.ignoreDependentChildrenMain = true;
+    else
+      box.ignoreDependentChildrenCross = true;
+  }
+  else if (config & UIDimension::Calculation::IgnoreDependentChildrenX)
+  {
+    if (properties.mainAxis == UIDimension::Vertical)
+      box.ignoreDependentChildrenMain = true;
+    else
+      box.ignoreDependentChildrenCross = true;
+  }
+
+  // Calculate the box
+  box.Recalculate();
+
+  // Return it's dimensions
+  return properties.mainAxis == axis ? box.mainSize : box.crossSize;
 }

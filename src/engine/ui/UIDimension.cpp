@@ -185,20 +185,23 @@ size_t UIDimension::CalculateRealPixelSize(Calculation configuration) const
   // Catch content-dependent cases
   if (type == MaxContent || type == MinContent)
   {
-    // Use content size
-    // It will already have been calculated taking into account whether this dimension is max or min
-    return Lock(weakOwner)->GetContentRealPixelsAlong(axis);
+    return Lock(weakOwner)->GetContentRealPixelsAlong(axis, configuration);
   }
 
   // When in percent
-  // if (type == Percent)
-  // {
-  //   // Get owner's parent dimensions, ignoring depending children (such as this one) to avoid a paradox
-  //   float parentSize = Lock(weakOwner)->GetParent()->GetSize(axis).AsRealPixels(configuration | IgnoreDependentChildren);
+  if (type == Percent)
+  {
+    // Get owner's parent dimensions, ignoring depending children (such as this one) to avoid a paradox
+    auto parent = Lock(weakOwner)->GetParent();
+    Calculation ignoreChildren = axis == Horizontal ? IgnoreDependentChildrenX : IgnoreDependentChildrenY;
+    size_t parentSize = parent->GetDimension(axis).AsRealPixels(UIDimension::Calculation(configuration | ignoreChildren));
 
-  //   // Return percentage applied to this size
-  //   return size_t(parentSize * value / 100);
-  // }
+    // Add padding
+    parentSize += parent->padding.SumAlong(axis);
+
+    // Return percentage applied to this size
+    return size_t(float(parentSize) * value / 100);
+  }
 
   // If arrived here we have some error
   throw runtime_error("ERROR: unrecognized UIDimension unit type");
