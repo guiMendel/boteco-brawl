@@ -1,4 +1,5 @@
 #include "UIDimension.h"
+#include "UIObject.h"
 #include "Game.h"
 
 using namespace std;
@@ -98,7 +99,7 @@ UIDimension &UIDimension2::Along(UIDimension::Axis axis)
   return axis == UIDimension::Horizontal ? x : y;
 }
 
-UIDimension::UIDimension(Axis axis) : axis(axis), type(RealPixels) {}
+UIDimension::UIDimension(Axis axis, UnitType initialType) : axis(axis), type(initialType) {}
 
 size_t UIDimension::AsRealPixels() { return AsRealPixels(Default); }
 
@@ -139,6 +140,17 @@ float UIDimension::RealPixelsTo(size_t valuePixels, UnitType requestedType) cons
   if (requestedType == RealPixels)
     return valuePixels;
 
+  // Camera dependent
+  if (requestedType == WorldUnits)
+    return valuePixels * Lock(Lock(weakOwner)->canvas.weakCamera)->GetUnitsPerRealPixel();
+
+  // Catch valueless target types
+  if (requestedType == None || requestedType == MaxContent || requestedType == MinContent)
+  {
+    MESSAGE << "WARNING: tried converting UI Dimensions real pixels to a valueless type" << endl;
+    return 0;
+  }
+
   // If arrived here we have some error
   throw runtime_error("ERROR: unrecognized UIDimension unit type");
 }
@@ -162,6 +174,22 @@ size_t UIDimension::CalculateRealPixelSize(Calculation configuration) const
   if (type == RealPixels)
     return value;
 
+  // Catch happy case
+  if (type == None)
+    return 0;
+
+  // Camera dependent
+  if (type == WorldUnits)
+    return value * Lock(Lock(weakOwner)->canvas.weakCamera)->GetRealPixelsPerUnit();
+
+  // Catch content-dependent cases
+  if (type == MaxContent || type == MinContent)
+  {
+    // Use content size
+    // It will already have been calculated taking into account whether this dimension is max or min
+    return Lock(weakOwner)->GetContentRealPixelsAlong(axis);
+  }
+
   // When in percent
   // if (type == Percent)
   // {
@@ -170,16 +198,6 @@ size_t UIDimension::CalculateRealPixelSize(Calculation configuration) const
 
   //   // Return percentage applied to this size
   //   return size_t(parentSize * value / 100);
-  // }
-
-  // When in auto
-  // if (type == Auto)
-  // {
-  //   // Get content box
-  //   auto contentBox = Lock(weakOwner)->GetContentBox(configuration);
-
-  //   // Use content box size
-  //   return contentBox.GetSize(axis);
   // }
 
   // If arrived here we have some error
@@ -212,3 +230,5 @@ float UIDimension::VectorAxis(Vector2 vector, Axis axis)
 {
   return axis == Horizontal ? vector.x : vector.y;
 }
+
+UIDimension::UnitType UIDimension::GetType() const { return type; }

@@ -7,11 +7,14 @@ using namespace std;
 
 UIObject::UIObject(Canvas &canvas, string name, std::shared_ptr<UIContainer> parent)
     : GameObject(name),
-      width(UIDimension::Horizontal),
-      height(UIDimension::Vertical),
+      width(UIDimension::Horizontal, UIDimension::MaxContent),
+      height(UIDimension::Vertical, UIDimension::MaxContent),
       style(make_unique<UIInheritable>(*this)),
       canvas(canvas)
 {
+  if (IsCanvasRoot())
+    return;
+
   // Subscribe to own dimension change
   auto alertParent = [this](size_t, size_t)
   {
@@ -26,15 +29,12 @@ UIObject::UIObject(Canvas &canvas, string name, std::shared_ptr<UIContainer> par
                                            { alertParent(0, 0); });
   //  Padding size change is already included in width and height
 
-  if (IsCanvasRoot() == false)
-  {
-    // Treat no parent as child of canvas root
-    if (parent == nullptr)
-      parent = canvas.root;
+  // Treat no parent as child of canvas root
+  if (parent == nullptr)
+    parent = canvas.root;
 
-    // Register parent
-    weakParent = parent;
-  }
+  // Register parent
+  weakParent = parent;
 }
 
 UIObject::~UIObject() {}

@@ -25,10 +25,31 @@ public:
     World
   };
 
-  // Explicitly initialize shape
-  Canvas(GameObject &associatedObject, Space space, Vector2 size = Vector2::Zero());
+  // Raised when the canvas size changes
+  // Provides new and old values of size
+  EventII<Vector2, Vector2> OnChangeSize;
+
+  Canvas(GameObject &associatedObject,
+         Space space,
+         Vector2 size = Vector2::Zero(),
+         std::shared_ptr<Camera> camera = Camera::GetMain());
+
+  RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
+  void Render() override;
 
   virtual ~Canvas();
+
+  // Get the canvas size (in units or real pixels, depending on it's current space)
+  Vector2 GetSize() const;
+
+  // Set the canvas size (in units or real pixels, depending on it's current space)
+  void SetSize(Vector2 newSize);
+
+  // Get the current canvas space
+  Space GetSpace() const;
+
+  // Set the canvas space
+  void SetSpace(Space newSpace);
 
   void OnBeforeDestroy() override;
 
@@ -57,10 +78,6 @@ public:
   // How the canvas is related to the world
   Space space;
 
-  // Size of the canvas
-  // Ignored when Global space, in real pixels when WorldFixedSize space, and in world units when World space
-  Vector2 size;
-
   // Defines the point inside the canvas that will be displayed at it's position
   // Ignored on global canvas type
   // Values be in range [0, 1]
@@ -69,8 +86,8 @@ public:
   // The root UI Object
   std::shared_ptr<UIContainer> root;
 
-  RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
-  void Render() override;
+  // To which camera this canvas is associated
+  std::weak_ptr<Camera> weakCamera;
 
 private:
   // Get position of the anchor point in world units

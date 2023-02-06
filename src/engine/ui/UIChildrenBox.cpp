@@ -13,7 +13,7 @@ void UIChildrenGroup::AllocateChildren(ChildIterator &childIterator, ChildIterat
   Assert(childIterator != endIterator, "UI Children Group Received invalid iterator");
 
   // Max main size this group can have
-  size_t maxMainSize = numeric_limits<size_t>::max();
+  size_t maxMainSize = GetMaxMainSize();
 
   // Allocate at least one child
   do
@@ -47,6 +47,32 @@ void UIChildrenGroup::AllocateChild(ChildIterator childIterator)
 
   // Keep biggest cross size
   crossSize = max(crossSize, childCrossSize);
+}
+
+size_t UIChildrenGroup::GetMaxMainSize() const
+{
+  auto owner = box.GetOwner();
+  auto mainAxis = owner->Flexbox().mainAxis;
+  auto dimensionType = owner->GetDimension(mainAxis).GetType();
+
+  // For max content owners, no limit
+  if (dimensionType == UIDimension::MaxContent)
+    return numeric_limits<size_t>::max();
+
+  // For min content owners, get the maximum main size of it's children
+  else if (dimensionType == UIDimension::MinContent)
+  {
+    size_t maxChildSize{0};
+
+    for (auto child : owner->GetChildren())
+      maxChildSize = max(maxChildSize, child->GetRealPixelsAlong(mainAxis, true, true));
+
+    return maxChildSize;
+  }
+
+  // Any other cases, just return the main size of the owner
+  else
+    return owner->GetRealPixelsAlong(mainAxis, false);
 }
 
 void UIChildrenBox::SetOwner(shared_ptr<UIContainer> owner) { weakOwner = owner; }
@@ -114,6 +140,9 @@ void UIChildrenBox::RepositionChildren()
   // Current cross position
   size_t crossPosition{0};
 
+  // Cross gap
+  size_t crossGap = owner->properties.gap.Along(crossAxis).AsRealPixels();
+
   // For each group
   for (auto &group : groups)
   {
@@ -144,7 +173,7 @@ void UIChildrenBox::RepositionChildren()
     }
 
     // Increment cross position
-    crossPosition += group.crossSize;
+    crossPosition += group.crossSize + crossGap;
   }
 
   // Ensure all children have been repositioned
@@ -152,3 +181,11 @@ void UIChildrenBox::RepositionChildren()
 }
 
 shared_ptr<UIContainer> UIChildrenBox::GetOwner() const { return Lock(weakOwner); }
+
+size_t UIChildrenBox::GetRealPixelsAlong(UIDimension::Axis axis)
+{
+  if (axis == Lock(weakOwner)->properties.mainAxis)
+    return mainSize;
+  else
+    return crossSize;
+}

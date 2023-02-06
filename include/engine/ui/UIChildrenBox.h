@@ -33,6 +33,9 @@ struct UIChildrenGroup
   std::vector<std::pair<size_t, size_t>> items{};
 
 private:
+  // Get the max main size of this group
+  size_t GetMaxMainSize() const;
+
   // Reference to owner box
   UIChildrenBox &box;
 };
@@ -49,6 +52,9 @@ public:
 
   // Reposition the owner's children according to the current value of this box
   void RepositionChildren();
+
+  // Get real pixel size along an axis
+  size_t GetRealPixelsAlong(UIDimension::Axis axis);
 
   std::shared_ptr<UIContainer> GetOwner() const;
 

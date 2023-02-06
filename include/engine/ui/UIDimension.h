@@ -11,6 +11,7 @@ class UIContainer;
 class UIFlexboxProperties;
 class UIDimension2;
 class UIDimension4;
+class Canvas;
 
 class UIDimension
 {
@@ -18,6 +19,7 @@ class UIDimension
   friend class UIDimension4;
   friend class UIObject;
   friend class UIContainer;
+  friend class Canvas;
 
 public:
   // Defines the possible axis for a dimension
@@ -30,11 +32,22 @@ public:
   // Defines the possible unit types
   enum UnitType
   {
+    // No size (i.e. always 0 real pixels)
+    None,
+
     // Size equals the size of the owner's content box
-    // Auto,
+    // The content box will assume the maximum possible size when the owner's main axis is set to this
+    MaxContent,
+
+    // Size equals the size of the owner's content box
+    // The content box will assume the minimum possible size when the owner's main axis is set to this
+    MinContent,
 
     // Constant dimension size
-    RealPixels
+    RealPixels,
+
+    // World units size
+    WorldUnits
 
     // Size that depends on parent's size for this dimension
     // Is calculated based on the parent's size BEFORE it grows on account of children that depend on it's size (such as this one)
@@ -46,7 +59,7 @@ public:
   EventII<size_t, size_t> OnRealPixelSizeChange;
 
   // Default constructor
-  UIDimension(Axis axis);
+  UIDimension(Axis axis, UnitType initialType = None);
 
   virtual ~UIDimension() {}
 
@@ -61,6 +74,9 @@ public:
 
   // Returns the opposite axis
   static Axis GetCrossAxis(Axis axis);
+
+  // Get the currently set dimension type
+  UnitType GetType() const;
 
   // Returns the Vector2 value corresponding to the provided axis
   static float VectorAxis(Vector2 vector, Axis axis);

@@ -23,6 +23,9 @@ public:
   // Gets current text content
   std::string GetText();
 
+  // Is the size of the text texture
+  size_t GetContentRealPixelsAlong(UIDimension::Axis axis) override;
+
 private:
   // Recreates the main texture, applying a border
   void RemakeTexture();

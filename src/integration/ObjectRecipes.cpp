@@ -211,41 +211,30 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
 
     // Give this UI a container
     auto container = canvas->AddChild<UIContainer>("BadgeContainer");
-    container->width.Set(UIDimension::RealPixels, 35);
-    container->height.Set(UIDimension::RealPixels, 50);
     container->padding.Set(UIDimension::RealPixels, 10);
     container->style->textBorderSize.Set(2);
-    container->style->imageScaling.Set(10);
+    container->style->imageScaling.Set(6);
     container->style->imageColor.Set(player->GetColor());
     container->Flexbox().mainAxis = UIDimension::Vertical;
     container->Flexbox().gap.Set(UIDimension::RealPixels, 5);
     container->Flexbox().placeItems = {0.5, 0.5};
 
-    // TODO: add a default image size scaler to the uiObjects style as inheritable
-
     // Add heat text
     auto heatText = container->AddChild<UIText>("HeatDisplay", "0.0");
-    heatText->height.Set(UIDimension::RealPixels, 20);
 
     // Add life icon container
     auto lifeContainer = container->AddChild<UIContainer>(CHARACTER_LIFE_OBJECT);
-    lifeContainer->width.Set(UIDimension::RealPixels, 40);
-    lifeContainer->height.Set(UIDimension::RealPixels, 20);
     lifeContainer->Flexbox().gap.Set(UIDimension::RealPixels, 6);
     lifeContainer->Flexbox().placeItems = {0.5, 0.5};
     weak_ptr<UIContainer> weakLifeContainer = lifeContainer;
 
     // Add player indicator
     auto badgeImage = container->AddChild<UIImage>("PlayerIndicator", "./assets/sprites/badge.png");
-    badgeImage->width.Set(UIDimension::RealPixels, 35);
-    badgeImage->height.Set(UIDimension::RealPixels, 20);
 
     // Creates life icon image object and adds it to it's container
     auto addLifeIcon = [weakLifeContainer]()
     {
       auto lifeIcon = Lock(weakLifeContainer)->AddChild<UIImage>("LifeIcon", "./assets/sprites/life.png");
-      lifeIcon->width.Set(UIDimension::RealPixels, 20);
-      lifeIcon->height.Set(UIDimension::RealPixels, 20);
       // lifeIcon->margin.Set(UIDimension::RealPixels, 5);
     };
 

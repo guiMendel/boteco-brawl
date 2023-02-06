@@ -51,6 +51,10 @@ public:
   // =================================
   // OBJECT PROPERTIES
   // =================================
+public:
+  // Is the size of the children box
+  size_t GetContentRealPixelsAlong(UIDimension::Axis axis) override;
+
 private:
   void InitializeDimensions() override;
 

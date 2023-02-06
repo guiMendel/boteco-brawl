@@ -168,3 +168,8 @@ void UIContainer::PrecalculateDimensions()
   properties.gap.x.PrecalculateDefault();
   properties.gap.y.PrecalculateDefault();
 }
+
+size_t UIContainer::GetContentRealPixelsAlong(UIDimension::Axis axis)
+{
+  return childrenBox.GetRealPixelsAlong(axis);
+}

@@ -4,14 +4,15 @@
 using namespace std;
 
 // TODO fix this
-Canvas::Canvas(GameObject &associatedObject, Space space, Vector2 size)
+Canvas::Canvas(GameObject &associatedObject, Space space, Vector2 size, shared_ptr<Camera> camera)
     : WorldComponent(associatedObject),
-      space(space),
-      size(size),
-      root(GetScene()->NewObject<UIContainer>(*this, "UIRoot", nullptr))
+      root(GetScene()->NewObject<UIContainer>(*this, "UIRoot", nullptr)),
+      weakCamera(camera)
 {
   // Initialize root
   InitializeRootStyle();
+  SetSpace(space);
+  SetSize(size);
   root->InitializeDimensions();
 }
 
@@ -27,10 +28,10 @@ Vector2 Canvas::GetAnchorPosition() const
     return Camera::GetMain()->ScreenToWorld({0, 0});
 
   case Space::WorldFixedSize:
-    return gameObject.GetPosition() - Camera::GetMain()->GetUnitsPerRealPixel() * size * anchorPoint;
+    return gameObject.GetPosition() - Camera::GetMain()->GetUnitsPerRealPixel() * GetSize() * anchorPoint;
 
   case Space::World:
-    return gameObject.GetPosition() - size * anchorPoint;
+    return gameObject.GetPosition() - GetSize() * anchorPoint;
   }
 
   throw runtime_error("ERROR: Unrecognized canvas space");
@@ -84,9 +85,9 @@ void Canvas::Render()
   if (space == Space::World)
     drawSize = Vector2{float(Game::screenWidth), float(Game::screenHeight)} * camera->GetUnitsPerRealPixel();
   else if (space == Space::WorldFixedSize)
-    drawSize = size * camera->GetUnitsPerRealPixel();
+    drawSize = GetSize() * camera->GetUnitsPerRealPixel();
   else
-    drawSize = size;
+    drawSize = GetSize();
 
   Vector2 position;
 
@@ -111,4 +112,52 @@ void Canvas::OnBeforeDestroy()
 {
   // Destroy canvas object tree
   root->InternalDestroy();
+}
+
+Vector2 Canvas::GetSize() const { return {root->width.value, root->height.value}; }
+
+void Canvas::SetSize(Vector2 newSize)
+{
+  auto oldSize = GetSize();
+
+  // Check space
+  if (space == Space::WorldFixedSize)
+  {
+    root->width.Set(UIDimension::RealPixels, newSize.x);
+    root->height.Set(UIDimension::RealPixels, newSize.y);
+  }
+  else if (space == Space::World)
+  {
+    root->width.Set(UIDimension::WorldUnits, newSize.x);
+    root->height.Set(UIDimension::WorldUnits, newSize.y);
+  }
+  // Global space ignore this
+  else if (space == Space::Global)
+    return;
+
+  if (newSize != oldSize)
+    OnChangeSize.Invoke(newSize, oldSize);
+}
+
+Canvas::Space Canvas::GetSpace() const
+{
+  return space;
+}
+
+void Canvas::SetSpace(Space newSpace)
+{
+  auto newSize = GetSize();
+
+  // Catch global space
+  if (newSpace == Space::Global)
+  {
+    root->width.Set(UIDimension::RealPixels, Game::screenWidth);
+    root->height.Set(UIDimension::RealPixels, Game::screenHeight);
+
+    return;
+  }
+
+  space = newSpace;
+
+  SetSize(newSize);
 }
