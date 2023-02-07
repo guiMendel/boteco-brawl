@@ -214,7 +214,8 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     container->width.Set(UIDimension::Percent, 100);
     container->height.Set(UIDimension::Percent, 100);
     container->style->textBorderSize.Set(2);
-    container->style->imageScaling.Set(6);
+    container->style->fontSize.Set(25);
+    container->style->imageScaling.Set(5);
     container->style->imageColor.Set(player->GetColor());
     container->Flexbox().mainAxis = UIDimension::Vertical;
     container->Flexbox().gap.Set(UIDimension::RealPixels, 5);

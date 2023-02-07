@@ -175,24 +175,14 @@ public:
   template <class T>
   std::shared_ptr<T> GetUIObject(int id)
   {
-    auto gameObject = GetGameObject(id);
-
-    if (gameObject == nullptr)
-      return nullptr;
-
-    return RequirePointerCast<T>(gameObject);
+    return std::dynamic_pointer_cast<T>(GetGameObject(id));
   }
 
   // Gets a ui object by it's name. Throws if cast to the provided class fails.
   template <class T>
   std::shared_ptr<T> GetUIObject(std::string name)
   {
-    auto gameObject = GetGameObject(name);
-
-    if (gameObject == nullptr)
-      return nullptr;
-
-    return RequirePointerCast<T>(gameObject);
+    return std::dynamic_pointer_cast<T>(GetGameObject(name));
   }
 
   // Throws if this ui object doesn't exist. Throws if cast to the provided class fails.

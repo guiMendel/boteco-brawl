@@ -78,34 +78,34 @@ void Canvas::InitializeRootStyle()
 
 void Canvas::Render()
 {
-  auto camera = Camera::GetMain();
+  // auto camera = Camera::GetMain();
 
-  Vector2 drawSize;
+  // Vector2 drawSize;
 
-  if (space == Space::World)
-    drawSize = Vector2{float(Game::screenWidth), float(Game::screenHeight)} * camera->GetUnitsPerRealPixel();
-  else if (space == Space::WorldFixedSize)
-    drawSize = GetSize() * camera->GetUnitsPerRealPixel();
-  else
-    drawSize = GetSize();
+  // if (space == Space::World)
+  //   drawSize = Vector2{float(Game::screenWidth), float(Game::screenHeight)} * camera->GetUnitsPerRealPixel();
+  // else if (space == Space::WorldFixedSize)
+  //   drawSize = GetSize() * camera->GetUnitsPerRealPixel();
+  // else
+  //   drawSize = GetSize();
 
-  Vector2 position;
+  // Vector2 position;
 
-  if (space == Space::Global)
-    position = camera->ScreenToWorld({Game::screenWidth / 2.0f, Game::screenHeight / 2.0f});
-  else
-  {
-    Vector2 anchorDisplacement{
-        Lerp(-drawSize.x / 2, drawSize.x / 2, anchorPoint.x),
-        Lerp(-drawSize.y / 2, drawSize.y / 2, anchorPoint.y)};
+  // if (space == Space::Global)
+  //   position = camera->ScreenToWorld({Game::screenWidth / 2.0f, Game::screenHeight / 2.0f});
+  // else
+  // {
+  //   Vector2 anchorDisplacement{
+  //       Lerp(-drawSize.x / 2, drawSize.x / 2, anchorPoint.x),
+  //       Lerp(-drawSize.y / 2, drawSize.y / 2, anchorPoint.y)};
 
-    position = gameObject.GetPosition() - anchorDisplacement;
-  }
+  //   position = gameObject.GetPosition() - anchorDisplacement;
+  // }
 
-  auto color = Color::Cyan();
-  color.alpha = 70;
+  // auto color = Color::Cyan();
+  // color.alpha = 70;
 
-  Debug::DrawBox(Rectangle(position, drawSize.x, drawSize.y), color);
+  // Debug::DrawBox(Rectangle(position, drawSize.x, drawSize.y), color);
 }
 
 void Canvas::OnBeforeDestroy()

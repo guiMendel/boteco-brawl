@@ -95,7 +95,7 @@ UIFlexboxProperties &UIContainer::Flexbox()
   return properties;
 }
 
-void UIContainer::Update(float)
+void UIContainer::Update(float deltaTime)
 {
   // For root's update
   if (IsCanvasRoot())
@@ -114,6 +114,8 @@ void UIContainer::Update(float)
 
   // Detect if recalculation of children box is necessary
   DetectRecalculation();
+
+  UIObject::Update(deltaTime);
 }
 
 void UIContainer::DetectRecalculation()

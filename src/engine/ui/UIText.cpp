@@ -16,6 +16,18 @@ void UIText::Start()
 
   // Initialize texture
   RemakeTexture();
+
+  // Remake whenever a text related style property changes
+  auto remake = [this]()
+  { RemakeTexture(); };
+
+  style->fontPath.OnChangeValue.AddListener("remake-text", remake);
+  style->fontSize.OnChangeValue.AddListener("remake-text", remake);
+  style->textColor.OnChangeValue.AddListener("remake-text", remake);
+  style->textBorderColor.OnChangeValue.AddListener("remake-text", remake);
+  style->textBorderSize.OnChangeValue.AddListener("remake-text", remake);
+
+  UIObject::Start();
 }
 
 void UIText::Render()
@@ -38,6 +50,17 @@ void UIText::Render()
 
   // Debug render
   UIObject::Render();
+}
+
+void UIText::Update(float deltaTime)
+{
+  if (forceRemake)
+  {
+    RemakeTexture();
+    forceRemake = false;
+  }
+
+  UIContent::Update(deltaTime);
 }
 
 void UIText::SetText(string text)

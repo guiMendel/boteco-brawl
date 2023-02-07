@@ -16,6 +16,7 @@ public:
 
   void Start() override;
   void Render() override;
+  void Update(float) override;
 
   // Sets new text content
   void SetText(std::string text);
@@ -49,6 +50,9 @@ private:
 
   // Format to use when creating textures
   Uint32 textureFormat;
+
+  // Whether to remake texture next frame
+  bool forceRemake{false};
 };
 
 #endif

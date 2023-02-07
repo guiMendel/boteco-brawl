@@ -9,7 +9,7 @@ UIObject::UIObject(Canvas &canvas, string name, std::shared_ptr<UIContainer> par
     : GameObject(name),
       width(UIDimension::Horizontal, UIDimension::MaxContent),
       height(UIDimension::Vertical, UIDimension::MaxContent),
-      style(make_unique<UIInheritable>(*this)),
+      style(make_unique<UIInheritable>(this)),
       canvas(canvas)
 {
   if (IsCanvasRoot())
@@ -156,20 +156,20 @@ void UIObject::RegisterToScene()
 void UIObject::Render()
 {
   // Don't render root
-  if (IsCanvasRoot())
-    return;
+  // if (IsCanvasRoot())
+  //   return;
 
-  auto camera = Camera::GetMain();
+  // auto camera = Camera::GetMain();
 
-  auto color = Color::Pink();
-  color.alpha = 170;
+  // auto color = Color::Pink();
+  // color.alpha = 170;
 
-  Debug::DrawBox(Rectangle(
-                     Rectangle::TopLeftInitialize,
-                     canvas.CanvasToWorld(GetPosition()),
-                     GetPaddedWidth() * camera->GetUnitsPerRealPixel(),
-                     GetPaddedHeight() * camera->GetUnitsPerRealPixel()),
-                 color);
+  // Debug::DrawBox(Rectangle(
+  //                    Rectangle::TopLeftInitialize,
+  //                    canvas.CanvasToWorld(GetPosition()),
+  //                    GetPaddedWidth() * camera->GetUnitsPerRealPixel(),
+  //                    GetPaddedHeight() * camera->GetUnitsPerRealPixel()),
+  //                color);
 }
 
 auto UIObject::DestroySelf() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator
