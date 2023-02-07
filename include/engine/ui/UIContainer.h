@@ -20,6 +20,9 @@ struct UIFlexboxProperties
   // Minimum empty space between container's items
   UIDimension2 gap;
 
+  // Whether to wrap items if they reach the container's limits
+  bool wrap{true};
+
   // Where to align items to within the container's available space
   // Values must be in range [0, 1]
   Vector2 placeItems;

@@ -220,6 +220,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     container->Flexbox().mainAxis = UIDimension::Vertical;
     container->Flexbox().gap.Set(UIDimension::RealPixels, 5);
     container->Flexbox().placeItems = {0.5, 1};
+    container->Flexbox().wrap = false;
 
     // Add heat text
     auto heatText = container->AddChild<UIText>("HeatDisplay", "0.0");

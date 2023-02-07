@@ -20,8 +20,7 @@ void UIChildrenGroup::AllocateChildren(ChildIterator &childIterator, ChildIterat
   {
     AllocateChild(childIterator);
     childIterator = box.FindIndependent(++childIterator, endIterator);
-  }
-  while (
+  } while (
       // Check if there are more children
       childIterator != endIterator &&
       // As well as if next child fits in this group
@@ -55,6 +54,11 @@ void UIChildrenGroup::AllocateChild(ChildIterator childIterator)
 size_t UIChildrenGroup::GetMaxMainSize() const
 {
   auto owner = box.GetOwner();
+
+  // If wrap is off, no limit
+  if (owner->Flexbox().wrap == false)
+    return numeric_limits<size_t>::max();
+
   auto mainAxis = owner->Flexbox().mainAxis;
   auto dimensionType = owner->GetDimension(mainAxis).GetType();
 
