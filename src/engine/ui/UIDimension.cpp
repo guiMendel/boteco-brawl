@@ -159,9 +159,18 @@ void UIDimension::Set(UnitType newType, float newValue)
 {
   type = newType;
   value = newValue;
+
+  // Invalidate calculation cache
+  precalculationFrame = Game::currentFrame - 1;
 }
 
-void UIDimension::SetOwner(std::shared_ptr<UIObject> owner) { weakOwner = owner; }
+void UIDimension::SetOwner(std::shared_ptr<UIObject> owner)
+{
+  weakOwner = owner;
+
+  // Invalidate calculation cache
+  precalculationFrame = Game::currentFrame - 1;
+}
 
 UIDimension::Axis UIDimension::GetCrossAxis(Axis axis)
 {

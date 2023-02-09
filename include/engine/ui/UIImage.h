@@ -16,6 +16,9 @@ public:
   // Sets new image path
   void SetImagePath(std::string imagePath);
 
+  // Set new dimensions for the image, keeping intact the current aspect ratio
+  void SetSizePreserveRatio(UIDimension::Axis axis, UIDimension::UnitType unit, float value);
+
   // Gets current image path
   std::string GetImagePath();
 

@@ -34,7 +34,7 @@ Vector2 Canvas::GetAnchorPosition() const
     return gameObject.GetPosition() - GetSize() * anchorPoint;
   }
 
-  throw runtime_error("ERROR: Unrecognized canvas space");
+  throw runtime_error("Unrecognized canvas space");
 }
 
 Vector2 Canvas::CanvasToWorld(Vector2 position, shared_ptr<Camera> camera) const
@@ -148,6 +148,8 @@ void Canvas::SetSpace(Space newSpace)
 {
   auto newSize = GetSize();
 
+  space = newSpace;
+
   // Catch global space
   if (newSpace == Space::Global)
   {
@@ -156,8 +158,6 @@ void Canvas::SetSpace(Space newSpace)
 
     return;
   }
-
-  space = newSpace;
 
   SetSize(newSize);
 }

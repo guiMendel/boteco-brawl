@@ -6,6 +6,7 @@
 #include "Camera.h"
 #include "TimeScaleManager.h"
 #include "ShakeEffectManager.h"
+#include "CameraBehavior.h"
 
 using namespace std;
 
@@ -19,7 +20,10 @@ void MainScene::InitializeObjects()
   auto charactersParent = Instantiate("CharactersParent");
 
   // Create the main camera
-  auto mainCamera = Instantiate("MainCamera", ObjectRecipes::Camera(charactersParent))->GetComponent<Camera>();
+  auto mainCamera = Instantiate("MainCamera", ObjectRecipes::Camera())->GetComponent<Camera>();
+
+  // Give it behavior
+  mainCamera->gameObject.AddComponent<CameraBehavior>(charactersParent);
 
   // Add player manager
   auto playerManager = Instantiate("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true))->RequireComponent<PlayerManager>();

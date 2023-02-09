@@ -40,20 +40,15 @@
 
 using namespace std;
 
-auto ObjectRecipes::Camera(shared_ptr<WorldObject> charactersParent)
+auto ObjectRecipes::Camera()
     -> function<void(shared_ptr<WorldObject>)>
 {
-  auto weakParent{weak_ptr(charactersParent)};
-  return [weakParent](shared_ptr<WorldObject> cameraObject)
+  return [](shared_ptr<WorldObject> cameraObject)
   {
-    LOCK(weakParent, charactersParent);
-
     auto camera = cameraObject->AddComponent<::Camera>(5);
 
     // Register it prematurely
     camera->RegisterToScene();
-
-    cameraObject->AddComponent<CameraBehavior>(charactersParent);
   };
 }
 
@@ -206,7 +201,7 @@ auto ObjectRecipes::Character(shared_ptr<Player> player) -> function<void(shared
     auto display = character->CreateChild(CHARACTER_UI_OBJECT, {0, -collider->GetBox().height / 2 - 0.2f});
 
     // Give it a canvas
-    auto canvas = display->AddComponent<Canvas>(Canvas::Space::WorldFixedSize, Vector2{100, 90});
+    auto canvas = display->AddComponent<::Canvas>(Canvas::Space::WorldFixedSize, Vector2{100, 90});
     canvas->anchorPoint = {0.5, 1};
 
     // Give this UI a container
@@ -327,5 +322,13 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<WorldObject> 
     // If it started playing before we could set the emission params, reset it
     if (emitter->IsEmitting())
       emitter->StartEmission();
+  };
+}
+
+auto ObjectRecipes::Canvas(Canvas::Space space) -> std::function<void(std::shared_ptr<WorldObject>)>
+{
+  return [space](shared_ptr<WorldObject> canvas)
+  {
+    canvas->AddComponent<::Canvas>(space);
   };
 }

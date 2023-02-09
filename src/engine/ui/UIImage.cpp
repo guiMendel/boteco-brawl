@@ -81,3 +81,19 @@ size_t UIImage::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::C
 {
   return (axis == UIDimension::Horizontal ? textureWidth : textureHeight) * style->imageScaling.Get();
 }
+
+void UIImage::SetSizePreserveRatio(UIDimension::Axis mainAxis, UIDimension::UnitType unit, float value)
+{
+  // Get both dimensions
+  auto &mainDimension = GetDimension(mainAxis);
+  auto &crossDimension = GetDimension(UIDimension::GetCrossAxis(mainAxis));
+
+  // Get current ratio
+  float ratio = float(crossDimension.AsRealPixels()) / float(mainDimension.AsRealPixels());
+
+  // Set main dimension to new value
+  mainDimension.Set(unit, value);
+
+  // Set cross dimension respectively
+  crossDimension.Set(UIDimension::RealPixels, float(mainDimension.AsRealPixels()) * ratio);
+}

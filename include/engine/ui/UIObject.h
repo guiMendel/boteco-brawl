@@ -28,14 +28,13 @@ public:
   // OBJECT PROPERTIES
   // =================================
 public:
-  // Returns the real pixel displacement between the top-left of the Canvas and this object's top-left
+  // Returns the real pixel displacement between the top-left of the parent (unpadded) and this object's top-left
   Vector2 GetPosition() override;
 
   // Returns top-left position after counting in the padding
   Vector2 GetContentPosition();
 
   // Gets either width or height, depending on the provided axis
-  // Second argument tells whether to include margin
   UIDimension &GetDimension(UIDimension::Axis axis);
 
   // Gets real pixel size along an axis (size + padding [and possibly + margin])

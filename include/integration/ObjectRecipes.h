@@ -25,12 +25,13 @@ public:
     };
   }
 
-  static auto Camera(std::shared_ptr<WorldObject> charactersParent)
-      -> std::function<void(std::shared_ptr<WorldObject>)>;
+  static auto Camera() -> std::function<void(std::shared_ptr<WorldObject>)>;
 
   static auto Arena(std::string imagePath) -> std::function<void(std::shared_ptr<WorldObject>)>;
 
   static auto Character(std::shared_ptr<Player> player) -> std::function<void(std::shared_ptr<WorldObject>)>;
+
+  static auto Canvas(Canvas::Space space) -> std::function<void(std::shared_ptr<WorldObject>)>;
 
   static auto Platform(Vector2 size, bool withEffector = false) -> std::function<void(std::shared_ptr<WorldObject>)>;
 
