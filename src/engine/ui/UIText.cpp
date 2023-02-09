@@ -141,8 +141,8 @@ void UIText::RemakeTexture()
   SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
   // Start blipping border texture onto it
-  for (size_t row = 0; row <= borderPixels * 2; row++)
-    for (size_t column = 0; column <= borderPixels * 2; column++)
+  for (int row = 0; row <= borderPixels * 2; row++)
+    for (int column = 0; column <= borderPixels * 2; column++)
     {
       // Skip center
       if (row == borderPixels && column == borderPixels)
@@ -171,7 +171,7 @@ void UIText::RemakeTexture()
 
 string UIText::GetText() { return text; }
 
-size_t UIText::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::Calculation)
+int UIText::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::Calculation)
 {
   return axis == UIDimension::Horizontal ? pixelWidth : pixelHeight;
 }

@@ -38,19 +38,19 @@ public:
   UIDimension &GetDimension(UIDimension::Axis axis);
 
   // Gets real pixel size along an axis (size + padding [and possibly + margin])
-  size_t GetRealPixelsAlong(UIDimension::Axis axis, bool includePadding = true, bool includeMargin = false);
+  int GetRealPixelsAlong(UIDimension::Axis axis, bool includePadding = true, bool includeMargin = false);
 
   // Gets real pixel size along an axis of this object's content (whatever is inside of it)
-  virtual size_t GetContentRealPixelsAlong(
+  virtual int GetContentRealPixelsAlong(
       UIDimension::Axis axis,
       UIDimension::Calculation config = UIDimension::Calculation::Default) = 0;
 
   // Set local position, where the first value is along the given axis and the second is along the other axis
   void SetLocalPositionAlong(UIDimension::Axis axis, int mainSize, int crossSize);
 
-  size_t GetPaddedWidth();
+  int GetUnpaddedWidth();
 
-  size_t GetPaddedHeight();
+  int GetUnpaddedHeight();
 
   // Sets whether position is automatically calculated or given as an absolute value relative to parent
   void SetPositionAbsolute(bool value);
@@ -76,6 +76,9 @@ public:
 
   // Defines all properties of the object that can be inherited from it's parent
   std::unique_ptr<UIInheritable> style;
+
+  // Offsets render position but has no effect over non-children objects' positions
+  UIDimension2 offset;
 
 private:
   // Gives all dimensions this object's shared pointer
@@ -114,7 +117,7 @@ public:
       std::shared_ptr<UIObject> first, std::shared_ptr<UIObject> second);
 
   // Arrangement order priority within parent container
-  size_t arrangeOrder{0};
+  int arrangeOrder{0};
 
 protected:
   void InternalSetParent(std::shared_ptr<GameObject> newParent) override;

@@ -25,7 +25,7 @@ public:
   std::string GetText();
 
   // Is the size of the text texture
-  size_t GetContentRealPixelsAlong(
+  int GetContentRealPixelsAlong(
       UIDimension::Axis axis,
       UIDimension::Calculation config = UIDimension::Calculation::Default) override;
 

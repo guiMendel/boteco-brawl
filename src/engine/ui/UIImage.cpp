@@ -42,8 +42,8 @@ void UIImage::UseTexture(function<void(SDL_Texture *)> procedure)
 void UIImage::Render()
 {
   // Get target dimensions
-  size_t targetWidth = width.AsRealPixels();
-  size_t targetHeight = height.AsRealPixels();
+  int targetWidth = GetUnpaddedWidth();
+  int targetHeight = GetUnpaddedHeight();
 
   auto camera = Camera::GetMain();
   auto pixelPosition = canvas.CanvasToScreen(GetContentPosition());
@@ -77,7 +77,7 @@ void UIImage::ReloadTextureDimensions()
   SDL_QueryTexture(texture.get(), nullptr, nullptr, &textureWidth, &textureHeight);
 }
 
-size_t UIImage::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::Calculation)
+int UIImage::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::Calculation)
 {
   return (axis == UIDimension::Horizontal ? textureWidth : textureHeight) * style->imageScaling.Get();
 }
@@ -96,4 +96,10 @@ void UIImage::SetSizePreserveRatio(UIDimension::Axis mainAxis, UIDimension::Unit
 
   // Set cross dimension respectively
   crossDimension.Set(UIDimension::RealPixels, float(mainDimension.AsRealPixels()) * ratio);
+}
+
+float UIImage::GetScaling(UIDimension::Axis axis)
+{
+  return float(GetRealPixelsAlong(axis, false)) /
+         float(axis == UIDimension::Horizontal ? textureWidth : textureHeight);
 }

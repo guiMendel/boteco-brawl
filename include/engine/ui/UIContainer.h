@@ -9,7 +9,7 @@
 struct UIFlexboxProperties
 {
   // Gets a hash to identify this configuration set
-  size_t GetHash() const;
+  int GetHash() const;
 
   // Sets dimensions owners
   void SetOwner(std::shared_ptr<UIObject> owner);
@@ -21,7 +21,7 @@ struct UIFlexboxProperties
   UIDimension2 gap;
 
   // Whether to wrap items if they reach the container's limits
-  bool wrap{true};
+  bool wrap{false};
 
   // Where to align items to within the container's available space
   // Values must be in range [0, 1]
@@ -56,13 +56,13 @@ public:
   // =================================
 public:
   // Is the size of the children box
-  size_t GetContentRealPixelsAlong(
+  int GetContentRealPixelsAlong(
       UIDimension::Axis axis,
       UIDimension::Calculation config = UIDimension::Calculation::Default) override;
 
   // Calculates the size of the children box treating those who depend on this container's size as 0
   // Returns horizontal size first
-  size_t GetIndependentContentRealPixels(UIDimension::Axis axis, UIDimension::Calculation config) const;
+  int GetIndependentContentRealPixels(UIDimension::Axis axis, UIDimension::Calculation config) const;
 
 private:
   void InitializeDimensions() override;
@@ -90,7 +90,7 @@ protected:
   std::shared_ptr<GameObject> InternalGetParent() const override;
 
   // Generator for arrangement order of children
-  size_t arrangeOrderGenerator{0};
+  int arrangeOrderGenerator{0};
 
   // =================================
   // CHILDREN BOX
@@ -113,7 +113,7 @@ protected:
   UIChildrenBox childrenBox;
 
   // Last hash value of properties
-  size_t lastPropertiesHash;
+  int lastPropertiesHash;
 
   // Whether should check if the properties have changed since last frame
   bool checkPropertyChange{false};

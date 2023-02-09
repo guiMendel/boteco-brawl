@@ -56,7 +56,7 @@ public:
 
   // Raised when the real pixel size of this dimensions changes
   // Provides new and old values for the size
-  EventII<size_t, size_t> OnRealPixelSizeChange;
+  EventII<int, int> OnRealPixelSizeChange;
 
   // Default constructor
   UIDimension(Axis axis, UnitType initialType = None);
@@ -67,7 +67,7 @@ public:
   void Set(UnitType type, float value = 0);
 
   // Get this dimensions specifically as real pixels
-  size_t AsRealPixels();
+  int AsRealPixels();
 
   // Get this dimension in the specified type
   float As(UnitType requestedType);
@@ -85,7 +85,7 @@ public:
   const Axis axis;
 
   // Gets value that uniquely identifies this dimension's configuration
-  size_t GetHash() const;
+  int GetHash() const;
 
   // Defines compatible configurations for the calculation of dimensions
   enum Calculation
@@ -102,23 +102,23 @@ public:
 private:
   // Get this dimensions specifically as real pixels
   // Allows configuring how calculation is done
-  size_t AsRealPixels(Calculation configuration);
+  int AsRealPixels(Calculation configuration);
 
   // Converts a value in real pixels to the requested value
-  float RealPixelsTo(size_t valuePixels, UnitType requestedType) const;
+  float RealPixelsTo(int valuePixels, UnitType requestedType) const;
 
   // Sets the owner
   void SetOwner(std::shared_ptr<UIObject> weakOwner);
 
   // Calculates dimension in real pixels
-  size_t CalculateRealPixelSize(Calculation configuration) const;
+  int CalculateRealPixelSize(Calculation configuration) const;
 
   // Calculates and stores real pixel size with default configuration
   // Raises event if size change is detected from last calculation
   void PrecalculateDefault();
 
   // Last calculated real pixel size
-  size_t lastRealPixelSize{0};
+  int lastRealPixelSize{0};
 
   // Frame in which lastRealPixelSize was calculated
   unsigned long precalculationFrame{std::numeric_limits<long>::max()};
@@ -151,7 +151,10 @@ struct UIDimension2
   UIDimension &Along(UIDimension::Axis axis);
 
   // Gets value that uniquely identifies this dimension's configuration
-  size_t GetHash() const;
+  int GetHash() const;
+
+  // Gets the real pixel values as a vector
+  Vector2 AsVector();
 
 private:
   // Sets the owner
@@ -190,10 +193,10 @@ struct UIDimension4
   std::pair<UIDimension &, UIDimension &> Along(UIDimension::Axis axis);
 
   // Get summed real pixel values along an axis
-  size_t SumAlong(UIDimension::Axis axis);
+  int SumAlong(UIDimension::Axis axis);
 
   // Gets value that uniquely identifies this dimension's configuration
-  size_t GetHash() const;
+  int GetHash() const;
 
 private:
   // Sets the owner

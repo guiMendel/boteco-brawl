@@ -24,17 +24,17 @@ struct UIChildrenGroup
   void AllocateChild(ChildIterator childIterator);
 
   // Real pixel size of the group along the container's main axis
-  size_t mainSize{0};
+  int mainSize{0};
 
   // Real pixel size of the group along the container's cross axis
-  size_t crossSize{0};
+  int crossSize{0};
 
   // Guards position in main axis & size in cross axis of each item inside this group (real pixels)
-  std::vector<std::pair<size_t, size_t>> items{};
+  std::vector<std::pair<int, int>> items{};
 
 private:
   // Get the max main size of this group
-  size_t GetMaxMainSize() const;
+  int GetMaxMainSize() const;
 
   // Reference to owner box
   UIChildrenBox &box;
@@ -59,7 +59,7 @@ public:
   void RepositionChildren();
 
   // Get real pixel size along an axis
-  size_t GetRealPixelsAlong(UIDimension::Axis axis);
+  int GetRealPixelsAlong(UIDimension::Axis axis);
 
   std::shared_ptr<UIContainer> GetOwner() const;
 
@@ -68,10 +68,10 @@ private:
   ChildIterator FindValidChild(ChildIterator childIterator, ChildIterator endIterator);
 
   // Real pixel size of the box along the container's main axis
-  size_t mainSize{0};
+  int mainSize{0};
 
   // Real pixel size of the box along the container's cross axis
-  size_t crossSize{0};
+  int crossSize{0};
 
   // Whether to ignore owner's children that depend on it's size
   bool ignoreDependentChildrenMain{false}, ignoreDependentChildrenCross{false};

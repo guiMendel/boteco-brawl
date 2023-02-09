@@ -10,10 +10,10 @@ void UIChildrenGroup::AllocateChildren(ChildIterator &childIterator, ChildIterat
   auto mainAxis = properties.mainAxis;
 
   // Safecheck
-  Assert(childIterator != endIterator, "UI Children Group Received invalid iterator");
+  Assert(childIterator < endIterator, "UI Children Group Received invalid iterator");
 
   // Max main size this group can have
-  size_t maxMainSize = GetMaxMainSize();
+  int maxMainSize = GetMaxMainSize();
 
   // Allocate at least one child
   do
@@ -51,25 +51,25 @@ void UIChildrenGroup::AllocateChild(ChildIterator childIterator)
   crossSize = max(crossSize, childCrossSize);
 }
 
-size_t UIChildrenGroup::GetMaxMainSize() const
+int UIChildrenGroup::GetMaxMainSize() const
 {
   auto owner = box.GetOwner();
 
   // If wrap is off, no limit
   if (owner->Flexbox().wrap == false)
-    return numeric_limits<size_t>::max();
+    return numeric_limits<int>::max();
 
   auto mainAxis = owner->Flexbox().mainAxis;
   auto dimensionType = owner->GetDimension(mainAxis).GetType();
 
   // For max content owners, no limit
   if (dimensionType == UIDimension::MaxContent)
-    return numeric_limits<size_t>::max();
+    return numeric_limits<int>::max();
 
   // For min content owners, get the maximum main size of it's children
   else if (dimensionType == UIDimension::MinContent)
   {
-    size_t maxChildSize{0};
+    int maxChildSize{0};
 
     for (auto child : owner->GetChildren())
       maxChildSize = max(maxChildSize, child->GetRealPixelsAlong(mainAxis, true, true));
@@ -99,10 +99,11 @@ void UIChildrenBox::Recalculate()
   mainSize = 0;
 
   // Discount extra gap
-  crossSize = -crossGap;
+  crossSize = 0;
 
   // Get children iterator
   auto children = owner->GetChildren();
+
   auto childIterator = FindValidChild(children.begin(), children.end());
 
   // Construct groups as they are filled
@@ -112,9 +113,13 @@ void UIChildrenBox::Recalculate()
   // Calculate dimensions anew
   for (auto &group : groups)
   {
-    mainSize = max(mainSize, group.mainSize);
+    mainSize = max(mainSize, int(group.mainSize));
     crossSize += group.crossSize + crossGap;
   }
+
+  // Discount extra gap
+  if (groups.size() > 0)
+    crossSize -= crossGap;
 }
 
 void UIChildrenBox::RepositionChildren()
@@ -141,10 +146,10 @@ void UIChildrenBox::RepositionChildren()
   auto childIterator = FindValidChild(children.begin(), children.end());
 
   // Current cross position
-  size_t crossPosition{0};
+  int crossPosition{0};
 
   // Cross gap
-  size_t crossGap = owner->properties.gap.Along(crossAxis).AsRealPixels();
+  int crossGap = owner->properties.gap.Along(crossAxis).AsRealPixels();
 
   // For each group
   for (auto &group : groups)
@@ -174,6 +179,8 @@ void UIChildrenBox::RepositionChildren()
                                    mainPosition + mainMargin + mainEmptyOffset,
                                    crossPosition + crossMargin + crossEmptyOffset);
 
+      // cout << *child << " position: " << child->GetPosition() << ", size: " << child->width.AsRealPixels() << ", " << child->height.AsRealPixels() << endl;
+
       //  Get next child
       childIterator = FindValidChild(++childIterator, children.end());
     }
@@ -188,7 +195,7 @@ void UIChildrenBox::RepositionChildren()
 
 shared_ptr<UIContainer> UIChildrenBox::GetOwner() const { return Lock(weakOwner); }
 
-size_t UIChildrenBox::GetRealPixelsAlong(UIDimension::Axis axis)
+int UIChildrenBox::GetRealPixelsAlong(UIDimension::Axis axis)
 {
   if (axis == Lock(weakOwner)->properties.mainAxis)
     return mainSize;
@@ -198,6 +205,9 @@ size_t UIChildrenBox::GetRealPixelsAlong(UIDimension::Axis axis)
 
 UIChildrenBox::ChildIterator UIChildrenBox::FindValidChild(ChildIterator childIterator, ChildIterator endIterator)
 {
+  if (childIterator == endIterator)
+    return endIterator;
+
   auto mainAxis = Lock(weakOwner)->Flexbox().mainAxis;
   auto crossAxis = UIDimension::GetCrossAxis(mainAxis);
 

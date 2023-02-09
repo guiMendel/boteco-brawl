@@ -16,8 +16,11 @@ UIObject::UIObject(Canvas &canvas, string name, std::shared_ptr<UIContainer> par
     return;
 
   // Subscribe to own dimension change
-  auto alertParent = [this](size_t, size_t)
+  auto alertParent = [this](int, int)
   {
+    if (IsPositionAbsolute())
+      return;
+
     LOCK(weakParent, parent);
 
     parent->forceRecalculation = true;
@@ -46,9 +49,13 @@ Vector2 UIObject::GetPosition()
 
   // Catch absolute position
   if (positionAbsolute)
+  {
     localPosition = GetAbsolutePosition();
 
-  return Lock(weakParent)->GetContentPosition() + localPosition;
+    return Lock(weakParent)->GetPosition() + localPosition + offset.AsVector();
+  }
+
+  return Lock(weakParent)->GetContentPosition() + localPosition + offset.AsVector();
 }
 
 Vector2 UIObject::GetContentPosition()
@@ -159,21 +166,24 @@ void UIObject::RegisterToScene()
 
 void UIObject::Render()
 {
+#ifdef RENDER_UI_OUTLINE
+
   // Don't render root
-  // if (IsCanvasRoot())
-  //   return;
+  if (IsCanvasRoot())
+    return;
 
-  // auto camera = Camera::GetMain();
+  auto camera = Camera::GetMain();
 
-  // auto color = Color::Pink();
-  // color.alpha = 170;
+  auto color = Color::Pink();
+  color.alpha = 170;
 
-  // Debug::DrawBox(Rectangle(
-  //                    Rectangle::TopLeftInitialize,
-  //                    canvas.CanvasToWorld(GetPosition()),
-  //                    GetPaddedWidth() * camera->GetUnitsPerRealPixel(),
-  //                    GetPaddedHeight() * camera->GetUnitsPerRealPixel()),
-  //                color);
+  Debug::DrawBox(Rectangle(
+                     Rectangle::TopLeftInitialize,
+                     canvas.CanvasToWorld(GetPosition()),
+                     width.AsRealPixels() * camera->GetUnitsPerRealPixel(),
+                     height.AsRealPixels() * camera->GetUnitsPerRealPixel()),
+                 color);
+#endif
 }
 
 auto UIObject::DestroySelf() -> std::unordered_map<int, std::weak_ptr<UIObject>>::iterator
@@ -239,15 +249,16 @@ void UIObject::InitializeDimensions()
   padding.SetOwner(GetShared());
   margin.SetOwner(GetShared());
   absolutePosition.SetOwner(GetShared());
+  offset.SetOwner(GetShared());
 }
 
-size_t UIObject::GetRealPixelsAlong(UIDimension::Axis axis, bool includePadding, bool includeMargin)
+int UIObject::GetRealPixelsAlong(UIDimension::Axis axis, bool includePadding, bool includeMargin)
 {
-  size_t bonus{0};
+  int bonus{0};
 
-  // Add padding
-  if (includePadding)
-    bonus = padding.SumAlong(axis);
+  // If no padding, discount it
+  if (includePadding == false)
+    bonus -= padding.SumAlong(axis);
 
   // Add margin
   if (includeMargin)
@@ -278,9 +289,9 @@ void UIObject::PrecalculateDimensions()
   padding.PrecalculateDefault();
 }
 
-size_t UIObject::GetPaddedWidth() { return width.AsRealPixels() + padding.SumAlong(UIDimension::Horizontal); }
+int UIObject::GetUnpaddedWidth() { return width.AsRealPixels() - padding.SumAlong(UIDimension::Horizontal); }
 
-size_t UIObject::GetPaddedHeight() { return height.AsRealPixels() + padding.SumAlong(UIDimension::Vertical); }
+int UIObject::GetUnpaddedHeight() { return height.AsRealPixels() - padding.SumAlong(UIDimension::Vertical); }
 
 void UIObject::SetPositionAbsolute(bool value)
 {
@@ -306,8 +317,8 @@ Vector2 UIObject::GetAbsolutePosition()
       // Get the placement for this axis
       float axisPlacement = UIDimension::VectorAxis(parent->Flexbox().placeItems, dimension.axis);
 
-      // Get axis empty space
-      float emptySpace = float(parent->GetRealPixelsAlong(dimension.axis, false)) -
+      // Get axis empty space (include padding)
+      float emptySpace = float(parent->GetRealPixelsAlong(dimension.axis)) -
                          float(GetRealPixelsAlong(dimension.axis, true, true));
 
       // Distribute empty space with axis placement

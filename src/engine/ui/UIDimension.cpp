@@ -11,7 +11,7 @@ UIDimension4::UIDimension4()
       bottom(UIDimension::Vertical),
       left(UIDimension::Horizontal)
 {
-  auto raiseOwn = [this](size_t, size_t)
+  auto raiseOwn = [this](int, int)
   {
     OnRealPixelSizeChange.Invoke();
   };
@@ -66,7 +66,7 @@ std::pair<UIDimension &, UIDimension &> UIDimension4::Along(UIDimension::Axis ax
   return {top, bottom};
 }
 
-size_t UIDimension4::SumAlong(UIDimension::Axis axis)
+int UIDimension4::SumAlong(UIDimension::Axis axis)
 {
   auto margins = Along(axis);
   return margins.first.AsRealPixels() + margins.second.AsRealPixels();
@@ -99,11 +99,16 @@ UIDimension &UIDimension2::Along(UIDimension::Axis axis)
   return axis == UIDimension::Horizontal ? x : y;
 }
 
+Vector2 UIDimension2::AsVector()
+{
+  return Vector2(x.AsRealPixels(), y.AsRealPixels());
+}
+
 UIDimension::UIDimension(Axis axis, UnitType initialType) : axis(axis), type(initialType) {}
 
-size_t UIDimension::AsRealPixels() { return AsRealPixels(Default); }
+int UIDimension::AsRealPixels() { return AsRealPixels(Default); }
 
-size_t UIDimension::AsRealPixels(Calculation configuration)
+int UIDimension::AsRealPixels(Calculation configuration)
 {
   Assert(weakOwner.expired() == false, "Tried reading value of UI Dimensions without first giving it an owner");
 
@@ -134,7 +139,7 @@ float UIDimension::As(UnitType requestedType)
   return RealPixelsTo(AsRealPixels(), requestedType);
 }
 
-float UIDimension::RealPixelsTo(size_t valuePixels, UnitType requestedType) const
+float UIDimension::RealPixelsTo(int valuePixels, UnitType requestedType) const
 {
   // Catch happy case
   if (requestedType == RealPixels)
@@ -177,7 +182,7 @@ UIDimension::Axis UIDimension::GetCrossAxis(Axis axis)
   return axis == Horizontal ? Vertical : Horizontal;
 }
 
-size_t UIDimension::CalculateRealPixelSize(Calculation configuration) const
+int UIDimension::CalculateRealPixelSize(Calculation configuration) const
 {
   // Catch happy case
   if (type == RealPixels)
@@ -194,7 +199,8 @@ size_t UIDimension::CalculateRealPixelSize(Calculation configuration) const
   // Catch content-dependent cases
   if (type == MaxContent || type == MinContent)
   {
-    return Lock(weakOwner)->GetContentRealPixelsAlong(axis, configuration);
+    auto result = Lock(weakOwner)->GetContentRealPixelsAlong(axis, configuration);
+    return result;
   }
 
   // When in percent
@@ -203,13 +209,13 @@ size_t UIDimension::CalculateRealPixelSize(Calculation configuration) const
     // Get owner's parent dimensions, ignoring depending children (such as this one) to avoid a paradox
     auto parent = Lock(weakOwner)->GetParent();
     Calculation ignoreChildren = axis == Horizontal ? IgnoreDependentChildrenX : IgnoreDependentChildrenY;
-    size_t parentSize = parent->GetDimension(axis).AsRealPixels(UIDimension::Calculation(configuration | ignoreChildren));
+    int parentSize = parent->GetDimension(axis).AsRealPixels(UIDimension::Calculation(configuration | ignoreChildren));
 
-    // Add padding
-    parentSize += parent->padding.SumAlong(axis);
+    // // Subtract padding
+    // parentSize -= parent->padding.SumAlong(axis);
 
     // Return percentage applied to this size
-    return size_t(float(parentSize) * value / 100);
+    return int(float(parentSize) * value / 100);
   }
 
   // If arrived here we have some error
@@ -234,9 +240,9 @@ void UIDimension::PrecalculateDefault()
   precalculationFrame = Game::currentFrame;
 }
 
-size_t UIDimension::GetHash() const { return HashTwo(size_t(axis), size_t(value * 100)); }
-size_t UIDimension2::GetHash() const { return HashTwo(x.GetHash(), y.GetHash()); }
-size_t UIDimension4::GetHash() const { return HashMany(top.GetHash(), right.GetHash(), bottom.GetHash(), left.GetHash()); }
+int UIDimension::GetHash() const { return HashTwo(int(axis), int(value * 100)); }
+int UIDimension2::GetHash() const { return HashTwo(x.GetHash(), y.GetHash()); }
+int UIDimension4::GetHash() const { return HashMany(top.GetHash(), right.GetHash(), bottom.GetHash(), left.GetHash()); }
 
 float UIDimension::VectorAxis(Vector2 vector, Axis axis)
 {

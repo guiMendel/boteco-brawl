@@ -23,9 +23,12 @@ public:
   std::string GetImagePath();
 
   // Is the size of the image texture (with style's imageScaling applied)
-  size_t GetContentRealPixelsAlong(
+  int GetContentRealPixelsAlong(
       UIDimension::Axis axis,
       UIDimension::Calculation config = UIDimension::Calculation::Default) override;
+
+  // Get how much scaling was applied to the size of the image on the requested axis
+  float GetScaling(UIDimension::Axis axis = UIDimension::Horizontal);
 
 private:
   // Allows a procedure to operate with a texture from image with color alterations already applied to it

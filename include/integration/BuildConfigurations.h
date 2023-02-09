@@ -17,4 +17,9 @@
 // How many collision matrix columns to print each time
 #define COLUMNS_PER_SECTION 4
 
+// === UI
+
+// Whether to render a debug pink box around UI Objects
+// #define RENDER_UI_OUTLINE
+
 #endif

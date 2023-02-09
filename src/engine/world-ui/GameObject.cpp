@@ -18,7 +18,7 @@ GameObject::GameObject(string name)
 
 GameObject::~GameObject()
 {
-  MESSAGE << "In destructor of " << GetName() << endl;
+  MESSAGE << "In destructor of " << *this << endl;
 
   // Detect leaked components
   for (auto [componentId, component] : components)

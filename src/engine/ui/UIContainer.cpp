@@ -2,13 +2,13 @@
 
 using namespace std;
 
-size_t UIFlexboxProperties::GetHash() const
+int UIFlexboxProperties::GetHash() const
 {
   // Dont' take reverse into consideration, as it doesn't affect the content box calculation
-  return HashMany(size_t(mainAxis),
+  return HashMany(int(mainAxis),
                   gap.GetHash(),
-                  size_t(placeItems.x * 100),
-                  size_t(placeItems.y * 100));
+                  int(placeItems.x * 100),
+                  int(placeItems.y * 100));
 }
 
 void UIFlexboxProperties::SetOwner(std::shared_ptr<UIObject> owner) { gap.SetOwner(owner); }
@@ -171,7 +171,7 @@ void UIContainer::PrecalculateDimensions()
   properties.gap.y.PrecalculateDefault();
 }
 
-size_t UIContainer::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::Calculation config)
+int UIContainer::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimension::Calculation config)
 {
   if (config == UIDimension::Calculation::Default)
     return childrenBox.GetRealPixelsAlong(axis);
@@ -179,7 +179,7 @@ size_t UIContainer::GetContentRealPixelsAlong(UIDimension::Axis axis, UIDimensio
   return GetIndependentContentRealPixels(axis, config);
 }
 
-size_t UIContainer::GetIndependentContentRealPixels(UIDimension::Axis axis, UIDimension::Calculation config) const
+int UIContainer::GetIndependentContentRealPixels(UIDimension::Axis axis, UIDimension::Calculation config) const
 {
   // Create a children box to calculate separately
   UIChildrenBox box;
