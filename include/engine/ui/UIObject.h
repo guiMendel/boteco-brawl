@@ -52,11 +52,21 @@ public:
 
   size_t GetPaddedHeight();
 
+  // Sets whether position is automatically calculated or given as an absolute value relative to parent
+  void SetPositionAbsolute(bool value);
+
+  // Checks if position is set to absolute
+  bool IsPositionAbsolute() const;
+
   // Width of the object (padding + content)
   UIDimension width;
 
   // Height of the object (padding + content)
   UIDimension height;
+
+  // Absolute coordinates of this object (relative to parent)
+  // When none, anchors self based on parent's place items flex property
+  UIDimension2 absolutePosition;
 
   // Minimum space between this object's edges and it's content box
   UIDimension4 padding;
@@ -74,8 +84,14 @@ private:
   // Precalculates the dimensions real pixel values for this frame
   virtual void PrecalculateDimensions();
 
+  // Gets real pixels of absolute position for this object
+  Vector2 GetAbsolutePosition();
+
   // The real pixel displacement between the top-left of the parent and this object's top-left
   Vector2 localPosition;
+
+  // Positioning type of this object uses absolute coordinates (relative to parent) instead of automatic calculation
+  bool positionAbsolute{false};
 
   // =================================
   // OBJECTS HIERARCHY

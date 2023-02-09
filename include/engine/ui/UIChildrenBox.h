@@ -64,8 +64,8 @@ public:
   std::shared_ptr<UIContainer> GetOwner() const;
 
 private:
-  // Returns the next iterator that points to a child that doesn't depend on it's paren't size
-  ChildIterator FindIndependent(ChildIterator childIterator, ChildIterator endIterator);
+  // Returns the next iterator that points to a child that doesn't depend on it's paren't size & isn't absolute
+  ChildIterator FindValidChild(ChildIterator childIterator, ChildIterator endIterator);
 
   // Real pixel size of the box along the container's main axis
   size_t mainSize{0};

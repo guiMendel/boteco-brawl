@@ -44,6 +44,10 @@ Vector2 UIObject::GetPosition()
   if (IsCanvasRoot())
     return localPosition;
 
+  // Catch absolute position
+  if (positionAbsolute)
+    localPosition = GetAbsolutePosition();
+
   return Lock(weakParent)->GetContentPosition() + localPosition;
 }
 
@@ -234,6 +238,7 @@ void UIObject::InitializeDimensions()
   height.SetOwner(GetShared());
   padding.SetOwner(GetShared());
   margin.SetOwner(GetShared());
+  absolutePosition.SetOwner(GetShared());
 }
 
 size_t UIObject::GetRealPixelsAlong(UIDimension::Axis axis, bool includePadding, bool includeMargin)
@@ -276,3 +281,44 @@ void UIObject::PrecalculateDimensions()
 size_t UIObject::GetPaddedWidth() { return width.AsRealPixels() + padding.SumAlong(UIDimension::Horizontal); }
 
 size_t UIObject::GetPaddedHeight() { return height.AsRealPixels() + padding.SumAlong(UIDimension::Vertical); }
+
+void UIObject::SetPositionAbsolute(bool value)
+{
+  if (positionAbsolute == value)
+    return;
+
+  positionAbsolute = value;
+
+  // Force parent recalculation
+  Lock(weakParent)->forceRecalculation = true;
+}
+
+Vector2 UIObject::GetAbsolutePosition()
+{
+  // Gets position for a dimension
+  auto getPositionFor = [this](UIDimension &dimension)
+  {
+    // If none, use parent's place items
+    if (dimension.GetType() == UIDimension::None)
+    {
+      LOCK(weakParent, parent);
+
+      // Get the placement for this axis
+      float axisPlacement = UIDimension::VectorAxis(parent->Flexbox().placeItems, dimension.axis);
+
+      // Get axis empty space
+      float emptySpace = float(parent->GetRealPixelsAlong(dimension.axis, false)) -
+                         float(GetRealPixelsAlong(dimension.axis, true, true));
+
+      // Distribute empty space with axis placement
+      return axisPlacement * emptySpace;
+    }
+
+    // Return dimension own calculation
+    return float(dimension.AsRealPixels());
+  };
+
+  return Vector2{getPositionFor(absolutePosition.x), getPositionFor(absolutePosition.y)};
+}
+
+bool UIObject::IsPositionAbsolute() const { return positionAbsolute; }

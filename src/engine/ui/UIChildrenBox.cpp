@@ -19,7 +19,7 @@ void UIChildrenGroup::AllocateChildren(ChildIterator &childIterator, ChildIterat
   do
   {
     AllocateChild(childIterator);
-    childIterator = box.FindIndependent(++childIterator, endIterator);
+    childIterator = box.FindValidChild(++childIterator, endIterator);
   } while (
       // Check if there are more children
       childIterator != endIterator &&
@@ -103,7 +103,7 @@ void UIChildrenBox::Recalculate()
 
   // Get children iterator
   auto children = owner->GetChildren();
-  auto childIterator = FindIndependent(children.begin(), children.end());
+  auto childIterator = FindValidChild(children.begin(), children.end());
 
   // Construct groups as they are filled
   while (childIterator != children.end())
@@ -138,7 +138,7 @@ void UIChildrenBox::RepositionChildren()
   auto alignment = owner->properties.placeItems;
 
   // Get an iterator for the children
-  auto childIterator = children.begin();
+  auto childIterator = FindValidChild(children.begin(), children.end());
 
   // Current cross position
   size_t crossPosition{0};
@@ -163,7 +163,7 @@ void UIChildrenBox::RepositionChildren()
       int crossEmptyOffset = int(crossBoxOffset + group.crossSize - itemCrossSize) * UIDimension::VectorAxis(alignment, crossAxis);
 
       // Get child
-      auto child = *childIterator++;
+      auto child = *childIterator;
 
       // Get margins for this child
       auto mainMargin = child->margin.Along(mainAxis).first.AsRealPixels();
@@ -173,6 +173,9 @@ void UIChildrenBox::RepositionChildren()
       child->SetLocalPositionAlong(mainAxis,
                                    mainPosition + mainMargin + mainEmptyOffset,
                                    crossPosition + crossMargin + crossEmptyOffset);
+
+      //  Get next child
+      childIterator = FindValidChild(++childIterator, children.end());
     }
 
     // Increment cross position
@@ -193,12 +196,12 @@ size_t UIChildrenBox::GetRealPixelsAlong(UIDimension::Axis axis)
     return crossSize;
 }
 
-UIChildrenBox::ChildIterator UIChildrenBox::FindIndependent(ChildIterator childIterator, ChildIterator endIterator)
+UIChildrenBox::ChildIterator UIChildrenBox::FindValidChild(ChildIterator childIterator, ChildIterator endIterator)
 {
   auto mainAxis = Lock(weakOwner)->Flexbox().mainAxis;
   auto crossAxis = UIDimension::GetCrossAxis(mainAxis);
 
-  auto isDependent = [this, mainAxis, crossAxis](shared_ptr<UIObject> child)
+  auto isInvalid = [this, mainAxis, crossAxis](shared_ptr<UIObject> child)
   {
     if (ignoreDependentChildrenMain && child->GetDimension(mainAxis).GetType() == UIDimension::Percent)
       return true;
@@ -206,10 +209,13 @@ UIChildrenBox::ChildIterator UIChildrenBox::FindIndependent(ChildIterator childI
     if (ignoreDependentChildrenCross && child->GetDimension(crossAxis).GetType() == UIDimension::Percent)
       return true;
 
+    if (child->IsPositionAbsolute())
+      return true;
+
     return false;
   };
 
-  while (childIterator != endIterator && isDependent(*childIterator))
+  while (childIterator != endIterator && isInvalid(*childIterator))
     childIterator++;
 
   return childIterator;

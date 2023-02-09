@@ -22,4 +22,7 @@ void CharacterSelectScene::InitializeObjects()
   auto background = mainContainer->AddChild<UIImage>("Background", "./assets/images/character-selection/background.png");
   // background->height.Set(UIDimension::Percent, 100);
   background->SetSizePreserveRatio(UIDimension::Vertical, UIDimension::Percent, 100);
+
+  // Position background absolutely on the center
+  background->SetPositionAbsolute(true);
 }
