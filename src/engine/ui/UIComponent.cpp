@@ -16,3 +16,11 @@ shared_ptr<UIComponent> UIComponent::GetShared() const
 
   return RequirePointerCast<UIComponent>(shared);
 }
+
+RenderLayer UIComponent::GetRenderLayer()
+{
+  return uiObject.GetRenderLayer();
+}
+
+// Use value from style
+int UIComponent::GetRenderOrder() { return uiObject.GetRenderOrder(); }

@@ -42,11 +42,13 @@ void UIImage::UseTexture(function<void(SDL_Texture *)> procedure)
 void UIImage::Render()
 {
   // Get target dimensions
-  int targetWidth = GetUnpaddedWidth();
-  int targetHeight = GetUnpaddedHeight();
+  int targetWidth = GetUnpaddedWidth() * GetScale().x;
+  int targetHeight = GetUnpaddedHeight() * GetScale().y;
 
   auto camera = Camera::GetMain();
-  auto pixelPosition = canvas.CanvasToScreen(GetContentPosition());
+  // auto pixelPosition = canvas.CanvasToScreen(GetContentPosition()) -
+  auto pixelPosition = canvas.CanvasToScreen(GetContentPosition()) -
+                       Vector2{float(GetUnpaddedWidth()), float(GetUnpaddedHeight())} * (GetScale() - Vector2::One()) / 2;
 
   SDL_Rect destinationRect = {int(pixelPosition.x), int(pixelPosition.y), int(targetWidth), int(targetHeight)};
   SDL_Rect sourceRect = {0, 0, textureWidth, textureHeight};

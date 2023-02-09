@@ -58,6 +58,9 @@ public:
   // Checks if position is set to absolute
   bool IsPositionAbsolute() const;
 
+  // Gets absolute scale of this object
+  Vector2 GetScale() const;
+
   // Width of the object (padding + content)
   UIDimension width;
 
@@ -79,6 +82,9 @@ public:
 
   // Offsets render position but has no effect over non-children objects' positions
   UIDimension2 offset;
+
+  // Scale of this object (does NOT affect positioning of other objects)
+  Vector2 localScale{1, 1};
 
 private:
   // Gives all dimensions this object's shared pointer

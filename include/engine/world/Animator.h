@@ -68,7 +68,7 @@ public:
   std::shared_ptr<Animation> GetCurrentAnimation() const;
 
   // Get the animation which is about to be played
-  // Only non null during the small window between Start being called and the current animation being stopped
+  // Only non null during the small window between Play being called and the current animation being stopped
   std::shared_ptr<Animation> GetIncomingAnimation() const;
 
   // Triggered on animation cycle end

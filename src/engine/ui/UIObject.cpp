@@ -3,6 +3,8 @@
 #include "UIContainer.h"
 #include "Canvas.h"
 
+#define RENDER_UI_OUTLINE
+
 using namespace std;
 
 UIObject::UIObject(Canvas &canvas, string name, std::shared_ptr<UIContainer> parent)
@@ -51,6 +53,8 @@ Vector2 UIObject::GetPosition()
   if (positionAbsolute)
   {
     localPosition = GetAbsolutePosition();
+
+    // cout << *this << Lock(weakParent)->GetPosition() + localPosition + offset.AsVector() << endl;
 
     return Lock(weakParent)->GetPosition() + localPosition + offset.AsVector();
   }
@@ -333,3 +337,11 @@ Vector2 UIObject::GetAbsolutePosition()
 }
 
 bool UIObject::IsPositionAbsolute() const { return positionAbsolute; }
+
+Vector2 UIObject::GetScale() const
+{
+  if (IsCanvasRoot())
+    return localScale;
+
+  return Lock(weakParent)->GetScale() * localScale;
+}

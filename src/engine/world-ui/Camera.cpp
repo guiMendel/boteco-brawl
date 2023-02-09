@@ -45,32 +45,12 @@ void Camera::SetSize(float newSize)
 
 Vector2 Camera::GetTopLeft() const
 {
-  static auto currentPixelsPerUnit = realPixelsPerUnit;
-
-  static Vector2 topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
-
-  if (currentPixelsPerUnit != realPixelsPerUnit)
-  {
-    currentPixelsPerUnit = realPixelsPerUnit;
-    topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
-  }
-
-  return worldObject.GetPosition() + topLeftDisplacement;
+  return worldObject.GetPosition() + screenQuarter * unitsPerRealPixel;
 }
 
 void Camera::SetTopLeft(Vector2 newPosition)
 {
-  static auto currentPixelsPerUnit = realPixelsPerUnit;
-
-  static Vector2 topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
-
-  if (currentPixelsPerUnit != realPixelsPerUnit)
-  {
-    currentPixelsPerUnit = realPixelsPerUnit;
-    topLeftDisplacement = screenQuarter / currentPixelsPerUnit;
-  }
-
-  worldObject.SetPosition(newPosition - topLeftDisplacement);
+  worldObject.SetPosition(newPosition - screenQuarter * unitsPerRealPixel);
 }
 
 // Convert coordinates

@@ -3,6 +3,8 @@
 #include "Canvas.h"
 #include "UIContainer.h"
 #include "UIImage.h"
+#include "UIBackground.h"
+#include "SplashAnimation.h"
 
 using namespace std;
 
@@ -37,11 +39,24 @@ void SplashScene::InitializeObjects()
   // === CONTENT
 
   // Splash art
-  mainContainer->AddChild<UIImage>("Splash", "./assets/images/splash-screen/splash.png");
+  auto splash = mainContainer->AddChild<UIImage>("Splash", "./assets/images/splash-screen/splash.png");
+  splash->localScale = {20, 20};
 
   // Press start
   mainContainer->AddChild<UIImage>("Splash", "./assets/images/splash-screen/press-start.png");
 
   // Funny text
   mainContainer->AddChild<UIImage>("Splash", "./assets/images/splash-screen/text.png");
+
+  // === CURTAIN
+
+  auto curtain = mainContainer->AddChild<UIContainer>("Curtain")->AddComponent<UIBackground>(Color::Black());
+  curtain->uiObject.style->renderOrder.Set(10);
+  curtain->uiObject.SetPositionAbsolute(true);
+  curtain->uiObject.width.Set(UIDimension::Percent, 100);
+  curtain->uiObject.height.Set(UIDimension::Percent, 100);
+
+  // === ANIMATION
+
+  mainContainer->AddComponent<SplashAnimation>(splash, nullptr, curtain);
 }
