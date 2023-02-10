@@ -47,9 +47,12 @@ void SplashScene::InitializeObjects()
 
   // Splash subtitle
   auto subtitle = mainContainer->AddChild<UIImage>("Subtitle", "./assets/images/splash-screen/subtitle.png");
+  subtitle->SetEnabled(false);
+  subtitle->style->renderOrder.Set(5);
 
   // Press start
-  mainContainer->AddChild<UIImage>("StartPrompt", "./assets/images/splash-screen/press-start.png");
+  auto prompt = mainContainer->AddChild<UIImage>("StartPrompt", "./assets/images/splash-screen/press-start.png");
+  prompt->style->imageColor.Set(Color(255, 255, 255, 0));
 
   // Funny text
   mainContainer->AddChild<UIImage>("Text", "./assets/images/splash-screen/text.png");
@@ -75,5 +78,5 @@ void SplashScene::InitializeObjects()
   stompParticles->emitOnStart = false;
 
   // Add animation handler
-  mainContainer->AddComponent<SplashAnimation>(splash, subtitle, curtain, stompParticles);
+  mainContainer->AddComponent<SplashAnimation>(splash, subtitle, prompt, curtain, stompParticles);
 }

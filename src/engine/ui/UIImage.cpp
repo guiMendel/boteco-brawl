@@ -41,6 +41,9 @@ void UIImage::UseTexture(function<void(SDL_Texture *)> procedure)
 
 void UIImage::Render()
 {
+  if (IsEnabled() == false)
+    return;
+
   // Get target dimensions
   int targetWidth = GetUnpaddedWidth() * GetScale().x;
   int targetHeight = GetUnpaddedHeight() * GetScale().y;

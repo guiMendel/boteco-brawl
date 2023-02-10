@@ -3,7 +3,7 @@
 #include "UIContainer.h"
 #include "Canvas.h"
 
-#define RENDER_UI_OUTLINE
+// #define RENDER_UI_OUTLINE
 
 using namespace std;
 

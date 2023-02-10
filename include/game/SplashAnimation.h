@@ -19,6 +19,7 @@ public:
       GameObject &associatedObject,
       std::shared_ptr<UIImage> splash,
       std::shared_ptr<UIImage> subtitle,
+      std::shared_ptr<UIImage> prompt,
       std::shared_ptr<UIBackground> curtain,
       std::shared_ptr<ParticleEmitter> stompParticles);
   virtual ~SplashAnimation() {}
@@ -29,6 +30,7 @@ public:
 private:
   std::weak_ptr<UIImage> weakSplash;
   std::weak_ptr<UIImage> weakSubtitle;
+  std::weak_ptr<UIImage> weakPrompt;
   std::weak_ptr<UIBackground> weakCurtain;
   std::weak_ptr<ParticleEmitter> weakStompParticles;
 

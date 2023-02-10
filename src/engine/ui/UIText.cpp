@@ -32,6 +32,9 @@ void UIText::Start()
 
 void UIText::Render()
 {
+  if (IsEnabled() == false)
+    return;
+
   // Get the real position
   // Offset coordinates to match anchor point
   Vector2 realPosition{canvas.CanvasToScreen(GetContentPosition())};
