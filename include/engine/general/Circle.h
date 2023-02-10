@@ -48,6 +48,10 @@ public:
   // The scale must have the same absolute value for both axes, otherwise an error will be raised
   void Scale(Vector2 scale) override;
 
+  Vector2 SamplePoint() const override;
+  
+  void DebugDrawAt(Vector2 position, Color color) override;
+
   explicit operator std::string() const override;
 };
 

@@ -1,4 +1,5 @@
 #include "Circle.h"
+#include "Debug.h"
 
 using namespace std;
 using namespace Helper;
@@ -68,4 +69,14 @@ void Circle::Scale(Vector2 scale)
   Assert(scale.x == scale.y, "Scale for a circle must have the same absolute values for both x and y coordinates");
 
   radius *= scale.x;
+}
+
+Vector2 Circle::SamplePoint() const
+{
+  return Vector2::Angled(RandomRange(0.0f, 2 * M_PI), RandomRange(0.0f, radius)) + center;
+}
+
+void Circle::DebugDrawAt(Vector2 position, Color color)
+{
+  Debug::DrawCircle(*this + position, color);
 }

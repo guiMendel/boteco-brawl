@@ -11,7 +11,6 @@
 #include <functional>
 #include <list>
 
-
 struct ParticleEmissionParameters
 {
   template <class T>
@@ -46,15 +45,13 @@ class ParticleEmitter : public WorldComponent
 public:
   Event OnStop;
 
-  ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer = RenderLayer::Default, float radius = 0.01, bool loop = false, float duration = 1);
+  ParticleEmitter(GameObject &associatedObject,
+                  RenderLayer renderLayer = RenderLayer::Default,
+                  std::unique_ptr<Shape> origin = std::make_unique<Circle>(0.01),
+                  bool loop = false,
+                  float duration = 1);
 
   virtual ~ParticleEmitter() {}
-
-  void SetOffset(Vector2 offset);
-
-  void SetRadius(float radius);
-
-  Circle GetOrigin() const;
 
   void Start() override;
   void PhysicsUpdate(float deltaTime) override;
@@ -89,6 +86,13 @@ public:
   // Whether to emit on start hook
   bool emitOnStart{true};
 
+  // Render order
+  int renderOrder{0};
+
+  // Circle from which particles will be emitted
+  // Its coordinates act as an offset from the object's position
+  std::unique_ptr<Shape> origin;
+
 private:
   void Emit();
 
@@ -97,10 +101,6 @@ private:
 
   // Gets a list of all active particles emitted by this emitter
   std::list<std::shared_ptr<Particle>> GetEmittedParticles();
-
-  // Circle from which particles will be emitted
-  // Its coordinates act as an offset from the object's position
-  Circle origin;
 
   // Whether is currently emitting
   bool active{false};
@@ -116,9 +116,6 @@ private:
 
   // Layer to render to
   RenderLayer renderLayer;
-
-  // Render order
-  int renderOrder{0};
 
   // Current value of params in the current cycle
   ParticleEmissionParameters currentParams;

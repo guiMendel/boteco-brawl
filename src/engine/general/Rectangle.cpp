@@ -1,8 +1,12 @@
 #include "Rectangle.h"
+#include "Debug.h"
 
 using namespace std;
+using namespace Helper;
 
 Rectangle::Rectangle(const Vector2 &coordinates, float width, float height) : Shape(coordinates), width(width), height(height) {}
+
+Rectangle::Rectangle(float width, float height) : Rectangle({0, 0}, width, height) {}
 
 Rectangle::Rectangle() : Rectangle(Vector2::Zero(), 0, 0) {}
 
@@ -130,4 +134,14 @@ void Rectangle::Scale(Vector2 scale)
 Vector2 Rectangle::PivotAroundCenter(Vector2 point, float angleOffset) const
 {
   return center.Pivot(point, rotation + angleOffset);
+}
+
+Vector2 Rectangle::SamplePoint() const
+{
+  return Vector2{RandomRange(-width / 2, width / 2), RandomRange(-height / 2, height / 2)} + center;
+}
+
+void Rectangle::DebugDrawAt(Vector2 position, Color color)
+{
+  Debug::DrawBox(*this + position, color);
 }

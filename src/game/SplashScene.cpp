@@ -5,6 +5,7 @@
 #include "UIImage.h"
 #include "UIBackground.h"
 #include "SplashAnimation.h"
+#include "ParticleEmitter.h"
 
 using namespace std;
 
@@ -40,13 +41,18 @@ void SplashScene::InitializeObjects()
 
   // Splash art
   auto splash = mainContainer->AddChild<UIImage>("Splash", "./assets/images/splash-screen/splash.png");
-  splash->localScale = {20, 20};
+  splash->localScale = {40, 40};
+  splash->style->renderOrder.Set(2);
+  splash->margin.bottom.Set(UIDimension::Percent, -10);
+
+  // Splash subtitle
+  auto subtitle = mainContainer->AddChild<UIImage>("Subtitle", "./assets/images/splash-screen/subtitle.png");
 
   // Press start
-  mainContainer->AddChild<UIImage>("Splash", "./assets/images/splash-screen/press-start.png");
+  mainContainer->AddChild<UIImage>("StartPrompt", "./assets/images/splash-screen/press-start.png");
 
   // Funny text
-  mainContainer->AddChild<UIImage>("Splash", "./assets/images/splash-screen/text.png");
+  mainContainer->AddChild<UIImage>("Text", "./assets/images/splash-screen/text.png");
 
   // === CURTAIN
 
@@ -58,5 +64,16 @@ void SplashScene::InitializeObjects()
 
   // === ANIMATION
 
-  mainContainer->AddComponent<SplashAnimation>(splash, nullptr, curtain);
+  // Add particle emitter for splash stomp
+  auto stompParticles = NewObject<WorldObject>("StompParticles")->AddComponent<ParticleEmitter>(RenderLayer::UI, make_unique<Rectangle>(splash->width.As(UIDimension::WorldUnits), splash->height.As(UIDimension::WorldUnits)), false, 0.01);
+  stompParticles->emission.color = {Color(225, 170, 116), Color(185, 130, 76)};
+  stompParticles->emission.frequency = {0.0001, 0.00001};
+  stompParticles->emission.lifetime = {0.5, 5};
+  stompParticles->emission.speed = {1, 2};
+  stompParticles->emission.gravityModifier = {Vector2::Down(0.05), Vector2::Down(0.1)};
+  stompParticles->renderOrder = 15;
+  stompParticles->emitOnStart = false;
+
+  // Add animation handler
+  mainContainer->AddComponent<SplashAnimation>(splash, subtitle, curtain, stompParticles);
 }

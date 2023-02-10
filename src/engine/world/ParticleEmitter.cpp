@@ -13,24 +13,17 @@ ParticleEmissionParameters::ParticleEmissionParameters()
       lifetime({1, 2}),
       gravityModifier({Vector2::Zero(), Vector2::Zero()}) {}
 
-ParticleEmitter::ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer, float radius, bool loop, float duration)
+ParticleEmitter::ParticleEmitter(GameObject &associatedObject, RenderLayer renderLayer, unique_ptr<Shape> origin, bool loop, float duration)
     : WorldComponent(associatedObject),
       duration(duration),
       loop(loop),
-      origin(radius),
+      origin(origin.release()),
       renderLayer(renderLayer) {}
-
-void ParticleEmitter::SetOffset(Vector2 offset) { origin.center = offset; }
-void ParticleEmitter::SetRadius(float radius) { origin.radius = radius; }
-
-Circle ParticleEmitter::GetOrigin() const { return origin; }
 
 void ParticleEmitter::Render()
 {
-  // cout << worldObject.GetPosition() << endl;
-
   // Debug
-  Debug::DrawCircle(GetOrigin() + worldObject.GetPosition(), Color::Yellow());
+  origin->DebugDrawAt(worldObject.GetPosition(), Color::Yellow());
 
   // Render each of this emitter's particles
   for (auto particle : GetEmittedParticles())
@@ -89,9 +82,7 @@ void ParticleEmitter::Emit()
   Vector2 gravityModifier = RandomRange(currentParams.gravityModifier);
 
   // Get position
-  float positionAngle = RandomRange(0.0f, 2 * M_PI);
-  float positionRadius = RandomRange(0.0f, origin.radius);
-  Vector2 position = worldObject.GetPosition() + origin.center + Vector2::Angled(positionAngle, positionRadius);
+  Vector2 position = worldObject.GetPosition() + origin->SamplePoint();
 
   // Create particle
   auto particle = GetSystem().CreateParticle(
@@ -119,7 +110,7 @@ void ParticleEmitter::Stop()
 {
   if (active == false)
     return;
-    
+
   cycleLifetime = 0;
   active = false;
   OnStop.Invoke();

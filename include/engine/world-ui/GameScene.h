@@ -123,7 +123,7 @@ public:
   template <class T, typename... Args>
   std::shared_ptr<T> NewObject(Args &&...args)
   {
-    // Create the object, which automatically registers itself to the scene
+    // Create the object
     auto object = std::make_shared<T>(std::forward<Args>(args)...);
 
     // Request it's registration

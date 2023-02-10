@@ -21,18 +21,18 @@ SplashAnimation::SplashAnimation(
     GameObject &associatedObject,
     shared_ptr<UIImage> splash,
     shared_ptr<UIImage> subtitle,
-    shared_ptr<UIBackground> curtain)
+    shared_ptr<UIBackground> curtain,
+    shared_ptr<ParticleEmitter> stompParticles)
     : UIComponent(associatedObject),
       weakSplash(splash),
       weakSubtitle(subtitle),
-      weakCurtain(curtain) {}
+      weakCurtain(curtain),
+      weakStompParticles(stompParticles) {}
 
 void SplashAnimation::Start()
 {
-  cout << "Start it" << endl;
-
-  auto splashFallSpeed = make_shared<float>(0.1);
-  auto splashFallAcceleration = make_shared<float>(1);
+  auto splashFallSpeed = make_shared<float>(0);
+  auto splashFallAcceleration = make_shared<float>(15);
 
   // Slam splash art on screen
   auto slamSplash = [this, splashFallSpeed, splashFallAcceleration](float deltaTime, Animation &animation)
@@ -40,7 +40,7 @@ void SplashAnimation::Start()
     // Curtain fade in
     LOCK(weakCurtain, curtain);
 
-    curtain->color.alpha = Color::ClampValid(curtain->color.alpha - 60 * deltaTime);
+    curtain->color.alpha = Color::ClampValid(curtain->color.alpha - 120 * deltaTime);
 
     // Splash fall
     LOCK(weakSplash, splash);
@@ -54,13 +54,28 @@ void SplashAnimation::Start()
     if (splash->localScale.x <= 1 || splash->localScale.y <= 1)
     {
       splash->localScale = Vector2::One();
+      curtain->color.alpha = 0;
 
-      if (curtain->color.alpha == 0)
-        animation.done = true;
+      animation.done = true;
     }
   };
 
-  auto slamAnimation = make_shared<Animation>(slamSplash);
+  auto slamEffect = [this](float, Animation &animation)
+  {
+    LOCK(weakSplash, splash);
+    LOCK(weakStompParticles, stompParticles);
+
+    Rectangle *box = dynamic_cast<Rectangle *>(stompParticles->origin.get());
+    stompParticles->worldObject.SetPosition(splash->canvas.CanvasToWorld(splash->GetPosition()) +
+                                            Vector2{box->width, box->height} / 2);
+
+    stompParticles->StartEmission();
+
+    animation.done = true;
+  };
+
+  auto slamEffectEnd = make_shared<Animation>(slamEffect);
+  auto slamAnimation = make_shared<Animation>(slamSplash, slamEffectEnd);
 
   currentAnimation = slamAnimation;
 }

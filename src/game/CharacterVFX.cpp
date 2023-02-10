@@ -2,6 +2,8 @@
 #include "Heat.h"
 #include "BoxCollider.h"
 
+using namespace std;
+
 // Minimum speed to start emitting smoke
 static const float minSmokeSpeed{6};
 
@@ -16,7 +18,9 @@ void CharacterVFX::Awake()
 
   // Configure dash emitter
   auto dashEmitter = emitterObject->AddComponent<ParticleEmitter>(
-      RenderLayer::VFX, characterBox.GetMinDimension() / 2, true);
+      RenderLayer::VFX,
+      make_unique<Circle>(characterBox.GetMinDimension() / 2),
+      true);
 
   weakDashEmitter = dashEmitter;
 
@@ -35,7 +39,9 @@ void CharacterVFX::Awake()
 
   // Configure smoke emitter
   auto smokeEmitter = emitterObject->AddComponent<ParticleEmitter>(
-      RenderLayer::VFX, characterBox.GetMinDimension() / 2, true);
+      RenderLayer::VFX,
+      make_unique<Circle>(characterBox.GetMinDimension() / 2),
+      true);
 
   weakSmokeEmitter = smokeEmitter;
 

@@ -20,7 +20,10 @@ void ParticleFX::PlayEffectAt(Vector2 position, float radius, float duration, Pa
 {
   // Create a temporary child to hold the emitter
   auto emitter = worldObject.CreateChild("FXEmitter", position)
-                     ->AddComponent<ParticleEmitter>(RenderLayer::VFX, radius, false, duration);
+                     ->AddComponent<ParticleEmitter>(RenderLayer::VFX,
+                     make_unique<Circle>(radius),
+                     false,
+                     duration);
   emitter->emission = params;
 
   // Play

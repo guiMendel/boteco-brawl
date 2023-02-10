@@ -6,6 +6,7 @@
 #include "UIText.h"
 #include "UIContainer.h"
 #include "UIBackground.h"
+#include "ParticleEmitter.h"
 
 // Maps input from some source (player or AI) to the the creation and dispatch of the corresponding actions
 class SplashAnimation : public UIComponent
@@ -18,7 +19,8 @@ public:
       GameObject &associatedObject,
       std::shared_ptr<UIImage> splash,
       std::shared_ptr<UIImage> subtitle,
-      std::shared_ptr<UIBackground> curtain);
+      std::shared_ptr<UIBackground> curtain,
+      std::shared_ptr<ParticleEmitter> stompParticles);
   virtual ~SplashAnimation() {}
 
   void Start() override;
@@ -28,6 +30,7 @@ private:
   std::weak_ptr<UIImage> weakSplash;
   std::weak_ptr<UIImage> weakSubtitle;
   std::weak_ptr<UIBackground> weakCurtain;
+  std::weak_ptr<ParticleEmitter> weakStompParticles;
 
   struct Animation;
   std::shared_ptr<Animation> currentAnimation;

@@ -25,6 +25,8 @@ public:
   // === CONSTRUCTORS
 
   Rectangle(const Vector2 &coordinates, float width, float height);
+  Rectangle(float width, float height);
+  Rectangle(std::initializer_list<float> list) = delete;
   Rectangle();
   Rectangle(const Rectangle &other);
   Rectangle(const Rectangle &&other);
@@ -55,6 +57,10 @@ public:
   // Scale rect's dimensions by the given amount
   // This uses axes relative to the object's rotation, not global axes
   void Scale(Vector2 scale) override;
+
+  Vector2 SamplePoint() const override;
+
+  void DebugDrawAt(Vector2 position, Color color) override;
 
   Vector2 TopLeft(float pivoted = 0.0f) const;
   Vector2 BottomLeft(float pivoted = 0.0f) const;

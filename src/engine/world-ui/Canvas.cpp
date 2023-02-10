@@ -25,7 +25,7 @@ Vector2 Canvas::GetAnchorPosition() const
   switch (space)
   {
   case Space::Global:
-    return Camera::GetMain()->ScreenToWorld({0, 0});
+    return Camera::GetMain()->ScreenToWorld(Vector2{0, 0});
 
   case Space::WorldFixedSize:
     return gameObject.GetPosition() - Camera::GetMain()->GetUnitsPerRealPixel() * GetSize() * anchorPoint;

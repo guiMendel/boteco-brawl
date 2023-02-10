@@ -5,6 +5,7 @@
 #include <string>
 #include "Vector2.h"
 #include "Helper.h"
+#include "Color.h"
 
 class Shape
 {
@@ -34,6 +35,13 @@ public:
 
   // Rotate by the given amount
   void Rotate(float rotation);
+
+  // Gets the offset for a random point inside the shape's area
+  // The point is an offset relative to the shape's center of mass
+  virtual Vector2 SamplePoint() const = 0;
+
+  // Draws self on screen using debug
+  virtual void DebugDrawAt(Vector2 position, Color color) = 0;
 
   // === CASTS
 

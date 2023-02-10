@@ -310,7 +310,9 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<WorldObject> 
     body->gravityScale = gravityScale;
 
     // Release smoke as it passes
-    auto emitter = projectile->AddComponent<ParticleEmitter>(RenderLayer::VFX, 0.2, true);
+    auto emitter = projectile->AddComponent<ParticleEmitter>(RenderLayer::VFX,
+                                                             make_unique<Circle>(0.2),
+                                                             true);
 
     emitter->emission.color = {Color(90, 90, 90), Color(200, 200, 200)};
     emitter->emission.frequency = {0.001, 0.2};
