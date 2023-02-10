@@ -129,7 +129,7 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   auto header = selectionContainer->AddChild<UIContainer>("Header");
 
   // Character options
-  auto characters = selectionContainer->AddChild<UIContainer>("CharacterOptions");
+  auto optionsGrid = selectionContainer->AddChild<UIContainer>("CharacterOptions");
 
   // Player selections
   auto selections = selectionContainer->AddChild<UIContainer>("PlayerSelections");
@@ -145,7 +145,33 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
 
   // === OPTIONS
 
-  characters->AddChild<UIImage>("CharacterGrid", "./assets/images/character-selection/character-options/options.png");
+  optionsGrid->Flexbox().wrap = true;
+  optionsGrid->Flexbox().gap.x.Set(UIDimension::RealPixels, 55);
+  optionsGrid->Flexbox().gap.y.Set(UIDimension::RealPixels, 40);
+  optionsGrid->width.SetMax(UIDimension::Percent, 100);
+
+  // Adds a character option given its assets
+  auto addOption = [optionsGrid](string optionName, string optionDescriptionPath)
+  {
+    auto option = optionsGrid->AddChild<UIContainer>("Option" + optionName);
+    option->Flexbox().placeItems = {0.5, 0.5};
+    option->Flexbox().gap.Set(UIDimension::RealPixels, 10);
+
+    option->AddChild<UIImage>("Portrait", "./assets/images/character-selection/character-options/option-portrait.png");
+    option->AddChild<UIImage>("Description", optionDescriptionPath);
+  };
+
+  // Kafta
+  addOption("Kafta", "./assets/images/character-selection/character-options/option-kafta.png");
+
+  // Pastel
+  addOption("Pastel", "./assets/images/character-selection/character-options/option-pastel.png");
+
+  // Kiba
+  addOption("Kiba", "./assets/images/character-selection/character-options/option-kiba.png");
+
+  // Random
+  addOption("Random", "./assets/images/character-selection/character-options/option-unknown.png");
 
   // === PLAYER SELECTIONS
 

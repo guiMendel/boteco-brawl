@@ -2,6 +2,8 @@
 #include "Debug.h"
 #include "ParticleEmitter.h"
 
+// #define RENDER_EMITTER_OUTLINE
+
 using namespace std;
 using namespace Helper;
 
@@ -22,8 +24,10 @@ ParticleEmitter::ParticleEmitter(GameObject &associatedObject, RenderLayer rende
 
 void ParticleEmitter::Render()
 {
+#ifdef RENDER_EMITTER_OUTLINE
   // Debug
   origin->DebugDrawAt(worldObject.GetPosition(), Color::Yellow());
+#endif
 
   // Render each of this emitter's particles
   for (auto particle : GetEmittedParticles())

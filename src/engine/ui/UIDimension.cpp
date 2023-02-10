@@ -110,7 +110,8 @@ Vector2 UIDimension2::AsVector()
   return Vector2(x.AsRealPixels(), y.AsRealPixels());
 }
 
-UIDimension::UIDimension(Axis axis, UnitType initialType) : axis(axis), type(initialType) {}
+UIDimension::UIDimension(Axis axis, UnitType initialType)
+    : axis(axis), type(initialType), maxType(None), minType(None) {}
 
 int UIDimension::AsRealPixels() { return AsRealPixels(Default); }
 
@@ -129,7 +130,7 @@ int UIDimension::AsRealPixels(Calculation configuration)
   }
 
   // Otherwise, perform calculation
-  return CalculateRealPixelSize(configuration);
+  return CalculateRealPixelSize(value, type, configuration);
 }
 
 float UIDimension::As(UnitType requestedType)
@@ -187,6 +188,24 @@ void UIDimension::Set(UnitType newType, float newValue)
   precalculationFrame = Game::currentFrame - 1;
 }
 
+void UIDimension::SetMax(UnitType newType, float newValue)
+{
+  maxType = newType;
+  maxValue = newValue;
+
+  // Invalidate calculation cache
+  precalculationFrame = Game::currentFrame - 1;
+}
+
+void UIDimension::SetMin(UnitType newType, float newValue)
+{
+  minType = newType;
+  minValue = newValue;
+
+  // Invalidate calculation cache
+  precalculationFrame = Game::currentFrame - 1;
+}
+
 void UIDimension::SetOwner(std::shared_ptr<UIObject> owner)
 {
   weakOwner = owner;
@@ -200,11 +219,20 @@ UIDimension::Axis UIDimension::GetCrossAxis(Axis axis)
   return axis == Horizontal ? Vertical : Horizontal;
 }
 
-int UIDimension::CalculateRealPixelSize(Calculation configuration) const
+int UIDimension::CalculateRealPixelSize(float value, UnitType type, Calculation configuration, bool clamp) const
 {
+  // Min & max values
+  int minPixels{numeric_limits<int>::min()}, maxPixels{numeric_limits<int>::max()};
+
+  if (clamp)
+  {
+    minPixels = GetMinSize(configuration);
+    maxPixels = GetMaxSize(configuration);
+  }
+
   // Catch happy case
   if (type == RealPixels)
-    return value;
+    return Clamp(int(value), minPixels, maxPixels);
 
   // Catch happy case
   if (type == None)
@@ -212,14 +240,11 @@ int UIDimension::CalculateRealPixelSize(Calculation configuration) const
 
   // Camera dependent
   if (type == WorldUnits)
-    return value * Lock(Lock(weakOwner)->canvas.weakCamera)->GetRealPixelsPerUnit();
+    return Clamp(int(value * Lock(Lock(weakOwner)->canvas.weakCamera)->GetRealPixelsPerUnit()), minPixels, maxPixels);
 
   // Catch content-dependent cases
   if (type == MaxContent || type == MinContent)
-  {
-    auto result = Lock(weakOwner)->GetContentRealPixelsAlong(axis, configuration);
-    return result;
-  }
+    return Clamp(Lock(weakOwner)->GetContentRealPixelsAlong(axis, configuration), minPixels, maxPixels);
 
   // When in percent
   if (type == Percent)
@@ -229,11 +254,8 @@ int UIDimension::CalculateRealPixelSize(Calculation configuration) const
     Calculation ignoreChildren = axis == Horizontal ? IgnoreDependentChildrenX : IgnoreDependentChildrenY;
     int parentSize = parent->GetDimension(axis).AsRealPixels(UIDimension::Calculation(configuration | ignoreChildren));
 
-    // // Subtract padding
-    // parentSize -= parent->padding.SumAlong(axis);
-
     // Return percentage applied to this size
-    return int(float(parentSize) * value / 100);
+    return Clamp(int(float(parentSize) * value / 100), minPixels, maxPixels);
   }
 
   // If arrived here we have some error
@@ -242,7 +264,7 @@ int UIDimension::CalculateRealPixelSize(Calculation configuration) const
 
 void UIDimension::PrecalculateDefault()
 {
-  auto newSize = CalculateRealPixelSize(Default);
+  auto newSize = CalculateRealPixelSize(value, type, Default);
 
   // Compare
   if (newSize == lastRealPixelSize)
@@ -268,3 +290,27 @@ float UIDimension::VectorAxis(Vector2 vector, Axis axis)
 }
 
 UIDimension::UnitType UIDimension::GetType() const { return type; }
+
+UIDimension::UnitType UIDimension::GetMaxType() const { return maxType; }
+
+UIDimension::UnitType UIDimension::GetMinType() const { return minType; }
+
+int UIDimension::GetMaxSize() const { return GetMaxSize(Default); }
+
+int UIDimension::GetMaxSize(Calculation configuration) const
+{
+  if (maxType == None)
+    return numeric_limits<int>::max();
+
+  return CalculateRealPixelSize(maxValue, maxType, configuration, false);
+}
+
+int UIDimension::GetMinSize() const { return GetMinSize(Default); }
+
+int UIDimension::GetMinSize(Calculation configuration) const
+{
+  if (minType == None)
+    return numeric_limits<int>::min();
+
+  return CalculateRealPixelSize(minValue, minType, configuration, false);
+}

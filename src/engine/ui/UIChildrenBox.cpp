@@ -60,21 +60,25 @@ int UIChildrenGroup::GetMaxMainSize() const
     return numeric_limits<int>::max();
 
   auto mainAxis = owner->Flexbox().mainAxis;
-  auto dimensionType = owner->GetDimension(mainAxis).GetType();
+  auto mainDimension = owner->GetDimension(mainAxis);
 
-  // For max content owners, no limit
-  if (dimensionType == UIDimension::MaxContent)
-    return numeric_limits<int>::max();
+  // For max content owners
+  if (mainDimension.GetType() == UIDimension::MaxContent)
+  {
+    // Return max dimension size
+    return mainDimension.GetMaxSize();
+  }
 
   // For min content owners, get the maximum main size of it's children
-  else if (dimensionType == UIDimension::MinContent)
+  else if (mainDimension.GetType() == UIDimension::MinContent)
   {
     int maxChildSize{0};
 
     for (auto child : owner->GetChildren())
       maxChildSize = max(maxChildSize, child->GetRealPixelsAlong(mainAxis, true, true));
 
-    return maxChildSize;
+    // And also ensure it does not exceed the max size
+    return min(maxChildSize, mainDimension.GetMaxSize());
   }
 
   // Any other cases, just return the main size of the owner
@@ -93,7 +97,7 @@ void UIChildrenBox::Recalculate()
 
   // Get cross gap
   auto &properties = owner->Flexbox();
-  auto crossGap = properties.gap.Along(properties.mainAxis).AsRealPixels();
+  auto crossGap = properties.gap.Along(UIDimension::GetCrossAxis(properties.mainAxis)).AsRealPixels();
 
   // Reset dimensions
   mainSize = 0;
@@ -213,10 +217,18 @@ UIChildrenBox::ChildIterator UIChildrenBox::FindValidChild(ChildIterator childIt
 
   auto isInvalid = [this, mainAxis, crossAxis](shared_ptr<UIObject> child)
   {
-    if (ignoreDependentChildrenMain && child->GetDimension(mainAxis).GetType() == UIDimension::Percent)
+    auto &childMain = child->GetDimension(mainAxis);
+    if (ignoreDependentChildrenMain &&
+        (childMain.GetType() == UIDimension::Percent ||
+         childMain.GetMaxType() == UIDimension::Percent ||
+         childMain.GetMinType() == UIDimension::Percent))
       return true;
 
-    if (ignoreDependentChildrenCross && child->GetDimension(crossAxis).GetType() == UIDimension::Percent)
+    auto &childCross = child->GetDimension(crossAxis);
+    if (ignoreDependentChildrenCross &&
+        (childCross.GetType() == UIDimension::Percent ||
+         childCross.GetMaxType() == UIDimension::Percent ||
+         childCross.GetMinType() == UIDimension::Percent))
       return true;
 
     if (child->IsPositionAbsolute())

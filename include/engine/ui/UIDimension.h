@@ -66,6 +66,12 @@ public:
   // Set a new value for this dimension
   void Set(UnitType type, float value = 0);
 
+  // Set a new max value for this dimension
+  void SetMax(UnitType type, float value = 0);
+
+  // Set a new min value for this dimension
+  void SetMin(UnitType type, float value = 0);
+
   // Get this dimensions specifically as real pixels
   int AsRealPixels();
 
@@ -77,6 +83,18 @@ public:
 
   // Get the currently set dimension type
   UnitType GetType() const;
+
+  // Get the currently set dimension type
+  UnitType GetMaxType() const;
+
+  // Get the currently set dimension type
+  UnitType GetMinType() const;
+
+  // Get max size in real pixels
+  int GetMaxSize() const;
+
+  // Get min size in real pixels
+  int GetMinSize() const;
 
   // Returns the Vector2 value corresponding to the provided axis
   static float VectorAxis(Vector2 vector, Axis axis);
@@ -111,11 +129,17 @@ private:
   void SetOwner(std::shared_ptr<UIObject> weakOwner);
 
   // Calculates dimension in real pixels
-  int CalculateRealPixelSize(Calculation configuration) const;
+  int CalculateRealPixelSize(float value, UnitType requestedType, Calculation configuration, bool clamp = true) const;
 
   // Calculates and stores real pixel size with default configuration
   // Raises event if size change is detected from last calculation
   void PrecalculateDefault();
+
+  // Get max size in real pixels
+  int GetMaxSize(Calculation configuration) const;
+
+  // Get min size in real pixels
+  int GetMinSize(Calculation configuration) const;
 
   // Last calculated real pixel size
   int lastRealPixelSize{0};
@@ -128,6 +152,18 @@ private:
 
   // Internal dimension's unit type
   UnitType type;
+
+  // Max value
+  float maxValue{0};
+
+  // Max unit type
+  UnitType maxType;
+
+  // Min value
+  float minValue{0};
+
+  // Min unit type
+  UnitType minType;
 
   // Owner of this dimension
   std::weak_ptr<UIObject> weakOwner;
