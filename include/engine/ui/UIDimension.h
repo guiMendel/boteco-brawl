@@ -146,7 +146,7 @@ struct UIDimension2
 
   // Sets value for all directions
   void Set(UIDimension::UnitType type, float value = 0);
-  void Set(UIDimension::UnitType type, Vector2 value = Vector2::Zero());
+  void Set(UIDimension::UnitType type, Vector2 value);
 
   // Get value of an axis
   UIDimension &Along(UIDimension::Axis axis);

@@ -233,6 +233,7 @@ void SplashAnimation::ResetInitialAnimation()
   curtain->color.alpha = 0;
   splash->localScale = Vector2::One();
   Lock(weakSubtitle)->SetEnabled(true);
+  Lock(weakMainContainer)->offset.Set(UIDimension::None);
 
   currentAnimation = promptAnimation;
 }

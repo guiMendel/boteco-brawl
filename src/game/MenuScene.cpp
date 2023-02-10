@@ -20,7 +20,7 @@ void MenuScene::InitializeObjects()
 {
   // Create the main camera
   auto camera = Instantiate("MainCamera", ObjectRecipes::Camera())->RequireComponent<Camera>();
-  camera->background = Color(126, 65, 5);
+  camera->background = Color(226, 160, 106);
 
   // Create main UI canvas
   auto canvas = Instantiate("Canvas", ObjectRecipes::Canvas(Canvas::Space::Global))->RequireComponent<Canvas>();
