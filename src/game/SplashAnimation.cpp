@@ -66,7 +66,24 @@ void SplashAnimation::Start()
     }
   };
 
-  auto slamEffect = [this](float, Animation &animation)
+  auto slamEffectIntensity = make_shared<float>(40);
+
+  auto slamEffect = [this, slamEffectIntensity](float deltaTime, Animation &animation)
+  {
+    LOCK(weakMainContainer, mainContainer);
+
+    // Take random offset
+    Vector2 newOffset = Vector2::Angled(RandomRange(0, 2 * M_PI), RandomRange(*slamEffectIntensity / 2, *slamEffectIntensity));
+
+    // Apply it
+    mainContainer->offset.Set(UIDimension::RealPixels, newOffset);
+
+    // Reduce intensity
+    if ((*slamEffectIntensity -= 70 * deltaTime) <= 0)
+      animation.done = true;
+  };
+
+  auto slamEffectStart = [this, slamEffectIntensity](Animation &)
   {
     LOCK(weakSplash, splash);
     LOCK(weakStompParticles, stompParticles);
@@ -76,8 +93,6 @@ void SplashAnimation::Start()
                                             Vector2{box->width, box->height} / 2);
 
     stompParticles->StartEmission();
-
-    animation.done = true;
   };
 
   auto delayDuration = make_shared<float>(3);
@@ -165,7 +180,7 @@ void SplashAnimation::Start()
   promptAnimation = make_shared<Animation>(promptHighlight);
   auto flashAnimation = make_shared<Animation>(flashFade, promptAnimation, flashFadeStart);
   auto delayAnimation = make_shared<Animation>(delay, flashAnimation);
-  auto slamEffectEnd = make_shared<Animation>(slamEffect, delayAnimation);
+  auto slamEffectEnd = make_shared<Animation>(slamEffect, delayAnimation, slamEffectStart);
   auto slamAnimation = make_shared<Animation>(slamSplash, slamEffectEnd);
 
   currentAnimation = slamAnimation;
@@ -199,7 +214,7 @@ void SplashAnimation::Update(float deltaTime)
   {
     int paddingDifference = targetPadding - currentPadding;
 
-    currentPadding += min(int(deltaTime * 120), abs(paddingDifference)) * GetSign(paddingDifference);
+    currentPadding += min(int(deltaTime * 100), abs(paddingDifference)) * GetSign(paddingDifference);
 
     mainContainer->padding.top.Set(UIDimension::Percent, currentPadding);
   }

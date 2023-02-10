@@ -82,6 +82,12 @@ void UIDimension2::Set(UIDimension::UnitType type, float value)
   y.Set(type, value);
 }
 
+void UIDimension2::Set(UIDimension::UnitType type, Vector2 value)
+{
+  x.Set(type, value.x);
+  y.Set(type, value.y);
+}
+
 void UIDimension2::SetOwner(std::shared_ptr<UIObject> owner)
 {
   x.SetOwner(owner);
