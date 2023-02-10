@@ -6,6 +6,7 @@
 #include "UIBackground.h"
 #include "SplashAnimation.h"
 #include "ParticleEmitter.h"
+#include "MainMenuInput.h"
 
 using namespace std;
 
@@ -16,6 +17,9 @@ void SplashScene::InitializeObjects()
 
   // Create main UI canvas
   auto canvas = Instantiate("Canvas", ObjectRecipes::Canvas(Canvas::Space::Global))->RequireComponent<Canvas>();
+
+  // Add input
+  auto input = Instantiate("InputHandler", ObjectRecipes::SingleComponent<MainMenuInput>());
 
   // Add main container
   auto mainContainer = canvas->AddChild<UIContainer>("Main");

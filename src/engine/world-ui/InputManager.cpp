@@ -82,14 +82,18 @@ float InputManager::Update()
     // On keyboard press
     else if (event.type == SDL_KEYDOWN)
     {
+      auto symbol = event.key.keysym.sym;
+
       // Ignore repetitions
       if (!event.key.repeat)
       {
-        auto symbol = event.key.keysym.sym;
-
         keyState[symbol] = true;
         keyUpdate[symbol] = updateCounter;
+
+        OnKeyPress.Invoke(symbol);
       }
+
+      OnKeyDown.Invoke(symbol);
     }
 
     // On keyboard release
@@ -99,6 +103,8 @@ float InputManager::Update()
 
       keyState[symbol] = false;
       keyUpdate[symbol] = updateCounter;
+
+      OnKeyRelease.Invoke(symbol);
     }
 
     // ===  CONTROLLERS
