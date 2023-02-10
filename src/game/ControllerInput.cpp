@@ -63,15 +63,15 @@ void ControllerInput::Start()
   string callbackIdentifier = "controller-input-player-" + to_string(player->PlayerId());
 
   // Subscribe to analog movement
-  inputManager.OnControllerLeftAnalog.AddListener(callbackIdentifier, [this](Vector2 direction, int targetId)
-                                                  { if (targetId == GetAssociatedControllerId()) HandleAnalogMovement(direction); });
+  inputManager.OnControllerLeftAnalog.AddListener(callbackIdentifier, [this](Vector2 direction, shared_ptr<ControllerDevice> controller)
+                                                  { if (controller->GetId() == GetAssociatedControllerId()) HandleAnalogMovement(direction); });
 
   // Subscribe to analog buttons
-  inputManager.OnControllerButtonPress.AddListener(callbackIdentifier, [this](SDL_GameControllerButton button, int targetId)
-                                                   { if (targetId == GetAssociatedControllerId()) HandleButtonPress(button); });
+  inputManager.OnControllerButtonPress.AddListener(callbackIdentifier, [this](SDL_GameControllerButton button, shared_ptr<ControllerDevice> controller)
+                                                   { if (controller->GetId() == GetAssociatedControllerId()) HandleButtonPress(button); });
 
-  inputManager.OnControllerButtonRelease.AddListener(callbackIdentifier, [this](SDL_GameControllerButton button, int targetId)
-                                                     { if (targetId == GetAssociatedControllerId()) HandleButtonRelease(button); });
+  inputManager.OnControllerButtonRelease.AddListener(callbackIdentifier, [this](SDL_GameControllerButton button, shared_ptr<ControllerDevice> controller)
+                                                     { if (controller->GetId() == GetAssociatedControllerId()) HandleButtonRelease(button); });
 }
 
 int ControllerInput::GetAssociatedControllerId() const
@@ -80,5 +80,5 @@ int ControllerInput::GetAssociatedControllerId() const
 
   auto controller = player->GetController();
 
-  return controller == nullptr ? -1 : controller->instanceId;
+  return controller == nullptr ? -1 : controller->GetId();
 }

@@ -3,6 +3,15 @@
 
 #include "GameScene.h"
 
+#define MAIN_CONTAINER_OBJECT "Main"
+#define CURTAIN_OBJECT "Curtain"
+#define SPLASH_OBJECT "Splash"
+#define SUBTITLE_OBJECT "Subtitle"
+#define PROMPT_OBJECT "StartPrompt"
+#define PARTICLES_OBJECT "StompParticles"
+#define BILL_IMAGE "Bill"
+#define BILLS_OBJECT "PlayerSelections"
+
 class MenuScene : public GameScene
 {
 public:

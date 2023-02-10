@@ -8,21 +8,18 @@
 #include "UIBackground.h"
 #include "ParticleEmitter.h"
 
+class MainMenuInput;
+
 // Maps input from some source (player or AI) to the the creation and dispatch of the corresponding actions
 class SplashAnimation : public UIComponent
 {
+  friend class MainMenuInput;
+
 public:
   // How quickly the text size multiplier decays back to 1
   static const float textSizeMultiplierDecay;
 
-  SplashAnimation(
-      GameObject &associatedObject,
-      std::shared_ptr<UIContainer> mainContainer,
-      std::shared_ptr<UIImage> splash,
-      std::shared_ptr<UIImage> subtitle,
-      std::shared_ptr<UIImage> prompt,
-      std::shared_ptr<UIBackground> curtain,
-      std::shared_ptr<ParticleEmitter> stompParticles);
+  SplashAnimation(GameObject &associatedObject);
   virtual ~SplashAnimation() {}
 
   void Start() override;
@@ -35,6 +32,15 @@ public:
   void ResetInitialAnimation();
 
 private:
+  // Plays current animation
+  void PlayerCurrentAnimation(float deltaTime);
+
+  // Pan screen
+  void ApplyScreenPan(float deltaTime);
+
+  // Raise bills
+  void RaiseBills(float deltaTime);
+
   // Target index of screen
   int targetIndex{0};
 
@@ -44,6 +50,9 @@ private:
   std::weak_ptr<UIImage> weakPrompt;
   std::weak_ptr<UIBackground> weakCurtain;
   std::weak_ptr<ParticleEmitter> weakStompParticles;
+
+  // Bills to animate removal of offset from
+  std::vector<std::weak_ptr<UIObject>> raisingBills;
 
   struct Animation;
   std::shared_ptr<Animation> currentAnimation;

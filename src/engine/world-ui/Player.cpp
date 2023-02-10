@@ -16,13 +16,11 @@ void Player::LoseController()
   if (auto currentController = GetController(); currentController != nullptr)
     currentController->LosePlayer();
 
+  weakController.reset();
+
   // If using a controller, start searching for a new one
   if (usingController)
     SearchForController();
-
-  // Otherwise just forget the current controller
-  else
-    weakController.reset();
 }
 
 void Player::UseController()

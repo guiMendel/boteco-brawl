@@ -25,8 +25,11 @@ void MainScene::InitializeObjects()
   // Give it behavior
   mainCamera->gameObject.AddComponent<CameraBehavior>(charactersParent);
 
-  // Add player manager
-  auto playerManager = Instantiate("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true))->RequireComponent<PlayerManager>();
+  // // Add player manager
+  // auto playerManager = Instantiate("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true))->RequireComponent<PlayerManager>();
+
+  // Get player manager
+  auto playerManager = RequireFindComponent<PlayerManager>();
 
   // Add player 2
   auto player2 = playerManager->AddNewPlayer();

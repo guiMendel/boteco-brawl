@@ -24,10 +24,10 @@ class InputManager
 public:
   // Controller analog movement, with Controller instance id
   // Vector axis range from -1 to 1
-  EventII<Vector2, int> OnControllerLeftAnalog, OnControllerRightAnalog;
+  EventII<Vector2, std::shared_ptr<ControllerDevice>> OnControllerLeftAnalog, OnControllerRightAnalog;
 
   // Controller button event, with button & Controller instance id
-  EventII<SDL_GameControllerButton, int> OnControllerButtonPress, OnControllerButtonRelease;
+  EventII<SDL_GameControllerButton, std::shared_ptr<ControllerDevice>> OnControllerButtonPress, OnControllerButtonRelease;
 
   // Keyboard key events
   EventI<int> OnKeyPress, OnKeyRelease, OnKeyDown;
@@ -90,7 +90,7 @@ private:
   // Mouse Y coordinates
   int mouseY;
 
-  // Currently open controllers
+  // Currently open controllers (instance id mapped to controller)
   std::unordered_map<int, std::shared_ptr<ControllerDevice>> controllers;
 
   // Tolerance of joystick axis jitter, in range 0 to 1

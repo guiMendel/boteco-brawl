@@ -1,4 +1,5 @@
 #include "MenuScene.h"
+#include "PlayerManager.h"
 #include "ObjectRecipes.h"
 #include "Canvas.h"
 #include "UIContainer.h"
@@ -10,22 +11,19 @@
 
 using namespace std;
 
-#define CURTAIN_OBJECT "Curtain"
-#define SPLASH_OBJECT "Splash"
-#define SUBTITLE_OBJECT "Subtitle"
-#define PROMPT_OBJECT "StartPrompt"
-#define PARTICLES_OBJECT "StompParticles"
-
 void MenuScene::InitializeObjects()
 {
   // Create the main camera
   auto camera = Instantiate("MainCamera", ObjectRecipes::Camera())->RequireComponent<Camera>();
   camera->background = Color(226, 160, 106);
 
+  // Add player manager
+  Instantiate("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true));
+
   // Create main UI canvas
   auto canvas = Instantiate("Canvas", ObjectRecipes::Canvas(Canvas::Space::Global))->RequireComponent<Canvas>();
 
-  auto mainContainer = canvas->AddChild<UIContainer>("Main");
+  auto mainContainer = canvas->AddChild<UIContainer>(MAIN_CONTAINER_OBJECT);
   mainContainer->width.Set(UIDimension::Percent, 100);
   mainContainer->height.Set(UIDimension::Percent, 100);
   mainContainer->Flexbox().placeItems = {0.5, 0};
@@ -57,16 +55,10 @@ void MenuScene::InitializeObjects()
   CreateSelection(mainContainer);
 
   // Add animation handler
-  auto animationHandler = mainContainer->AddComponent<SplashAnimation>(
-      mainContainer,
-      RequireUIObject<UIImage>(SPLASH_OBJECT),
-      RequireUIObject<UIImage>(SUBTITLE_OBJECT),
-      RequireUIObject<UIImage>(PROMPT_OBJECT),
-      curtain,
-      RequireWorldObject(PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>());
+  mainContainer->AddComponent<SplashAnimation>();
 
   // Add input
-  NewObject<WorldObject>("InputHandler")->AddComponent<MainMenuInput>(animationHandler);
+  NewObject<WorldObject>("InputHandler")->AddComponent<MainMenuInput>();
 }
 
 void MenuScene::CreateSplash(shared_ptr<UIContainer> mainContainer)
@@ -132,7 +124,7 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   auto optionsGrid = selectionContainer->AddChild<UIContainer>("CharacterOptions");
 
   // Player selections
-  auto selections = selectionContainer->AddChild<UIContainer>("PlayerSelections");
+  auto selections = selectionContainer->AddChild<UIContainer>(BILLS_OBJECT);
 
   // === HEADER
 
@@ -189,7 +181,7 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
     connectPrompt->offset.y.Set(UIDimension::Percent, -10);
 
     // Add bill
-    auto bill = playerSection->AddChild<UIImage>("Bill", billPath);
+    auto bill = playerSection->AddChild<UIImage>(BILL_IMAGE, billPath);
     bill->offset.y.Set(UIDimension::Percent, 65);
 
     return playerSection;

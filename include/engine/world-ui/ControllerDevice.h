@@ -7,7 +7,6 @@
 #include <string>
 
 class Player;
-class ControllerInput;
 class PlayerManager;
 
 // Thrown when opening a controller fails
@@ -22,8 +21,6 @@ public:
 // Class that is responsible for a connected game controller device
 class ControllerDevice
 {
-  friend class ControllerInput;
-
 public:
   // Requires an index of a connected controller
   ControllerDevice(int controllerIndex);
@@ -45,10 +42,10 @@ public:
   // Checks all players for one to associate to
   void SearchPlayersForAssociation();
 
-private:
   // Associates this controller to a player
   void AssociateToPlayer(std::shared_ptr<Player> player);
 
+private:
   // Check if should associate to this player
   void MaybeAssociateToPlayer(std::shared_ptr<Player> player);
 

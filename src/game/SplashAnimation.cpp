@@ -1,8 +1,12 @@
 #include "SplashAnimation.h"
+#include "MenuScene.h"
 #include <functional>
 
 using namespace std;
 using namespace Helper;
+
+// Speed with which to raise bills, in percent per second
+static const float raiseBillSpeed{120};
 
 struct SplashAnimation::Animation
 {
@@ -19,21 +23,14 @@ struct SplashAnimation::Animation
   shared_ptr<Animation> next;
 };
 
-SplashAnimation::SplashAnimation(
-    GameObject &associatedObject,
-    shared_ptr<UIContainer> mainContainer,
-    shared_ptr<UIImage> splash,
-    shared_ptr<UIImage> subtitle,
-    shared_ptr<UIImage> prompt,
-    shared_ptr<UIBackground> curtain,
-    shared_ptr<ParticleEmitter> stompParticles)
+SplashAnimation::SplashAnimation(GameObject &associatedObject)
     : UIComponent(associatedObject),
-      weakMainContainer(mainContainer),
-      weakSplash(splash),
-      weakSubtitle(subtitle),
-      weakPrompt(prompt),
-      weakCurtain(curtain),
-      weakStompParticles(stompParticles) {}
+      weakMainContainer(GetScene()->RequireUIObject<UIContainer>(MAIN_CONTAINER_OBJECT)),
+      weakSplash(GetScene()->RequireUIObject<UIImage>(SPLASH_OBJECT)),
+      weakSubtitle(GetScene()->RequireUIObject<UIImage>(SUBTITLE_OBJECT)),
+      weakPrompt(GetScene()->RequireUIObject<UIImage>(PROMPT_OBJECT)),
+      weakCurtain(GetScene()->RequireUIObject<UIContainer>(CURTAIN_OBJECT)->RequireComponent<UIBackground>()),
+      weakStompParticles(GetScene()->RequireWorldObject(PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>()) {}
 
 void SplashAnimation::Start()
 {
@@ -188,36 +185,11 @@ void SplashAnimation::Start()
 
 void SplashAnimation::Update(float deltaTime)
 {
-  if (currentAnimation == nullptr)
-    return;
+  PlayerCurrentAnimation(deltaTime);
 
-  if (currentAnimation->done)
-  {
-    currentAnimation = currentAnimation->next;
+  ApplyScreenPan(deltaTime);
 
-    if (currentAnimation && currentAnimation->startCallback)
-      currentAnimation->startCallback(*currentAnimation);
-
-    return;
-  }
-
-  currentAnimation->callback(deltaTime, *currentAnimation);
-
-  // === PAN SCREEN
-  LOCK(weakMainContainer, mainContainer);
-
-  // Get target padding
-  int targetPadding = targetIndex * -100;
-  int currentPadding = mainContainer->padding.top.As(UIDimension::Percent);
-
-  if (currentPadding != targetPadding)
-  {
-    int paddingDifference = targetPadding - currentPadding;
-
-    currentPadding += min(int(deltaTime * 100), abs(paddingDifference)) * GetSign(paddingDifference);
-
-    mainContainer->padding.top.Set(UIDimension::Percent, currentPadding);
-  }
+  RaiseBills(deltaTime);
 }
 
 void SplashAnimation::PanContent(int index)
@@ -236,4 +208,72 @@ void SplashAnimation::ResetInitialAnimation()
   Lock(weakMainContainer)->offset.Set(UIDimension::None);
 
   currentAnimation = promptAnimation;
+}
+
+void SplashAnimation::PlayerCurrentAnimation(float deltaTime)
+{
+  if (currentAnimation == nullptr)
+    return;
+
+  if (currentAnimation->done)
+  {
+    currentAnimation = currentAnimation->next;
+
+    if (currentAnimation && currentAnimation->startCallback)
+      currentAnimation->startCallback(*currentAnimation);
+
+    return;
+  }
+
+  currentAnimation->callback(deltaTime, *currentAnimation);
+}
+
+void SplashAnimation::ApplyScreenPan(float deltaTime)
+{
+  LOCK(weakMainContainer, mainContainer);
+
+  // Get target padding
+  int targetPadding = targetIndex * -100;
+  int currentPadding = mainContainer->padding.top.As(UIDimension::Percent);
+
+  if (currentPadding != targetPadding)
+  {
+    int paddingDifference = targetPadding - currentPadding;
+
+    currentPadding += min(int(deltaTime * 100), abs(paddingDifference)) * GetSign(paddingDifference);
+
+    mainContainer->padding.top.Set(UIDimension::Percent, currentPadding);
+  }
+}
+
+void SplashAnimation::RaiseBills(float deltaTime)
+{
+  // For each bill
+  auto billIterator = raisingBills.begin();
+  while (billIterator != raisingBills.end())
+  {
+    auto bill = Lock(*billIterator);
+
+    // Get new offset
+    float newOffset = bill->offset.y.As(UIDimension::Percent) - raiseBillSpeed * deltaTime;
+
+    // Detect animation end
+    if (newOffset <= 0)
+    {
+      // Remove all offset
+      bill->offset.Set(UIDimension::None);
+
+      // Remove this entry
+      billIterator = raisingBills.erase(billIterator);
+    }
+
+    // Otherwise
+    else
+    {
+      // Apply raise
+      bill->offset.y.Set(UIDimension::Percent, newOffset);
+
+      billIterator++;
+    }
+  }
 }

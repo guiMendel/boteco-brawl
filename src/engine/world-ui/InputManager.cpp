@@ -29,9 +29,6 @@ float InputManager::Update()
   // Get mouse coords
   SDL_GetMouseState(&mouseX, &mouseY);
 
-  // Handle changes to connected controllers
-  // ConnectControllers();
-
   // Reset quit request
   quitRequested = false;
 
@@ -140,11 +137,11 @@ float InputManager::Update()
 
     // On controller button press
     else if (event.type == SDL_CONTROLLERBUTTONDOWN)
-      OnControllerButtonPress.Invoke((SDL_GameControllerButton)event.cbutton.button, event.cbutton.which);
+      OnControllerButtonPress.Invoke((SDL_GameControllerButton)event.cbutton.button, controllers.at(event.cbutton.which));
 
     // On controller button release
     else if (event.type == SDL_CONTROLLERBUTTONUP)
-      OnControllerButtonRelease.Invoke((SDL_GameControllerButton)event.cbutton.button, event.cbutton.which);
+      OnControllerButtonRelease.Invoke((SDL_GameControllerButton)event.cbutton.button, controllers.at(event.cbutton.which));
 
     // On controller axis move
     else if (event.type == SDL_CONTROLLERAXISMOTION)
@@ -173,7 +170,7 @@ float InputManager::Update()
     if (analog != lastLeftControllerAnalogs[instanceId])
     {
       // If they are different, raise
-      OnControllerLeftAnalog.Invoke(analog, instanceId);
+      OnControllerLeftAnalog.Invoke(analog, controllers.at(instanceId));
     }
   }
   for (auto [instanceId, analog] : currentRightControllerAnalogs)
@@ -182,7 +179,7 @@ float InputManager::Update()
     if (analog != lastRightControllerAnalogs[instanceId])
     {
       // If they are different, raise
-      OnControllerRightAnalog.Invoke(analog, instanceId);
+      OnControllerRightAnalog.Invoke(analog, controllers.at(instanceId));
     }
   }
 

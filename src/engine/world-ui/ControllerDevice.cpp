@@ -38,10 +38,20 @@ ControllerDevice::~ControllerDevice() { LosePlayer(); }
 
 void ControllerDevice::AssociateToPlayer(std::shared_ptr<Player> player)
 {
+  // Erase any previous associations
+  if (GetPlayer() != nullptr)
+    GetPlayer()->LoseController();
+
+  LosePlayer();
+
   MESSAGE << "Associating controller " << GetId() << " to player " << player->PlayerId() << endl;
 
   player->AssociateController(GetShared());
   weakAssociationPlayer = player;
+
+  // Set controller color to player color
+  auto color = player->GetColor();
+  SDL_GameControllerSetLED(controllerStruct.get(), color.red, color.green, color.blue);
 }
 
 std::shared_ptr<ControllerDevice> ControllerDevice::GetShared() const
