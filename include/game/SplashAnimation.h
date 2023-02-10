@@ -17,6 +17,7 @@ public:
 
   SplashAnimation(
       GameObject &associatedObject,
+      std::shared_ptr<UIContainer> mainContainer,
       std::shared_ptr<UIImage> splash,
       std::shared_ptr<UIImage> subtitle,
       std::shared_ptr<UIImage> prompt,
@@ -27,7 +28,17 @@ public:
   void Start() override;
   void Update(float) override;
 
+  // Pans the menu content to the given screen index
+  void PanContent(int index);
+
+  // Resets initial animation to it's final state
+  void ResetInitialAnimation();
+
 private:
+  // Target index of screen
+  int targetIndex{0};
+
+  std::weak_ptr<UIContainer> weakMainContainer;
   std::weak_ptr<UIImage> weakSplash;
   std::weak_ptr<UIImage> weakSubtitle;
   std::weak_ptr<UIImage> weakPrompt;
@@ -36,6 +47,7 @@ private:
 
   struct Animation;
   std::shared_ptr<Animation> currentAnimation;
+  std::shared_ptr<Animation> promptAnimation;
 };
 
 #endif

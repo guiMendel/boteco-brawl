@@ -24,15 +24,13 @@ void MenuScene::InitializeObjects()
   // Create main UI canvas
   auto canvas = Instantiate("Canvas", ObjectRecipes::Canvas(Canvas::Space::Global))->RequireComponent<Canvas>();
 
-  // Add input
-  auto input = Instantiate("InputHandler", ObjectRecipes::SingleComponent<MainMenuInput>());
-
   auto mainContainer = canvas->AddChild<UIContainer>("Main");
   mainContainer->width.Set(UIDimension::Percent, 100);
   mainContainer->height.Set(UIDimension::Percent, 100);
   mainContainer->Flexbox().placeItems = {0.5, 0};
   mainContainer->Flexbox().mainAxis = UIDimension::Vertical;
   // mainContainer->Flexbox().gap.Set(UIDimension::Percent, 5);
+  mainContainer->padding.top.Set(UIDimension::Percent, 0);
 
   // === BACKGROUND
 
@@ -58,12 +56,16 @@ void MenuScene::InitializeObjects()
   CreateSelection(mainContainer);
 
   // Add animation handler
-  mainContainer->AddComponent<SplashAnimation>(
+  auto animationHandler = mainContainer->AddComponent<SplashAnimation>(
+      mainContainer,
       RequireUIObject<UIImage>(SPLASH_OBJECT),
       RequireUIObject<UIImage>(SUBTITLE_OBJECT),
       RequireUIObject<UIImage>(PROMPT_OBJECT),
       curtain,
       RequireWorldObject(PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>());
+
+  // Add input
+  NewObject<WorldObject>("InputHandler")->AddComponent<MainMenuInput>(animationHandler);
 }
 
 void MenuScene::CreateSplash(shared_ptr<UIContainer> mainContainer)

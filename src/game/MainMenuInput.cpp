@@ -3,8 +3,8 @@
 
 using namespace std;
 
-MainMenuInput::MainMenuInput(GameObject &associatedObject)
-    : WorldComponent(associatedObject) {}
+MainMenuInput::MainMenuInput(GameObject &associatedObject, shared_ptr<SplashAnimation> animationHandler)
+    : WorldComponent(associatedObject), weakAnimationHandler(animationHandler) {}
 
 void MainMenuInput::Start()
 {
@@ -29,5 +29,12 @@ void MainMenuInput::Start()
 
 void MainMenuInput::HitStart()
 {
-  cout << "GOOOOO" << endl;
+  // Get animation handler
+  LOCK(weakAnimationHandler, animationHandler);
+
+  // Pan to selection screen
+  animationHandler->PanContent(1);
+
+  // Reset any active animations
+  animationHandler->ResetInitialAnimation();
 }

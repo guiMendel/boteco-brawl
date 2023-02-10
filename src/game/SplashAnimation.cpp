@@ -21,12 +21,14 @@ struct SplashAnimation::Animation
 
 SplashAnimation::SplashAnimation(
     GameObject &associatedObject,
+    shared_ptr<UIContainer> mainContainer,
     shared_ptr<UIImage> splash,
     shared_ptr<UIImage> subtitle,
     shared_ptr<UIImage> prompt,
     shared_ptr<UIBackground> curtain,
     shared_ptr<ParticleEmitter> stompParticles)
     : UIComponent(associatedObject),
+      weakMainContainer(mainContainer),
       weakSplash(splash),
       weakSubtitle(subtitle),
       weakPrompt(prompt),
@@ -160,7 +162,7 @@ void SplashAnimation::Start()
       *fadeDirection = -*fadeDirection;
   };
 
-  auto promptAnimation = make_shared<Animation>(promptHighlight);
+  promptAnimation = make_shared<Animation>(promptHighlight);
   auto flashAnimation = make_shared<Animation>(flashFade, promptAnimation, flashFadeStart);
   auto delayAnimation = make_shared<Animation>(delay, flashAnimation);
   auto slamEffectEnd = make_shared<Animation>(slamEffect, delayAnimation);
@@ -185,4 +187,37 @@ void SplashAnimation::Update(float deltaTime)
   }
 
   currentAnimation->callback(deltaTime, *currentAnimation);
+
+  // === PAN SCREEN
+  LOCK(weakMainContainer, mainContainer);
+
+  // Get target padding
+  int targetPadding = targetIndex * -100;
+  int currentPadding = mainContainer->padding.top.As(UIDimension::Percent);
+
+  if (currentPadding != targetPadding)
+  {
+    int paddingDifference = targetPadding - currentPadding;
+
+    currentPadding += min(int(deltaTime * 120), abs(paddingDifference)) * GetSign(paddingDifference);
+
+    mainContainer->padding.top.Set(UIDimension::Percent, currentPadding);
+  }
+}
+
+void SplashAnimation::PanContent(int index)
+{
+  targetIndex = index;
+}
+
+void SplashAnimation::ResetInitialAnimation()
+{
+  LOCK(weakCurtain, curtain);
+  LOCK(weakSplash, splash);
+
+  curtain->color.alpha = 0;
+  splash->localScale = Vector2::One();
+  Lock(weakSubtitle)->SetEnabled(true);
+
+  currentAnimation = promptAnimation;
 }

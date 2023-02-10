@@ -149,6 +149,18 @@ float UIDimension::RealPixelsTo(int valuePixels, UnitType requestedType) const
   if (requestedType == WorldUnits)
     return valuePixels * Lock(Lock(weakOwner)->canvas.weakCamera)->GetUnitsPerRealPixel();
 
+  // Parent dependent
+  if (requestedType == Percent)
+  {
+    // Get owner's parent dimensions, ignoring depending children (such as this one) to avoid a paradox
+    auto parent = Lock(weakOwner)->GetParent();
+    Calculation ignoreChildren = axis == Horizontal ? IgnoreDependentChildrenX : IgnoreDependentChildrenY;
+    int parentSize = parent->GetDimension(axis).AsRealPixels(UIDimension::Calculation(ignoreChildren));
+
+    // Return percentage applied to this size
+    return int(float(valuePixels) / float(parentSize) * 100);
+  }
+
   // Catch valueless target types
   if (requestedType == None || requestedType == MaxContent || requestedType == MinContent)
   {
@@ -157,7 +169,7 @@ float UIDimension::RealPixelsTo(int valuePixels, UnitType requestedType) const
   }
 
   // If arrived here we have some error
-  throw runtime_error("ERROR: unrecognized UIDimension unit type");
+  throw runtime_error("unrecognized UIDimension unit type");
 }
 
 void UIDimension::Set(UnitType newType, float newValue)
@@ -219,7 +231,7 @@ int UIDimension::CalculateRealPixelSize(Calculation configuration) const
   }
 
   // If arrived here we have some error
-  throw runtime_error("ERROR: unrecognized UIDimension unit type");
+  throw runtime_error("unrecognized UIDimension unit type");
 }
 
 void UIDimension::PrecalculateDefault()
