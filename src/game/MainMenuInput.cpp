@@ -405,6 +405,9 @@ void MainMenuInput::SetPlayerSelect(shared_ptr<UIContainer> option, shared_ptr<B
 
   // Set the player to this character
   optionData->characterSetter(player);
+
+  // Update start prompt
+  UpdateStartPrompt();
 }
 
 void MainMenuInput::RemovePlayerHover(shared_ptr<BrawlPlayer> player)
@@ -454,6 +457,9 @@ void MainMenuInput::RemovePlayerSelect(shared_ptr<BrawlPlayer> player)
 
   // Remove character from player
   player->characterRecipe = nullptr;
+
+  // Update start prompt
+  UpdateStartPrompt();
 }
 
 shared_ptr<BrawlPlayer> MainMenuInput::CreatePlayer()
@@ -466,4 +472,33 @@ shared_ptr<BrawlPlayer> MainMenuInput::CreatePlayer()
 
   // New player
   return Lock(weakPlayerManager)->AddNewPlayer<BrawlPlayer>(hoverBadge, selectBadge);
+}
+
+void MainMenuInput::UpdateStartPrompt()
+{
+  LOCK(weakPlayerManager, playerManager);
+  LOCK(weakAnimationHandler, animationHandler);
+
+  // Get players
+  auto players = playerManager->GetPlayers();
+
+  // If only one player, not ready
+  if (players.size() <= 1)
+  {
+    arenaStartReady = false;
+    animationHandler->targetStartPromptOffset = 100;
+    return;
+  }
+
+  // Check that all players have a character recipe
+  for (auto player : players)
+    if (RequirePointerCast<BrawlPlayer>(player)->characterRecipe == nullptr)
+    {
+      arenaStartReady = false;
+      animationHandler->targetStartPromptOffset = 100;
+      return;
+    }
+
+  arenaStartReady = true;
+  animationHandler->targetStartPromptOffset = 0;
 }

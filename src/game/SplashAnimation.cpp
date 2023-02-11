@@ -8,6 +8,15 @@ using namespace Helper;
 // Speed with which to raise bills, in percent per second
 static const float raiseBillSpeed{120};
 
+// Speed with which to slide start prompt
+static const float startPromptSlideSpeed{200};
+
+// Min start prompt color modulation
+static const int startPromptMinColor{200};
+
+// Speed to change prompt color modulation
+static const int startPromptModulateSpeed{70};
+
 struct SplashAnimation::Animation
 {
   using Callback = function<void(float, Animation &)>;
@@ -28,7 +37,8 @@ SplashAnimation::SplashAnimation(GameObject &associatedObject)
       weakMainContainer(GetScene()->RequireUIObject<UIContainer>(MAIN_CONTAINER_OBJECT)),
       weakSplash(GetScene()->RequireUIObject<UIImage>(SPLASH_OBJECT)),
       weakSubtitle(GetScene()->RequireUIObject<UIImage>(SUBTITLE_OBJECT)),
-      weakPrompt(GetScene()->RequireUIObject<UIImage>(PROMPT_OBJECT)),
+      weakPrompt(GetScene()->RequireUIObject<UIImage>(START_PROMPT_OBJECT)),
+      weakStartPrompt(GetScene()->RequireUIObject<UIImage>(START_ARENA_IMAGE)),
       weakCurtain(GetScene()->RequireUIObject<UIContainer>(CURTAIN_OBJECT)->RequireComponent<UIBackground>()),
       weakStompParticles(GetScene()->RequireWorldObject(PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>()) {}
 
@@ -194,6 +204,8 @@ void SplashAnimation::Update(float deltaTime)
   ApplyScreenPan(deltaTime);
 
   RaiseBills(deltaTime);
+
+  AnimateStartPrompt(deltaTime);
 }
 
 void SplashAnimation::PanContent(int index)
@@ -281,4 +293,40 @@ void SplashAnimation::RaiseBills(float deltaTime)
       billIterator++;
     }
   }
+}
+
+void SplashAnimation::AnimateStartPrompt(float deltaTime)
+{
+  LOCK(weakStartPrompt, startPrompt);
+
+  // Get it's current offset
+  auto currentOffset = startPrompt->offset.x.As(UIDimension::Percent);
+
+  // cout << "currentOffset: " << currentOffset << ", targetStartPromptOffset: " << targetStartPromptOffset << endl;
+
+  // If it's different from target
+  if (currentOffset != targetStartPromptOffset)
+  {
+    // Get distance
+    auto distance = targetStartPromptOffset - currentOffset;
+    auto frameDisplacement = GetSign(distance) * startPromptSlideSpeed * deltaTime;
+
+    if (abs(frameDisplacement) < abs(distance))
+      startPrompt->offset.x.Set(UIDimension::Percent, currentOffset + frameDisplacement);
+    else
+      startPrompt->offset.x.Set(UIDimension::Percent, targetStartPromptOffset);
+  }
+
+  // Modulate the color
+  auto newColor = Clamp(
+      int(startPrompt->style->imageColor.Get().red + startPromptColorDirection * startPromptModulateSpeed * deltaTime),
+      startPromptMinColor,
+      255);
+
+  // Change direction if necessary
+  if (newColor == startPromptMinColor || newColor == 255)
+    startPromptColorDirection = -startPromptColorDirection;
+
+  // Set the new color
+  startPrompt->style->imageColor.Set(Color(newColor, newColor, newColor));
 }

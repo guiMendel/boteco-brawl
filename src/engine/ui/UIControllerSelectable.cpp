@@ -186,7 +186,7 @@ Timer &UIControllerSelectable::GetControllerTimer(std::shared_ptr<ControllerDevi
     };
 
     // Subscribe to destroy the timer when the controller dies
-    controller->OnBeforeDestroy.AddListener("destroy-UIControllerSelectable-timer", destroyTimer);
+    // controller->OnBeforeDestroy.AddListener("destroy-UIControllerSelectable-timer", destroyTimer);
   }
 
   // Return the timer

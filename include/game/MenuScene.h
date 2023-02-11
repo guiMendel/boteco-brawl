@@ -7,13 +7,14 @@
 #define CURTAIN_OBJECT "Curtain"
 #define SPLASH_OBJECT "Splash"
 #define SUBTITLE_OBJECT "Subtitle"
-#define PROMPT_OBJECT "StartPrompt"
+#define START_PROMPT_OBJECT "StartPrompt"
 #define PARTICLES_OBJECT "StompParticles"
 #define BILLS_OBJECT "PlayerSelections"
 #define OPTIONS_OBJECT "CharacterOptions"
 #define BACK_BUTTON_IMAGE "BackButton"
 #define BILL_IMAGE "Bill"
 #define IDLE_ANIMATIONS_OBJECT "IdleAnimations"
+#define START_ARENA_IMAGE "StartArenaPrompt"
 
 class MenuScene : public GameScene
 {

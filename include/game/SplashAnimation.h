@@ -41,13 +41,23 @@ private:
   // Raise bills
   void RaiseBills(float deltaTime);
 
+  // Handles animations of start prompt
+  void AnimateStartPrompt(float deltaTime);
+
   // Target index of screen
   int targetIndex{0};
+
+  // Target offset of start prompt
+  int targetStartPromptOffset{100};
+
+  // Direction to change start prompt modulation color to
+  int startPromptColorDirection{-1};
 
   std::weak_ptr<UIContainer> weakMainContainer;
   std::weak_ptr<UIImage> weakSplash;
   std::weak_ptr<UIImage> weakSubtitle;
   std::weak_ptr<UIImage> weakPrompt;
+  std::weak_ptr<UIImage> weakStartPrompt;
   std::weak_ptr<UIBackground> weakCurtain;
   std::weak_ptr<ParticleEmitter> weakStompParticles;
 

@@ -66,6 +66,12 @@ private:
   // Remove a player's selection
   void RemovePlayerSelect(std::shared_ptr<BrawlPlayer> player);
 
+  // Update if start prompt is ready or not to show
+  void UpdateStartPrompt();
+
+  // Whether ready to start arena battle
+  bool arenaStartReady{false};
+
   // The default cursor
   std::shared_ptr<MouseCursor> defaultCursor;
 

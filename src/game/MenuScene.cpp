@@ -99,7 +99,7 @@ void MenuScene::CreateSplash(shared_ptr<UIContainer> mainContainer)
   subtitle->style->renderOrder.Set(5);
 
   // Press start
-  auto prompt = splashContainer->AddChild<UIImage>(PROMPT_OBJECT, "./assets/images/splash-screen/press-start.png");
+  auto prompt = splashContainer->AddChild<UIImage>(START_PROMPT_OBJECT, "./assets/images/splash-screen/press-start.png");
   prompt->style->imageColor.Set(Color(255, 255, 255, 0));
 
   // Funny text
@@ -124,7 +124,7 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   auto selectionContainer = mainContainer->AddChild<UIContainer>("SelectionContainer");
   selectionContainer->width.Set(UIDimension::Percent, 100);
   selectionContainer->height.Set(UIDimension::Percent, 100);
-  selectionContainer->padding.Set(UIDimension::Percent, 10);
+  selectionContainer->padding.Set(UIDimension::Percent, 7);
   selectionContainer->Flexbox().placeItems = {0.5, 0};
   selectionContainer->Flexbox().mainAxis = UIDimension::Vertical;
   selectionContainer->Flexbox().gap.Set(UIDimension::Percent, 5);
@@ -139,6 +139,12 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
 
   // Character options
   auto optionsGrid = selectionContainer->AddChild<UIContainer>(OPTIONS_OBJECT);
+
+  // Start prompt
+  auto startPrompt = selectionContainer->AddChild<UIImage>(START_ARENA_IMAGE, "./assets/images/character-selection/prompt-start.png");
+  startPrompt->margin.top.Set(UIDimension::Percent, -3);
+  startPrompt->margin.bottom.Set(UIDimension::Percent, -3);
+  startPrompt->offset.x.Set(UIDimension::Percent, 20);
 
   // Player selections
   auto selections = selectionContainer->AddChild<UIContainer>(BILLS_OBJECT);
