@@ -5,5 +5,9 @@ using namespace std;
 CharacterUIOption::CharacterUIOption(
     GameObject &associatedObject,
     string characterBillTextPath,
+    AnimationSetter setAnimation,
     CharacterSetter characterSetter)
-    : UIComponent(associatedObject), characterBillTextPath(characterBillTextPath), characterSetter(characterSetter) {}
+    : UIComponent(associatedObject),
+      characterBillTextPath(characterBillTextPath),
+      setAnimation(setAnimation),
+      characterSetter(characterSetter) {}

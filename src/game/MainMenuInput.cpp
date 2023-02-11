@@ -394,6 +394,15 @@ void MainMenuInput::SetPlayerSelect(shared_ptr<UIContainer> option, shared_ptr<B
   textImage->SetPositionAbsolute(true);
   textImage->offset.Set(UIDimension::RealPixels, Vector2(-6, -37));
 
+  // Add idle animation visualization
+  auto billWorldPosition = bill->canvas.CanvasToWorld(bill->GetPosition());
+  auto visualizationParent = GetScene()->RequireWorldObject(IDLE_ANIMATIONS_OBJECT);
+  auto visualization = visualizationParent->CreateChild(IDLE_ANIMATION_VIEW(player->PlayerId()));
+  visualization->SetPosition(billWorldPosition + Vector2{1.7, 2.5});
+  visualization->AddComponent<SpriteRenderer>(RenderLayer::UI, 15);
+  auto visualizationAnimator = visualization->AddComponent<Animator>();
+  optionData->setAnimation(visualizationAnimator);
+
   // Set the player to this character
   optionData->characterSetter(player);
 }
@@ -437,6 +446,14 @@ void MainMenuInput::RemovePlayerSelect(shared_ptr<BrawlPlayer> player)
 
   // Remove it
   textImage->RequestDestroy();
+
+  // Destroy animation view
+  auto visualizationParent = GetScene()->RequireWorldObject(IDLE_ANIMATIONS_OBJECT);
+  auto visualization = visualizationParent->RequireChild(IDLE_ANIMATION_VIEW(player->PlayerId()));
+  visualization->RequestDestroy();
+
+  // Remove character from player
+  player->characterRecipe = nullptr;
 }
 
 shared_ptr<BrawlPlayer> MainMenuInput::CreatePlayer()

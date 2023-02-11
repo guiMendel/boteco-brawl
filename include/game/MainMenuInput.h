@@ -12,6 +12,7 @@
 #define BILL_TEXT_IMAGE "SelectionText"
 #define SELECTION_IMAGE(playerId) "SelectionBadge" + std::to_string(playerId)
 #define HOVER_IMAGE(playerId) "HoverBadge" + std::to_string(playerId)
+#define IDLE_ANIMATION_VIEW(playerId) "IdleAnimationView" + std::to_string(playerId)
 
 class MainMenuInput : public WorldComponent
 {

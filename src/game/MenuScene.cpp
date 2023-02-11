@@ -1,6 +1,8 @@
 #include "MenuScene.h"
 #include "CharacterKafta.h"
 #include "CharacterKiba.h"
+#include "CharacterKaftaAnimations.h"
+#include "CharacterKibaAnimations.h"
 #include "BrawlPlayer.h"
 #include "UIControllerSelectable.h"
 #include "CharacterUIOption.h"
@@ -127,6 +129,9 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   selectionContainer->Flexbox().mainAxis = UIDimension::Vertical;
   selectionContainer->Flexbox().gap.Set(UIDimension::Percent, 5);
 
+  // Add an object to hold all idle animation character visualizations
+  NewObject<WorldObject>(IDLE_ANIMATIONS_OBJECT);
+
   // === MAIN SECTIONS
 
   // Header with back button
@@ -158,6 +163,7 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   auto addOption = [optionsGrid](string optionName,
                                  string optionDescriptionPath,
                                  string optionBillTextPath,
+                                 CharacterUIOption::AnimationSetter setAnimation,
                                  CharacterUIOption::CharacterSetter setPlayerCharacter)
   {
     auto option = optionsGrid->AddChild<UIContainer>("Option" + optionName);
@@ -168,7 +174,7 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
     if (optionBillTextPath != "")
     {
       // Add the data
-      option->AddComponent<CharacterUIOption>(optionBillTextPath, setPlayerCharacter);
+      option->AddComponent<CharacterUIOption>(optionBillTextPath, setAnimation, setPlayerCharacter);
 
       // Add the controller selection component
       option->AddComponent<UIControllerSelectable>();
@@ -179,11 +185,14 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   };
 
   // Kafta
-  addOption("Kafta",
-            "./assets/images/character-selection/character-options/option-kafta.png",
-            "./assets/images/character-selection/character-options/bill-select-kafta.png",
-            [](shared_ptr<BrawlPlayer> player)
-            { player->SetCharacter<CharacterKafta>(); });
+  addOption(
+      "Kafta",
+      "./assets/images/character-selection/character-options/option-kafta.png",
+      "./assets/images/character-selection/character-options/bill-select-kafta.png",
+      [](shared_ptr<Animator> animator)
+      { animator->RegisterAnimation<CharacterKaftaAnimations::Idle>(); },
+      [](shared_ptr<BrawlPlayer> player)
+      { player->SetCharacter<CharacterKafta>(); });
 
   // // Pastel
   // addOption("Pastel",
@@ -193,19 +202,24 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   addOption("Random",
             "./assets/images/character-selection/character-options/option-unknown.png",
             "",
+            nullptr,
             nullptr);
 
   // Kiba
-  addOption("Kiba",
-            "./assets/images/character-selection/character-options/option-kiba.png",
-            "./assets/images/character-selection/character-options/bill-select-kiba.png",
-            [](shared_ptr<BrawlPlayer> player)
-            { player->SetCharacter<CharacterKiba>(); });
+  addOption(
+      "Kiba",
+      "./assets/images/character-selection/character-options/option-kiba.png",
+      "./assets/images/character-selection/character-options/bill-select-kiba.png",
+      [](shared_ptr<Animator> animator)
+      { animator->RegisterAnimation<CharacterKibaAnimations::Idle>(); },
+      [](shared_ptr<BrawlPlayer> player)
+      { player->SetCharacter<CharacterKiba>(); });
 
   // Random
   addOption("Random",
             "./assets/images/character-selection/character-options/option-unknown.png",
             "",
+            nullptr,
             nullptr);
 
   // === PLAYER SELECTIONS

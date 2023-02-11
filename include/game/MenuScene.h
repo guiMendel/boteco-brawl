@@ -13,6 +13,7 @@
 #define OPTIONS_OBJECT "CharacterOptions"
 #define BACK_BUTTON_IMAGE "BackButton"
 #define BILL_IMAGE "Bill"
+#define IDLE_ANIMATIONS_OBJECT "IdleAnimations"
 
 class MenuScene : public GameScene
 {

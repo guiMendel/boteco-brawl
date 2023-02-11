@@ -1,5 +1,5 @@
-#ifndef __ANIMATION_RECIPES__
-#define __ANIMATION_RECIPES__
+#ifndef __CHARACTER_TEST_ANIMATIONS__
+#define __CHARACTER_TEST_ANIMATIONS__
 
 #include "CharacterAnimations.h"
 
