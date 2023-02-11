@@ -10,6 +10,7 @@
 #define PROMPT_OBJECT "StartPrompt"
 #define PARTICLES_OBJECT "StompParticles"
 #define BILLS_OBJECT "PlayerSelections"
+#define OPTIONS_OBJECT "CharacterOptions"
 #define BACK_BUTTON_IMAGE "BackButton"
 #define BILL_IMAGE "Bill"
 

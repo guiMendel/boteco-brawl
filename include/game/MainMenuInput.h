@@ -6,6 +6,10 @@
 #include "SplashAnimation.h"
 #include "PlayerManager.h"
 
+#define BILL_TEXT_IMAGE "SelectionText"
+#define SELECTION_IMAGE "SelectionBadge"
+#define HOVER_IMAGE "HoverBadge"
+
 class MainMenuInput : public WorldComponent
 {
 public:
@@ -30,8 +34,20 @@ private:
   // Triggered when a controller hits start
   void ControllerStart(std::shared_ptr<ControllerDevice> controller);
 
+  // Sets up selection for a character option
+  void SetUpSelection(std::shared_ptr<UIContainer> option);
+
+  // Sets up hover for a character option
+  void SetUpHover(std::shared_ptr<UIContainer> option);
+
   // Maps player id to respective bill object
   std::unordered_map<int, std::weak_ptr<UIContainer>> playerBills;
+
+  // Maps player id to selected character option
+  std::unordered_map<int, std::weak_ptr<UIContainer>> playerSelections;
+
+  // Maps player id to hovered character option
+  std::unordered_map<int, std::weak_ptr<UIContainer>> playerHovers;
 
   std::weak_ptr<SplashAnimation> weakAnimationHandler;
   std::weak_ptr<UIContainer> weakBillContainer;

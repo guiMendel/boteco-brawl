@@ -326,6 +326,8 @@ Vector2 UIObject::GetAbsolutePosition()
       float emptySpace = float(parent->GetRealPixelsAlong(dimension.axis)) -
                          float(GetRealPixelsAlong(dimension.axis, true, true));
 
+      // cout << "For " << *this << ": axisPlacement=" << axisPlacement << ", emptySpace=" << emptySpace << ". Parent=" << *GetParent() << endl;
+
       // Distribute empty space with axis placement
       return axisPlacement * emptySpace;
     }

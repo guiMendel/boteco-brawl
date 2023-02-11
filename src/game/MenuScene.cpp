@@ -1,4 +1,5 @@
 #include "MenuScene.h"
+#include "CharacterUIOption.h"
 #include "PlayerManager.h"
 #include "ObjectRecipes.h"
 #include "Canvas.h"
@@ -125,7 +126,7 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   auto header = selectionContainer->AddChild<UIContainer>("Header");
 
   // Character options
-  auto optionsGrid = selectionContainer->AddChild<UIContainer>("CharacterOptions");
+  auto optionsGrid = selectionContainer->AddChild<UIContainer>(OPTIONS_OBJECT);
 
   // Player selections
   auto selections = selectionContainer->AddChild<UIContainer>(BILLS_OBJECT);
@@ -147,27 +148,41 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   optionsGrid->width.SetMax(UIDimension::Percent, 100);
 
   // Adds a character option given its assets
-  auto addOption = [optionsGrid](string optionName, string optionDescriptionPath)
+  auto addOption = [optionsGrid](string optionName, string optionDescriptionPath, string optionBillTextPath)
   {
     auto option = optionsGrid->AddChild<UIContainer>("Option" + optionName);
     option->Flexbox().placeItems = {0.5, 0.5};
     option->Flexbox().gap.Set(UIDimension::RealPixels, 10);
+
+    // Add this option's data
+    if (optionBillTextPath != "")
+    {
+      option->AddComponent<CharacterUIOption>(optionBillTextPath);
+    }
 
     option->AddChild<UIImage>("Portrait", "./assets/images/character-selection/character-options/option-portrait.png");
     option->AddChild<UIImage>("Description", optionDescriptionPath);
   };
 
   // Kafta
-  addOption("Kafta", "./assets/images/character-selection/character-options/option-kafta.png");
+  addOption("Kafta",
+            "./assets/images/character-selection/character-options/option-kafta.png",
+            "./assets/images/character-selection/character-options/bill-select-kafta.png");
 
   // Pastel
-  addOption("Pastel", "./assets/images/character-selection/character-options/option-pastel.png");
+  addOption("Pastel",
+            "./assets/images/character-selection/character-options/option-pastel.png",
+            "./assets/images/character-selection/character-options/bill-select-pastel.png");
 
   // Kiba
-  addOption("Kiba", "./assets/images/character-selection/character-options/option-kiba.png");
+  addOption("Kiba",
+            "./assets/images/character-selection/character-options/option-kiba.png",
+            "./assets/images/character-selection/character-options/bill-select-kiba.png");
 
   // Random
-  addOption("Random", "./assets/images/character-selection/character-options/option-unknown.png");
+  addOption("Random",
+            "./assets/images/character-selection/character-options/option-unknown.png",
+            "");
 
   // === PLAYER SELECTIONS
 
