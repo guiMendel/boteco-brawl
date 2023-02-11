@@ -1,4 +1,4 @@
-#include "GeneralAnimations.h"
+#include "TestCharacterAnimations.h"
 #include "CharacterVFX.h"
 #include "ShakeEffectManager.h"
 #include "GunParry.h"
@@ -10,7 +10,7 @@
 #include "ObjectRecipes.h"
 
 using namespace std;
-using namespace GeneralAnimations;
+using namespace TestCharacterAnimations;
 
 // Takes the last frame of a sequence, replicates it n - 1 times, and sets all of it's instances duration
 void SplitLastFrame(vector<AnimationFrame> &frames, int numberOfInstances, float newDuration);

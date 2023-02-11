@@ -80,7 +80,7 @@
 
 class Animator;
 
-namespace GeneralAnimations
+namespace TestCharacterAnimations
 {
   class Run : public StatefulAnimation
   {

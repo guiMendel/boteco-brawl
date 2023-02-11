@@ -172,13 +172,13 @@ GENERAL_OBJS = $(patsubst %,$(GENERAL_OBJECT_DIRECTORY)\\%,$(_GENERAL_OBJS))
 
 
 # Header files
-_INTEGRATION_DEPS = ColliderDensity.h GameData.h ObjectRecipes.h RenderLayer.h Tag.h PhysicsLayer.h BuildConfigurations.h
+_INTEGRATION_DEPS = ColliderDensity.h GameData.h RenderLayer.h Tag.h PhysicsLayer.h BuildConfigurations.h
 
 # Generate header filepaths
 INTEGRATION_DEPS = $(patsubst %,$(INTEGRATION_INCLUDE_DIRECTORY)\\%,$(_INTEGRATION_DEPS))
 
 # Object files
-_INTEGRATION_OBJS = ObjectRecipes.o InitialScene.o GameConfiguration.o PhysicsConfiguration.o
+_INTEGRATION_OBJS = InitialScene.o GameConfiguration.o PhysicsConfiguration.o
 
 # Generate object filepaths
 INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATION_OBJS))
@@ -188,13 +188,13 @@ INTEGRATION_OBJS = $(patsubst %,$(INTEGRATION_OBJECT_DIRECTORY)\\%,$(_INTEGRATIO
 
 
 # Header files
-_GAME_DEPS = MainScene.h Movement.h PlayerInput.h Action.h CharacterStateManager.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h ParticleFX.h CharacterRepelCollision.h PlatformDrop.h FallDeath.h Arena.h Heat.h Damage.h Attack.h Character.h TestCharacter.h GeneralAnimations.h NewAnimationTypes.h TimeScaleManager.h Parry.h GunParry.h LandingAttackEffector.h LandEffector.h ShakeEffectManager.h CharacterVFX.h CameraBehavior.h CharacterUIManager.h MenuScene.h SplashAnimation.h MainMenuInput.h CharacterUIOption.h BrawlPlayer.h
+_GAME_DEPS = MainScene.h Movement.h PlayerInput.h Action.h CharacterStateManager.h CharacterState.h CharacterStateRecipes.h CharacterController.h Actions.h KeyboardInput.h ControllerInput.h ParticleFX.h CharacterRepelCollision.h PlatformDrop.h FallDeath.h Arena.h Heat.h Damage.h Attack.h Character.h TestCharacter.h TestCharacterAnimations.h NewAnimationTypes.h TimeScaleManager.h Parry.h GunParry.h LandingAttackEffector.h LandEffector.h ShakeEffectManager.h CharacterVFX.h CameraBehavior.h CharacterUIManager.h MenuScene.h SplashAnimation.h MainMenuInput.h CharacterUIOption.h BrawlPlayer.h ObjectRecipes.h 
 
 # Generate header filepaths
 GAME_DEPS = $(patsubst %,$(GAME_INCLUDE_DIRECTORY)\\%,$(_GAME_DEPS))
 
 # Object files
-_GAME_OBJS = MainScene.o Movement.o PlayerInput.o CharacterStateManager.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o ParticleFX.o CharacterRepelCollision.o PlatformDrop.o FallDeath.o Arena.o Heat.o Attack.o Character.o TestCharacter.o GeneralAnimations.o NewAnimationTypes.o TimeScaleManager.o GunParry.o Damage.o LandingAttackEffector.o ShakeEffectManager.o CharacterVFX.o CameraBehavior.o CharacterUIManager.o SplashAnimation.o MainMenuInput.o MenuScene.o CharacterUIOption.o BrawlPlayer.o
+_GAME_OBJS = MainScene.o Movement.o PlayerInput.o CharacterStateManager.o CharacterStateRecipes.o CharacterController.o Action.o CharacterState.o Actions.o KeyboardInput.o ControllerInput.o ParticleFX.o CharacterRepelCollision.o PlatformDrop.o FallDeath.o Arena.o Heat.o Attack.o Character.o TestCharacter.o TestCharacterAnimations.o NewAnimationTypes.o TimeScaleManager.o GunParry.o Damage.o LandingAttackEffector.o ShakeEffectManager.o CharacterVFX.o CameraBehavior.o CharacterUIManager.o SplashAnimation.o MainMenuInput.o MenuScene.o CharacterUIOption.o BrawlPlayer.o ObjectRecipes.o 
 
 # Generate object filepaths
 GAME_OBJS = $(patsubst %,$(GAME_OBJECT_DIRECTORY)\\%,$(_GAME_OBJS))
