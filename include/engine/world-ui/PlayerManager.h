@@ -8,6 +8,8 @@
 #include <memory>
 #include <vector>
 
+#define PLAYER_OBJECT_NAME "Player"
+
 // Handles human players connected to the game
 class PlayerManager : public WorldComponent
 {
@@ -29,7 +31,21 @@ public:
   void SetMainPlayer(std::shared_ptr<Player> player);
 
   // Creates a new player
-  std::shared_ptr<Player> AddNewPlayer();
+  template <class T, typename... Args>
+  std::shared_ptr<T> AddNewPlayer(Args &&...args)
+  {
+    // Get current players
+    auto players = GetPlayers();
+
+    // Create and pick this player's color
+    auto newPlayer = worldObject.CreateChild(PLAYER_OBJECT_NAME)->AddComponent<T>(*this, playerColors[players.size()], std::forward<Args>(args)...);
+
+    // If this is the only player, set it as main
+    if (GetPlayers().size() == 1)
+      SetMainPlayer(newPlayer);
+
+    return newPlayer;
+  }
 
 private:
   // Component id of main player worldObject

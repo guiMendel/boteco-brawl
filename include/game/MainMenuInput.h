@@ -6,10 +6,12 @@
 #include "UIContainer.h"
 #include "SplashAnimation.h"
 #include "PlayerManager.h"
+#include "BrawlPlayer.h"
+#include <queue>
 
 #define BILL_TEXT_IMAGE "SelectionText"
-#define SELECTION_IMAGE(playerId) "SelectionBadge" #playerId
-#define HOVER_IMAGE(playerId) "HoverBadge" #playerId
+#define SELECTION_IMAGE(playerId) "SelectionBadge" + std::to_string(playerId)
+#define HOVER_IMAGE(playerId) "HoverBadge" + std::to_string(playerId)
 
 class MainMenuInput : public WorldComponent
 {
@@ -20,6 +22,9 @@ public:
   void Start() override;
   void Update(float) override;
 
+  // Creates a new player
+  std::shared_ptr<BrawlPlayer> CreatePlayer();
+
 private:
   // Activate hover cursor
   void SetHoverCursor(bool value);
@@ -28,7 +33,7 @@ private:
   void AnimateClick();
 
   // Associates a player to a player bill
-  void AssociatePlayerBill(std::shared_ptr<Player> player, std::shared_ptr<UIContainer> bill);
+  void AssociatePlayerBill(std::shared_ptr<BrawlPlayer> player, std::shared_ptr<UIContainer> bill);
 
   // Gets a bill by it's index
   std::shared_ptr<UIContainer> GetBill(size_t index);
@@ -49,16 +54,16 @@ private:
   void SetUpMouseHover(std::shared_ptr<UIContainer> option);
 
   // Set a player to hover an option
-  void SetPlayerHover(std::shared_ptr<UIContainer> option, std::shared_ptr<Player> player);
+  void SetPlayerHover(std::shared_ptr<UIContainer> option, std::shared_ptr<BrawlPlayer> player);
 
   // Set a player to select an option
-  void SetPlayerSelect(std::shared_ptr<UIContainer> option, std::shared_ptr<Player> player);
+  void SetPlayerSelect(std::shared_ptr<UIContainer> option, std::shared_ptr<BrawlPlayer> player);
 
   // Remove a player's hover
-  void RemovePlayerHover(std::shared_ptr<Player> player);
+  void RemovePlayerHover(std::shared_ptr<BrawlPlayer> player);
 
   // Remove a player's selection
-  void RemovePlayerSelect(std::shared_ptr<Player> player);
+  void RemovePlayerSelect(std::shared_ptr<BrawlPlayer> player);
 
   // The default cursor
   std::shared_ptr<MouseCursor> defaultCursor;
@@ -81,6 +86,9 @@ private:
   std::weak_ptr<SplashAnimation> weakAnimationHandler;
   std::weak_ptr<UIContainer> weakBillContainer;
   std::weak_ptr<PlayerManager> weakPlayerManager;
+
+  // Selection badges for each player to take as they connect
+  std::queue<std::pair<std::string, std::string>> playerBadges;
 };
 
 #endif

@@ -16,6 +16,7 @@ static const int cutDecaySpeed{200};
 
 // Name of cursor animation delay timer
 #define RESET_HOVER_TIMER "reset-hover"
+#define SELECTOR_OFFSET -11
 
 MainMenuInput::MainMenuInput(GameObject &associatedObject)
     : WorldComponent(associatedObject),
@@ -25,6 +26,15 @@ MainMenuInput::MainMenuInput(GameObject &associatedObject)
       weakBillContainer(GetScene()->RequireUIObject<UIContainer>(BILLS_OBJECT)),
       weakPlayerManager(GetScene()->RequireFindComponent<PlayerManager>())
 {
+  // Add player badges
+  playerBadges.push({"./assets/images/character-selection/character-options/selector-1.png",
+                     "./assets/images/character-selection/character-options/selected-1.png"});
+  playerBadges.push({"./assets/images/character-selection/character-options/selector-2.png",
+                     "./assets/images/character-selection/character-options/selected-2.png"});
+  playerBadges.push({"./assets/images/character-selection/character-options/selector-3.png",
+                     "./assets/images/character-selection/character-options/selected-3.png"});
+  playerBadges.push({"./assets/images/character-selection/character-options/selector-4.png",
+                     "./assets/images/character-selection/character-options/selected-4.png"});
 }
 
 void MainMenuInput::Start()
@@ -36,7 +46,8 @@ void MainMenuInput::Start()
   RegisterListeners();
 
   // Associate main player to first bill
-  AssociatePlayerBill(Lock(weakPlayerManager)->GetMainPlayer(), GetBill(0));
+  AssociatePlayerBill(RequirePointerCast<BrawlPlayer>(Lock(weakPlayerManager)->GetMainPlayer()),
+                      GetBill(0));
 }
 
 void MainMenuInput::Update(float deltaTime)
@@ -158,7 +169,7 @@ void MainMenuInput::RegisterListeners()
     auto onControllerHover = [this, weakOption](shared_ptr<ControllerDevice> controller)
     {
       // Ignore controllers with no player
-      auto player = controller->GetPlayer();
+      auto player = RequirePointerCast<BrawlPlayer>(controller->GetPlayer());
 
       if (player == nullptr)
         return;
@@ -170,7 +181,7 @@ void MainMenuInput::RegisterListeners()
     auto onControllerUnhover = [this](shared_ptr<ControllerDevice> controller)
     {
       // Ignore controllers with no player
-      auto player = controller->GetPlayer();
+      auto player = RequirePointerCast<BrawlPlayer>(controller->GetPlayer());
 
       if (player == nullptr)
         return;
@@ -184,14 +195,14 @@ void MainMenuInput::RegisterListeners()
   }
 
   // Subscribe to controller selection
-  auto onControllerSelect = [this](SDL_GameControllerButton button, std::shared_ptr<ControllerDevice> controller)
+  auto onControllerSelect = [this](SDL_GameControllerButton button, shared_ptr<ControllerDevice> controller)
   {
     // Only accept A
     if (button != SDL_CONTROLLER_BUTTON_A)
       return;
 
     // Ignore controller with no player
-    auto player = controller->GetPlayer();
+    auto player = RequirePointerCast<BrawlPlayer>(controller->GetPlayer());
 
     if (player == nullptr)
       return;
@@ -225,7 +236,8 @@ void MainMenuInput::SetUpMouseSelection(shared_ptr<UIContainer> option)
       return;
 
     // Set main player to select this option
-    SetPlayerSelect(Lock(weakOption), Lock(weakPlayerManager)->GetMainPlayer());
+    SetPlayerSelect(Lock(weakOption),
+                    RequirePointerCast<BrawlPlayer>(Lock(weakPlayerManager)->GetMainPlayer()));
   };
 
   option->OnUIEvent.AddListener("detect-selection", handleSelection);
@@ -251,7 +263,8 @@ void MainMenuInput::SetUpMouseHover(shared_ptr<UIContainer> option)
     SetHoverCursor(true);
 
     // Set main player to hover this option
-    SetPlayerHover(Lock(weakOption), Lock(weakPlayerManager)->GetMainPlayer());
+    SetPlayerHover(Lock(weakOption),
+                   RequirePointerCast<BrawlPlayer>(Lock(weakPlayerManager)->GetMainPlayer()));
   };
 
   // Handle it's hover
@@ -264,14 +277,14 @@ void MainMenuInput::SetUpMouseHover(shared_ptr<UIContainer> option)
     SetHoverCursor(false);
 
     // Remove main player hover badge
-    RemovePlayerHover(Lock(weakPlayerManager)->GetMainPlayer());
+    RemovePlayerHover(RequirePointerCast<BrawlPlayer>(Lock(weakPlayerManager)->GetMainPlayer()));
   };
 
   option->OnUIEvent.AddListener("detect-hover-enter", handleHoverEnter);
   option->OnUIEvent.AddListener("detect-hover-exit", handleHoverExit);
 }
 
-void MainMenuInput::AssociatePlayerBill(shared_ptr<Player> player, shared_ptr<UIContainer> bill)
+void MainMenuInput::AssociatePlayerBill(shared_ptr<BrawlPlayer> player, shared_ptr<UIContainer> bill)
 {
   // Remove bill offset
   Lock(weakAnimationHandler)->raisingBills.push_back(bill->RequireChild(BILL_IMAGE));
@@ -290,10 +303,10 @@ void MainMenuInput::ControllerStart(shared_ptr<ControllerDevice> controller)
   PlayerStart();
 
   // If controller has no player, create one for it
-  if (controller->GetPlayer() == nullptr)
+  // Ignore if already has all players
+  if (controller->GetPlayer() == nullptr && playerBadges.empty() == false)
   {
-    // New player
-    auto newPlayer = Lock(weakPlayerManager)->AddNewPlayer();
+    auto newPlayer = CreatePlayer();
 
     // Associate this controller to it
     controller->AssociateToPlayer(newPlayer);
@@ -343,7 +356,7 @@ void MainMenuInput::AnimateClick()
   cutSprite->OverrideWidthPixels(32);
 }
 
-void MainMenuInput::SetPlayerHover(shared_ptr<UIContainer> option, shared_ptr<Player> player)
+void MainMenuInput::SetPlayerHover(shared_ptr<UIContainer> option, shared_ptr<BrawlPlayer> player)
 {
   // If there was a previous hover, remove it
   RemovePlayerHover(player);
@@ -352,12 +365,12 @@ void MainMenuInput::SetPlayerHover(shared_ptr<UIContainer> option, shared_ptr<Pl
   playerHovers[player->PlayerId()] = option;
 
   // Place hover badge on option
-  auto hoverBadge = option->AddChild<UIImage>(HOVER_IMAGE(player->PlayerId()), "./assets/images/character-selection/character-options/selector-1.png");
+  auto hoverBadge = option->AddChild<UIImage>(HOVER_IMAGE(player->PlayerId()), player->hoverBadgePath);
   hoverBadge->SetPositionAbsolute(true);
-  hoverBadge->absolutePosition.x.Set(UIDimension::RealPixels, -20);
+  hoverBadge->absolutePosition.x.Set(UIDimension::RealPixels, SELECTOR_OFFSET);
 }
 
-void MainMenuInput::SetPlayerSelect(shared_ptr<UIContainer> option, shared_ptr<Player> player)
+void MainMenuInput::SetPlayerSelect(shared_ptr<UIContainer> option, shared_ptr<BrawlPlayer> player)
 {
   // If there was a previous selection, remove it
   RemovePlayerSelect(player);
@@ -366,9 +379,9 @@ void MainMenuInput::SetPlayerSelect(shared_ptr<UIContainer> option, shared_ptr<P
   playerSelections[player->PlayerId()] = option;
 
   // Place selected badge on option
-  auto selectedBadge = option->AddChild<UIImage>(SELECTION_IMAGE(player->PlayerId()), "./assets/images/character-selection/character-options/selected-1.png");
+  auto selectedBadge = option->AddChild<UIImage>(SELECTION_IMAGE(player->PlayerId()), player->selectionBadgePath);
   selectedBadge->SetPositionAbsolute(true);
-  selectedBadge->absolutePosition.x.Set(UIDimension::RealPixels, -20);
+  selectedBadge->absolutePosition.x.Set(UIDimension::RealPixels, SELECTOR_OFFSET);
 
   // Get the data
   auto optionData = option->RequireComponent<CharacterUIOption>();
@@ -382,7 +395,7 @@ void MainMenuInput::SetPlayerSelect(shared_ptr<UIContainer> option, shared_ptr<P
   textImage->offset.Set(UIDimension::RealPixels, Vector2(-6, -37));
 }
 
-void MainMenuInput::RemovePlayerHover(shared_ptr<Player> player)
+void MainMenuInput::RemovePlayerHover(shared_ptr<BrawlPlayer> player)
 {
   // If there was a previous hover
   if (playerHovers.count(player->PlayerId()) == 0)
@@ -398,7 +411,7 @@ void MainMenuInput::RemovePlayerHover(shared_ptr<Player> player)
   playerHovers.erase(player->PlayerId());
 }
 
-void MainMenuInput::RemovePlayerSelect(shared_ptr<Player> player)
+void MainMenuInput::RemovePlayerSelect(shared_ptr<BrawlPlayer> player)
 {
   // If there was a previous selection
   if (playerSelections.count(player->PlayerId()) == 0)
@@ -421,4 +434,16 @@ void MainMenuInput::RemovePlayerSelect(shared_ptr<Player> player)
 
   // Remove it
   textImage->RequestDestroy();
+}
+
+shared_ptr<BrawlPlayer> MainMenuInput::CreatePlayer()
+{
+  Assert(playerBadges.empty() == false, "Cannot create more players");
+
+  // Get badges for new player
+  auto [hoverBadge, selectBadge] = playerBadges.front();
+  playerBadges.pop();
+
+  // New player
+  return Lock(weakPlayerManager)->AddNewPlayer<BrawlPlayer>(hoverBadge, selectBadge);
 }

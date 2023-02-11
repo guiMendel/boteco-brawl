@@ -1,35 +1,12 @@
 #include "PlayerManager.h"
 
-#define PLAYER_OBJECT_NAME "Player"
-
 using namespace std;
 
 // Set player colors
 const Color PlayerManager::playerColors[]{Color(41, 164, 17), Color(243, 134, 14), Color(1, 17, 172), Color(204, 1, 1)};
 
 PlayerManager::PlayerManager(GameObject &associatedObject)
-    : WorldComponent(associatedObject)
-{
-  // Add main player
-  AddNewPlayer();
-}
-
-shared_ptr<Player> PlayerManager::AddNewPlayer()
-{
-  // Get current players
-  auto players = GetPlayers();
-
-  Assert(players.size() < 4, "Tried adding more players than allowed");
-
-  // Create and pick this player's color
-  auto newPlayer = worldObject.CreateChild(PLAYER_OBJECT_NAME)->AddComponent<Player>(*this, playerColors[players.size()]);
-
-  // If this is the only player, set it as main
-  if (GetPlayers().size() == 1)
-    SetMainPlayer(newPlayer);
-
-  return newPlayer;
-}
+    : WorldComponent(associatedObject) {}
 
 void PlayerManager::SetMainPlayer(shared_ptr<Player> player) { mainPlayerId = player->PlayerId(); }
 

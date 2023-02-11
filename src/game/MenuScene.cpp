@@ -64,7 +64,10 @@ void MenuScene::InitializeObjects()
   mainContainer->AddComponent<SplashAnimation>();
 
   // Add input
-  NewObject<WorldObject>("InputHandler")->AddComponent<MainMenuInput>();
+  auto inputHandler = NewObject<WorldObject>("InputHandler")->AddComponent<MainMenuInput>();
+
+  // Add main player
+  inputHandler->CreatePlayer();
 }
 
 void MenuScene::CreateSplash(shared_ptr<UIContainer> mainContainer)

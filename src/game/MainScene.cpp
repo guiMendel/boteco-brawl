@@ -32,7 +32,7 @@ void MainScene::InitializeObjects()
   auto playerManager = RequireFindComponent<PlayerManager>();
 
   // Add player 2
-  auto player2 = playerManager->AddNewPlayer();
+  // auto player2 = playerManager->AddNewPlayer();
 
   // Add particle fx
   Instantiate("ParticleFX", ObjectRecipes::SingleComponent<ParticleFX>());
@@ -55,13 +55,13 @@ void MainScene::InitializeObjects()
                         charactersParent)
                         ->GetComponent<Rigidbody>();
 
-  auto character2 = Instantiate(
-                        "Character-2",
-                        ObjectRecipes::Character(player2),
-                        Vector2{3.5, -10},
-                        0,
-                        charactersParent)
-                        ->GetComponent<Rigidbody>();
+  // auto character2 = Instantiate(
+  //                       "Character-2",
+  //                       ObjectRecipes::Character(player2),
+  //                       Vector2{3.5, -10},
+  //                       0,
+  //                       charactersParent)
+  //                       ->GetComponent<Rigidbody>();
 
   Instantiate("Ground", ObjectRecipes::Platform({40, 2}), Vector2(0, 4));
   Instantiate("LeftWall", ObjectRecipes::Platform({2, 10}), Vector2(-20, 2));
