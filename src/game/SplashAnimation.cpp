@@ -92,7 +92,7 @@ void SplashAnimation::Start()
     stompParticles->StartEmission();
   };
 
-  auto delayDuration = make_shared<float>(3);
+  auto delayDuration = make_shared<float>(2);
 
   auto delay = [this, delayDuration](float deltaTime, Animation &animation)
   {
@@ -130,7 +130,11 @@ void SplashAnimation::Start()
 
   auto flashFadeStart = [this](Animation &)
   {
+    // Turn on subtitle
     Lock(weakSubtitle)->SetEnabled(true);
+
+    // Change splash image to the sliced version
+    Lock(weakSplash)->SetImagePath("./assets/images/splash-screen/splash.png");
   };
 
   auto minFlashDuration = make_shared<float>(3);
@@ -206,6 +210,7 @@ void SplashAnimation::ResetInitialAnimation()
   splash->localScale = Vector2::One();
   Lock(weakSubtitle)->SetEnabled(true);
   Lock(weakMainContainer)->offset.Set(UIDimension::None);
+  Lock(weakSplash)->SetImagePath("./assets/images/splash-screen/splash.png");
 
   currentAnimation = promptAnimation;
 }

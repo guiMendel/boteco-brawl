@@ -83,7 +83,7 @@ void MenuScene::CreateSplash(shared_ptr<UIContainer> mainContainer)
   // === CONTENT
 
   // Splash art
-  auto splash = splashContainer->AddChild<UIImage>(SPLASH_OBJECT, "./assets/images/splash-screen/splash.png");
+  auto splash = splashContainer->AddChild<UIImage>(SPLASH_OBJECT, "./assets/images/splash-screen/splash-whole.png");
   splash->localScale = {40, 40};
   splash->style->renderOrder.Set(2);
   splash->margin.bottom.Set(UIDimension::Percent, -10);
