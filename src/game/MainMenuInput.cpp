@@ -52,6 +52,39 @@ void MainMenuInput::RegisterListeners()
   };
 
   inputManager.OnControllerButtonPress.AddListener("ui-start", onButtonPress);
+
+  // React to back button hover
+  auto backButton = GetScene()->RequireUIObject<UIImage>(BACK_BUTTON_IMAGE);
+  weak_ptr weakBack{backButton};
+
+  // Make it lighter on mouse over
+  auto lightenBackButton = [weakBack](std::shared_ptr<UIEvent> event)
+  {
+    if (event->GetType() != UIEvent::OnMouseEnter)
+      return;
+
+    Lock(weakBack)->SetImagePath("./assets/images/character-selection/header/back-button-light.png");
+  };
+  auto darkenBackButton = [weakBack](std::shared_ptr<UIEvent> event)
+  {
+    if (event->GetType() != UIEvent::OnMouseLeave)
+      return;
+
+    Lock(weakBack)->SetImagePath("./assets/images/character-selection/header/back-button.png");
+  };
+
+  backButton->OnUIEvent.AddListener("lighten-on-hover", lightenBackButton);
+  backButton->OnUIEvent.AddListener("darken-on-hover-end", darkenBackButton);
+
+  // Return to first screen when it's clicked
+  auto returnScreen = [this](std::shared_ptr<UIEvent> event)
+  {
+    if (event->GetType() != UIEvent::OnMouseClick)
+      return;
+
+    Lock(weakAnimationHandler)->PanContent(0);
+  };
+  backButton->OnUIEvent.AddListener("return-screen-on-click", returnScreen);
 }
 
 void MainMenuInput::AssociatePlayerBill(shared_ptr<Player> player, shared_ptr<UIContainer> bill)

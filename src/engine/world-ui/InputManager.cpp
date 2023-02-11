@@ -63,6 +63,8 @@ float InputManager::Update()
 
       mouseState[button] = true;
       mouseUpdate[button] = updateCounter;
+
+      OnClickDown.Invoke(GetMouseScreenCoordinates());
     }
 
     // On un-click event
@@ -72,6 +74,8 @@ float InputManager::Update()
 
       mouseState[button] = false;
       mouseUpdate[button] = updateCounter;
+
+      OnClickUp.Invoke(GetMouseScreenCoordinates());
     }
 
     // ===  KEYBOARD
@@ -218,9 +222,14 @@ void InputManager::OpenController(int index)
   controller->SearchPlayersForAssociation();
 }
 
+Vector2 InputManager::GetMouseScreenCoordinates() const
+{
+  return Vector2((float)mouseX, (float)mouseY);
+}
+
 Vector2 InputManager::GetMouseWorldCoordinates() const
 {
-  return Camera::GetMain()->ScreenToWorld(Vector2((float)mouseX, (float)mouseY));
+  return Camera::GetMain()->ScreenToWorld(GetMouseScreenCoordinates());
 }
 
 std::shared_ptr<ControllerDevice> InputManager::GetController(int id)

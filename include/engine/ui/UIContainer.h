@@ -70,6 +70,14 @@ private:
   void PrecalculateDimensions() override;
 
   // =================================
+  // UI EVENTS
+  // =================================
+protected:
+  // Checks if the given OnMouseOver event applies to this object
+  // If it does, raises the event and propagates the check downwards
+  void CheckEventApplication(std::shared_ptr<UIMouseEvent> onMouseOverEvent) override;
+
+  // =================================
   // OBJECTS HIERARCHY
   // =================================
 public:

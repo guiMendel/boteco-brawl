@@ -4,6 +4,7 @@
 #include "GameObject.h"
 #include "Renderable.h"
 #include "UIDimension.h"
+#include "UIEvent.h"
 
 class GameScene;
 class UIContainer;
@@ -21,6 +22,9 @@ class UIObject : public GameObject, public Renderable
 public:
   // Will be disconnected from canvas object tree until manually inserted as child of another object
   UIObject(Canvas &canvas, std::string name, std::shared_ptr<UIContainer> parent);
+
+  void Awake() override;
+  void Update(float) override;
 
   virtual ~UIObject();
 
@@ -101,6 +105,29 @@ private:
 
   // Positioning type of this object uses absolute coordinates (relative to parent) instead of automatic calculation
   bool positionAbsolute{false};
+
+  // =================================
+  // UI EVENTS
+  // =================================
+public:
+  // Raised  whenever a UI Event is triggered for this object
+  EventI<std::shared_ptr<UIEvent>> OnUIEvent;
+
+protected:
+  // Checks if the given mouse event applies to this object
+  // If it does, raises the event and propagates the check downwards
+  virtual void CheckEventApplication(std::shared_ptr<UIMouseEvent> mouseEvent) = 0;
+
+  // Raises a mouse over event for this object
+  // Also raises mouse enter if necessary
+  void RaiseMouseEvent(std::shared_ptr<UIMouseEvent> onMouseOverEvent);
+
+  // Detects if a screen position is inside this object's area
+  bool Contains(Vector2 screenPosition);
+
+private:
+  // Whether a mouse over event was raised last frame
+  bool mouseOverLastFrame{false};
 
   // =================================
   // OBJECTS HIERARCHY

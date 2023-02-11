@@ -79,7 +79,6 @@ public:
   // Unique identifier of this scene
   const int id;
 
-protected:
   // Reference to input manager
   InputManager &inputManager;
 

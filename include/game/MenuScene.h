@@ -9,8 +9,9 @@
 #define SUBTITLE_OBJECT "Subtitle"
 #define PROMPT_OBJECT "StartPrompt"
 #define PARTICLES_OBJECT "StompParticles"
-#define BILL_IMAGE "Bill"
 #define BILLS_OBJECT "PlayerSelections"
+#define BACK_BUTTON_IMAGE "BackButton"
+#define BILL_IMAGE "Bill"
 
 class MenuScene : public GameScene
 {

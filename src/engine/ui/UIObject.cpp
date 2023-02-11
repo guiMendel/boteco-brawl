@@ -1,4 +1,5 @@
 #include "UIObject.h"
+#include "UIEvent.h"
 #include "Debug.h"
 #include "UIContainer.h"
 #include "Canvas.h"
@@ -344,4 +345,83 @@ Vector2 UIObject::GetScale() const
     return localScale;
 
   return Lock(weakParent)->GetScale() * localScale;
+}
+
+void UIObject::Update(float deltaTime)
+{
+  // Detect mouse leave
+  if (mouseOverLastFrame)
+  {
+    auto mousePosition = GetScene()->inputManager.GetMouseScreenCoordinates();
+
+    if (Contains(mousePosition) == false)
+    {
+      mouseOverLastFrame = false;
+
+      OnUIEvent.Invoke(make_shared<UIMouseEvent>(UIEvent::OnMouseLeave, mousePosition));
+    }
+  }
+
+  if (IsCanvasRoot())
+  {
+    // Get mouse position
+    auto mousePosition = GetScene()->inputManager.GetMouseScreenCoordinates();
+
+    // Create mouse over event
+    auto mouseOverEvent = make_shared<UIMouseEvent>(UIEvent::OnMouseOver, mousePosition);
+
+    // Check if it applies
+    CheckEventApplication(mouseOverEvent);
+  }
+
+  GameObject::Update(deltaTime);
+}
+
+void UIObject::RaiseMouseEvent(std::shared_ptr<UIMouseEvent> mouseEvent)
+{
+  if (mouseEvent->GetType() == UIEvent::OnMouseOver)
+  {
+    // If wasn't over last frame, raise enter
+    if (mouseOverLastFrame == false)
+      OnUIEvent.Invoke(make_shared<UIMouseEvent>(UIEvent::OnMouseEnter, mouseEvent->screenPosition));
+
+    // Register for next frame
+    mouseOverLastFrame = true;
+  }
+
+  // Raise event
+  OnUIEvent.Invoke(mouseEvent);
+}
+
+bool UIObject::Contains(Vector2 screenPosition)
+{
+  // Get own box
+  Rectangle box{Rectangle::TopLeftInitialize,
+                canvas.CanvasToScreen(GetPosition()),
+                float(width.AsRealPixels()),
+                float(height.AsRealPixels())};
+
+  // Check if position is within box
+  return box.Contains(screenPosition);
+}
+
+void UIObject::Awake()
+{
+  if (IsCanvasRoot())
+  {
+    // Handle mouse click
+    auto handleClick = [this](Vector2 screenPosition)
+    {
+      // Create mouse click event
+      auto mouseClickEvent = make_shared<UIMouseEvent>(UIEvent::OnMouseClick, screenPosition);
+
+      // Check if it applies
+      CheckEventApplication(mouseClickEvent);
+    };
+
+    // Subscribe to mouse click
+    GetScene()->inputManager.OnClickDown.AddListener("canvas-root", handleClick);
+  }
+
+  GameObject::Awake();
 }

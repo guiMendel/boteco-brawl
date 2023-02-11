@@ -25,6 +25,8 @@ UIContainer::UIContainer(
 void UIContainer::Awake()
 {
   childrenBox.SetOwner(GetShared());
+
+  UIObject::Awake();
 }
 
 void UIContainer::CascadeDown(function<void(GameObject &)> callback, bool topDown)
@@ -208,4 +210,18 @@ int UIContainer::GetIndependentContentRealPixels(UIDimension::Axis axis, UIDimen
 
   // Return it's dimensions
   return properties.mainAxis == axis ? box.mainSize : box.crossSize;
+}
+
+void UIContainer::CheckEventApplication(std::shared_ptr<UIMouseEvent> mouseEvent)
+{
+  if (Contains(mouseEvent->screenPosition))
+  {
+    // Propagate check downwards
+    for (auto child : GetChildren())
+      child->CheckEventApplication(mouseEvent);
+
+    // Raise in this object if still propagating
+    if (mouseEvent->propagating)
+      RaiseMouseEvent(mouseEvent);
+  }
 }

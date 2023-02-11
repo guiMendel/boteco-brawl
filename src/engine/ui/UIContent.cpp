@@ -22,3 +22,11 @@ void UIContent::CascadeDown(function<void(GameObject &)> callback, bool topDown)
 }
 
 std::shared_ptr<GameObject> UIContent::InternalGetParent() const { return GetParent(); }
+
+void UIContent::CheckEventApplication(std::shared_ptr<UIMouseEvent> mouseEvent)
+{
+  if (Contains(mouseEvent->screenPosition))
+    // Raise in this object if still propagating
+    if (mouseEvent->propagating)
+      RaiseMouseEvent(mouseEvent);
+}

@@ -13,6 +13,10 @@ using namespace std;
 
 void MenuScene::InitializeObjects()
 {
+  // SDL_Surface *surface = IMG_Load("./assets/images/cursor-test.png");
+  // SDL_Cursor *cursor = SDL_CreateColorCursor(surface, 20, 20);
+  // SDL_SetCursor(cursor);
+
   // Create the main camera
   auto camera = Instantiate("MainCamera", ObjectRecipes::Camera())->RequireComponent<Camera>();
   camera->background = Color(226, 160, 106);
@@ -132,7 +136,7 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   header->width.Set(UIDimension::Percent, 92);
   header->Flexbox().gap.Set(UIDimension::RealPixels, 25);
 
-  header->AddChild<UIImage>("BackButton", "./assets/images/character-selection/header/back-button.png");
+  header->AddChild<UIImage>(BACK_BUTTON_IMAGE, "./assets/images/character-selection/header/back-button.png");
   header->AddChild<UIImage>("Splash", "./assets/images/character-selection/header/header-splash.png");
 
   // === OPTIONS

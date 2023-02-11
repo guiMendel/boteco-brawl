@@ -32,6 +32,9 @@ public:
   // Keyboard key events
   EventI<int> OnKeyPress, OnKeyRelease, OnKeyDown;
 
+  // Mouse events (coordinates in screen space)
+  EventI<Vector2> OnClickDown, OnClickUp;
+
   // Poll SDL events
   // Returns how many seconds the SDL_PollEvent function took to execute, in total
   // Reason: SDL_PollEvent may suspend the execution if user drags or resizes screen
@@ -57,6 +60,7 @@ public:
   int GetMouseX() const { return mouseX; }
   int GetMouseY() const { return mouseY; }
   Vector2 GetMouseWorldCoordinates() const;
+  Vector2 GetMouseScreenCoordinates() const;
 
   std::shared_ptr<ControllerDevice> GetController(int id);
 
