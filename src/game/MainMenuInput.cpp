@@ -393,6 +393,9 @@ void MainMenuInput::SetPlayerSelect(shared_ptr<UIContainer> option, shared_ptr<B
   auto textImage = bill->AddChild<UIImage>(BILL_TEXT_IMAGE, optionData->characterBillTextPath);
   textImage->SetPositionAbsolute(true);
   textImage->offset.Set(UIDimension::RealPixels, Vector2(-6, -37));
+
+  // Set the player to this character
+  optionData->characterSetter(player);
 }
 
 void MainMenuInput::RemovePlayerHover(shared_ptr<BrawlPlayer> player)

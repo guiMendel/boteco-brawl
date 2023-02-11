@@ -79,6 +79,9 @@ public:
   auto GetComponent(const Component *componentPointer) -> std::shared_ptr<Component>;
   auto RequireComponent(const Component *componentPointer) -> std::shared_ptr<Component>;
 
+  auto GetComponent(int id) -> std::shared_ptr<Component>;
+  auto RequireComponent(int id) -> std::shared_ptr<Component>;
+
   // Removes an existing component
   decltype(components)::iterator RemoveComponent(std::shared_ptr<Component> component);
 };

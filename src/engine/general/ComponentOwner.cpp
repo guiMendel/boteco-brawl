@@ -3,24 +3,32 @@
 
 using namespace std;
 
-auto ComponentOwner::GetComponent(const Component *componentPointer) -> shared_ptr<Component>
+auto ComponentOwner::GetComponent(int id) -> shared_ptr<Component>
 {
-  if (components.count(componentPointer->id) == 0)
+  if (components.count(id) == 0)
     return nullptr;
 
-  return components[componentPointer->id];
+  return components[id];
+}
+
+auto ComponentOwner::RequireComponent(int id) -> shared_ptr<Component>
+{
+  auto component = GetComponent(id);
+
+  if (!component)
+    throw runtime_error(string("Required component was not found"));
+
+  return component;
+}
+
+auto ComponentOwner::GetComponent(const Component *componentPointer) -> shared_ptr<Component>
+{
+  return GetComponent(componentPointer->id);
 }
 
 auto ComponentOwner::RequireComponent(const Component *componentPointer) -> shared_ptr<Component>
 {
-  auto component = GetComponent(componentPointer);
-
-  if (!component)
-  {
-    throw runtime_error(string("Required component was not found"));
-  }
-
-  return component;
+  return RequireComponent(componentPointer->id);
 }
 
 decltype(ComponentOwner::components)::iterator ComponentOwner::RemoveComponent(shared_ptr<Component> component)

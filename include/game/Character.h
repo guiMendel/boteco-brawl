@@ -42,10 +42,10 @@ public:
   // =================================
 public:
   // Adds this character's animations to an animator
-  virtual float AddAnimations(std::shared_ptr<Animator> animator) const = 0;
+  virtual void AddAnimations(std::shared_ptr<Animator> animator) const = 0;
 
   // Adds character-specific mechanics to the character's object
-  virtual float AddMechanics(std::shared_ptr<WorldObject> object) const = 0;
+  virtual void AddMechanics(std::shared_ptr<WorldObject> object) const = 0;
 
   // =================================
   // ATTACK ANIMATION SEQUENCE TRANSFORM

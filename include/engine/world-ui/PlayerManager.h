@@ -24,6 +24,9 @@ public:
 
   virtual ~PlayerManager() {}
 
+  std::shared_ptr<Player> GetPlayer(int playerId) const;
+  std::shared_ptr<Player> RequirePlayer(int playerId) const;
+
   std::vector<std::shared_ptr<Player>> GetPlayers() const;
   std::shared_ptr<Player> GetMainPlayer() const;
 

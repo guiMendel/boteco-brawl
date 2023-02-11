@@ -21,3 +21,21 @@ shared_ptr<Player> PlayerManager::GetMainPlayer() const
 
   return GetScene()->RequireWorldObject(mainPlayerId)->RequireComponent<Player>();
 }
+
+shared_ptr<Player> PlayerManager::GetPlayer(int playerId) const
+{
+  for (auto player : GetPlayers())
+    if (player->PlayerId() == playerId)
+      return player;
+
+  return nullptr;
+}
+
+shared_ptr<Player> PlayerManager::RequirePlayer(int playerId) const
+{
+  auto player = GetPlayer(playerId);
+
+  Assert(player != nullptr, "Couldn't find required player with id " + to_string(playerId));
+
+  return player;
+}

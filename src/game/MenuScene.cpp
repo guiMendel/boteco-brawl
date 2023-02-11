@@ -1,4 +1,7 @@
 #include "MenuScene.h"
+#include "CharacterKafta.h"
+#include "CharacterKiba.h"
+#include "BrawlPlayer.h"
 #include "UIControllerSelectable.h"
 #include "CharacterUIOption.h"
 #include "PlayerManager.h"
@@ -152,7 +155,10 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   optionsGrid->width.SetMax(UIDimension::Percent, 100);
 
   // Adds a character option given its assets
-  auto addOption = [optionsGrid](string optionName, string optionDescriptionPath, string optionBillTextPath)
+  auto addOption = [optionsGrid](string optionName,
+                                 string optionDescriptionPath,
+                                 string optionBillTextPath,
+                                 CharacterUIOption::CharacterSetter setPlayerCharacter)
   {
     auto option = optionsGrid->AddChild<UIContainer>("Option" + optionName);
     option->Flexbox().placeItems = {0.5, 0.5};
@@ -162,7 +168,7 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
     if (optionBillTextPath != "")
     {
       // Add the data
-      option->AddComponent<CharacterUIOption>(optionBillTextPath);
+      option->AddComponent<CharacterUIOption>(optionBillTextPath, setPlayerCharacter);
 
       // Add the controller selection component
       option->AddComponent<UIControllerSelectable>();
@@ -175,22 +181,32 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
   // Kafta
   addOption("Kafta",
             "./assets/images/character-selection/character-options/option-kafta.png",
-            "./assets/images/character-selection/character-options/bill-select-kafta.png");
+            "./assets/images/character-selection/character-options/bill-select-kafta.png",
+            [](shared_ptr<BrawlPlayer> player)
+            { player->SetCharacter<CharacterKafta>(); });
 
-  // Pastel
-  addOption("Pastel",
-            "./assets/images/character-selection/character-options/option-pastel.png",
-            "./assets/images/character-selection/character-options/bill-select-pastel.png");
+  // // Pastel
+  // addOption("Pastel",
+  //           "./assets/images/character-selection/character-options/option-pastel.png",
+  //           "./assets/images/character-selection/character-options/bill-select-pastel.png");
+  // Random
+  addOption("Random",
+            "./assets/images/character-selection/character-options/option-unknown.png",
+            "",
+            nullptr);
 
   // Kiba
   addOption("Kiba",
             "./assets/images/character-selection/character-options/option-kiba.png",
-            "./assets/images/character-selection/character-options/bill-select-kiba.png");
+            "./assets/images/character-selection/character-options/bill-select-kiba.png",
+            [](shared_ptr<BrawlPlayer> player)
+            { player->SetCharacter<CharacterKiba>(); });
 
   // Random
   addOption("Random",
             "./assets/images/character-selection/character-options/option-unknown.png",
-            "");
+            "",
+            nullptr);
 
   // === PLAYER SELECTIONS
 

@@ -6,17 +6,23 @@
 #include "UIImage.h"
 #include "UIText.h"
 #include "UIContainer.h"
+#include "BrawlPlayer.h"
 
 class CharacterUIOption : public UIComponent
 {
 public:
+  // Sets the character of a player
+  using CharacterSetter = std::function<void(std::shared_ptr<BrawlPlayer>)>;
+
   CharacterUIOption(
       GameObject &associatedObject,
-      std::string characterBillTextPath);
-      
+      std::string characterBillTextPath,
+      CharacterSetter characterSetter);
+
   virtual ~CharacterUIOption() {}
 
   std::string characterBillTextPath;
+  CharacterSetter characterSetter;
 };
 
 #endif

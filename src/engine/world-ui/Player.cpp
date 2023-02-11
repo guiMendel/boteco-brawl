@@ -58,3 +58,5 @@ void Player::AssociateController(shared_ptr<ControllerDevice> newDevice)
 int Player::PlayerId() const { return worldObject.id; }
 
 Color Player::GetColor() const { return color; }
+
+std::shared_ptr<Player> Player::GetShared() const { return RequirePointerCast<Player>(worldObject.RequireComponent(id)); }

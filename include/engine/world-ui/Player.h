@@ -41,6 +41,8 @@ public:
 
   Color GetColor() const;
 
+  std::shared_ptr<Player> GetShared() const;
+
 private:
   // Color associated to this player
   Color color;

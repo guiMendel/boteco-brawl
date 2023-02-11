@@ -7,7 +7,7 @@
 #include "Arena.h"
 #include "FallDeath.h"
 #include "PlatformEffector.h"
-#include "TestCharacter.h"
+#include "CharacterTest.h"
 #include "UIText.h"
 #include "UIImage.h"
 #include "PlatformDrop.h"
@@ -21,7 +21,7 @@
 #include "Movement.h"
 #include "KeyboardInput.h"
 #include "ControllerInput.h"
-#include "TestCharacterAnimations.h"
+#include "CharacterTestAnimations.h"
 #include "CharacterController.h"
 #include "CharacterStateManager.h"
 #include "ParticleEmitter.h"
@@ -40,8 +40,7 @@
 
 using namespace std;
 
-auto ObjectRecipes::Camera()
-    -> function<void(shared_ptr<WorldObject>)>
+auto ObjectRecipes::Camera() -> Recipe
 {
   return [](shared_ptr<WorldObject> cameraObject)
   {
@@ -52,7 +51,7 @@ auto ObjectRecipes::Camera()
   };
 }
 
-auto ObjectRecipes::Arena(string imagePath) -> function<void(shared_ptr<WorldObject>)>
+auto ObjectRecipes::Arena(string imagePath) -> Recipe
 {
   return [imagePath](shared_ptr<WorldObject> arena)
   {
@@ -72,7 +71,7 @@ auto ObjectRecipes::Arena(string imagePath) -> function<void(shared_ptr<WorldObj
   };
 }
 
-auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(shared_ptr<WorldObject>)>
+auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> Recipe
 {
   return [size, withEffector](shared_ptr<WorldObject> platform)
   {
@@ -92,7 +91,7 @@ auto ObjectRecipes::Platform(Vector2 size, bool withEffector) -> function<void(s
   };
 }
 
-auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<WorldObject> parent, Vector2 gravityScale) -> function<void(shared_ptr<WorldObject>)>
+auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<WorldObject> parent, Vector2 gravityScale) -> Recipe
 {
   auto weakParent{weak_ptr(parent)};
   return [initialVelocity, weakParent, gravityScale](shared_ptr<WorldObject> projectile)
@@ -109,7 +108,7 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<WorldObject> 
     auto animator = projectile->AddComponent<Animator>();
 
     // Add animations
-    animator->RegisterAnimation<TestCharacterAnimations::Projectile>(weakParent);
+    animator->RegisterAnimation<CharacterTestAnimations::Projectile>(weakParent);
 
     // Add speed
     body->velocity = initialVelocity;
@@ -134,7 +133,7 @@ auto ObjectRecipes::Projectile(Vector2 initialVelocity, shared_ptr<WorldObject> 
   };
 }
 
-auto ObjectRecipes::Canvas(Canvas::Space space) -> std::function<void(std::shared_ptr<WorldObject>)>
+auto ObjectRecipes::Canvas(Canvas::Space space) -> Recipe
 {
   return [space](shared_ptr<WorldObject> canvas)
   {

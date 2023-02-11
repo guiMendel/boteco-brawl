@@ -1,32 +1,32 @@
-#include "TestCharacter.h"
-#include "TestCharacterAnimations.h"
+#include "CharacterKafta.h"
+#include "CharacterKaftaAnimations.h"
 #include "GunParry.h"
 #include "Animator.h"
 #include "LandingAttackEffector.h"
 
 using namespace std;
-using namespace TestCharacterAnimations;
+using namespace CharacterKaftaAnimations;
 
-TestCharacter::TestCharacter(GameObject &associatedObject)
+CharacterKafta::CharacterKafta(GameObject &associatedObject)
     : Character(associatedObject) {}
 
-static const TestCharacter::transformerMap sequenceIndexTransformer{
+static const CharacterKafta::transformerMap sequenceIndexTransformer{
     {"neutral", SequenceIndexTransformer::Repeat(2)}};
 
-const TestCharacter::transformerMap &TestCharacter::GetSequenceIndexTransformer() const
+const CharacterKafta::transformerMap &CharacterKafta::GetSequenceIndexTransformer() const
 {
   return sequenceIndexTransformer;
 }
 
-float TestCharacter::GetBaseDamage() const { return 1; }
-float TestCharacter::GetDefaultArmor() const { return 1; }
-Rectangle TestCharacter::GetHurtbox() const { return Rectangle({0, 0}, 0.8, 1); }
-ColliderDensity TestCharacter::GetDensity() const { return ColliderDensity::Character; }
+float CharacterKafta::GetBaseDamage() const { return 1; }
+float CharacterKafta::GetDefaultArmor() const { return 1; }
+Rectangle CharacterKafta::GetHurtbox() const { return Rectangle({0, 0}, 0.8, 1); }
+ColliderDensity CharacterKafta::GetDensity() const { return ColliderDensity::Character; }
 
-float TestCharacter::GetAcceleration() const { return 35; }
-float TestCharacter::GetDefaultSpeed() const { return 5; }
+float CharacterKafta::GetAcceleration() const { return 35; }
+float CharacterKafta::GetDefaultSpeed() const { return 5; }
 
-float TestCharacter::AddAnimations(std::shared_ptr<Animator> animator) const
+void CharacterKafta::AddAnimations(std::shared_ptr<Animator> animator) const
 {
   animator->RegisterAnimation<Idle>();
   animator->RegisterAnimation<Run>();
@@ -53,7 +53,7 @@ float TestCharacter::AddAnimations(std::shared_ptr<Animator> animator) const
   animator->RegisterAnimation<Spin>();
 }
 
-float TestCharacter::AddMechanics(std::shared_ptr<WorldObject> object) const
+void CharacterKafta::AddMechanics(std::shared_ptr<WorldObject> object) const
 {
   // Give it parry capacity
   object->AddComponent<GunParry>();

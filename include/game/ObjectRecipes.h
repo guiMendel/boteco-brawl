@@ -15,8 +15,11 @@
 class ObjectRecipes
 {
 public:
+  // Defines a recipe type
+  using Recipe = std::function<void(std::shared_ptr<WorldObject>)>;
+
   template <class T>
-  static auto SingleComponent(bool dontDestroyOnLoad = false) -> std::function<void(std::shared_ptr<WorldObject>)>
+  static auto SingleComponent(bool dontDestroyOnLoad = false) -> Recipe
   {
     return [dontDestroyOnLoad](std::shared_ptr<WorldObject> object)
     {
@@ -26,13 +29,12 @@ public:
     };
   }
 
-  static auto Camera() -> std::function<void(std::shared_ptr<WorldObject>)>;
+  static auto Camera() -> Recipe;
 
-  static auto Arena(std::string imagePath) -> std::function<void(std::shared_ptr<WorldObject>)>;
+  static auto Arena(std::string imagePath) -> Recipe;
 
   template <class T>
-  static auto Character(std::shared_ptr<Player> player)
-      -> std::function<void(std::shared_ptr<WorldObject>)>
+  static auto Character(std::shared_ptr<Player> player) -> Recipe
   {
     return [weakPlayer = std::weak_ptr(player)](std::shared_ptr<WorldObject> object)
     {
@@ -44,12 +46,12 @@ public:
     };
   }
 
-  static auto Canvas(Canvas::Space space) -> std::function<void(std::shared_ptr<WorldObject>)>;
+  static auto Canvas(Canvas::Space space) -> Recipe;
 
-  static auto Platform(Vector2 size, bool withEffector = false) -> std::function<void(std::shared_ptr<WorldObject>)>;
+  static auto Platform(Vector2 size, bool withEffector = false) -> Recipe;
 
   static auto Projectile(Vector2 initialSpeed, std::shared_ptr<WorldObject> parent, Vector2 gravityScale = Vector2::One())
-      -> std::function<void(std::shared_ptr<WorldObject>)>;
+      -> Recipe;
 
 private:
   // Initializes a character's object once it already has it's character component

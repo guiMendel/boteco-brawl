@@ -1,13 +1,13 @@
-#ifndef __TEST_CHARACTER__
-#define __TEST_CHARACTER__
+#ifndef __CHARACTER_KIBA__
+#define __CHARACTER_KIBA__
 
 #include "Character.h"
 
-class TestCharacter : public Character
+class CharacterKiba : public Character
 {
 public:
-  TestCharacter(GameObject &associatedObject);
-  virtual ~TestCharacter() {}
+  CharacterKiba(GameObject &associatedObject);
+  virtual ~CharacterKiba() {}
 
   // =================================
   // BASIC PROPERTIES
@@ -40,10 +40,10 @@ public:
   // =================================
 public:
   // Adds this character's animations to an animator
-  float AddAnimations(std::shared_ptr<Animator> animator) const override;
+  void AddAnimations(std::shared_ptr<Animator> animator) const override;
 
   // Adds character-specific mechanics to the character's object
-  float AddMechanics(std::shared_ptr<WorldObject> object) const override;
+  void AddMechanics(std::shared_ptr<WorldObject> object) const override;
 
   // =================================
   // ATTACK ANIMATION SEQUENCE TRANSFORM

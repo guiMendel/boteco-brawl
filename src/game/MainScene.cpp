@@ -7,7 +7,7 @@
 #include "TimeScaleManager.h"
 #include "ShakeEffectManager.h"
 #include "CameraBehavior.h"
-#include "TestCharacter.h"
+#include "CharacterTest.h"
 
 using namespace std;
 
@@ -50,7 +50,7 @@ void MainScene::InitializeObjects()
   // Add player
   auto character1 = Instantiate(
                         "Character-1",
-                        ObjectRecipes::Character<TestCharacter>(playerManager->GetMainPlayer()),
+                        ObjectRecipes::Character<CharacterTest>(playerManager->GetMainPlayer()),
                         Vector2{-3.5, -10},
                         0,
                         charactersParent)

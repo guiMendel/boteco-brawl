@@ -1,4 +1,4 @@
-#include "TestCharacterAnimations.h"
+#include "CharacterKibaAnimations.h"
 #include "CharacterVFX.h"
 #include "ShakeEffectManager.h"
 #include "GunParry.h"
@@ -10,10 +10,8 @@
 #include "ObjectRecipes.h"
 
 using namespace std;
-using namespace TestCharacterAnimations;
-
-// Takes the last frame of a sequence, replicates it n - 1 times, and sets all of it's instances duration
-void SplitLastFrame(vector<AnimationFrame> &frames, int numberOfInstances, float newDuration);
+using namespace CharacterKibaAnimations;
+using namespace CharacterAnimationHelper;
 
 // === JUMP
 
@@ -37,9 +35,8 @@ vector<AnimationFrame> Jump::InitializeFrames()
     auto colliderBox = object.RequireComponent<BoxCollider>()->GetBox();
 
     object.RequireComponent<CharacterVFX>()->PlayDust(
-      Vector2(-colliderBox.width / 4, colliderBox.height / 2),
-      {DegreesToRadians(-135), DegreesToRadians(-100)} 
-    );
+        Vector2(-colliderBox.width / 4, colliderBox.height / 2),
+        {DegreesToRadians(-135), DegreesToRadians(-100)});
   };
 
   frames[1].AddCallback(callback);
@@ -381,20 +378,4 @@ vector<AnimationFrame> Crash::InitializeFrames()
   frames[0].SetDuration(0.6);
 
   return frames;
-}
-
-// === HELPER FUNCTIONS DEFINITIONS
-
-void SplitLastFrame(vector<AnimationFrame> &frames, int numberOfInstances, float newDuration)
-{
-  Assert(frames.size() > 0, "Can't replicate frames of empty sequence");
-  Assert(numberOfInstances > 0, "Can't remove frame");
-
-  auto &lastFrame = frames[frames.size() - 1];
-
-  // Set new duration
-  lastFrame.SetDuration(newDuration);
-
-  // Replicate it
-  frames.insert(frames.end(), numberOfInstances - 1, lastFrame);
 }
