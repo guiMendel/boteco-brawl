@@ -2,6 +2,7 @@
 #define __UI_INPUT_MANAGER__
 
 #include "WorldComponent.h"
+#include "MouseCursor.h"
 #include "UIContainer.h"
 #include "SplashAnimation.h"
 #include "PlayerManager.h"
@@ -17,8 +18,15 @@ public:
   virtual ~MainMenuInput() {}
 
   void Start() override;
+  void Update(float) override;
 
 private:
+  // Activate hover cursor
+  void SetHoverCursor(bool value);
+
+  // Plays click animation if is hovering
+  void AnimateClick();
+
   // Associates a player to a player bill
   void AssociatePlayerBill(std::shared_ptr<Player> player, std::shared_ptr<UIContainer> bill);
 
@@ -39,6 +47,15 @@ private:
 
   // Sets up hover for a character option
   void SetUpHover(std::shared_ptr<UIContainer> option);
+
+  // The default cursor
+  std::shared_ptr<MouseCursor> defaultCursor;
+
+  // The hover cursor
+  std::shared_ptr<MouseCursor> hoverCursor;
+
+  // Whether cursor is in hover mode
+  bool hovering{false};
 
   // Maps player id to respective bill object
   std::unordered_map<int, std::weak_ptr<UIContainer>> playerBills;

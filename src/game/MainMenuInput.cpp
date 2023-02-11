@@ -1,4 +1,5 @@
 #include "MainMenuInput.h"
+#include "SpriteRenderer.h"
 #include "CharacterUIOption.h"
 #include "PlayerManager.h"
 #include "MenuScene.h"
@@ -6,18 +7,61 @@
 
 using namespace std;
 
+// Time that knife cursor remains down after a click
+static const float clickAnimationDelay{0.1};
+
+// Speed of cut decay
+static const int cutDecaySpeed{200};
+
+// Name of cursor animation delay timer
+#define RESET_HOVER_TIMER "reset-hover"
+
 MainMenuInput::MainMenuInput(GameObject &associatedObject)
     : WorldComponent(associatedObject),
+      defaultCursor(make_shared<MouseCursor>("./assets/images/knife-pointer.png", Vector2(0, 12))),
+      hoverCursor(make_shared<MouseCursor>("./assets/images/knife-hover.png", Vector2(0, 12))),
       weakAnimationHandler(GetScene()->RequireUIObject<UIContainer>(MAIN_CONTAINER_OBJECT)->RequireComponent<SplashAnimation>()),
       weakBillContainer(GetScene()->RequireUIObject<UIContainer>(BILLS_OBJECT)),
-      weakPlayerManager(GetScene()->RequireFindComponent<PlayerManager>()) {}
+      weakPlayerManager(GetScene()->RequireFindComponent<PlayerManager>())
+{
+}
 
 void MainMenuInput::Start()
 {
+  // Activate default cursor
+  defaultCursor->Activate();
+
   RegisterListeners();
 
   // Associate main player to first bill
   AssociatePlayerBill(Lock(weakPlayerManager)->GetMainPlayer(), GetBill(0));
+}
+
+void MainMenuInput::Update(float deltaTime)
+{
+  // Check if a hover click animation is up
+  if (hovering && defaultCursor->IsActive() && gameObject.timer.Get(RESET_HOVER_TIMER) >= 0)
+  {
+    gameObject.timer.Stop(RESET_HOVER_TIMER);
+
+    hoverCursor->Activate();
+  }
+
+  // For each cut sprite
+  for (auto cutObject : worldObject.GetChildren())
+  {
+    auto cutSprite = cutObject->RequireComponent<SpriteRenderer>();
+
+    // Get new alpha
+    int newAlpha = cutSprite->GetColors().first.alpha - cutDecaySpeed * deltaTime;
+
+    // If it's over, remove child
+    if (newAlpha <= 0)
+      cutObject->RequestDestroy();
+
+    else
+      cutSprite->SetColor(Color(255, 255, 255, newAlpha));
+  }
 }
 
 void MainMenuInput::PlayerStart()
@@ -59,17 +103,21 @@ void MainMenuInput::RegisterListeners()
   weak_ptr weakBack{backButton};
 
   // Make it lighter on mouse over
-  auto lightenBackButton = [weakBack](shared_ptr<UIEvent> event)
+  auto lightenBackButton = [this, weakBack](shared_ptr<UIEvent> event)
   {
     if (event->GetType() != UIEvent::OnMouseEnter)
       return;
 
+    SetHoverCursor(true);
+
     Lock(weakBack)->SetImagePath("./assets/images/character-selection/header/back-button-light.png");
   };
-  auto darkenBackButton = [weakBack](shared_ptr<UIEvent> event)
+  auto darkenBackButton = [this, weakBack](shared_ptr<UIEvent> event)
   {
     if (event->GetType() != UIEvent::OnMouseLeave)
       return;
+
+    SetHoverCursor(false);
 
     Lock(weakBack)->SetImagePath("./assets/images/character-selection/header/back-button.png");
   };
@@ -95,6 +143,10 @@ void MainMenuInput::RegisterListeners()
     SetUpSelection(optionContainer);
     SetUpHover(optionContainer);
   }
+
+  // Cursor click animation
+  inputManager.OnClickDown.AddListener("cursor-animation", [this](Vector2)
+                                       { AnimateClick(); });
 }
 
 void MainMenuInput::SetUpSelection(shared_ptr<UIContainer> option)
@@ -174,6 +226,9 @@ void MainMenuInput::SetUpHover(shared_ptr<UIContainer> option)
     if (event->GetType() != UIEvent::OnMouseEnter)
       return;
 
+    // Set hovering state
+    SetHoverCursor(true);
+
     // Get this player
     auto player = Lock(weakPlayerManager)->GetMainPlayer();
 
@@ -194,6 +249,10 @@ void MainMenuInput::SetUpHover(shared_ptr<UIContainer> option)
     auto hoverBadge = option->AddChild<UIImage>(HOVER_IMAGE, "./assets/images/character-selection/character-options/selector-1.png");
     hoverBadge->SetPositionAbsolute(true);
     hoverBadge->absolutePosition.x.Set(UIDimension::RealPixels, -20);
+
+    SDL_Surface *surface = IMG_Load("./assets/images/knife-hover.png");
+    SDL_Cursor *cursor = SDL_CreateColorCursor(surface, 0, 12);
+    SDL_SetCursor(cursor);
   };
 
   // Handle it's selection
@@ -201,6 +260,9 @@ void MainMenuInput::SetUpHover(shared_ptr<UIContainer> option)
   {
     if (event->GetType() != UIEvent::OnMouseLeave)
       return;
+
+    // Unset hovering
+    SetHoverCursor(false);
 
     // Get this player
     auto player = Lock(weakPlayerManager)->GetMainPlayer();
@@ -215,6 +277,10 @@ void MainMenuInput::SetUpHover(shared_ptr<UIContainer> option)
 
       playerHovers.erase(player->PlayerId());
     }
+
+    SDL_Surface *surface = IMG_Load("./assets/images/knife-pointer.png");
+    SDL_Cursor *cursor = SDL_CreateColorCursor(surface, 0, 12);
+    SDL_SetCursor(cursor);
   };
 
   option->OnUIEvent.AddListener("detect-hover-enter", handleHoverEnter);
@@ -251,4 +317,38 @@ void MainMenuInput::ControllerStart(shared_ptr<ControllerDevice> controller)
     // Associate player to bill
     AssociatePlayerBill(newPlayer, GetBill(playerBills.size()));
   }
+}
+
+void MainMenuInput::SetHoverCursor(bool value)
+{
+  hovering = value;
+
+  if (hovering)
+    hoverCursor->Activate();
+
+  else
+    defaultCursor->Activate();
+}
+
+void MainMenuInput::AnimateClick()
+{
+  if (hovering == false || defaultCursor->IsActive())
+    return;
+
+  // Activate default cursor
+  defaultCursor->Activate();
+
+  // Set timer to revert back to hover cursor
+  gameObject.timer.Reset(RESET_HOVER_TIMER, -clickAnimationDelay);
+
+  // Create a cut line sprite
+  auto cutLine = worldObject.CreateChild("KnifeCursorCut");
+
+  // Get cut position
+  auto cutPosition = GetScene()->inputManager.GetMouseWorldCoordinates() + Vector2(0.25, 0.05);
+  cutLine->SetPosition(cutPosition);
+
+  // Add the sprite
+  auto cutSprite = cutLine->AddComponent<SpriteRenderer>("./assets/images/knife-cut.png", RenderLayer::UI, 15);
+  cutSprite->OverrideWidthPixels(32);
 }

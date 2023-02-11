@@ -156,13 +156,13 @@ UI_OBJS = $(patsubst %,$(UI_OBJECT_DIRECTORY)\\%,$(_UI_OBJS))
 # === GENERAL
 
 # Header files
-_GENERAL_DEPS = Circle.h Color.h Event.h Helper.h Rectangle.h Shape.h Vector2.h ComponentOwner.h Parent.h
+_GENERAL_DEPS = Circle.h Color.h Event.h Helper.h Rectangle.h Shape.h Vector2.h ComponentOwner.h Parent.h MouseCursor.h
 
 # Generate header filepaths
 GENERAL_DEPS = $(patsubst %,$(GENERAL_INCLUDE_DIRECTORY)\\%,$(_GENERAL_DEPS))
 
 # Object files
-_GENERAL_OBJS = Circle.o Color.o Helper.o Rectangle.o Shape.o Vector2.o main.o ComponentOwner.o
+_GENERAL_OBJS = Circle.o Color.o Helper.o Rectangle.o Shape.o Vector2.o main.o ComponentOwner.o MouseCursor.o
 
 # Generate object filepaths
 GENERAL_OBJS = $(patsubst %,$(GENERAL_OBJECT_DIRECTORY)\\%,$(_GENERAL_OBJS))
