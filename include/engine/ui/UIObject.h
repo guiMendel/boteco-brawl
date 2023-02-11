@@ -32,7 +32,7 @@ public:
   // OBJECT PROPERTIES
   // =================================
 public:
-  // Returns the real pixel displacement between the top-left of the parent (unpadded) and this object's top-left
+  // Returns the real pixel displacement between the top-left of the canvas and this object's top-left
   Vector2 GetPosition() override;
 
   // Returns top-left position after counting in the padding

@@ -168,6 +168,29 @@ namespace Helper
   }
 
   // Iterates through each weak pointer, removing those that are expired, and collecting the rest in a shared ptr collection
+  template <typename T>
+  std::vector<std::shared_ptr<T>> ParseWeakIntoShared(std::vector<std::weak_ptr<T>> &weakVector)
+  {
+    std::vector<std::shared_ptr<T>> finalVector;
+
+    // Start iterating
+    auto weakIterator = weakVector.begin();
+
+    while (weakIterator != weakVector.end())
+    {
+      // If it's expired remove it
+      if (weakIterator->expired())
+        weakIterator = weakVector.erase(weakIterator);
+
+      // Otherwise, add it to the vector
+      else
+        finalVector.push_back((weakIterator++)->lock());
+    }
+
+    return finalVector;
+  }
+
+  // Iterates through each weak pointer, removing those that are expired, and collecting the rest in a shared ptr collection
   template <typename T, typename U>
   std::vector<std::shared_ptr<U>> WeakMapToVector(std::unordered_map<T, std::weak_ptr<U>> &weakMap)
   {

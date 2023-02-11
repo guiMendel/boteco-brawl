@@ -8,8 +8,8 @@
 #include "PlayerManager.h"
 
 #define BILL_TEXT_IMAGE "SelectionText"
-#define SELECTION_IMAGE "SelectionBadge"
-#define HOVER_IMAGE "HoverBadge"
+#define SELECTION_IMAGE(playerId) "SelectionBadge" #playerId
+#define HOVER_IMAGE(playerId) "HoverBadge" #playerId
 
 class MainMenuInput : public WorldComponent
 {
@@ -43,10 +43,22 @@ private:
   void ControllerStart(std::shared_ptr<ControllerDevice> controller);
 
   // Sets up selection for a character option
-  void SetUpSelection(std::shared_ptr<UIContainer> option);
+  void SetUpMouseSelection(std::shared_ptr<UIContainer> option);
 
   // Sets up hover for a character option
-  void SetUpHover(std::shared_ptr<UIContainer> option);
+  void SetUpMouseHover(std::shared_ptr<UIContainer> option);
+
+  // Set a player to hover an option
+  void SetPlayerHover(std::shared_ptr<UIContainer> option, std::shared_ptr<Player> player);
+
+  // Set a player to select an option
+  void SetPlayerSelect(std::shared_ptr<UIContainer> option, std::shared_ptr<Player> player);
+
+  // Remove a player's hover
+  void RemovePlayerHover(std::shared_ptr<Player> player);
+
+  // Remove a player's selection
+  void RemovePlayerSelect(std::shared_ptr<Player> player);
 
   // The default cursor
   std::shared_ptr<MouseCursor> defaultCursor;

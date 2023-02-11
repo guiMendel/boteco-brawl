@@ -3,6 +3,7 @@
 
 #include "SDL_gamecontroller.h"
 #include "Helper.h"
+#include "Event.h"
 #include <memory>
 #include <string>
 
@@ -22,6 +23,9 @@ public:
 class ControllerDevice
 {
 public:
+  // Raised right before a controller device's destruction
+  Event OnBeforeDestroy;
+
   // Requires an index of a connected controller
   ControllerDevice(int controllerIndex);
 

@@ -34,7 +34,12 @@ ControllerDevice::ControllerDevice(int controllerIndex)
         { MaybeAssociateToPlayer(player); });
 }
 
-ControllerDevice::~ControllerDevice() { LosePlayer(); }
+ControllerDevice::~ControllerDevice()
+{
+  OnBeforeDestroy.Invoke();
+
+  LosePlayer();
+}
 
 void ControllerDevice::AssociateToPlayer(std::shared_ptr<Player> player)
 {

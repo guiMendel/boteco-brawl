@@ -1,4 +1,5 @@
 #include "MenuScene.h"
+#include "UIControllerSelectable.h"
 #include "CharacterUIOption.h"
 #include "PlayerManager.h"
 #include "ObjectRecipes.h"
@@ -154,10 +155,14 @@ void MenuScene::CreateSelection(shared_ptr<UIContainer> mainContainer)
     option->Flexbox().placeItems = {0.5, 0.5};
     option->Flexbox().gap.Set(UIDimension::RealPixels, 10);
 
-    // Add this option's data
+    // If it's selectable
     if (optionBillTextPath != "")
     {
+      // Add the data
       option->AddComponent<CharacterUIOption>(optionBillTextPath);
+
+      // Add the controller selection component
+      option->AddComponent<UIControllerSelectable>();
     }
 
     option->AddChild<UIImage>("Portrait", "./assets/images/character-selection/character-options/option-portrait.png");

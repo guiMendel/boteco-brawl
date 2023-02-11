@@ -12,6 +12,7 @@
     "CONTROLLERDEVICEREMAPPED",
     "CONTROLLERDEVICEREMOVED",
     "Delayable",
+    "DPAD",
     "Faca",
     "GAMECONTROLLER",
     "Kafta",
@@ -31,6 +32,7 @@
     "Szudzik's",
     "TEXTUREACCESS",
     "threehalfs",
+    "Unhover",
     "WINDOWPOS"
   ],
   "files.associations": {

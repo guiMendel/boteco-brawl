@@ -1,4 +1,5 @@
 #include "MainMenuInput.h"
+#include "UIControllerSelectable.h"
 #include "SpriteRenderer.h"
 #include "CharacterUIOption.h"
 #include "PlayerManager.h"
@@ -31,6 +32,7 @@ void MainMenuInput::Start()
   // Activate default cursor
   defaultCursor->Activate();
 
+  // Register all listeners
   RegisterListeners();
 
   // Associate main player to first bill
@@ -140,16 +142,72 @@ void MainMenuInput::RegisterListeners()
   for (auto option : GetScene()->RequireUIObject<UIContainer>(OPTIONS_OBJECT)->GetChildren())
   {
     auto optionContainer = RequirePointerCast<UIContainer>(option);
-    SetUpSelection(optionContainer);
-    SetUpHover(optionContainer);
+    SetUpMouseSelection(optionContainer);
+    SetUpMouseHover(optionContainer);
   }
 
   // Cursor click animation
   inputManager.OnClickDown.AddListener("cursor-animation", [this](Vector2)
                                        { AnimateClick(); });
+
+  // Subscribe to controller hover
+  for (auto selectable : UIControllerSelectable::GetAllInstances())
+  {
+    weak_ptr weakOption{GetScene()->RequireUIObject<UIContainer>(selectable->uiObject.id)};
+
+    auto onControllerHover = [this, weakOption](shared_ptr<ControllerDevice> controller)
+    {
+      // Ignore controllers with no player
+      auto player = controller->GetPlayer();
+
+      if (player == nullptr)
+        return;
+
+      // Add the hover badge
+      SetPlayerHover(Lock(weakOption), player);
+    };
+
+    auto onControllerUnhover = [this](shared_ptr<ControllerDevice> controller)
+    {
+      // Ignore controllers with no player
+      auto player = controller->GetPlayer();
+
+      if (player == nullptr)
+        return;
+
+      // Remove the hover badge
+      RemovePlayerHover(player);
+    };
+
+    selectable->OnControllerSelect.AddListener("menu-select", onControllerHover);
+    selectable->OnControllerUnselect.AddListener("menu-unselect", onControllerUnhover);
+  }
+
+  // Subscribe to controller selection
+  auto onControllerSelect = [this](SDL_GameControllerButton button, std::shared_ptr<ControllerDevice> controller)
+  {
+    // Only accept A
+    if (button != SDL_CONTROLLER_BUTTON_A)
+      return;
+
+    // Ignore controller with no player
+    auto player = controller->GetPlayer();
+
+    if (player == nullptr)
+      return;
+
+    // If this player has no hover, stop
+    if (playerHovers.count(player->PlayerId()) == 0)
+      return;
+
+    // Select hovered option
+    SetPlayerSelect(Lock(playerHovers[player->PlayerId()]), player);
+  };
+
+  inputManager.OnControllerButtonPress.AddListener("menu-select", onControllerSelect);
 }
 
-void MainMenuInput::SetUpSelection(shared_ptr<UIContainer> option)
+void MainMenuInput::SetUpMouseSelection(shared_ptr<UIContainer> option)
 {
   // Get it's data
   auto optionData = option->GetComponent<CharacterUIOption>();
@@ -166,51 +224,14 @@ void MainMenuInput::SetUpSelection(shared_ptr<UIContainer> option)
     if (event->GetType() != UIEvent::OnMouseClick)
       return;
 
-    // Get this player
-    auto player = Lock(weakPlayerManager)->GetMainPlayer();
-
-    // If there was a previous selection
-    if (playerSelections.count(player->PlayerId()) > 0)
-    {
-      LOCK(playerSelections.at(player->PlayerId()), oldOption);
-
-      // Remove old badge
-      oldOption->RequireChild(SELECTION_IMAGE)->RequestDestroy();
-    }
-
-    // Make new association
-    LOCK(weakOption, option);
-    playerSelections[player->PlayerId()] = option;
-
-    // Place selected badge on option
-    auto selectedBadge = option->AddChild<UIImage>(SELECTION_IMAGE, "./assets/images/character-selection/character-options/selected-1.png");
-    selectedBadge->SetPositionAbsolute(true);
-    selectedBadge->absolutePosition.x.Set(UIDimension::RealPixels, -20);
-
-    LOCK(weakData, optionData);
-
-    // Get the player's bill
-    auto bill = Lock(playerBills[player->PlayerId()]);
-
-    // See if it already has a text image
-    auto textImage = dynamic_pointer_cast<UIImage>(bill->GetChild(BILL_TEXT_IMAGE));
-
-    // If not, add it
-    if (textImage == nullptr)
-    {
-      textImage = bill->AddChild<UIImage>(BILL_TEXT_IMAGE, optionData->characterBillTextPath);
-      textImage->SetPositionAbsolute(true);
-      textImage->offset.Set(UIDimension::RealPixels, Vector2(-6, -37));
-    }
-
-    else
-      textImage->SetImagePath(optionData->characterBillTextPath);
+    // Set main player to select this option
+    SetPlayerSelect(Lock(weakOption), Lock(weakPlayerManager)->GetMainPlayer());
   };
 
   option->OnUIEvent.AddListener("detect-selection", handleSelection);
 }
 
-void MainMenuInput::SetUpHover(shared_ptr<UIContainer> option)
+void MainMenuInput::SetUpMouseHover(shared_ptr<UIContainer> option)
 {
   // Get it's data
   auto optionData = option->GetComponent<CharacterUIOption>();
@@ -220,7 +241,7 @@ void MainMenuInput::SetUpHover(shared_ptr<UIContainer> option)
 
   weak_ptr weakOption{option};
 
-  // Handle it's selection
+  // Handle it's hover
   auto handleHoverEnter = [this, weakOption](shared_ptr<UIEvent> event)
   {
     if (event->GetType() != UIEvent::OnMouseEnter)
@@ -229,33 +250,11 @@ void MainMenuInput::SetUpHover(shared_ptr<UIContainer> option)
     // Set hovering state
     SetHoverCursor(true);
 
-    // Get this player
-    auto player = Lock(weakPlayerManager)->GetMainPlayer();
-
-    // If there was a previous hover
-    if (playerHovers.count(player->PlayerId()) > 0)
-    {
-      LOCK(playerHovers.at(player->PlayerId()), oldOption);
-
-      // Remove old badge
-      oldOption->RequireChild(HOVER_IMAGE)->RequestDestroy();
-    }
-
-    // Make new association
-    LOCK(weakOption, option);
-    playerHovers[player->PlayerId()] = option;
-
-    // Place hover badge on option
-    auto hoverBadge = option->AddChild<UIImage>(HOVER_IMAGE, "./assets/images/character-selection/character-options/selector-1.png");
-    hoverBadge->SetPositionAbsolute(true);
-    hoverBadge->absolutePosition.x.Set(UIDimension::RealPixels, -20);
-
-    SDL_Surface *surface = IMG_Load("./assets/images/knife-hover.png");
-    SDL_Cursor *cursor = SDL_CreateColorCursor(surface, 0, 12);
-    SDL_SetCursor(cursor);
+    // Set main player to hover this option
+    SetPlayerHover(Lock(weakOption), Lock(weakPlayerManager)->GetMainPlayer());
   };
 
-  // Handle it's selection
+  // Handle it's hover
   auto handleHoverExit = [this, weakOption](shared_ptr<UIEvent> event)
   {
     if (event->GetType() != UIEvent::OnMouseLeave)
@@ -264,23 +263,8 @@ void MainMenuInput::SetUpHover(shared_ptr<UIContainer> option)
     // Unset hovering
     SetHoverCursor(false);
 
-    // Get this player
-    auto player = Lock(weakPlayerManager)->GetMainPlayer();
-
-    // If there was a previous hover
-    if (playerHovers.count(player->PlayerId()) > 0)
-    {
-      LOCK(playerHovers.at(player->PlayerId()), oldOption);
-
-      // Remove old badge
-      oldOption->RequireChild(HOVER_IMAGE)->RequestDestroy();
-
-      playerHovers.erase(player->PlayerId());
-    }
-
-    SDL_Surface *surface = IMG_Load("./assets/images/knife-pointer.png");
-    SDL_Cursor *cursor = SDL_CreateColorCursor(surface, 0, 12);
-    SDL_SetCursor(cursor);
+    // Remove main player hover badge
+    RemovePlayerHover(Lock(weakPlayerManager)->GetMainPlayer());
   };
 
   option->OnUIEvent.AddListener("detect-hover-enter", handleHoverEnter);
@@ -316,6 +300,12 @@ void MainMenuInput::ControllerStart(shared_ptr<ControllerDevice> controller)
 
     // Associate player to bill
     AssociatePlayerBill(newPlayer, GetBill(playerBills.size()));
+
+    // Start controller hover on first option
+    auto firstOptionSelectable = UIControllerSelectable::GetAllInstances().at(0);
+
+    // Associate controller to this selectable
+    firstOptionSelectable->AssociateController(controller);
   }
 }
 
@@ -351,4 +341,84 @@ void MainMenuInput::AnimateClick()
   // Add the sprite
   auto cutSprite = cutLine->AddComponent<SpriteRenderer>("./assets/images/knife-cut.png", RenderLayer::UI, 15);
   cutSprite->OverrideWidthPixels(32);
+}
+
+void MainMenuInput::SetPlayerHover(shared_ptr<UIContainer> option, shared_ptr<Player> player)
+{
+  // If there was a previous hover, remove it
+  RemovePlayerHover(player);
+
+  // Make new association
+  playerHovers[player->PlayerId()] = option;
+
+  // Place hover badge on option
+  auto hoverBadge = option->AddChild<UIImage>(HOVER_IMAGE(player->PlayerId()), "./assets/images/character-selection/character-options/selector-1.png");
+  hoverBadge->SetPositionAbsolute(true);
+  hoverBadge->absolutePosition.x.Set(UIDimension::RealPixels, -20);
+}
+
+void MainMenuInput::SetPlayerSelect(shared_ptr<UIContainer> option, shared_ptr<Player> player)
+{
+  // If there was a previous selection, remove it
+  RemovePlayerSelect(player);
+
+  // Make new association
+  playerSelections[player->PlayerId()] = option;
+
+  // Place selected badge on option
+  auto selectedBadge = option->AddChild<UIImage>(SELECTION_IMAGE(player->PlayerId()), "./assets/images/character-selection/character-options/selected-1.png");
+  selectedBadge->SetPositionAbsolute(true);
+  selectedBadge->absolutePosition.x.Set(UIDimension::RealPixels, -20);
+
+  // Get the data
+  auto optionData = option->RequireComponent<CharacterUIOption>();
+
+  // Get the player's bill
+  auto bill = Lock(playerBills[player->PlayerId()]);
+
+  // Add a text image
+  auto textImage = bill->AddChild<UIImage>(BILL_TEXT_IMAGE, optionData->characterBillTextPath);
+  textImage->SetPositionAbsolute(true);
+  textImage->offset.Set(UIDimension::RealPixels, Vector2(-6, -37));
+}
+
+void MainMenuInput::RemovePlayerHover(shared_ptr<Player> player)
+{
+  // If there was a previous hover
+  if (playerHovers.count(player->PlayerId()) == 0)
+    return;
+
+  // Get old option
+  LOCK(playerHovers.at(player->PlayerId()), oldOption);
+
+  // Remove old badge
+  oldOption->RequireChild(HOVER_IMAGE(player->PlayerId()))->RequestDestroy();
+
+  // Remove option record
+  playerHovers.erase(player->PlayerId());
+}
+
+void MainMenuInput::RemovePlayerSelect(shared_ptr<Player> player)
+{
+  // If there was a previous selection
+  if (playerSelections.count(player->PlayerId()) == 0)
+    return;
+
+  // Get old option
+  LOCK(playerSelections.at(player->PlayerId()), oldOption);
+
+  // Remove old badge
+  oldOption->RequireChild(SELECTION_IMAGE(player->PlayerId()))->RequestDestroy();
+
+  // Remove option record
+  playerSelections.erase(player->PlayerId());
+
+  // Get the player's bill
+  auto bill = Lock(playerBills[player->PlayerId()]);
+
+  // Get it's text image
+  auto textImage = RequirePointerCast<UIImage>(bill->RequireChild(BILL_TEXT_IMAGE));
+
+  // Remove it
+  textImage->RequestDestroy();
 }
