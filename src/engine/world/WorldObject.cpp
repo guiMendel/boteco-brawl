@@ -182,20 +182,17 @@ shared_ptr<WorldObject> WorldObject::GetShared()
   return GetScene()->RequireWorldObject(id);
 }
 
-shared_ptr<GameObject> WorldObject::InternalGetParent() const
+shared_ptr<GameObject> WorldObject::InternalGetParentNoException() const
 {
-  // Ensure not root
-  Assert(IsRoot() == false, "Getting parent is forbidden on root object");
-
-  // Ensure the parent is there
-  Assert(weakParent.expired() == false, "WorldObject " + GetName() + " unexpectedly failed to retrieve parent object");
-
   return weakParent.lock();
 }
 
 std::shared_ptr<WorldObject> WorldObject::InternalGetWorldParent() const
 {
-  return RequirePointerCast<WorldObject>(InternalGetParent());
+  // Ensure not root
+  Assert(IsRoot() == false, "Getting parent is forbidden on root object");
+
+  return RequirePointerCast<WorldObject>(InternalGetParentNoException());
 }
 
 shared_ptr<WorldObject> WorldObject::GetParent() const
@@ -221,20 +218,29 @@ auto WorldObject::UnlinkParent() -> unordered_map<int, weak_ptr<WorldObject>>::i
   return iterator;
 }
 
-void WorldObject::SetParent(shared_ptr<WorldObject> newParent)
+void WorldObject::SetParent(shared_ptr<WorldObject> newParent, std::shared_ptr<WorldObject> ownPointer)
 {
   Assert(IsRoot() == false, "SetParent is forbidden on root object");
 
+  if (ownPointer == nullptr)
+    ownPointer = GetShared();
+
   // Delete current parent
-  UnlinkParent();
+  if (weakParent.expired() == false)
+    UnlinkParent();
 
   // Set new parent
   weakParent = newParent;
-  newParent->children[id] = GetShared();
+  newParent->children[id] = ownPointer;
 
   // Inherit this new parent's layer if necessary
   if (inheritedPhysicsLayer)
     physicsLayer = newParent->physicsLayer;
+}
+
+void WorldObject::SetParent(shared_ptr<WorldObject> newParent)
+{
+  SetParent(newParent, GetShared());
 }
 
 // Where this object exists in game space, in absolute coordinates
@@ -243,13 +249,13 @@ Vector2 WorldObject::GetPosition()
   if (IsRoot())
     return localPosition;
 
-  return InternalGetParent()->GetPosition() + localPosition;
+  return InternalGetWorldParent()->GetPosition() + localPosition;
 }
 void WorldObject::SetPosition(const Vector2 newPosition)
 {
   if (IsRoot())
     localPosition = newPosition;
-  localPosition = newPosition - InternalGetParent()->GetPosition();
+  localPosition = newPosition - InternalGetWorldParent()->GetPosition();
 }
 
 void WorldObject::Translate(const Vector2 translation)
@@ -505,7 +511,10 @@ void WorldObject::CascadeDown(function<void(GameObject &)> callback, bool topDow
     callback(*this);
 }
 
-void WorldObject::InternalSetParent(std::shared_ptr<GameObject> newParent)
+void WorldObject::InternalSetParent(std::shared_ptr<GameObject> newParent, std::shared_ptr<GameObject> ownPointer)
 {
-  SetParent(RequirePointerCast<WorldObject>(newParent));
+  if (ownPointer == nullptr)
+    ownPointer = GetShared();
+
+  SetParent(RequirePointerCast<WorldObject>(newParent), RequirePointerCast<WorldObject>(ownPointer));
 }

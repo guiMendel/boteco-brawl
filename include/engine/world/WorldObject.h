@@ -114,9 +114,11 @@ public:
 
 protected:
   // Gets pointer to parent, and ensures it's valid. Raises when called from root object
-  std::shared_ptr<GameObject> InternalGetParent() const override;
+  std::shared_ptr<GameObject> InternalGetParentNoException() const override;
 
-  void InternalSetParent(std::shared_ptr<GameObject> newParent) override;
+  void SetParent(std::shared_ptr<WorldObject> newParent, std::shared_ptr<WorldObject> ownPointer);
+
+  void InternalSetParent(std::shared_ptr<GameObject> newParent, std::shared_ptr<GameObject> ownPointer = nullptr) override;
 
   // Gets pointer to parent, cast to world object
   std::shared_ptr<WorldObject> InternalGetWorldParent() const;

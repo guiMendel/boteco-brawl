@@ -48,10 +48,10 @@ void UIContainer::CascadeDown(function<void(GameObject &)> callback, bool topDow
     callback(*this);
 }
 
-shared_ptr<GameObject> UIContainer::InternalGetParent() const
+shared_ptr<GameObject> UIContainer::InternalGetParentNoException() const
 {
   if (IsCanvasRoot())
-    return GetScene()->RequireGameObject(canvas.gameObject.id);
+    return GetScene()->GetGameObject(canvas.gameObject.id);
 
   return GetParent();
 }

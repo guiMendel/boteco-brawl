@@ -20,6 +20,7 @@ class GameScene;
 class GameObject : virtual public ComponentOwner
 {
   friend class GameScene;
+  friend class Game;
 
 protected:
   // Constructor dedicated for a scene's root object
@@ -147,10 +148,13 @@ public:
 
 protected:
   // Gets pointer to parent, and ensures it's valid. Raises when called from root object
-  virtual std::shared_ptr<GameObject> InternalGetParent() const = 0;
+  std::shared_ptr<GameObject> InternalGetParent() const;
+
+  // Gets parent, but may return nullptr if no parent
+  virtual std::shared_ptr<GameObject> InternalGetParentNoException() const = 0;
 
   // Sets a new parent
-  virtual void InternalSetParent(std::shared_ptr<GameObject> newParent) = 0;
+  virtual void InternalSetParent(std::shared_ptr<GameObject> newParent, std::shared_ptr<GameObject> ownPointer = nullptr) = 0;
 
   // =================================
   // UTILITY

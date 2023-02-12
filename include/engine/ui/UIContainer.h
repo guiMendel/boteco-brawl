@@ -95,7 +95,7 @@ public:
   std::vector<std::shared_ptr<UIObject>> GetChildren() override;
 
 protected:
-  std::shared_ptr<GameObject> InternalGetParent() const override;
+  std::shared_ptr<GameObject> InternalGetParentNoException() const override;
 
   // Generator for arrangement order of children
   int arrangeOrderGenerator{0};

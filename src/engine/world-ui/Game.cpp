@@ -441,7 +441,13 @@ void Game::TransitionScenes()
 
   // Add new objects
   for (auto newObject : objectsToKeep)
+  {
+    // Set those without a parent to be children of the new root
+    if (newObject->InternalGetParentNoException() == nullptr)
+      newObject->InternalSetParent(currentScene->GetRootObject(), newObject);
+
     currentScene->RegisterObject(newObject);
+  }
 
   // Start it if necessary
   if (started)

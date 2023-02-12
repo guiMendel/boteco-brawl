@@ -21,7 +21,7 @@ void UIContent::CascadeDown(function<void(GameObject &)> callback, bool topDown)
     callback(*this);
 }
 
-std::shared_ptr<GameObject> UIContent::InternalGetParent() const { return GetParent(); }
+std::shared_ptr<GameObject> UIContent::InternalGetParentNoException() const { return GetParent(); }
 
 void UIContent::CheckEventApplication(std::shared_ptr<UIMouseEvent> mouseEvent)
 {

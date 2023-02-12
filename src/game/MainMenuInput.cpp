@@ -1,4 +1,5 @@
 #include "MainMenuInput.h"
+#include "MainScene.h"
 #include "UIControllerSelectable.h"
 #include "SpriteRenderer.h"
 #include "CharacterUIOption.h"
@@ -202,7 +203,7 @@ void MainMenuInput::RegisterListeners()
   auto onControllerSelect = [this](SDL_GameControllerButton button, shared_ptr<ControllerDevice> controller)
   {
     // Only accept A
-    if (button != SDL_CONTROLLER_BUTTON_A)
+    if (button != SDL_CONTROLLER_BUTTON_A || controller->GetPlayer() == nullptr)
       return;
 
     // Ignore controller with no player
@@ -533,7 +534,7 @@ void MainMenuInput::StartBattle()
   // Loads battle scene
   auto loadBattleScene = [this]()
   {
-    cout << "Yaaaaaaay man!" << endl;
+    Game::GetInstance().SetScene(make_shared<MainScene>());
   };
 
   // Transition out of the menu

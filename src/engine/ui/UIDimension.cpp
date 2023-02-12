@@ -160,7 +160,7 @@ float UIDimension::RealPixelsTo(int valuePixels, UnitType requestedType) const
   if (requestedType == Percent)
   {
     // Get owner's parent dimensions, ignoring depending children (such as this one) to avoid a paradox
-    auto parent = Lock(weakOwner)->GetParent();
+    auto parent = Lock(weakOwner)->RequireParent();
     Calculation ignoreChildren = axis == Horizontal ? IgnoreDependentChildrenX : IgnoreDependentChildrenY;
     int parentSize = parent->GetDimension(axis).AsRealPixels(UIDimension::Calculation(ignoreChildren));
 
@@ -250,7 +250,7 @@ int UIDimension::CalculateRealPixelSize(float value, UnitType type, Calculation 
   if (type == Percent)
   {
     // Get owner's parent dimensions, ignoring depending children (such as this one) to avoid a paradox
-    auto parent = Lock(weakOwner)->GetParent();
+    auto parent = Lock(weakOwner)->RequireParent();
     Calculation ignoreChildren = axis == Horizontal ? IgnoreDependentChildrenX : IgnoreDependentChildrenY;
     int parentSize = parent->GetDimension(axis).AsRealPixels(UIDimension::Calculation(configuration | ignoreChildren));
 

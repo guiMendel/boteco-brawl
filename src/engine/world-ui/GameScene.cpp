@@ -276,14 +276,20 @@ vector<shared_ptr<GameObject>> GameScene::ExtractObjectsToCarryOn()
   for (auto child : GetRootObject()->GetChildren())
     if (child->keepOnLoad)
     {
-      // Keep it's pointer to return it
-      savedObjects.push_back(child);
-
       // Unlink it from root
       child->UnlinkParent();
 
-      // Remove it's scene reference
-      RemoveObject(child->id);
+      // Remove it and it's children from this scene and keep their pointers
+      auto extractObject = [this, &savedObjects](GameObject &object)
+      {
+        // Keep it's pointer to return it
+        savedObjects.push_back(RequireGameObject(object.id));
+
+        // Remove the object from this scene
+        RemoveObject(object.id);
+      };
+
+      child->CascadeDown(extractObject);
     }
 
   return savedObjects;

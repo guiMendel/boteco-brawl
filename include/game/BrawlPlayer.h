@@ -11,8 +11,8 @@ public:
       GameObject &associatedObject,
       PlayerManager &manager,
       Color color,
-      std::string hoverBadgePath,
-      std::string selectionBadgePath);
+      std::string hoverBadgePath = "",
+      std::string selectionBadgePath = "");
 
   // Set a character for this player
   template <class T>

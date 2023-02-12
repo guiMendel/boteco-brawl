@@ -81,12 +81,27 @@ shared_ptr<UIContainer> UIObject::GetParent() const
   if (IsCanvasRoot())
     return nullptr;
 
-  return Lock(weakParent);
+  return weakParent.lock();
 }
 
-void UIObject::SetParent(shared_ptr<UIContainer> newParent)
+shared_ptr<UIContainer> UIObject::RequireParent() const
+{
+  if (IsCanvasRoot())
+    return nullptr;
+
+  auto parent = GetParent();
+
+  Assert(parent != nullptr, "Failed to retrieve UI Object parent");
+
+  return parent;
+}
+
+void UIObject::SetParent(shared_ptr<UIContainer> newParent, shared_ptr<UIObject> ownPointer)
 {
   Assert(IsCanvasRoot() == false, "Canvas root can't have its parent set");
+
+  if (ownPointer == nullptr)
+    ownPointer = GetShared();
 
   // If no parent, add canvas root as parent (unless this is the first object to be added)
   if (newParent == nullptr && canvas.root != nullptr)
@@ -106,8 +121,13 @@ void UIObject::SetParent(shared_ptr<UIContainer> newParent)
     arrangeOrder = newParent->arrangeOrderGenerator++;
 
     // Give parent a reference to self
-    newParent->children[id] = GetShared();
+    newParent->children[id] = ownPointer;
   }
+}
+
+void UIObject::SetParent(shared_ptr<UIContainer> newParent)
+{
+  SetParent(newParent, GetShared());
 }
 
 bool UIObject::IsDescendantOf(shared_ptr<UIContainer> other) const
@@ -115,10 +135,10 @@ bool UIObject::IsDescendantOf(shared_ptr<UIContainer> other) const
   if (id == other->id)
     return true;
 
-  if (GetParent() == nullptr)
+  if (RequireParent() == nullptr)
     return false;
 
-  return GetParent()->IsDescendantOf(other);
+  return RequireParent()->IsDescendantOf(other);
 }
 
 bool UIObject::SameLineage(shared_ptr<UIObject> first, shared_ptr<UIObject> second)
@@ -220,7 +240,7 @@ auto UIObject::UnlinkParent() -> std::unordered_map<int, std::weak_ptr<UIObject>
   Assert(IsCanvasRoot() == false, "Canvas root has no parent to unlink");
 
   // Get parent
-  auto parent = GetParent();
+  auto parent = RequireParent();
 
   // Warn it to recalculate children box
   parent->forceRecalculation = true;
@@ -238,13 +258,16 @@ auto UIObject::UnlinkParent() -> std::unordered_map<int, std::weak_ptr<UIObject>
 
 void UIObject::InternalDestroy() { DestroySelf(); }
 
-void UIObject::InternalSetParent(std::shared_ptr<GameObject> newParent)
+void UIObject::InternalSetParent(std::shared_ptr<GameObject> newParent, std::shared_ptr<GameObject> ownPointer)
 {
   // Ignore this if canvas root
   if (IsCanvasRoot())
     return;
 
-  SetParent(RequirePointerCast<UIContainer>(newParent));
+  if (ownPointer == nullptr)
+    ownPointer = GetShared();
+
+  SetParent(RequirePointerCast<UIContainer>(newParent), RequirePointerCast<UIObject>(ownPointer));
 }
 
 void UIObject::InitializeDimensions()
@@ -326,7 +349,7 @@ Vector2 UIObject::GetAbsolutePosition()
       float emptySpace = float(parent->GetRealPixelsAlong(dimension.axis)) -
                          float(GetRealPixelsAlong(dimension.axis, true, true));
 
-      // cout << "For " << *this << ": axisPlacement=" << axisPlacement << ", emptySpace=" << emptySpace << ". Parent=" << *GetParent() << endl;
+      // cout << "For " << *this << ": axisPlacement=" << axisPlacement << ", emptySpace=" << emptySpace << ". Parent=" << *RequireParent() << endl;
 
       // Distribute empty space with axis placement
       return axisPlacement * emptySpace;

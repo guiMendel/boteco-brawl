@@ -32,7 +32,7 @@ public:
   void CascadeDown(std::function<void(GameObject &)> callback, bool topDown = true) override;
 
 protected:
-  std::shared_ptr<GameObject> InternalGetParent() const override;
+  std::shared_ptr<GameObject> InternalGetParentNoException() const override;
 };
 
 #include "UIInheritable.h"

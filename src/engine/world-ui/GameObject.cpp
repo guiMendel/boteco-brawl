@@ -257,3 +257,12 @@ std::string GameObject::GetName() const { return name; }
 void GameObject::SetEnabled(bool value) { enabled = value; }
 
 bool GameObject::IsRoot() const { return id == 0; }
+
+shared_ptr<GameObject> GameObject::InternalGetParent() const
+{
+  auto parent = InternalGetParentNoException();
+
+  Assert(parent != nullptr, "Failed to retrieve parent of " + string(*this));
+
+  return parent;
+}

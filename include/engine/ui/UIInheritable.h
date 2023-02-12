@@ -53,7 +53,7 @@ private:
   T Inherit() const
   {
     Helper::Assert(uiObject->IsCanvasRoot() == false, "Canvas root has no value set for inheritable property");
-    return accessFrom(uiObject->GetParent().get())->Get();
+    return accessFrom(uiObject->RequireParent().get())->Get();
   }
 
   // Raise OnChangeValue for this property and all properties inheriting from it

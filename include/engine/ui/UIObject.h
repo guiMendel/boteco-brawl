@@ -136,7 +136,10 @@ public:
   // Whether this object is the canvas root
   bool IsCanvasRoot() const;
 
-  // Gets pointer to parent, throws if it's invalid or if this is the root object
+  // Gets pointer to parent, throws if it's invalid
+  std::shared_ptr<UIContainer> RequireParent() const;
+
+  // Gets pointer to parent
   std::shared_ptr<UIContainer> GetParent() const;
 
   // Set the parent
@@ -153,7 +156,9 @@ public:
   int arrangeOrder{0};
 
 protected:
-  void InternalSetParent(std::shared_ptr<GameObject> newParent) override;
+  void SetParent(std::shared_ptr<UIContainer> newParent, std::shared_ptr<UIObject> ownPointer);
+
+  void InternalSetParent(std::shared_ptr<GameObject> newParent, std::shared_ptr<GameObject> ownPointer = nullptr) override;
 
 private:
   // Parent object

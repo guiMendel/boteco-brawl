@@ -6,6 +6,8 @@
 #include <functional>
 #include <memory>
 
+#define CHARACTERS_PARENT "CharactersParent"
+
 class MainScene : public GameScene
 {
 public:
@@ -15,6 +17,10 @@ public:
   void OnUpdate(float) override;
 
 private:
+  void SpawnCharacters();
+
+  void SetupArena();
+
   Music music;
 };
 
