@@ -235,18 +235,14 @@ namespace CharacterKaftaAnimations
     ATTACK_CANCEL(3)
   };
 
-  class Riposte : public AttackAnimation
+  class Riposte : public RiposteAnimation
   {
   public:
-    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Riposte)
+    Riposte(Animator &animator) : RiposteAnimation(animator) {}
+    virtual ~Riposte() {}
 
     DEF_NAME("riposte")
     DELCARE_FRAMES
-
-    DamageParameters GetAttackProperties() const override { return damage; }
-
-    // Damage properties vary according to the parry
-    DamageParameters damage;
   };
 
   class LandingAttack : public StatefulAnimation

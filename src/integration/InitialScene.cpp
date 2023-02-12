@@ -1,9 +1,9 @@
 #include "Game.h"
-#include "MenuScene.h"
+#include "MainScene.h"
 
 using namespace std;
 
 shared_ptr<GameScene> Game::GetInitialScene() const
 {
-  return make_unique<MenuScene>();
+  return make_unique<MainScene>();
 }

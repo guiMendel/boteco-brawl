@@ -179,4 +179,16 @@ private:
   float innerLoopElapsedTime{0};
 };
 
+class RiposteAnimation : public AttackAnimation
+{
+public:
+  RiposteAnimation(Animator &animator) : AttackAnimation(animator) {}
+  virtual ~RiposteAnimation() {}
+
+  DamageParameters GetAttackProperties() const override { return damage; }
+
+  // Damage properties vary according to the parry
+  DamageParameters damage;
+};
+
 #endif

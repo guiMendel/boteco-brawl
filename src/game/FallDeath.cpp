@@ -14,7 +14,7 @@ using namespace std;
 
 const float FallDeath::deathMargin{3};
 const float FallDeath::respawnDelay{2};
-const int FallDeath::startingLives{2};
+const int FallDeath::startingLives{3};
 
 FallDeath::FallDeath(GameObject &associatedObject)
     : WorldComponent(associatedObject), weakArena(GetScene()->FindComponent<Arena>())

@@ -79,6 +79,8 @@ void MainScene::SpawnCharacters()
         Vector2{offset, -10},
         0,
         charactersParent);
+
+    offset -= initialCharactersDistance;
   }
 }
 

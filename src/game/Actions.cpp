@@ -6,7 +6,7 @@
 #include "CharacterStateManager.h"
 #include "ParticleEmitter.h"
 #include "ObjectRecipes.h"
-#include "CharacterTestAnimations.h"
+#include "NewAnimationTypes.h"
 #include "Heat.h"
 
 using namespace std;
@@ -148,7 +148,7 @@ void Riposte::Trigger(WorldObject &target, shared_ptr<CharacterState> actionStat
   auto animator = target.RequireComponent<Animator>();
 
   // Get riposte animation
-  auto animation = RequirePointerCast<CharacterTestAnimations::Riposte>(animator->BuildAnimation("riposte"));
+  auto animation = RequirePointerCast<RiposteAnimation>(animator->BuildAnimation("riposte"));
 
   animation->damage = parry->Riposte(parriedDamage);
 
@@ -186,9 +186,7 @@ void LandingAttack::Trigger(WorldObject &target, shared_ptr<CharacterState> acti
   auto animator = target.RequireComponent<Animator>();
 
   // Get landing attack animation
-  auto animation = RequirePointerCast<CharacterTestAnimations::LandingAttack>(animator->BuildAnimation("landingAttack"));
-
-  animation->landingSpeed = landingSpeed;
+  auto animation = animator->BuildAnimation("landingAttack");
 
   // Give it a stop callback
   auto removeStateCallback = [stateId, weakStateManager]()
