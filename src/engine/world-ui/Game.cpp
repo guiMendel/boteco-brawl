@@ -15,12 +15,6 @@
 using namespace std;
 using namespace Helper;
 
-class no_scene_error : runtime_error
-{
-public:
-  no_scene_error(string message) : runtime_error(message) {}
-};
-
 // === EXTERNAL FIELDS
 
 #ifdef DISPLAY_REAL_FPS
@@ -250,7 +244,7 @@ Game &Game::GetInstance()
     gameInstance.reset(new Game("Risca Faca — Rinhas", screenWidth, screenHeight));
 
     // Set a starting scene as next scene
-    gameInstance->PushScene(gameInstance->GetInitialScene());
+    gameInstance->SetScene(gameInstance->GetInitialScene());
   }
 
   // Return the instance
@@ -261,7 +255,7 @@ void Game::Start()
 {
   // Push next scene in if necessary
   if (nextScene != nullptr)
-    PushNextScene();
+    TransitionScenes();
 
   started = true;
 
@@ -297,24 +291,16 @@ void Game::GameLoop()
 
     executionStart = SDL_GetTicks();
 
-    try
+    if (nextPhysicsFrameIn <= 0)
     {
-      if (nextPhysicsFrameIn <= 0)
-      {
-        PhysicsFrame();
-        nextPhysicsFrameIn = physicsDelay;
-      }
-
-      if (nextFrameIn <= 0)
-      {
-        // Throws when trying to pop it's last scene (and no nextScene is set)
-        Frame();
-        nextFrameIn = frameDelay;
-      }
+      PhysicsFrame();
+      nextPhysicsFrameIn = physicsDelay;
     }
-    catch (const no_scene_error &)
+
+    if (nextFrameIn <= 0)
     {
-      break;
+      Frame();
+      nextFrameIn = frameDelay;
     }
 
     // Check how long this loop was
@@ -337,9 +323,9 @@ void Game::GameLoop()
     }
   }
 
-  // Make sure scene pile is empty
-  while (loadedScenes.size() > 0)
-    DestroyScene();
+  // Make scene is destroyed
+  if (currentScene)
+    currentScene->Destroy();
 
   // Clear resources
   Resources::ClearAll();
@@ -355,27 +341,9 @@ void Game::Frame()
   // Count this frame
   framesThisSecond++;
 #endif
-  // Objects to add to scene
-  vector<shared_ptr<GameObject>> objectsToAdd;
-
-  // Check if scene needs to be popped
-  // Throws when it's the last scene (and no nextScene is set)
-  if (GetScene()->PopRequested())
-  {
-    objectsToAdd = GetScene()->ExtractObjectsToCarryOn();
-    PopScene();
-  }
 
   // Load next scene if necessary
-  if (nextScene != nullptr)
-    PushNextScene();
-
-  // Get reference to current scene
-  GameScene &scene{*GetScene()};
-
-  // Add new objects
-  for (auto newObject : objectsToAdd)
-    scene.RegisterObject(newObject);
+  TransitionScenes();
 
   // Get input
   auto pollDelay = inputManager.Update();
@@ -388,20 +356,18 @@ void Game::Frame()
   CalculateDeltaTime(frameStart, deltaTime);
 
   // Update the scene's timer
-  scene.timer.Update(deltaTime);
+  currentScene->timer.Update(deltaTime);
 
   // Update the scene
-  scene.Update(deltaTime);
+  currentScene->Update(deltaTime);
 
   // Render the scene
-  scene.Render();
+  currentScene->Render();
 
 #ifdef DISPLAY_REAL_FPS
   // Render frame count
   DisplayRealFps();
 #endif
-
-  // WARNING: DO NOT USE scene FROM HERE UNTIL END OF LOOP
 
   // Render the window
   SDL_RenderPresent(GetRenderer());
@@ -441,61 +407,46 @@ void Game::PhysicsFrame()
 
 shared_ptr<GameScene> Game::GetScene()
 {
-  Assert(loadedScenes.size() > 0, "No game scene loaded");
-
-  return loadedScenes.top();
+  return currentScene;
 }
 
-void Game::PushScene(shared_ptr<GameScene> &&scene)
+void Game::SetScene(shared_ptr<GameScene> scene)
 {
   // Alert if next is overridden
   if (nextScene != nullptr)
     MESSAGE << "WARNING: call to " << __FUNCTION__ << " will override previous call in the same frame" << endl;
 
   // Store this scene for next frame
-  nextScene = move(scene);
+  nextScene = scene;
 }
 
-void Game::PushNextScene()
+void Game::TransitionScenes()
 {
-  Assert(nextScene != nullptr, "Failed to push next scene: it was nullptr");
+  if (nextScene == nullptr)
+    return;
 
-  // Put current scene on hold
-  if (loadedScenes.size() > 0)
-    GetScene()->Pause();
+  // Objects to keep through scenes
+  vector<shared_ptr<GameObject>> objectsToKeep;
 
-  // Move this scene to the stack
-  loadedScenes.emplace(move(nextScene));
+  if (currentScene != nullptr)
+  {
+    objectsToKeep = currentScene->ExtractObjectsToCarryOn();
+
+    // Wrap current scene up
+    currentScene->Destroy();
+  }
+
+  // Set new scene
+  currentScene = nextScene;
+
+  // Add new objects
+  for (auto newObject : objectsToKeep)
+    currentScene->RegisterObject(newObject);
 
   // Start it if necessary
   if (started)
     GetScene()->Start();
-}
 
-void Game::PopScene()
-{
-  // Remove the scene
-  DestroyScene();
-
-  // If this is the last scene
-  if (loadedScenes.size() == 0)
-  {
-    // Throws if there is no nextScene
-    if (nextScene == nullptr)
-      throw no_scene_error("Game was left without any loaded scenes");
-
-    return;
-  }
-
-  // Resume next scene
-  GetScene()->Resume();
-}
-
-void Game::DestroyScene()
-{
-  // Wrap scene up
-  GetScene()->Destroy();
-
-  // Remove it
-  loadedScenes.pop();
+  // Reset variable
+  nextScene = nullptr;
 }

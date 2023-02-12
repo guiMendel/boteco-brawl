@@ -51,8 +51,8 @@ public:
   float GetDeltaTime() const { return deltaTime; }
   float GetPhysicsDeltaTime() const { return physicsDeltaTime; }
 
-  // Requests the push of a new scene to the queue
-  void PushScene(std::shared_ptr<GameScene> &&scene);
+  // Requests setting a new scene
+  void SetScene(std::shared_ptr<GameScene> scene);
 
   // Creates and returns the initial scene
   std::shared_ptr<GameScene> GetInitialScene() const;
@@ -78,15 +78,8 @@ private:
   // Calculates the delta time
   void CalculateDeltaTime(int &start, float &deltaTime);
 
-  // Calls destroy scene and resumes next scene
-  // Throws if stack is left empty
-  void PopScene();
-
-  // Removes current scene from stack and destroys it
-  void DestroyScene();
-
   // Actually pushes the next scene to stack
-  void PushNextScene();
+  void TransitionScenes();
 
   void GameLoop();
 
@@ -139,13 +132,13 @@ private:
   // Scene to push next frame
   std::shared_ptr<GameScene> nextScene;
 
-  // Stack of loaded scenes
-  std::stack<std::shared_ptr<GameScene>> loadedScenes;
+  // Current scene
+  std::shared_ptr<GameScene> currentScene;
 
-  // The window we'll be rendering to (with destructor function)
+  // The window we'll be rendering to
   Helper::auto_unique_ptr<SDL_Window> window;
 
-  // Renderer for the window (with destructor function)
+  // Renderer for the window
   Helper::auto_unique_ptr<SDL_Renderer> renderer;
 };
 

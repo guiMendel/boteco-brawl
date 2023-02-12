@@ -69,6 +69,9 @@ private:
   // Update if start prompt is ready or not to show
   void UpdateStartPrompt();
 
+  // Transition to arena scene
+  void StartBattle();
+
   // Whether ready to start arena battle
   bool arenaStartReady{false};
 

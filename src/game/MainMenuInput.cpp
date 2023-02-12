@@ -87,6 +87,10 @@ void MainMenuInput::PlayerStart()
 
   // Reset any active animations
   animationHandler->ResetInitialAnimation();
+
+  // Maybe start battle
+  if (arenaStartReady)
+    StartBattle();
 }
 
 void MainMenuInput::RegisterListeners()
@@ -216,6 +220,35 @@ void MainMenuInput::RegisterListeners()
   };
 
   inputManager.OnControllerButtonPress.AddListener("menu-select", onControllerSelect);
+
+  // React to battle start prompt hover
+  auto startBattlePrompt = GetScene()->RequireUIObject<UIImage>(START_ARENA_IMAGE);
+
+  // Make it lighter on mouse over
+  auto startPromptHover = [this](shared_ptr<UIEvent> event)
+  {
+    if (event->GetType() != UIEvent::OnMouseEnter)
+      return;
+
+    SetHoverCursor(true);
+  };
+  auto startPromptUnhover = [this, weakBack](shared_ptr<UIEvent> event)
+  {
+    if (event->GetType() != UIEvent::OnMouseLeave)
+      return;
+
+    SetHoverCursor(false);
+  };
+  auto startPromptClick = [this, weakBack](shared_ptr<UIEvent> event)
+  {
+    if (event->GetType() != UIEvent::OnMouseClick)
+      return;
+
+    StartBattle();
+  };
+
+  startBattlePrompt->OnUIEvent.AddListener("cursor-on-hover", startPromptHover);
+  startBattlePrompt->OnUIEvent.AddListener("cursor-on-hover-end", startPromptUnhover);
 }
 
 void MainMenuInput::SetUpMouseSelection(shared_ptr<UIContainer> option)
@@ -501,4 +534,10 @@ void MainMenuInput::UpdateStartPrompt()
 
   arenaStartReady = true;
   animationHandler->targetStartPromptOffset = 0;
+}
+
+void MainMenuInput::StartBattle()
+{
+  if (arenaStartReady == false)
+    return;
 }

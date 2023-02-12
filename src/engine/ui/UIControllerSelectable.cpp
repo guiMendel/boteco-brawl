@@ -177,17 +177,17 @@ void UIControllerSelectable::Update(float deltaTime)
 Timer &UIControllerSelectable::GetControllerTimer(std::shared_ptr<ControllerDevice> controller)
 {
   // If it doesn't exist yet
-  if (controllerCooldowns.count(controller->GetId()) == 0)
-  {
-    // Removes the timer for this controller
-    auto destroyTimer = [controllerId = controller->GetId()]()
-    {
-      UIControllerSelectable::controllerCooldowns.erase(controllerId);
-    };
+  // if (controllerCooldowns.count(controller->GetId()) == 0)
+  // {
+  //   // Removes the timer for this controller
+  //   auto destroyTimer = [controllerId = controller->GetId()]()
+  //   {
+  //     UIControllerSelectable::controllerCooldowns.erase(controllerId);
+  //   };
 
-    // Subscribe to destroy the timer when the controller dies
-    // controller->OnBeforeDestroy.AddListener("destroy-UIControllerSelectable-timer", destroyTimer);
-  }
+  //   Subscribe to destroy the timer when the controller dies
+  //   controller->OnBeforeDestroy.AddListener("destroy-UIControllerSelectable-timer", destroyTimer);
+  // }
 
   // Return the timer
   return controllerCooldowns[controller->GetId()];

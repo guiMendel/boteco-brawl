@@ -399,7 +399,7 @@ bool UIObject::Contains(Vector2 screenPosition)
 {
   // Get own box
   Rectangle box{Rectangle::TopLeftInitialize,
-                canvas.CanvasToScreen(GetPosition()),
+                canvas.CanvasToScreen(GetPosition() + offset.AsVector()),
                 float(width.AsRealPixels()),
                 float(height.AsRealPixels())};
 
