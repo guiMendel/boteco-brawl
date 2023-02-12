@@ -31,6 +31,9 @@ public:
   // Resets initial animation to it's final state
   void ResetInitialAnimation();
 
+  // Play menu transition out and then execute the callback
+  void TransitionOutAndExecute(std::function<void()> callback);
+
 private:
   // Plays current animation
   void PlayerCurrentAnimation(float deltaTime);

@@ -330,3 +330,44 @@ void SplashAnimation::AnimateStartPrompt(float deltaTime)
   // Set the new color
   startPrompt->style->imageColor.Set(Color(newColor, newColor, newColor));
 }
+
+void SplashAnimation::TransitionOutAndExecute(std::function<void()> callback)
+{
+  // Set black camera background
+  Camera::GetMain()->background = Color::Black();
+
+  // Hide animation views
+  GetScene()->RequireWorldObject(IDLE_ANIMATIONS_OBJECT)->SetEnabled(false);
+
+  // Transitions menu up and leaves screen black
+  auto transitionOut = [this](float deltaTime, Animation &animation)
+  {
+    LOCK(weakMainContainer, mainContainer);
+
+    // Get new margin
+    int newOffset = mainContainer->offset.y.As(UIDimension::Percent) - 120 * deltaTime;
+
+    // Check if done
+    if (newOffset <= -150)
+    {
+      mainContainer->offset.y.Set(UIDimension::Percent, -150);
+      animation.done = true;
+    }
+    else
+      mainContainer->offset.y.Set(UIDimension::Percent, newOffset);
+  };
+
+  // Executes the callback
+  auto executeCallback = [callback](float, Animation &animation)
+  {
+    callback();
+    animation.done = true;
+  };
+
+  // Make the animations
+  auto callbackAnimation = make_shared<Animation>(executeCallback);
+  auto transitionAnimation = make_shared<Animation>(transitionOut, callbackAnimation);
+
+  // Play it
+  currentAnimation = transitionAnimation;
+}

@@ -225,30 +225,19 @@ void MainMenuInput::RegisterListeners()
   auto startBattlePrompt = GetScene()->RequireUIObject<UIImage>(START_ARENA_IMAGE);
 
   // Make it lighter on mouse over
-  auto startPromptHover = [this](shared_ptr<UIEvent> event)
+  auto startPromptInteractions = [this](shared_ptr<UIEvent> event)
   {
-    if (event->GetType() != UIEvent::OnMouseEnter)
-      return;
+    if (event->GetType() == UIEvent::OnMouseEnter)
+      SetHoverCursor(true);
 
-    SetHoverCursor(true);
-  };
-  auto startPromptUnhover = [this, weakBack](shared_ptr<UIEvent> event)
-  {
-    if (event->GetType() != UIEvent::OnMouseLeave)
-      return;
+    else if (event->GetType() == UIEvent::OnMouseLeave)
+      SetHoverCursor(false);
 
-    SetHoverCursor(false);
-  };
-  auto startPromptClick = [this, weakBack](shared_ptr<UIEvent> event)
-  {
-    if (event->GetType() != UIEvent::OnMouseClick)
-      return;
-
-    StartBattle();
+    else if (event->GetType() == UIEvent::OnMouseClick)
+      StartBattle();
   };
 
-  startBattlePrompt->OnUIEvent.AddListener("cursor-on-hover", startPromptHover);
-  startBattlePrompt->OnUIEvent.AddListener("cursor-on-hover-end", startPromptUnhover);
+  startBattlePrompt->OnUIEvent.AddListener("cursor-on-hover", startPromptInteractions);
 }
 
 void MainMenuInput::SetUpMouseSelection(shared_ptr<UIContainer> option)
@@ -540,4 +529,13 @@ void MainMenuInput::StartBattle()
 {
   if (arenaStartReady == false)
     return;
+
+  // Loads battle scene
+  auto loadBattleScene = [this]()
+  {
+    cout << "Yaaaaaaay man!" << endl;
+  };
+
+  // Transition out of the menu
+  Lock(weakAnimationHandler)->TransitionOutAndExecute(loadBattleScene);
 }
