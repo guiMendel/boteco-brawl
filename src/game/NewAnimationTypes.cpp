@@ -125,7 +125,13 @@ float AttackAnimation::GetHitCooldown() const { return -1; }
 
 DamageParameters AttackAnimation::GetAttackProperties() const { return {0, AttackImpulse(Vector2::Zero(), 0), 0}; }
 
-void AttackAnimation::InternalOnStart() { SetupAttack(); }
+void AttackAnimation::InternalOnStart()
+{
+  // Bring the render order of this character to the front
+  animator.worldObject.RequireComponent<SpriteRenderer>()->SetRenderOrder(Game::currentFrame);
+
+  SetupAttack();
+}
 void AttackAnimation::InternalOnStop()
 {
   if (attackObjectId >= 0)
