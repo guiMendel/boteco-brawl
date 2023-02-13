@@ -8,6 +8,9 @@
 class Arena : public WorldComponent
 {
 public:
+  // Raised when arena fight starts
+  Event OnBattleStart;
+
   Arena(GameObject &associatedObject, float width, float height);
 
   Arena(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer);

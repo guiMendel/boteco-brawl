@@ -17,7 +17,7 @@ const float FallDeath::respawnDelay{2};
 const int FallDeath::startingLives{3};
 
 // Initial invulnerability time
-static const float initialInvulnerabilityTime{8};
+static const float initialInvulnerabilityTime{3};
 
 // Respawn invulnerability time
 static const float respawnInvulnerabilityTime{5};

@@ -1,4 +1,5 @@
 #include "CharacterController.h"
+#include "Arena.h"
 #include "LandEffector.h"
 #include "Parry.h"
 #include "CharacterStateRecipes.h"
@@ -88,6 +89,10 @@ void CharacterController::HandleMovementAnimation()
 
 void CharacterController::Start()
 {
+  // Enable control on battle start
+  GetScene()->RequireFindComponent<Arena>()->OnBattleStart.AddListener("enable-character-control-" + to_string(id), [this]()
+                                                                       { controlDisabled = false; });
+
   // For now, there must be player input. In the future there may be an AIInput instead
   auto inputs = worldObject.GetComponents<PlayerInput>();
 
@@ -99,17 +104,17 @@ void CharacterController::Start()
 
     // Subscribe to movement
     input->OnMoveDirection.AddListener("character-controller", [this](float direction)
-                                       { DispatchNonDelayable<Actions::Move>(direction); });
+                                       { Dispatch<Actions::Move>(false, true, direction); });
 
     // Make sure to dispatch another movement if movement key is being held when character becomes idle
     stateManager.OnEnterIdle.AddListener("check-if-moving", [this, weakInput]()
                                          { if (auto input = weakInput.lock(); input && input->GetCurrentMoveDirection() != 0)
-                                    DispatchNonDelayable<Actions::Move>(input->GetCurrentMoveDirection()); });
+                                    Dispatch<Actions::Move>(false, true, input->GetCurrentMoveDirection()); });
 
     // Subscribe to jumps
     // Make it a friend of moving
     input->OnJump.AddListener("character-controller", [this]()
-                              { if (movement.CanJump() ) Dispatch<Actions::Jump>(); });
+                              { if (movement.CanJump() ) Dispatch<Actions::Jump>(true, true); });
 
     // Fast falling isn't an action
     input->OnFastFall.AddListener("character-controller", [this]()
@@ -127,25 +132,25 @@ void CharacterController::Start()
 
     // Attacks
     input->OnAttackNeutral.AddListener("character-controller", [this]()
-                                       { Dispatch<Actions::Neutral>(); });
+                                       { Dispatch<Actions::Neutral>(true, true); });
     input->OnAttackHorizontal.AddListener("character-controller", [this]()
-                                          { Dispatch<Actions::Horizontal>(); });
+                                          { Dispatch<Actions::Horizontal>(true, true); });
     input->OnAttackUp.AddListener("character-controller", [this]()
-                                  { Dispatch<Actions::Up>(); });
+                                  { Dispatch<Actions::Up>(true, true); });
 
     // Air attacks
     input->OnAirHorizontal.AddListener("character-controller", [this]()
-                                       { Dispatch<Actions::AirHorizontal>(); });
+                                       { Dispatch<Actions::AirHorizontal>(true, true); });
     input->OnAirUp.AddListener("character-controller", [this]()
-                               { Dispatch<Actions::AirUp>(); });
+                               { Dispatch<Actions::AirUp>(true, true); });
     input->OnAirDown.AddListener("character-controller", [this]()
-                                 { Dispatch<Actions::AirDown>(); });
+                                 { Dispatch<Actions::AirDown>(true, true); });
 
     // Specials
     input->OnSpecialNeutral.AddListener("character-controller", [this]()
-                                        { Dispatch<Actions::SpecialNeutral>(); });
+                                        { Dispatch<Actions::SpecialNeutral>(true, true); });
     input->OnSpecialHorizontal.AddListener("character-controller", [this]()
-                                           { Dispatch<Actions::SpecialHorizontal>(); });
+                                           { Dispatch<Actions::SpecialHorizontal>(true, true); });
 
     // Raise release events on states
     input->OnReleaseAttack.AddListener("character-controller", [this]()
@@ -189,7 +194,7 @@ void CharacterController::OnLand()
   // If stunned on reach ground, crash instead of landing
   if (stateManager.HasState(STUNNED_STATE) && sqrSpeed >= minCrashSpeed * minCrashSpeed)
   {
-    DispatchNonDelayable<Actions::Crash>();
+    Dispatch<Actions::Crash>(false, false);
     return;
   }
 
@@ -210,7 +215,7 @@ void CharacterController::OnLand()
 
   // Perform land action if velocity is big enough
   if (sqrSpeed >= minLandAnimationSpeed * minLandAnimationSpeed)
-    DispatchNonDelayable<Actions::Land>();
+    Dispatch<Actions::Land>(false, false);
 
   else if (stateManager.GetStates().size() == 0)
     animator.Play("idle");
@@ -245,7 +250,7 @@ void CharacterController::DispatchDash(Vector2 direction)
 
   dashCooldown = totalDashCooldown;
 
-  Dispatch<Actions::Dash>(direction);
+  Dispatch<Actions::Dash>(true, true, direction);
 }
 
 void CharacterController::TakeHit(Damage damage, bool parryable)
@@ -258,7 +263,7 @@ void CharacterController::TakeHit(Damage damage, bool parryable)
     // If can parry, perform riposte
     if (parry != nullptr && parry->CanParry(damage))
     {
-      Dispatch<Actions::Riposte>(parry, damage);
+      Dispatch<Actions::Riposte>(true, false, parry, damage);
       return;
     }
   }
@@ -268,7 +273,7 @@ void CharacterController::TakeHit(Damage damage, bool parryable)
     return;
 
   // Otherwise, take damage
-  DispatchNonDelayable<Actions::TakeDamage>(damage);
+  Dispatch<Actions::TakeDamage>(false, false, damage);
 }
 
 shared_ptr<Player> CharacterController::GetPlayer() const

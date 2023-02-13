@@ -10,6 +10,11 @@
 
 #define PLAYER_OBJECT_NAME "Player"
 
+#define PLAYER_1_COLOR Color(41, 164, 17)
+#define PLAYER_2_COLOR Color(243, 134, 14)
+#define PLAYER_3_COLOR Color(1, 17, 172)
+#define PLAYER_4_COLOR Color(204, 1, 1)
+
 // Handles human players connected to the game
 class PlayerManager : public WorldComponent
 {

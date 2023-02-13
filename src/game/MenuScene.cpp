@@ -20,10 +20,6 @@ using namespace std;
 
 void MenuScene::InitializeObjects()
 {
-  SDL_Surface *surface = IMG_Load("./assets/images/knife-pointer.png");
-  SDL_Cursor *cursor = SDL_CreateColorCursor(surface, 0, 12);
-  SDL_SetCursor(cursor);
-
   // Create the main camera
   auto camera = Instantiate("MainCamera", ObjectRecipes::Camera())->RequireComponent<Camera>();
   camera->background = Color(226, 160, 106);

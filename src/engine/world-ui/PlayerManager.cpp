@@ -3,7 +3,7 @@
 using namespace std;
 
 // Set player colors
-const Color PlayerManager::playerColors[]{Color(41, 164, 17), Color(243, 134, 14), Color(1, 17, 172), Color(204, 1, 1)};
+const Color PlayerManager::playerColors[]{PLAYER_1_COLOR, PLAYER_2_COLOR, PLAYER_3_COLOR, PLAYER_4_COLOR};
 
 PlayerManager::PlayerManager(GameObject &associatedObject)
     : WorldComponent(associatedObject) {}

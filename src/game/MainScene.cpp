@@ -1,4 +1,7 @@
 #include "MainScene.h"
+#include "UIBackground.h"
+#include "UIImage.h"
+#include "ArenaUIAnimation.h"
 #include "GameData.h"
 #include "ObjectRecipes.h"
 #include "PlayerManager.h"
@@ -57,6 +60,41 @@ void MainScene::InitializeObjects()
   }
 
   SpawnCharacters();
+
+  // Add canvas
+  auto canvas = Instantiate("Canvas", ObjectRecipes::Canvas(Canvas::Space::Global))->RequireComponent<Canvas>();
+
+  auto countdownContainer = canvas->AddChild<UIContainer>("CountdownContainer");
+  countdownContainer->width.Set(UIDimension::Percent, 100);
+  countdownContainer->height.Set(UIDimension::Percent, 100);
+  countdownContainer->Flexbox().placeItems = {0, 0.5};
+  countdownContainer->padding.left.Set(UIDimension::Percent, 100);
+  countdownContainer->style->textBorderSize.Set(4);
+  countdownContainer->style->textBorderColor.Set(PLAYER_1_COLOR);
+  countdownContainer->style->fontSize.Set(110);
+  countdownContainer->style->textColor.Set(PLAYER_2_COLOR);
+
+  // Add curtain
+  auto curtain = countdownContainer->AddChild<UIContainer>(CURTAIN_OBJECT);
+  curtain->AddComponent<UIBackground>(Color::Black());
+  curtain->SetPositionAbsolute(true);
+  curtain->width.Set(UIDimension::Percent, 100);
+  curtain->height.Set(UIDimension::Percent, 100);
+  curtain->style->renderOrder.Set(10);
+
+  // Add each countdown object
+  for (auto text : {"3", "2", "1", "Rinha!"})
+  {
+    auto textContainer = countdownContainer->AddChild<UIContainer>("CountdownContainer" + string(text));
+    textContainer->width.Set(UIDimension::Percent, 100);
+    textContainer->height.Set(UIDimension::Percent, 100);
+    textContainer->Flexbox().placeItems = {0.5, 0.5};
+
+    auto textObject = textContainer->AddChild<UIText>("Countdown" + string(text), text);
+  }
+
+  // Add animation
+  countdownContainer->AddComponent<ArenaUIAnimation>();
 }
 
 void MainScene::SpawnCharacters()

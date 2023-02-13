@@ -31,28 +31,24 @@ private:
   void PhysicsUpdate(float deltaTime) override;
 
   template <class ActionType, typename... Args>
-  void Dispatch(Args &&...args)
+  void Dispatch(bool delayable, bool requiresControl, Args &&...args)
   {
-    stateManager.Perform(std::make_shared<ActionType>(std::forward<Args>(args)...), true);
-  }
-
-  template <class ActionType, typename... Args>
-  void DispatchNonDelayable(Args &&...args)
-  {
-    stateManager.Perform(std::make_shared<ActionType>(std::forward<Args>(args)...), false);
+    if (requiresControl == false || controlDisabled == false)
+      stateManager.Perform(std::make_shared<ActionType>(std::forward<Args>(args)...), delayable);
   }
 
   void HandleMovementAnimation();
 
   void DispatchDash(Vector2 direction);
 
-  void DispatchRiposte(DamageParameters damageParams);
-
   void OnLand();
 
   // Warns all states with this name that the action input was released
   // Also warn the queued action if it will produce this state
   void AnnounceInputRelease(std::string targetState);
+
+  // Whether character control is disabled
+  bool controlDisabled{true};
 
   // Whether an air dash is available
   bool airDashAvailable{true};

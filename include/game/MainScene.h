@@ -7,6 +7,7 @@
 #include <memory>
 
 #define CHARACTERS_PARENT "CharactersParent"
+#define CURTAIN_OBJECT "Curtain"
 
 class MainScene : public GameScene
 {
