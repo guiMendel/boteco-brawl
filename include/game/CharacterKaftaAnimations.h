@@ -137,10 +137,9 @@ namespace CharacterKaftaAnimations
     DEF_NAME("neutral1")
     DELCARE_FRAMES
 
-    SET_DAMAGE(BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.5), 0.2)
+    SET_DAMAGE(BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.2), 0.2)
 
-    ATTACK_SEQUENCE(3)
-    ATTACK_CANCEL(4)
+    ATTACK_SEQUENCE(2)
   };
 
   class Neutral2 : public AttackAnimation
@@ -151,7 +150,7 @@ namespace CharacterKaftaAnimations
     DEF_NAME("neutral2")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1.2f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 4), 0.3)
+    SET_DAMAGE(1.2f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.2), 0.3)
 
     ATTACK_CANCEL(5)
   };
@@ -263,36 +262,6 @@ namespace CharacterKaftaAnimations
 
     DEF_NAME("riposte")
     DELCARE_FRAMES
-  };
-
-  class LandingAttack : public StatefulAnimation
-  {
-  public:
-    CONSTRUCTOR_AND_DESTRUCTOR(LandingAttack)
-
-    DEF_NAME("landingAttack")
-    DELCARE_FRAMES
-
-    // Speed at which ground was intercepted
-    float landingSpeed;
-  };
-
-  class Projectile : public AttackAnimation
-  {
-  public:
-    std::weak_ptr<WorldObject> weakParent;
-
-    Projectile(Animator &animator, std::weak_ptr<WorldObject> weakParent)
-        : AttackAnimation(animator), weakParent(weakParent) {}
-    virtual ~Projectile() {}
-
-    DEF_NAME("projectile")
-    DELCARE_FRAMES
-    void OnConnectAttack(std::shared_ptr<CharacterController>) override;
-    void InternalOnStart() override;
-
-    SET_DAMAGE(1.8, AttackImpulse(animator.worldObject.GetShared(), 2), 0.2)
-    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 
 }

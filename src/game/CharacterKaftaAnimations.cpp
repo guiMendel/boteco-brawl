@@ -79,13 +79,12 @@ vector<AnimationFrame> Crash::InitializeFrames()
 
 vector<AnimationFrame> Neutral1::InitializeFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/punch.png",
-                                          SpritesheetClipInfo(16, 8), 0.1, {4, 0})};
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/neutral1.png",
+                                          SpritesheetClipInfo(144 / 3, 48), 0.1, {10, -8})};
 
   // Add hitboxes
-  FrameHitbox(frames[1], {Circle({7.5, 3.5}, 2), Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
-  FrameHitbox(frames[2], {Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
-  FrameHitbox(frames[3]);
+  FrameHitbox(frames[1], {Circle({37, 30}, 8.5)});
+  FrameHitbox(frames[2]);
 
   return frames;
 }
@@ -94,7 +93,7 @@ vector<AnimationFrame> Neutral1::InitializeFrames()
 
 vector<AnimationFrame> Neutral2::InitializeFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/kick.png",
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/kick.png",
                                           SpritesheetClipInfo(16, 8), 0.1, {4, 0})};
 
   // Add hitboxes
@@ -125,13 +124,13 @@ void Horizontal::InternalOnStart()
 
 vector<AnimationFrame> Horizontal::InitializeInLoopFrames()
 {
-  return SliceSpritesheet("./assets/sprites/horizontal.png",
+  return SliceSpritesheet("./assets/sprites/kafta/attacks/horizontal.png",
                           SpritesheetClipInfo(24, 8, 1), 0.2);
 }
 
 vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/horizontal.png",
+  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/horizontal.png",
                                SpritesheetClipInfo(24, 8, 3, 1), 0.2)};
 
   // Stop shake
@@ -156,7 +155,7 @@ vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
 
 vector<AnimationFrame> SpecialNeutral::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/special.png",
+  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/special.png",
                                SpritesheetClipInfo(16, 8, 1), 0.2, {4, 0})};
 
   // Add a recovery frame
@@ -194,7 +193,7 @@ void SpecialNeutral::InternalOnStop()
 
 vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/special-horizontal.png",
+  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/special-horizontal.png",
                                SpritesheetClipInfo(16, 8), 0.3, {4, 0})};
 
   // Add a recovery frame
@@ -248,7 +247,7 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
 
 vector<AnimationFrame> Riposte::InitializeFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/special.png",
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/special.png",
                                           SpritesheetClipInfo(16, 8, 2, 1), 0.2, {4, 0})};
 
   // Add hitboxes
@@ -262,13 +261,13 @@ vector<AnimationFrame> Riposte::InitializeFrames()
 
 vector<AnimationFrame> Up::InitializePreLoopFrames()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/up.png",
+  return Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/up.png",
                                      SpritesheetClipInfo(12, 16, 2, 0), 0.1, {1, -4});
 }
 
 vector<AnimationFrame> Up::InitializeInLoopFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/up.png",
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/up.png",
                                           SpritesheetClipInfo(12, 16, 2, 2), 0.1, {1, -4})};
 
   // Add hitboxes
@@ -280,7 +279,7 @@ vector<AnimationFrame> Up::InitializeInLoopFrames()
 
 vector<AnimationFrame> Up::InitializePostLoopFrames()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/up.png",
+  return Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/up.png",
                                      SpritesheetClipInfo(12, 16, 1, 4), 0.1, {1, -4});
 }
 
@@ -288,7 +287,7 @@ vector<AnimationFrame> Up::InitializePostLoopFrames()
 
 vector<AnimationFrame> AirHorizontal::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/air-horizontal.png",
+  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/air-horizontal.png",
                                SpritesheetClipInfo(16, 8), 0.15, {4, 0})};
 
   // Add hitboxes
@@ -305,7 +304,7 @@ vector<AnimationFrame> AirHorizontal::InitializeFrames()
 
 vector<AnimationFrame> AirUp::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/air-up.png",
+  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/air-up.png",
                                SpritesheetClipInfo(12, 14), 0.15, {2, -3})};
 
   // Add hitboxes
@@ -322,79 +321,17 @@ vector<AnimationFrame> AirUp::InitializeFrames()
 
 vector<AnimationFrame> AirDown::InitializePreLoopFrames()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/air-down.png",
+  return Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/air-down.png",
                                      SpritesheetClipInfo(8, 20, 1), 0.2, {0, 2});
 }
 
 vector<AnimationFrame> AirDown::InitializeInLoopFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/air-down.png",
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/air-down.png",
                                           SpritesheetClipInfo(8, 20, 1, 1), 0.1, {0, 2})};
 
   // Add hitboxes
   FrameHitbox(frames[0], {Circle({4, 14}, 3.5)});
-
-  return frames;
-}
-
-vector<AnimationFrame> LandingAttack::InitializeFrames()
-{
-  auto frames = Animation::SliceSpritesheet("./assets/sprites/air-down.png",
-                                            SpritesheetClipInfo(8, 20, 3, 2), 0.2, {0, 2});
-
-  // Halt character
-  auto stopVelocity = [](WorldObject &target)
-  {
-    auto body = target.RequireComponent<Rigidbody>();
-
-    body->velocity.x = 0;
-  };
-
-  frames[0].AddCallback(stopVelocity);
-
-  return frames;
-}
-
-// === PROJECTILE
-
-void Projectile::OnConnectAttack(std::shared_ptr<CharacterController>)
-{
-  // Play effect
-  ParticleEmissionParameters hit;
-  hit.color = {Color::Black(), Color::Gray()};
-  hit.frequency = {0.001, 0.005};
-  hit.lifetime = {0.05, 0.2};
-  hit.speed = {1, 3};
-
-  ParticleFX::EffectAt(
-      animator.worldObject.GetPosition(),
-      0.1,
-      0.001,
-      hit,
-      4);
-
-  // Go away
-  animator.worldObject.RequestDestroy();
-}
-
-void Projectile::InternalOnStart()
-{
-  AttackAnimation::InternalOnStart();
-
-  // Don't attack parent
-  IF_LOCK(weakParent, parent)
-  {
-    GetAttack()->Ignore(parent);
-  }
-}
-
-vector<AnimationFrame> Projectile::InitializeFrames()
-{
-  auto frames{SliceSpritesheet("./assets/sprites/bullet.png",
-                               SpritesheetClipInfo(3, 2), 0.15)};
-
-  // Add hitboxes
-  FrameHitbox(frames[0], {Circle({1.0, 0.5}, 1.5)});
 
   return frames;
 }

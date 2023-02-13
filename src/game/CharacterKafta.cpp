@@ -48,7 +48,6 @@ void CharacterKafta::AddAnimations(std::shared_ptr<Animator> animator) const
   animator->RegisterAnimation<SpecialNeutral>();
   animator->RegisterAnimation<SpecialHorizontal>();
   animator->RegisterAnimation<Riposte>();
-  animator->RegisterAnimation<LandingAttack>();
   animator->RegisterAnimation<Crash>();
   animator->RegisterAnimation<Spin>();
 }

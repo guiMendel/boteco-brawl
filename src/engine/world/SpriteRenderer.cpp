@@ -201,3 +201,5 @@ Vector2 SpriteRenderer::ApplyParallax(Vector2 position) const
       camera->ScreenToWorld(staticScreenPosition),
       parallax);
 }
+
+void SpriteRenderer::SetRenderOrder(int newOrder) { renderOrder = newOrder; }
