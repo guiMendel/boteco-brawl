@@ -7,10 +7,13 @@
 
 using namespace std;
 
+static const float screenRatio = float(Game::screenWidth) / float(Game::screenHeight);
+
 #define LENGTH(array) sizeof(array) / sizeof(array[0])
 #define CLAMP(value, minValue, maxValue) min(max(value, minValue), maxValue)
 
 const Color Camera::defaultBackground{0, 30, 137};
+const float Camera::initialSize{5};
 
 Vector2 screenQuarter = Vector2(-Game::screenWidth / 2.0f, -Game::screenHeight / 2.0f);
 
@@ -23,10 +26,9 @@ shared_ptr<Camera> Camera::GetMain()
   return cameras.front();
 }
 
-Camera::Camera(GameObject &associatedObject, float size)
-    : WorldComponent(associatedObject)
+Camera::Camera(GameObject &associatedObject) : WorldComponent(associatedObject)
 {
-  SetSize(size);
+  SetSize(initialSize);
 }
 
 void Camera::RegisterToScene()
@@ -60,9 +62,9 @@ Vector2 Camera::ScreenToWorld(const Vector2 &screenCoordinates) const
 }
 
 // Convert coordinates
-Vector2 Camera::WorldToScreen(const Vector2 &worldCoordinates) const
+Vector2 Camera::WorldToScreen(const Vector2 &worldCoordinates, float parallax) const
 {
-  return (worldCoordinates - GetTopLeft()) * realPixelsPerUnit;
+  return (worldCoordinates - GetTopLeft() - worldObject.GetPosition() * parallax) * realPixelsPerUnit;
 }
 
 // Convert coordinates & dimensions (screen pixels to game units)
@@ -79,8 +81,6 @@ Rectangle Camera::WorldToScreen(const Rectangle &worldRectangle) const
 
 Rectangle Camera::ToRectangle() const
 {
-  static const float screenRatio = Game::screenWidth / Game::screenHeight;
-
   float doubleSize = GetSize() * 2;
 
   return Rectangle(worldObject.GetPosition(), doubleSize * screenRatio, doubleSize);

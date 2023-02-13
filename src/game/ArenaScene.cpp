@@ -1,4 +1,5 @@
 #include "ArenaScene.h"
+#include "ArenaPiaui.h"
 #include "UIBackground.h"
 #include "UIImage.h"
 #include "ArenaUIAnimation.h"
@@ -149,11 +150,5 @@ void ArenaScene::SetupArena()
   auto mainParent = RequireWorldObject(MAIN_PARENT_OBJECT);
 
   // Add an arena
-  Instantiate("Arena", ObjectRecipes::Arena("./assets/images/boteco.jpg"))->SetParent(mainParent);
-
-  Instantiate("Ground", ObjectRecipes::Platform({5, 2}), Vector2(0, 4))->SetParent(mainParent);
-  // Instantiate("LeftWall", ObjectRecipes::Platform({2, 10}), Vector2(-20, 2))->SetParent(mainParent);
-  // Instantiate("RightWall", ObjectRecipes::Platform({2, 10}), Vector2(20, 2))->SetParent(mainParent);
-
-  Instantiate("Platform", ObjectRecipes::Platform({2, 0.5}, true), Vector2(0, 0))->SetParent(mainParent);
+  mainParent->CreateChild("Arena")->AddComponent<ArenaPiaui>();
 }

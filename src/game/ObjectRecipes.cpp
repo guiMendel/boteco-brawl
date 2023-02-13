@@ -45,30 +45,10 @@ auto ObjectRecipes::Camera() -> Recipe
 {
   return [](shared_ptr<WorldObject> cameraObject)
   {
-    auto camera = cameraObject->AddComponent<::Camera>(5);
+    auto camera = cameraObject->AddComponent<::Camera>();
 
     // Register it prematurely
     camera->RegisterToScene();
-  };
-}
-
-auto ObjectRecipes::Arena(string imagePath) -> Recipe
-{
-  return [imagePath](shared_ptr<WorldObject> arena)
-  {
-    // Get a background sprite
-    // auto spriteRenderer = arena->AddComponent<SpriteRenderer>(imagePath, RenderLayer::Background);
-    // auto sprite = spriteRenderer->sprite;
-
-    // // Make it cover the screen
-    // if (sprite->GetWidth() < sprite->GetHeight())
-    //   sprite->SetTargetDimension(Game::screenWidth / Camera::GetMain()->GetRealPixelsPerUnit());
-    // else
-    //   sprite->SetTargetDimension(-1, Game::screenHeight / Camera::GetMain()->GetRealPixelsPerUnit());
-
-    // Add arena
-    arena->AddComponent<::Arena>(50, 13);
-    // arena->AddComponent<::Arena>(24, 12);
   };
 }
 

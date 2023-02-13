@@ -10,13 +10,14 @@ using namespace std;
 // New timescale of world when battle ends
 static const float endTimeScale{0.2};
 
-Arena::Arena(GameObject &associatedObject, float width, float height)
-    : WorldComponent(associatedObject), width(width), height(height) {}
+Arena::Arena(GameObject &associatedObject)
+    : WorldComponent(associatedObject) {}
 
-Arena::Arena(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer)
-    : Arena(associatedObject, backgroundRenderer->GetSprite()->GetWidth(), backgroundRenderer->GetSprite()->GetHeight())
+void Arena::Awake()
 {
-  weakBackgroundRenderer = backgroundRenderer;
+  InitializeArena();
+
+  Assert(width > 0 && height > 0, "Failed to initialize dimensions of arena " + string(*this));
 }
 
 void Arena::Render()
@@ -54,3 +55,6 @@ void Arena::CheckBattleOver()
   // Transition out
   GetScene()->RequireFindComponent<ArenaUIAnimation>()->EndGame("Fim de Jogo");
 }
+
+float Arena::GetWidth() const { return width; }
+float Arena::GetHeight() const { return height; }

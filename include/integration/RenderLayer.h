@@ -6,6 +6,7 @@ enum class RenderLayer
 {
   Background,
   Default,
+  Platforms,
   Characters,
   Projectiles,
   VFX,

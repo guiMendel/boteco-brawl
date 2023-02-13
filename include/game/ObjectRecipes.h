@@ -31,8 +31,6 @@ public:
 
   static auto Camera() -> Recipe;
 
-  static auto Arena(std::string imagePath) -> Recipe;
-
   template <class T>
   static auto Character(std::shared_ptr<Player> player) -> Recipe
   {

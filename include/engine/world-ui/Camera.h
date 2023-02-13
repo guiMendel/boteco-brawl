@@ -13,7 +13,9 @@ class Camera : public WorldComponent
 public:
   static std::shared_ptr<Camera> GetMain();
 
-  Camera(GameObject &associatedObject, float size = 5);
+  static const float initialSize;
+
+  Camera(GameObject &associatedObject);
 
   virtual ~Camera() {}
 
@@ -41,7 +43,7 @@ public:
   Vector2 ScreenToWorld(const Vector2 &screenCoordinates) const;
 
   // Convert coordinates (game units to screen pixels)
-  Vector2 WorldToScreen(const Vector2 &worldCoordinates) const;
+  Vector2 WorldToScreen(const Vector2 &worldCoordinates, float parallax = 0) const;
 
   // Convert coordinates & dimensions (screen pixels to game units)
   Rectangle ScreenToWorld(const Rectangle &screenRectangle) const;

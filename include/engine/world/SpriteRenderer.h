@@ -28,6 +28,7 @@ public:
   void Render() override;
 
   // Given a render position, returns the position where the top-left pixel will be rendered
+  // Takes parallax into account if set
   Vector2 RenderPositionFor(Vector2 position, std::shared_ptr<Sprite> referenceSprite = nullptr) const;
 
   // Renders the sprite to the provided position, ignoring the associated object's position
@@ -59,6 +60,12 @@ public:
   // Sets a new width to render with, in real pixels
   void OverrideWidthPixels(int newWidth);
 
+  // Get dimensions of current sprite (in units) with parallax applied
+  std::pair<float, float> GetSpriteDimensionsParallax(std::shared_ptr<Sprite> referenceSprite = nullptr) const;
+
+  // Set a parallax modifier for the renderer
+  void SetParallax(float parallax, float referenceCameraSize);
+
 private:
   // Allows a procedure to operate with a texture from sprite with color alterations already applied to it
   void UseTexture(std::function<void(SDL_Texture *)> procedure);
@@ -89,6 +96,13 @@ private:
 
   // Which point of the sprite will be at the center (default is center)
   Vector2 anchorPoint{0.5, 0.5};
+
+  // Amount of parallax to apply (to position & size)
+  // Must be in range [0, 1], where 1 means it's not affected by camera movement at all
+  float parallax{0};
+
+  // Reference camera size for applying parallax to dimensions
+  float parallaxReferenceCameraSize;
 };
 
 #endif

@@ -11,27 +11,29 @@ public:
   // Raised when arena fight starts
   Event OnBattleStart;
 
-  Arena(GameObject &associatedObject, float width, float height);
-
-  Arena(GameObject &associatedObject, std::shared_ptr<SpriteRenderer> backgroundRenderer);
+  Arena(GameObject &associatedObject);
 
   virtual ~Arena() {}
   void Render() override;
+  void Awake() override;
 
   RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
   // Detect if battle is over
   void CheckBattleOver();
 
-  // Arena size's width
-  const float width;
+  float GetWidth() const;
+  float GetHeight() const;
 
-  // Arena size's height
-  const float height;
+protected:
+  // Set up the arena space
+  virtual void InitializeArena() = 0;
 
-private:
-  // Reference to background sprite renderer
-  std::weak_ptr<SpriteRenderer> weakBackgroundRenderer;
+  // Arena size's width, in units
+  float width{0};
+
+  // Arena size's height, in units
+  float height{0};
 };
 
 #endif

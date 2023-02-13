@@ -26,7 +26,7 @@ static const float decelerationBias{1};
 static const float alignTolerance{DegreesToRadians(35)};
 
 // Aspect ratio of game screen
-static const float screenRatio = Game::screenWidth / Game::screenHeight;
+static const float screenRatio = float(Game::screenWidth) / float(Game::screenHeight);
 
 CameraBehavior::CameraBehavior(GameObject &associatedObject, shared_ptr<WorldObject> charactersParent)
     : WorldComponent(associatedObject), weakCharactersParent(charactersParent) {}
@@ -46,9 +46,9 @@ void CameraBehavior::Awake()
   weakArena = arena;
 
   // Calculate arena dependent params
-  arenaAspectRatio = arena->width / arena->height;
+  arenaAspectRatio = arena->GetWidth() / arena->GetHeight();
 
-  maxSize = min(arena->height / 2, arena->width / screenRatio / 2);
+  maxSize = min(arena->GetHeight() / 2, arena->GetWidth() / screenRatio / 2);
 }
 
 Vector2 CameraBehavior::GetFrameDimensions() const
@@ -293,8 +293,8 @@ Vector2 CameraBehavior::ConfineToArena(Vector2 position, float size)
 
   // Adjust position to fit within arena
   return Vector2(
-      Clamp(position.x, -arena->width / 2 + horizontalSize, arena->width / 2 - horizontalSize),
-      Clamp(position.y, -arena->height / 2 + size, arena->height / 2 - size));
+      Clamp(position.x, -arena->GetWidth() / 2 + horizontalSize, arena->GetWidth() / 2 - horizontalSize),
+      Clamp(position.y, -arena->GetHeight() / 2 + size, arena->GetHeight() / 2 - size));
 }
 
 void CameraBehavior::Reset()

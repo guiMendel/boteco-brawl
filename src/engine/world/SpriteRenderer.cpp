@@ -7,8 +7,11 @@
 using namespace std;
 using namespace Helper;
 
+// Aspect ratio of game screen
+static const float screenRatio = float(Game::screenWidth) / float(Game::screenHeight);
+
 SpriteRenderer::SpriteRenderer(GameObject &associatedObject, RenderLayer renderLayer, int renderOrder)
-    : WorldComponent(associatedObject), renderLayer(renderLayer), renderOrder(renderOrder)
+    : WorldComponent(associatedObject), renderLayer(renderLayer), renderOrder(renderOrder), parallaxReferenceCameraSize(Camera::initialSize)
 {
 }
 
@@ -25,31 +28,27 @@ Vector2 SpriteRenderer::RenderPositionFor(Vector2 position, shared_ptr<Sprite> r
   // Apply offset
   position += offset * worldObject.GetScale();
 
-  auto scale = worldObject.GetScale().GetAbsolute();
+  // Apply parallax
+  auto camera{Camera::GetMain()};
+  position = camera->ScreenToWorld(camera->WorldToScreen(position, parallax));
+
   auto sprite = referenceSprite == nullptr ? this->sprite : referenceSprite;
 
   Assert(sprite != nullptr, "Sprite renderer had no sprite set");
 
   // Get sprite's dimensions
-  auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
-
-  // Check for override
-  if (overrideWidthPixels > 0)
-  {
-    height = overrideWidthPixels * (height / width) / Camera::GetMain()->GetRealPixelsPerUnit();
-    width = overrideWidthPixels / Camera::GetMain()->GetRealPixelsPerUnit();
-  }
+  auto [width, height] = GetSpriteDimensionsParallax(referenceSprite);
 
   return position - Vector2(width, height) * anchorPoint;
 }
 
 void SpriteRenderer::Render(Vector2 position)
 {
+  // Get parallaxed position
   position = RenderPositionFor(position);
 
-  auto scale = worldObject.GetScale().GetAbsolute();
-
-  auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
+  // Get parallaxed dimensions
+  auto [width, height] = GetSpriteDimensionsParallax();
 
   auto camera = Camera::GetMain();
   auto pixelPosition = camera->WorldToScreen(position);
@@ -57,13 +56,6 @@ void SpriteRenderer::Render(Vector2 position)
   SDL_Rect destinationRect = {
       int(pixelPosition.x), int(pixelPosition.y),
       int(width * camera->GetRealPixelsPerUnit()), int(height * camera->GetRealPixelsPerUnit())};
-
-  // Check for width override
-  if (overrideWidthPixels > 0)
-  {
-    destinationRect.w = overrideWidthPixels;
-    destinationRect.h = overrideWidthPixels * height / width;
-  }
 
   // Detect flips
   SDL_RendererFlip horizontalFlip = worldObject.localScale.x < 0 ? SDL_FLIP_HORIZONTAL : SDL_FLIP_NONE;
@@ -146,3 +138,50 @@ shared_ptr<Sprite> SpriteRenderer::GetSprite() const { return sprite; }
 void SpriteRenderer::OverrideWidthPixels(int newWidth) { overrideWidthPixels = newWidth; }
 
 void SpriteRenderer::SetAnchorPoint(Vector2 point) { anchorPoint = point; }
+
+pair<float, float> SpriteRenderer::GetSpriteDimensionsParallax(shared_ptr<Sprite> referenceSprite) const
+{
+  // Coalesce sprite
+  if (referenceSprite == nullptr)
+    referenceSprite = GetSprite();
+
+  // Get scale
+  auto scale = worldObject.GetScale().GetAbsolute();
+
+  // Get sprite's original dimensions scaled
+  auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
+
+  // Catch override
+  if (overrideWidthPixels > 0)
+  {
+    height = overrideWidthPixels * (height / width) * Camera::GetMain()->GetUnitsPerRealPixel();
+    width = overrideWidthPixels * Camera::GetMain()->GetUnitsPerRealPixel();
+
+    return {width, height};
+  }
+
+  if (parallax == 0)
+    return {width, height};
+
+  // Get reference camera's dimensions
+  float referenceHeight = parallaxReferenceCameraSize * 2;
+  float referenceWidth = screenRatio * referenceHeight;
+
+  // Get dimensions proportional size to reference camera size
+  auto proportionalWidth = width / referenceWidth;
+  auto proportionalHeight = height / referenceHeight;
+
+  // Get current camera's dimensions
+  float cameraHeight = Camera::GetMain()->GetSize() * 2;
+  float cameraWidth = screenRatio * cameraHeight;
+
+  return make_pair(
+      Lerp(width, cameraWidth * proportionalWidth, parallax),
+      Lerp(height, cameraHeight * proportionalHeight, parallax));
+}
+
+void SpriteRenderer::SetParallax(float parallax, float referenceCameraSize)
+{
+  this->parallax = parallax;
+  parallaxReferenceCameraSize = referenceCameraSize;
+}

@@ -54,13 +54,13 @@ void FallDeath::Update(float)
 
   if (
       // Off left
-      position.x < -arena->width / 2 - deathMargin ||
+      position.x < -arena->GetWidth() / 2 - deathMargin ||
       // Off right
-      position.x > arena->width / 2 + deathMargin ||
+      position.x > arena->GetWidth() / 2 + deathMargin ||
       // Off top (ignore it invulnerable)
-      (position.y < -arena->height / 2 - deathMargin && invulnerability.IsInvulnerable() == false) ||
+      (position.y < -arena->GetHeight() / 2 - deathMargin && invulnerability.IsInvulnerable() == false) ||
       // Off bottom
-      position.y > arena->height / 2 + deathMargin)
+      position.y > arena->GetHeight() / 2 + deathMargin)
     Fall();
 }
 
@@ -112,7 +112,7 @@ void FallDeath::Respawn()
   auto height = worldObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
 
   // Set new position
-  worldObject.SetPosition({0, -arena->height / 2 - height / 2});
+  worldObject.SetPosition({0, -arena->GetHeight() / 2 - height / 2});
 
   // Enable it
   SetCharacterActive(true);
@@ -153,19 +153,19 @@ void FallDeath::PlayEffect() const
 
   // Get effect position
   Vector2 effectPosition{
-      Clamp(worldObject.GetPosition().x, -arena->width / 2 - radius, arena->width / 2 + radius),
-      Clamp(worldObject.GetPosition().y, -arena->height / 2 - radius, arena->height / 2 + radius)};
+      Clamp(worldObject.GetPosition().x, -arena->GetWidth() / 2 - radius, arena->GetWidth() / 2 + radius),
+      Clamp(worldObject.GetPosition().y, -arena->GetHeight() / 2 - radius, arena->GetHeight() / 2 + radius)};
 
   // Get effect direction
   Vector2 effectDirection;
-  if (worldObject.GetPosition().x < -arena->width / 2)
+  if (worldObject.GetPosition().x < -arena->GetWidth() / 2)
     effectDirection.x = 1;
-  else if (worldObject.GetPosition().x > arena->width / 2)
+  else if (worldObject.GetPosition().x > arena->GetWidth() / 2)
     effectDirection.x = -1;
 
-  if (worldObject.GetPosition().y < -arena->height / 2)
+  if (worldObject.GetPosition().y < -arena->GetHeight() / 2)
     effectDirection.y = 1;
-  else if (worldObject.GetPosition().y > arena->height / 2)
+  else if (worldObject.GetPosition().y > arena->GetHeight() / 2)
     effectDirection.y = -1;
 
   float effectAngle = effectDirection.Angle();
