@@ -21,6 +21,7 @@ const float CharacterController::totalDashCooldown{1};
 CharacterController::CharacterController(GameObject &associatedObject, shared_ptr<Player> player)
     : WorldComponent(associatedObject),
       weakPlayer(player),
+      invulnerability(*worldObject.RequireComponent<Invulnerability>()),
       stateManager(*worldObject.RequireComponent<CharacterStateManager>()),
       movement(*worldObject.RequireComponent<Movement>()),
       rigidbody(*worldObject.RequireComponent<Rigidbody>()),
@@ -261,6 +262,10 @@ void CharacterController::TakeHit(Damage damage, bool parryable)
       return;
     }
   }
+
+  // Ignore if invulnerable
+  if (invulnerability.IsInvulnerable())
+    return;
 
   // Otherwise, take damage
   DispatchNonDelayable<Actions::TakeDamage>(damage);

@@ -1,4 +1,5 @@
 #include "Canvas.h"
+#include "Invulnerability.h"
 #include "ObjectRecipes.h"
 #include "Resources.h"
 #include "CharacterVFX.h"
@@ -177,6 +178,9 @@ void ObjectRecipes::InitializeCharacter(shared_ptr<::Character> character, share
   characterObject.AddComponent<CharacterVFX>();
 
   // === DYING FROM FALLING OFF
+
+  // Give it invulnerability
+  characterObject.AddComponent<Invulnerability>();
 
   auto fallDeath = characterObject.AddComponent<FallDeath>();
 

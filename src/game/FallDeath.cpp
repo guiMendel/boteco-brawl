@@ -16,10 +16,24 @@ const float FallDeath::deathMargin{3};
 const float FallDeath::respawnDelay{2};
 const int FallDeath::startingLives{3};
 
+// Initial invulnerability time
+static const float initialInvulnerabilityTime{8};
+
+// Respawn invulnerability time
+static const float respawnInvulnerabilityTime{5};
+
 FallDeath::FallDeath(GameObject &associatedObject)
-    : WorldComponent(associatedObject), weakArena(GetScene()->FindComponent<Arena>())
+    : WorldComponent(associatedObject),
+      weakArena(GetScene()->FindComponent<Arena>()),
+      invulnerability(*worldObject.RequireComponent<Invulnerability>())
 {
   Assert(weakArena.expired() == false, "Failed to find an Arena component");
+}
+
+void FallDeath::Start()
+{
+  // Start invulnerable
+  invulnerability.SetInvulnerable(initialInvulnerabilityTime);
 }
 
 void FallDeath::Update(float)
@@ -43,8 +57,8 @@ void FallDeath::Update(float)
       position.x < -arena->width / 2 - deathMargin ||
       // Off right
       position.x > arena->width / 2 + deathMargin ||
-      // Off top
-      position.y < -arena->height / 2 - deathMargin ||
+      // Off top (ignore it invulnerable)
+      (position.y < -arena->height / 2 - deathMargin && invulnerability.IsInvulnerable() == false) ||
       // Off bottom
       position.y > arena->height / 2 + deathMargin)
     Fall();
@@ -100,10 +114,8 @@ void FallDeath::Respawn()
   // Enable it
   SetCharacterActive(true);
 
-  auto body = worldObject.RequireComponent<Rigidbody>();
-  auto movement = worldObject.RequireComponent<Movement>();
-  auto input = worldObject.RequireComponent<PlayerInput>();
-  auto stateManager = worldObject.RequireComponent<CharacterStateManager>();
+  // Apply inv
+  invulnerability.SetInvulnerable(respawnInvulnerabilityTime);
 
   return;
 }

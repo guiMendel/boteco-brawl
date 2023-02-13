@@ -4,6 +4,7 @@
 #include "WorldObject.h"
 #include "WorldComponent.h"
 #include "Arena.h"
+#include "Invulnerability.h"
 
 class FallDeath : public WorldComponent
 {
@@ -26,6 +27,7 @@ public:
   FallDeath(GameObject &associatedObject);
   virtual ~FallDeath() {}
 
+  void Start() override;
   void Update(float) override;
 
   // Disable or enable the character (remove it from arena)
@@ -66,6 +68,8 @@ private:
   int lives{startingLives};
 
   bool fallen{false};
+
+  Invulnerability &invulnerability;
 };
 
 #endif

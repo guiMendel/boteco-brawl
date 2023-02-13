@@ -9,6 +9,7 @@
 #include "Action.h"
 #include "Damage.h"
 #include "Animator.h"
+#include "Invulnerability.h"
 #include <unordered_set>
 
 // Maps input from some source (player or AI) to the the creation and dispatch of the corresponding actions
@@ -67,6 +68,7 @@ private:
 
   Vector2 lastVelocity;
 
+  Invulnerability &invulnerability;
   CharacterStateManager &stateManager;
   Movement &movement;
   Rigidbody &rigidbody;
