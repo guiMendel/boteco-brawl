@@ -1,4 +1,5 @@
 #include "CharacterKaftaAnimations.h"
+#include "Resources.h"
 #include "CharacterVFX.h"
 #include "ShakeEffectManager.h"
 #include "GunParry.h"
@@ -13,12 +14,27 @@ using namespace std;
 using namespace CharacterKaftaAnimations;
 using namespace CharacterAnimationHelper;
 
+// === DASH
+
+vector<AnimationFrame> Dash::InitializeFrames()
+{
+  auto frames = SliceSpritesheet("./assets/sprites/kafta/general/dash.png", SpritesheetClipInfo(48, 48), 0.3, {0, -8});
+
+  // Use 2 frames
+  SplitLastFrame(frames, 2, 0.1);
+
+  // First frame with duration 0.2
+  frames[0].SetDuration(0.1);
+
+  return frames;
+}
+
 // === JUMP
 
 vector<AnimationFrame> Jump::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/jump.png",
-                               SpritesheetClipInfo(8, 8, 2), 0.1)};
+  auto frames{SliceSpritesheet("./assets/sprites/kafta/general/jump.png",
+                               SpritesheetClipInfo(48, 48), 0.1, {0, -8})};
 
   // Add jump impulse to jump frame
   auto callback = [](WorldObject &object)
@@ -35,12 +51,26 @@ vector<AnimationFrame> Jump::InitializeFrames()
     auto colliderBox = object.RequireComponent<BoxCollider>()->GetBox();
 
     object.RequireComponent<CharacterVFX>()->PlayDust(
-      Vector2(-colliderBox.width / 4, colliderBox.height / 2),
-      {DegreesToRadians(-135), DegreesToRadians(-100)} 
-    );
+        Vector2(-colliderBox.width / 4, colliderBox.height / 2),
+        {DegreesToRadians(-135), DegreesToRadians(-100)});
   };
 
   frames[1].AddCallback(callback);
+
+  return frames;
+}
+
+// === CRASH
+
+vector<AnimationFrame> Crash::InitializeFrames()
+{
+  auto frames = SliceSpritesheet("./assets/sprites/kafta/general/get-up.png", SpritesheetClipInfo(48, 48), 0.117, {0, -8});
+
+  // Add fallen frame
+  AnimationFrame fallenFrame{Resources::GetSprite("./assets/sprites/kafta/general/fallen.png"), 0.6};
+  fallenFrame.spriteOffset = Vector2{0, -8} / Game::defaultVirtualPixelsPerUnit;
+
+  frames.insert(frames.begin(), fallenFrame);
 
   return frames;
 }
@@ -365,18 +395,6 @@ vector<AnimationFrame> Projectile::InitializeFrames()
 
   // Add hitboxes
   FrameHitbox(frames[0], {Circle({1.0, 0.5}, 1.5)});
-
-  return frames;
-}
-
-// === CRASH
-
-vector<AnimationFrame> Crash::InitializeFrames()
-{
-  auto frames{SliceSpritesheet("./assets/sprites/get-up.png",
-                               SpritesheetClipInfo(8, 8), 0.15)};
-
-  frames[0].SetDuration(0.6);
 
   return frames;
 }

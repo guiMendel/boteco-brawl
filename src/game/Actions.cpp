@@ -1,4 +1,5 @@
 #include "Actions.h"
+#include "Character.h"
 #include "CharacterVFX.h"
 #include "Movement.h"
 #include "Animation.h"
@@ -76,7 +77,11 @@ void Dash::Trigger(WorldObject &target, shared_ptr<CharacterState> dashState)
       stateManager->SetState(recoveringState, GetFriendStates());
     }
   };
-  animation->GetFrame(2).AddCallback(stateSwitchCallback);
+
+  // Get recover frame
+  int recoverFrame = target.RequireComponent<Character>()->GetDashRecoverFrame();
+
+  animation->GetFrame(recoverFrame).AddCallback(stateSwitchCallback);
 
   // On stop, ensure both states have been removed
   auto stopCallback = [dashStateId, recoveringStateId, weakStateManager]()

@@ -72,3 +72,5 @@ void CharacterKiba::AddMechanics(std::shared_ptr<WorldObject> object) const
   // Give it the landing attack effector
   object->AddComponent<LandingAttackEffector>(effectorCondition);
 }
+
+int CharacterKiba::GetDashRecoverFrame() const { return 1; }

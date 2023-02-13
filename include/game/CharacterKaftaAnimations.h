@@ -15,7 +15,7 @@ namespace CharacterKaftaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Run)
 
     DEF_NAME("run")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/Run.png", SpritesheetClipInfo(8, 8, 10), 0.1))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kafta/general/run.png", SpritesheetClipInfo(48, 48), 0.08, {0, -8}))
 
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
@@ -26,7 +26,7 @@ namespace CharacterKaftaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Idle)
 
     DEF_NAME("idle")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/idle.png", SpritesheetClipInfo(8, 8), 0.1))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kafta/general/idle.png", SpritesheetClipInfo(48, 48), 0.5, {0, -8}))
 
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
@@ -46,7 +46,7 @@ namespace CharacterKaftaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Rise)
 
     DEF_NAME("rise")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 1, 2), 0.1))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kafta/general/rise.png", SpritesheetClipInfo(48, 48), 0.1, {0, -8}))
 
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
@@ -57,7 +57,7 @@ namespace CharacterKaftaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Fall)
 
     DEF_NAME("fall")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 1, 3), 0.1))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kafta/general/fall.png", SpritesheetClipInfo(48, 48), 0.1, {0, -8}))
 
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
@@ -68,7 +68,7 @@ namespace CharacterKaftaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Land)
 
     DEF_NAME("land")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/jump.png", SpritesheetClipInfo(8, 8, 1, 4), 0.15))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kafta/general/land.png", SpritesheetClipInfo(48, 48), 0.15, {0, -8}))
   };
 
   class Brake : public StatefulAnimation
@@ -77,7 +77,7 @@ namespace CharacterKaftaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Brake)
 
     DEF_NAME("brake")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/carry.png", SpritesheetClipInfo(8, 8, 1, 1), 0.1))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kafta/general/brake.png", SpritesheetClipInfo(48, 48), 0.1, {0, -8}))
 
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
@@ -88,7 +88,7 @@ namespace CharacterKaftaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Ouch1)
 
     DEF_NAME("ouch1")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/ouch.png", SpritesheetClipInfo(8, 8, 1), 0.2))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kafta/general/ouch1.png", SpritesheetClipInfo(48, 48), 0.2, {0, -8}))
   };
 
   class Ouch2 : public StatefulAnimation
@@ -97,7 +97,7 @@ namespace CharacterKaftaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Ouch2)
 
     DEF_NAME("ouch2")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/ouch.png", SpritesheetClipInfo(8, 8, 1, 1), 0.2))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kafta/general/ouch2.png", SpritesheetClipInfo(48, 48), 0.2, {0, -8}))
   };
 
   class Dash : public StatefulAnimation
@@ -106,7 +106,27 @@ namespace CharacterKaftaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Dash)
 
     DEF_NAME("dash")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/carry.png", SpritesheetClipInfo(8, 8, 3, 5), 0.1))
+    DELCARE_FRAMES
+  };
+
+  class Spin : public StatefulAnimation
+  {
+  public:
+    CONSTRUCTOR_AND_DESTRUCTOR(Spin)
+
+    DEF_NAME("spin")
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kafta/general/spinning.png", SpritesheetClipInfo(48, 48), 0.15, {0, -2}))
+
+    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
+  };
+
+  class Crash : public StatefulAnimation
+  {
+  public:
+    CONSTRUCTOR_AND_DESTRUCTOR(Crash)
+
+    DEF_NAME("crash")
+    DELCARE_FRAMES
   };
 
   class Neutral1 : public AttackAnimation
@@ -255,26 +275,6 @@ namespace CharacterKaftaAnimations
 
     // Speed at which ground was intercepted
     float landingSpeed;
-  };
-
-  class Spin : public StatefulAnimation
-  {
-  public:
-    CONSTRUCTOR_AND_DESTRUCTOR(Spin)
-
-    DEF_NAME("spin")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/spinning.png", SpritesheetClipInfo(10, 10), 0.15))
-
-    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
-  };
-
-  class Crash : public StatefulAnimation
-  {
-  public:
-    CONSTRUCTOR_AND_DESTRUCTOR(Crash)
-
-    DEF_NAME("crash")
-    DELCARE_FRAMES
   };
 
   class Projectile : public AttackAnimation

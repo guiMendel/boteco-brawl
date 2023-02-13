@@ -45,6 +45,9 @@ public:
   // Adds character-specific mechanics to the character's object
   void AddMechanics(std::shared_ptr<WorldObject> object) const override;
 
+  // Get frame of dash at which point to switch from dash state to recovering state
+  int GetDashRecoverFrame() const override;
+
   // =================================
   // ATTACK ANIMATION SEQUENCE TRANSFORM
   // =================================

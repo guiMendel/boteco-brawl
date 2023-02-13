@@ -20,7 +20,7 @@ const CharacterKafta::transformerMap &CharacterKafta::GetSequenceIndexTransforme
 
 float CharacterKafta::GetBaseDamage() const { return 1; }
 float CharacterKafta::GetDefaultArmor() const { return 1; }
-Rectangle CharacterKafta::GetHurtbox() const { return Rectangle({0, 0}, 0.8, 1); }
+Rectangle CharacterKafta::GetHurtbox() const { return Rectangle({0, 0}, 0.8, 2); }
 ColliderDensity CharacterKafta::GetDensity() const { return ColliderDensity::Character; }
 
 float CharacterKafta::GetAcceleration() const { return 35; }
@@ -72,3 +72,5 @@ void CharacterKafta::AddMechanics(std::shared_ptr<WorldObject> object) const
   // Give it the landing attack effector
   object->AddComponent<LandingAttackEffector>(effectorCondition);
 }
+
+int CharacterKafta::GetDashRecoverFrame() const { return 1; }

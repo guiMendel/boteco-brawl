@@ -63,7 +63,8 @@ void ArenaScene::InitializeObjects()
     playerManager = Instantiate("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true))->RequireComponent<PlayerManager>();
 
     playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKafta>();
-    playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKiba>();
+    playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKafta>();
+    // playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKiba>();
   }
 
   playerManager->worldObject.SetParent(mainParent);
@@ -134,12 +135,16 @@ void ArenaScene::SpawnCharacters()
   // For each player
   for (auto player : playerManager->GetPlayers())
   {
-    Instantiate(
+    auto character = Instantiate(
         "Character" + to_string(player->PlayerId()),
         RequirePointerCast<BrawlPlayer>(player)->characterRecipe,
         Vector2{offset, -10},
         0,
         charactersParent);
+
+    // Face the center of the arena
+    if (offset > 0)
+      character->localScale.x = -1;
 
     offset -= initialCharactersDistance;
   }

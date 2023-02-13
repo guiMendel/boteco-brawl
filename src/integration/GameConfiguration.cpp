@@ -12,4 +12,4 @@ const int Game::screenWidth{1200};
 const int Game::screenHeight{600};
 
 // Default pixels per unit
-const int Game::defaultVirtualPixelsPerUnit{8};
+const int Game::defaultVirtualPixelsPerUnit{16};
