@@ -47,8 +47,6 @@ void CameraBehavior::Awake()
 
   // Calculate arena dependent params
   arenaAspectRatio = arena->GetWidth() / arena->GetHeight();
-
-  maxSize = min(arena->GetHeight() / 2, arena->GetWidth() / screenRatio / 2);
 }
 
 Vector2 CameraBehavior::GetFrameDimensions() const
@@ -150,7 +148,7 @@ void CameraBehavior::UpdateTargets()
   LOCK(weakCamera, camera);
 
   // Set the size to the largest dimension (also respect min size)
-  targetSize = Clamp(max(maxDistances.y, maxDistances.x / screenRatio) + padding, minSize, maxSize);
+  targetSize = Clamp(max(maxDistances.y, maxDistances.x / screenRatio) + padding, minSize, GetMaxCameraSize());
 
   // === VALIDATE TARGETS
 
@@ -268,7 +266,7 @@ void CameraBehavior::ApplyTargetSize(float deltaTime)
   // Accelerate current speed to target speed
   sizeSpeed = Clamp(sizeSpeed + sizeAcceleration, -scaledMaxSpeed, scaledMaxSpeed);
 
-  SetSize(min(camera->GetSize() + sizeSpeed * deltaTime, maxSize));
+  SetSize(min(camera->GetSize() + sizeSpeed * deltaTime, GetMaxCameraSize()));
 }
 
 void CameraBehavior::SetPosition(Vector2 position)
@@ -282,7 +280,7 @@ void CameraBehavior::SetSize(float newSize)
   LOCK(weakCamera, camera);
 
   // Ensure it doesn't surpass max size possible for arena size
-  camera->SetSize(min(newSize, maxSize));
+  camera->SetSize(min(newSize, GetMaxCameraSize()));
 }
 
 Vector2 CameraBehavior::ConfineToArena(Vector2 position, float size)
@@ -305,7 +303,7 @@ void CameraBehavior::Reset()
   SetPosition({0, 0});
 
   // Adjust size to be the maximum possible which still fits inside the arena
-  SetSize(maxSize);
+  SetSize(GetMaxCameraSize());
 }
 
 void CameraBehavior::Render()
@@ -327,4 +325,19 @@ void CameraBehavior::Render()
 
   if (lastAcceleration)
     Debug::DrawArrow(camera->GetPosition(), camera->GetPosition() + lastAcceleration, Color::Pink(), 0.2);
+}
+
+float CameraBehavior::GetMaxCameraSize()
+{
+  if (maxSize == -1)
+  {
+    if (weakArena.expired())
+      weakArena = GetScene()->RequireFindComponent<Arena>();
+
+    LOCK(weakArena, arena);
+
+    maxSize = min(arena->GetHeight() / 2, arena->GetWidth() / screenRatio / 2);
+  }
+
+  return maxSize;
 }

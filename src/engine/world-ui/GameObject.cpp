@@ -263,5 +263,4 @@ shared_ptr<GameObject> GameObject::InternalGetParent() const
 
 void GameObject::OnBeforeDestroy()
 {
-  cout << "OnBeforeDestroy " << *this << endl;
 }

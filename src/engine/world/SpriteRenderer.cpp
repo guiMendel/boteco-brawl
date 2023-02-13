@@ -29,12 +29,11 @@ Vector2 SpriteRenderer::RenderPositionFor(Vector2 position, shared_ptr<Sprite> r
   position += offset * worldObject.GetScale();
 
   // Apply parallax
-  auto camera{Camera::GetMain()};
-  position = camera->ScreenToWorld(camera->WorldToScreen(position, parallax));
+  position = ApplyParallax(position);
 
-  auto sprite = referenceSprite == nullptr ? this->sprite : referenceSprite;
+  referenceSprite = referenceSprite == nullptr ? this->sprite : referenceSprite;
 
-  Assert(sprite != nullptr, "Sprite renderer had no sprite set");
+  Assert(referenceSprite != nullptr, "Sprite renderer had no sprite set");
 
   // Get sprite's dimensions
   auto [width, height] = GetSpriteDimensionsParallax(referenceSprite);
@@ -149,7 +148,7 @@ pair<float, float> SpriteRenderer::GetSpriteDimensionsParallax(shared_ptr<Sprite
   auto scale = worldObject.GetScale().GetAbsolute();
 
   // Get sprite's original dimensions scaled
-  auto [width, height] = make_pair(sprite->GetWidth(scale.x), sprite->GetHeight(scale.y));
+  auto [width, height] = make_pair(referenceSprite->GetWidth(scale.x), referenceSprite->GetHeight(scale.y));
 
   // Catch override
   if (overrideWidthPixels > 0)
@@ -184,4 +183,21 @@ void SpriteRenderer::SetParallax(float parallax, float referenceCameraSize)
 {
   this->parallax = parallax;
   parallaxReferenceCameraSize = referenceCameraSize;
+}
+
+Vector2 SpriteRenderer::ApplyParallax(Vector2 position) const
+{
+  if (parallax == 0)
+    return position;
+
+  // Get camera
+  auto camera = Camera::GetMain();
+
+  // Get what this position would be if the camera were at origin
+  Vector2 staticScreenPosition = camera->WorldToScreen(position, true);
+
+  return Lerp(
+      position,
+      camera->ScreenToWorld(staticScreenPosition),
+      parallax);
 }

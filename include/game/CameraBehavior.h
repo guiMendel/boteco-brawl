@@ -35,6 +35,9 @@ public:
   // Get current width and height of frame in units (dimensions of camera discounting padding)
   Vector2 GetFrameDimensions() const;
 
+  // Get camera max size
+  float GetMaxCameraSize();
+
   void Awake() override;
   void Render() override;
   void Start() override;
@@ -89,7 +92,7 @@ private:
   float arenaAspectRatio{1};
 
   // Max size of camera, dictated by arena size
-  float maxSize{std::numeric_limits<float>::max()};
+  float maxSize{-1};
 
   std::weak_ptr<Camera> weakCamera;
   std::weak_ptr<Arena> weakArena;

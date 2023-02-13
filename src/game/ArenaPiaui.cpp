@@ -1,4 +1,5 @@
 #include "ArenaPiaui.h"
+#include "CameraBehavior.h"
 #include "ObjectRecipes.h"
 #include "SpriteRenderer.h"
 
@@ -17,10 +18,16 @@ void ArenaPiaui::InitializeArena()
   width = platforms->GetSprite()->GetWidth();
   height = platforms->GetSprite()->GetHeight();
 
+  // Get max camera size
+  float maxCameraSize = GetScene()->RequireFindComponent<CameraBehavior>()->GetMaxCameraSize();
+
   // Add background
-  worldObject.AddComponent<SpriteRenderer>(
+  auto background = worldObject.AddComponent<SpriteRenderer>(
       "./assets/sprites/piaui/background.png",
       RenderLayer::Background);
+
+  // Give background a parallax
+  background->SetParallax(0.5, maxCameraSize);
 
   GetScene()->Instantiate("Platform", ObjectRecipes::Platform({30, 3}), Vector2{0, 5})->SetParent(worldObject.GetShared());
 }

@@ -8,8 +8,12 @@
 #include "WorldComponent.h"
 #include <memory>
 
+class SpriteRenderer;
+
 class Camera : public WorldComponent
 {
+  friend class SpriteRenderer;
+  
 public:
   static std::shared_ptr<Camera> GetMain();
 
@@ -43,7 +47,7 @@ public:
   Vector2 ScreenToWorld(const Vector2 &screenCoordinates) const;
 
   // Convert coordinates (game units to screen pixels)
-  Vector2 WorldToScreen(const Vector2 &worldCoordinates, float parallax = 0) const;
+  Vector2 WorldToScreen(const Vector2 &worldCoordinates) const;
 
   // Convert coordinates & dimensions (screen pixels to game units)
   Rectangle ScreenToWorld(const Rectangle &screenRectangle) const;
@@ -64,6 +68,9 @@ public:
   static const Color defaultBackground;
 
 private:
+  // Allows to "pretend" camera's position is set on origin
+  Vector2 WorldToScreen(const Vector2 &worldCoordinates, bool useOriginPosition) const;
+
   // Current unit resolution of camera
   float realPixelsPerUnit;
 
