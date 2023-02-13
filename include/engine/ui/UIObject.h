@@ -24,6 +24,7 @@ public:
   UIObject(Canvas &canvas, std::string name, std::shared_ptr<UIContainer> parent);
 
   void Awake() override;
+  void OnBeforeDestroy() override;
   void Update(float) override;
 
   virtual ~UIObject();
@@ -89,6 +90,9 @@ public:
 
   // Scale of this object (does NOT affect positioning of other objects)
   Vector2 localScale{1, 1};
+
+protected:
+  std::string callbackIdentifier;
 
 private:
   // Gives all dimensions this object's shared pointer

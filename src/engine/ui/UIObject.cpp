@@ -432,6 +432,8 @@ bool UIObject::Contains(Vector2 screenPosition)
 
 void UIObject::Awake()
 {
+  callbackIdentifier = "ui-object-" + to_string(id);
+
   if (IsCanvasRoot())
   {
     // Handle mouse click
@@ -445,8 +447,16 @@ void UIObject::Awake()
     };
 
     // Subscribe to mouse click
-    GetScene()->inputManager.OnClickDown.AddListener("canvas-root", handleClick);
+    GetScene()->inputManager.OnClickDown.AddListener(callbackIdentifier, handleClick);
   }
 
   GameObject::Awake();
+}
+
+void UIObject::OnBeforeDestroy()
+{
+  if (IsCanvasRoot())
+    GetScene()->inputManager.OnClickDown.RemoveListener(callbackIdentifier);
+
+  GameObject::OnBeforeDestroy();
 }

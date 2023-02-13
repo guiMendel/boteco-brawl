@@ -65,9 +65,6 @@ protected:
   virtual void Update(float) {}
   virtual void PhysicsUpdate(float) {}
 
-  virtual void OnSceneResume() {}
-  virtual void OnScenePause() {}
-
   // Called on the frame it is destroyed, right before being destroyed
   virtual void OnBeforeDestroy() {}
 

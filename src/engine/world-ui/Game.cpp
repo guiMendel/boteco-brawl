@@ -10,7 +10,7 @@
 #include "Helper.h"
 #include "Resources.h"
 #include "GameScene.h"
-#include "MainScene.h"
+#include "ArenaScene.h"
 
 using namespace std;
 using namespace Helper;

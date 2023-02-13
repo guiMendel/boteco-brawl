@@ -18,6 +18,8 @@
 
 using namespace std;
 
+string MenuScene::GetName() const { return "MenuScene"; }
+
 void MenuScene::InitializeObjects()
 {
   // Create the main camera

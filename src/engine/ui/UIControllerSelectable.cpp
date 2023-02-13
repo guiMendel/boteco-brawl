@@ -90,10 +90,12 @@ void UIControllerSelectable::Awake()
     resetTimer(GetControllerTimer(targetController));
   };
 
+  callbackIdentifier = "controller-selectable-" + to_string(id);
+
   // Set up listeners
-  GetScene()->inputManager.OnControllerLeftAnalog.AddListener("controller-selectable-" + to_string(id), onAnalog);
-  GetScene()->inputManager.OnControllerButtonPress.AddListener("controller-selectable-" + to_string(id), onButton);
-  GetScene()->inputManager.OnControllerButtonRelease.AddListener("controller-selectable-reset-timer-" + to_string(id), onButtonUp);
+  GetScene()->inputManager.OnControllerLeftAnalog.AddListener(callbackIdentifier, onAnalog);
+  GetScene()->inputManager.OnControllerButtonPress.AddListener(callbackIdentifier, onButton);
+  GetScene()->inputManager.OnControllerButtonRelease.AddListener(callbackIdentifier, onButtonUp);
 }
 
 void UIControllerSelectable::MoveControllerSelection(shared_ptr<ControllerDevice> controller, Vector2 targetDirection)
@@ -191,4 +193,11 @@ Timer &UIControllerSelectable::GetControllerTimer(std::shared_ptr<ControllerDevi
 
   // Return the timer
   return controllerCooldowns[controller->GetId()];
+}
+
+void UIControllerSelectable::OnBeforeDestroy()
+{
+  GetScene()->inputManager.OnControllerLeftAnalog.RemoveListener(callbackIdentifier);
+  GetScene()->inputManager.OnControllerButtonPress.RemoveListener(callbackIdentifier);
+  GetScene()->inputManager.OnControllerButtonRelease.RemoveListener(callbackIdentifier);
 }

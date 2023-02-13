@@ -33,6 +33,8 @@ auto ComponentOwner::RequireComponent(const Component *componentPointer) -> shar
 
 decltype(ComponentOwner::components)::iterator ComponentOwner::RemoveComponent(shared_ptr<Component> component)
 {
+  // cout << "Will destroy component: " << *component << endl;
+
   // Detect not present
   if (components.count(component->id) == 0)
     return components.end();

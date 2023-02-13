@@ -60,7 +60,7 @@ void ControllerInput::Start()
   LOCK(weakPlayer, player);
 
   // This component callback identifier
-  string callbackIdentifier = "controller-input-player-" + to_string(player->PlayerId());
+  callbackIdentifier = "controller-input-player-" + to_string(player->PlayerId());
 
   // Subscribe to analog movement
   inputManager.OnControllerLeftAnalog.AddListener(callbackIdentifier, [this](Vector2 direction, shared_ptr<ControllerDevice> controller)
@@ -81,4 +81,11 @@ int ControllerInput::GetAssociatedControllerId() const
   auto controller = player->GetController();
 
   return controller == nullptr ? -1 : controller->GetId();
+}
+
+void ControllerInput::OnBeforeDestroy()
+{
+  inputManager.OnControllerLeftAnalog.RemoveListener(callbackIdentifier);
+  inputManager.OnControllerButtonPress.RemoveListener(callbackIdentifier);
+  inputManager.OnControllerButtonRelease.RemoveListener(callbackIdentifier);
 }

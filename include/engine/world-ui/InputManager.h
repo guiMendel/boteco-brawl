@@ -86,7 +86,7 @@ private:
   // Whether user has requested to quit
   bool quitRequested{false};
 
-  int updateCounter;
+  int updateCounter{0};
 
   // Mouse X coordinates
   int mouseX;

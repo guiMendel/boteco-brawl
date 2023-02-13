@@ -12,6 +12,7 @@ public:
   virtual ~ControllerInput() {}
 
   void Start() override;
+  void OnBeforeDestroy() override;
 
   // Get controller instance id associated to this controller input's player
   int GetAssociatedControllerId() const;
@@ -25,6 +26,9 @@ private:
 
   // To which player this controller input is bound
   const std::weak_ptr<Player> weakPlayer;
+
+  // The unique callback identifier for this controller
+  std::string callbackIdentifier;
 };
 
 #endif

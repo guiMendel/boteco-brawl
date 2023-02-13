@@ -12,10 +12,12 @@
 #define COUNTDOWN_OBJECT "CountdownContainer"
 #define VICTORY_TEXT "VictoryText"
 
-class MainScene : public GameScene
+class ArenaScene : public GameScene
 {
 public:
-  virtual ~MainScene() {}
+  virtual ~ArenaScene() {}
+
+  std::string GetName() const override;
 
   void InitializeObjects() override;
   void OnUpdate(float) override;

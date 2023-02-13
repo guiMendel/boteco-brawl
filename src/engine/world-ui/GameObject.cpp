@@ -97,18 +97,6 @@ void GameObject::PhysicsUpdate(float deltaTime)
   }
 }
 
-void GameObject::OnScenePause()
-{
-  for (auto [componentId, component] : components)
-    component->OnScenePause();
-}
-
-void GameObject::OnSceneResume()
-{
-  for (auto [componentId, component] : components)
-    component->OnSceneResume();
-}
-
 // Absolute scale of the object
 float GameObject::GetTimeScale() const
 {
@@ -137,12 +125,18 @@ void GameObject::SetTimeScale(float newScale)
 
 void GameObject::InternalDestroy()
 {
+  // for (auto [componentId, component] : components)
+  //   cout << "Will destroy component: " << *component << endl;
+
   // Wrap all components up
   for (
       auto componentIterator = components.begin();
       componentIterator != components.end();
       componentIterator = RemoveComponent(componentIterator->second))
     ;
+
+  // Wrap self up
+  OnBeforeDestroy();
 
   // Delete self from scene's list
   if (IsRoot())
@@ -265,4 +259,9 @@ shared_ptr<GameObject> GameObject::InternalGetParent() const
   Assert(parent != nullptr, "Failed to retrieve parent of " + string(*this));
 
   return parent;
+}
+
+void GameObject::OnBeforeDestroy()
+{
+  cout << "OnBeforeDestroy " << *this << endl;
 }

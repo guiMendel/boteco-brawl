@@ -20,6 +20,7 @@ public:
   MainMenuInput(GameObject &associatedObject);
   virtual ~MainMenuInput() {}
 
+  void OnBeforeDestroy() override;
   void Start() override;
   void Update(float) override;
 
@@ -99,6 +100,8 @@ private:
 
   // Selection badges for each player to take as they connect
   std::queue<std::pair<std::string, std::string>> playerBadges;
+
+  std::string callbackIdentifier;
 };
 
 #endif

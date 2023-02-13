@@ -1,12 +1,14 @@
 #include "ArenaUIAnimation.h"
-#include "MainScene.h"
+#include "ArenaScene.h"
 #include "Arena.h"
 
 using namespace std;
 
 static const float curtainFadeSpeed{110};
-static const float countdownSlideSpeed{250};
-static const float countDownSlideInterval{0.7};
+static const float countdownSlideSpeed{800};
+static const float countDownSlideInterval{0.1};
+// static const float countdownSlideSpeed{250};
+// static const float countDownSlideInterval{0.7};
 static const float victoryShowTime{2};
 
 #define COUNTDOWN_SLIDE_TIMER "countdown-next-slide"

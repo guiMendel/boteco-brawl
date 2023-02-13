@@ -27,6 +27,8 @@ GameScene::GameScene()
 GameScene::~GameScene()
 {
   Assert(gameObjects.size() == 0, "Failed to destroy all scene's objects before reaching it's destructor");
+
+  MESSAGE << "In SCENE DESTRUCTOR of " << nameBeforeDestruction << endl;
 }
 
 void GameScene::CascadeDown(function<void(GameObject &)> callback, bool topDown)
@@ -180,18 +182,6 @@ void GameScene::Start()
   physicsSystem.Start();
 }
 
-void GameScene::Pause()
-{
-  // Communicate to objects
-  CASCADE_OBJECTS(OnScenePause, );
-}
-
-void GameScene::Resume()
-{
-  // Communicate to objects
-  CASCADE_OBJECTS(OnSceneResume, );
-}
-
 void GameScene::RemoveObject(int id)
 {
   Assert(id != 0, "Cannot destroy root object with this method");
@@ -285,6 +275,8 @@ vector<shared_ptr<GameObject>> GameScene::ExtractObjectsToCarryOn()
         // Keep it's pointer to return it
         savedObjects.push_back(RequireGameObject(object.id));
 
+        MESSAGE << "Extracting object " << object << " to carry on to next scene" << endl;
+
         // Remove the object from this scene
         RemoveObject(object.id);
       };
@@ -366,4 +358,6 @@ void GameScene::Destroy()
 
   // Clear unused resources
   Resources::ClearAll();
+
+  nameBeforeDestruction = GetName();
 }

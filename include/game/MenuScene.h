@@ -21,6 +21,8 @@ class MenuScene : public GameScene
 public:
   virtual ~MenuScene() {}
 
+  std::string GetName() const override;
+
   void InitializeObjects() override;
 
 private:

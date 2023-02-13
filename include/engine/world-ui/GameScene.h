@@ -49,10 +49,6 @@ public:
 
   virtual void Start();
 
-  virtual void Pause();
-
-  virtual void Resume();
-
 protected:
   // Allows for child class scenes to hook behavior to the update loop
   virtual void OnUpdate(float) {}
@@ -67,6 +63,9 @@ protected:
   // SCENE PROPERTIES
   // =================================
 public:
+  // A name for the scene, not necessarily unique
+  virtual std::string GetName() const = 0;
+
   // The scene's own physics system instance
   PhysicsSystem physicsSystem;
 
@@ -81,6 +80,10 @@ public:
 
   // Reference to input manager
   InputManager &inputManager;
+
+private:
+  // Set right before scene is destroyed
+  std::string nameBeforeDestruction;
 
   // =================================
   // GAME SCENE HANDLING

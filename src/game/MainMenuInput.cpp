@@ -1,5 +1,5 @@
 #include "MainMenuInput.h"
-#include "MainScene.h"
+#include "ArenaScene.h"
 #include "UIControllerSelectable.h"
 #include "SpriteRenderer.h"
 #include "CharacterUIOption.h"
@@ -96,6 +96,8 @@ void MainMenuInput::PlayerStart()
 
 void MainMenuInput::RegisterListeners()
 {
+  callbackIdentifier = "main-menu-input-" + to_string(id);
+
   // Raises stat if enter was pressed
   auto onKeyPress = [this](int key)
   {
@@ -103,16 +105,7 @@ void MainMenuInput::RegisterListeners()
       PlayerStart();
   };
 
-  inputManager.OnKeyPress.AddListener("ui-start", onKeyPress);
-
-  // Raises stat if start was pressed
-  auto onButtonPress = [this](SDL_GameControllerButton button, shared_ptr<ControllerDevice> controller)
-  {
-    if (button == SDL_CONTROLLER_BUTTON_START)
-      ControllerStart(controller);
-  };
-
-  inputManager.OnControllerButtonPress.AddListener("ui-start", onButtonPress);
+  inputManager.OnKeyPress.AddListener(callbackIdentifier, onKeyPress);
 
   // React to back button hover
   auto backButton = GetScene()->RequireUIObject<UIImage>(BACK_BUTTON_IMAGE);
@@ -161,7 +154,7 @@ void MainMenuInput::RegisterListeners()
   }
 
   // Cursor click animation
-  inputManager.OnClickDown.AddListener("cursor-animation", [this](Vector2)
+  inputManager.OnClickDown.AddListener(callbackIdentifier, [this](Vector2)
                                        { AnimateClick(); });
 
   // Subscribe to controller hover
@@ -198,8 +191,15 @@ void MainMenuInput::RegisterListeners()
   }
 
   // Subscribe to controller selection
-  auto onControllerSelect = [this](SDL_GameControllerButton button, shared_ptr<ControllerDevice> controller)
+  auto onButtonPress = [this](SDL_GameControllerButton button, shared_ptr<ControllerDevice> controller)
   {
+    // Get start
+    if (button == SDL_CONTROLLER_BUTTON_START)
+    {
+      ControllerStart(controller);
+      return;
+    }
+
     // Only accept A
     if (button != SDL_CONTROLLER_BUTTON_A || controller->GetPlayer() == nullptr)
       return;
@@ -218,7 +218,7 @@ void MainMenuInput::RegisterListeners()
     SetPlayerSelect(Lock(playerHovers[player->PlayerId()]), player);
   };
 
-  inputManager.OnControllerButtonPress.AddListener("menu-select", onControllerSelect);
+  inputManager.OnControllerButtonPress.AddListener(callbackIdentifier, onButtonPress);
 
   // React to battle start prompt hover
   auto startBattlePrompt = GetScene()->RequireUIObject<UIImage>(START_ARENA_IMAGE);
@@ -532,9 +532,16 @@ void MainMenuInput::StartBattle()
   // Loads battle scene
   auto loadBattleScene = [this]()
   {
-    Game::GetInstance().SetScene(make_shared<MainScene>());
+    Game::GetInstance().SetScene(make_shared<ArenaScene>());
   };
 
   // Transition out of the menu
   Lock(weakAnimationHandler)->TransitionOutAndExecute(loadBattleScene);
+}
+
+void MainMenuInput::OnBeforeDestroy()
+{
+  inputManager.OnKeyPress.RemoveListener(callbackIdentifier);
+  inputManager.OnClickDown.RemoveListener(callbackIdentifier);
+  inputManager.OnControllerButtonPress.RemoveListener(callbackIdentifier);
 }

@@ -1,7 +1,7 @@
 #include "Arena.h"
 #include "ArenaUIAnimation.h"
 #include "TimeScaleManager.h"
-#include "MainScene.h"
+#include "ArenaScene.h"
 #include "FallDeath.h"
 #include "Debug.h"
 

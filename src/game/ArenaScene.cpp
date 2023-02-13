@@ -1,4 +1,4 @@
-#include "MainScene.h"
+#include "ArenaScene.h"
 #include "UIBackground.h"
 #include "UIImage.h"
 #include "ArenaUIAnimation.h"
@@ -20,11 +20,13 @@ using namespace std;
 // Initial space between characters
 static const float initialCharactersDistance{3};
 
-void MainScene::OnUpdate(float)
+string ArenaScene::GetName() const { return "ArenaScene"; }
+
+void ArenaScene::OnUpdate(float)
 {
 }
 
-void MainScene::InitializeObjects()
+void ArenaScene::InitializeObjects()
 {
   // Will hold all in-game objects
   auto mainParent = Instantiate(MAIN_PARENT_OBJECT);
@@ -117,7 +119,7 @@ void MainScene::InitializeObjects()
   canvas->worldObject.AddComponent<ArenaUIAnimation>();
 }
 
-void MainScene::SpawnCharacters()
+void ArenaScene::SpawnCharacters()
 {
   auto playerManager = RequireFindComponent<PlayerManager>();
   auto charactersParent = RequireWorldObject(CHARACTERS_PARENT);
@@ -142,16 +144,16 @@ void MainScene::SpawnCharacters()
   }
 }
 
-void MainScene::SetupArena()
+void ArenaScene::SetupArena()
 {
   auto mainParent = RequireWorldObject(MAIN_PARENT_OBJECT);
 
   // Add an arena
   Instantiate("Arena", ObjectRecipes::Arena("./assets/images/boteco.jpg"))->SetParent(mainParent);
 
-  Instantiate("Ground", ObjectRecipes::Platform({40, 2}), Vector2(0, 4))->SetParent(mainParent);
-  Instantiate("LeftWall", ObjectRecipes::Platform({2, 10}), Vector2(-20, 2))->SetParent(mainParent);
-  Instantiate("RightWall", ObjectRecipes::Platform({2, 10}), Vector2(20, 2))->SetParent(mainParent);
+  Instantiate("Ground", ObjectRecipes::Platform({5, 2}), Vector2(0, 4))->SetParent(mainParent);
+  // Instantiate("LeftWall", ObjectRecipes::Platform({2, 10}), Vector2(-20, 2))->SetParent(mainParent);
+  // Instantiate("RightWall", ObjectRecipes::Platform({2, 10}), Vector2(20, 2))->SetParent(mainParent);
 
   Instantiate("Platform", ObjectRecipes::Platform({2, 0.5}, true), Vector2(0, 0))->SetParent(mainParent);
 }

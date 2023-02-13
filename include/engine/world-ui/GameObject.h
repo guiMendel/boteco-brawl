@@ -45,8 +45,8 @@ public:
   virtual void Update(float deltaTime);
   virtual void PhysicsUpdate(float deltaTime);
 
-  virtual void OnScenePause();
-  virtual void OnSceneResume();
+  // Die
+  virtual void OnBeforeDestroy();
 
 protected:
   // Allows for registering to the scene's variables

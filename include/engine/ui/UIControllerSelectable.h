@@ -19,6 +19,7 @@ public:
 
   // Register to instances & set up controller input listener
   void Awake() override;
+  void OnBeforeDestroy() override;
   void Update(float) override;
 
   // Get all instances of this component
@@ -45,6 +46,9 @@ private:
 
   // Maps controller id to a timer
   static std::unordered_map<int, Timer> controllerCooldowns;
+
+  // Callback identifier
+  std::string callbackIdentifier;
 };
 
 #endif
