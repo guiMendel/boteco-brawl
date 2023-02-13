@@ -79,8 +79,6 @@ void CharacterUIManager::UpdateLifeCounter() const
   // Erase current lives
   EraseLives();
 
-  cout << "adding lives: " << fallDeath->GetLives() << endl;
-
   // If no more, stop
   if (fallDeath->GetLives() == 0)
     return;

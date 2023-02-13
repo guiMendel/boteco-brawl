@@ -14,7 +14,7 @@ using namespace std;
 
 const float FallDeath::deathMargin{3};
 const float FallDeath::respawnDelay{2};
-const int FallDeath::startingLives{3};
+const int FallDeath::startingLives{1};
 
 // Initial invulnerability time
 static const float initialInvulnerabilityTime{3};
@@ -94,6 +94,9 @@ void FallDeath::Fall()
   OnFall.Invoke();
 
   PlayEffect();
+
+  // Check if battle is over
+  Lock(weakArena)->CheckBattleOver();
 }
 
 void FallDeath::Respawn()

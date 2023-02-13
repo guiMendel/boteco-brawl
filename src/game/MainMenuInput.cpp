@@ -108,8 +108,6 @@ void MainMenuInput::RegisterListeners()
   // Raises stat if start was pressed
   auto onButtonPress = [this](SDL_GameControllerButton button, shared_ptr<ControllerDevice> controller)
   {
-    cout << "Pressed button " << button << endl;
-
     if (button == SDL_CONTROLLER_BUTTON_START)
       ControllerStart(controller);
   };

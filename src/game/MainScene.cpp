@@ -26,23 +26,27 @@ void MainScene::OnUpdate(float)
 
 void MainScene::InitializeObjects()
 {
-  // Object to hold characters
-  auto charactersParent = Instantiate(CHARACTERS_PARENT);
-
-  // Create the main camera
-  auto mainCamera = Instantiate("MainCamera", ObjectRecipes::Camera())->GetComponent<Camera>();
-
-  // Add particle fx
-  Instantiate("ParticleFX", ObjectRecipes::SingleComponent<ParticleFX>());
+  // Will hold all in-game objects
+  auto mainParent = Instantiate(MAIN_PARENT_OBJECT);
 
   // Add time scale manager
   Instantiate("TimeScaleManager", ObjectRecipes::SingleComponent<TimeScaleManager>());
 
-  // Add a shake effect manager
-  Instantiate("ShakeEffectManager", ObjectRecipes::SingleComponent<ShakeEffectManager>());
+  // Object to hold characters
+  auto charactersParent = mainParent->CreateChild(CHARACTERS_PARENT);
+
+  // Create the main camera
+  auto mainCamera = Instantiate("MainCamera", ObjectRecipes::Camera())->GetComponent<Camera>();
+  mainCamera->worldObject.SetParent(mainParent);
 
   // Give it behavior
   mainCamera->gameObject.AddComponent<CameraBehavior>(charactersParent);
+
+  // Add particle fx
+  Instantiate("ParticleFX", ObjectRecipes::SingleComponent<ParticleFX>())->SetParent(mainParent);
+
+  // Add a shake effect manager
+  Instantiate("ShakeEffectManager", ObjectRecipes::SingleComponent<ShakeEffectManager>())->SetParent(mainParent);
 
   SetupArena();
 
@@ -59,12 +63,23 @@ void MainScene::InitializeObjects()
     playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKiba>();
   }
 
+  playerManager->worldObject.SetParent(mainParent);
+
   SpawnCharacters();
 
   // Add canvas
   auto canvas = Instantiate("Canvas", ObjectRecipes::Canvas(Canvas::Space::Global))->RequireComponent<Canvas>();
 
-  auto countdownContainer = canvas->AddChild<UIContainer>("CountdownContainer");
+  // Add curtain
+  auto curtain = canvas->AddChild<UIContainer>(CURTAIN_OBJECT);
+  curtain->AddComponent<UIBackground>(Color::Black());
+  curtain->SetPositionAbsolute(true);
+  curtain->width.Set(UIDimension::Percent, 100);
+  curtain->height.Set(UIDimension::Percent, 100);
+  curtain->style->renderOrder.Set(10);
+
+  // Add countdown container
+  auto countdownContainer = canvas->AddChild<UIContainer>(COUNTDOWN_OBJECT);
   countdownContainer->width.Set(UIDimension::Percent, 100);
   countdownContainer->height.Set(UIDimension::Percent, 100);
   countdownContainer->Flexbox().placeItems = {0, 0.5};
@@ -73,14 +88,6 @@ void MainScene::InitializeObjects()
   countdownContainer->style->textBorderColor.Set(PLAYER_1_COLOR);
   countdownContainer->style->fontSize.Set(110);
   countdownContainer->style->textColor.Set(PLAYER_2_COLOR);
-
-  // Add curtain
-  auto curtain = countdownContainer->AddChild<UIContainer>(CURTAIN_OBJECT);
-  curtain->AddComponent<UIBackground>(Color::Black());
-  curtain->SetPositionAbsolute(true);
-  curtain->width.Set(UIDimension::Percent, 100);
-  curtain->height.Set(UIDimension::Percent, 100);
-  curtain->style->renderOrder.Set(10);
 
   // Add each countdown object
   for (auto text : {"3", "2", "1", "Rinha!"})
@@ -93,8 +100,21 @@ void MainScene::InitializeObjects()
     auto textObject = textContainer->AddChild<UIText>("Countdown" + string(text), text);
   }
 
+  // Add victory text
+  auto victoryContainer = canvas->AddChild<UIContainer>("VictoryContainer");
+  victoryContainer->width.Set(UIDimension::Percent, 100);
+  victoryContainer->height.Set(UIDimension::Percent, 100);
+  victoryContainer->Flexbox().placeItems = {0.5, 0.5};
+  victoryContainer->margin.left.Set(UIDimension::Percent, 120);
+  victoryContainer->style->textBorderSize.Set(4);
+  victoryContainer->style->textBorderColor.Set(PLAYER_1_COLOR);
+  victoryContainer->style->fontSize.Set(110);
+  victoryContainer->style->textColor.Set(PLAYER_2_COLOR);
+
+  victoryContainer->AddChild<UIText>(VICTORY_TEXT, " ");
+
   // Add animation
-  countdownContainer->AddComponent<ArenaUIAnimation>();
+  canvas->worldObject.AddComponent<ArenaUIAnimation>();
 }
 
 void MainScene::SpawnCharacters()
@@ -124,12 +144,14 @@ void MainScene::SpawnCharacters()
 
 void MainScene::SetupArena()
 {
+  auto mainParent = RequireWorldObject(MAIN_PARENT_OBJECT);
+
   // Add an arena
-  Instantiate("Arena", ObjectRecipes::Arena("./assets/images/boteco.jpg"));
+  Instantiate("Arena", ObjectRecipes::Arena("./assets/images/boteco.jpg"))->SetParent(mainParent);
 
-  Instantiate("Ground", ObjectRecipes::Platform({40, 2}), Vector2(0, 4));
-  Instantiate("LeftWall", ObjectRecipes::Platform({2, 10}), Vector2(-20, 2));
-  Instantiate("RightWall", ObjectRecipes::Platform({2, 10}), Vector2(20, 2));
+  Instantiate("Ground", ObjectRecipes::Platform({40, 2}), Vector2(0, 4))->SetParent(mainParent);
+  Instantiate("LeftWall", ObjectRecipes::Platform({2, 10}), Vector2(-20, 2))->SetParent(mainParent);
+  Instantiate("RightWall", ObjectRecipes::Platform({2, 10}), Vector2(20, 2))->SetParent(mainParent);
 
-  Instantiate("Platform", ObjectRecipes::Platform({2, 0.5}, true), Vector2(0, 0));
+  Instantiate("Platform", ObjectRecipes::Platform({2, 0.5}, true), Vector2(0, 0))->SetParent(mainParent);
 }

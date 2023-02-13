@@ -208,15 +208,44 @@ public:
     return nullptr;
   }
 
+  // Finds all components in this scene's hierarchy
+  template <class T>
+  auto FindComponents() -> std::vector<std::shared_ptr<T>>
+  {
+    std::vector<std::shared_ptr<T>> foundComponents;
+
+    // Find the position of the object that is of the requested type
+    for (auto [objectId, object] : gameObjects)
+    {
+      auto component = object->ComponentOwner::GetComponent<T>();
+
+      if (component != nullptr)
+        foundComponents.push_back(component);
+    }
+
+    return foundComponents;
+  }
+
   // Finds a component in this scene's hierarchy and throws if it's not found
   template <class T>
   auto RequireFindComponent() -> std::shared_ptr<T>
   {
     auto object = FindComponent<T>();
 
-    Helper::Assert(object != nullptr, "Required object type was not present in game scene");
+    Helper::Assert(object != nullptr, "Required component type was not present in game scene");
 
     return object;
+  }
+
+  // Finds a component in this scene's hierarchy and throws if it's not found
+  template <class T>
+  auto RequireFindComponents() -> std::vector<std::shared_ptr<T>>
+  {
+    auto objects = FindComponents<T>();
+
+    Helper::Assert(objects.empty() == false, "Required component type was not present in game scene");
+
+    return objects;
   }
 
   // Initializes the scene's objects

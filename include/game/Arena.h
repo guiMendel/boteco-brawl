@@ -20,6 +20,9 @@ public:
 
   RenderLayer GetRenderLayer() override { return RenderLayer::Debug; }
 
+  // Detect if battle is over
+  void CheckBattleOver();
+
   // Arena size's width
   const float width;
 
