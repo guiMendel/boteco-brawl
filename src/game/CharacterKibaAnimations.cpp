@@ -17,8 +17,8 @@ using namespace CharacterAnimationHelper;
 
 vector<AnimationFrame> Jump::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/jump.png",
-                               SpritesheetClipInfo(8, 8, 2), 0.1)};
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/general/jump.png",
+                               SpritesheetClipInfo(480 / 6, 48, 2), 0.1, {0, -8})};
 
   // Add jump impulse to jump frame
   auto callback = [](WorldObject &object)
@@ -40,6 +40,18 @@ vector<AnimationFrame> Jump::InitializeFrames()
   };
 
   frames[1].AddCallback(callback);
+
+  return frames;
+}
+
+// === CRASH
+
+vector<AnimationFrame> Crash::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/general/get-up.png",
+                               SpritesheetClipInfo(56, 32), 0.15)};
+
+  frames[0].SetDuration(0.6);
 
   return frames;
 }
@@ -364,18 +376,6 @@ vector<AnimationFrame> Projectile::InitializeFrames()
 
   // Add hitboxes
   FrameHitbox(frames[0], {Circle({1.0, 0.5}, 1.5)});
-
-  return frames;
-}
-
-// === CRASH
-
-vector<AnimationFrame> Crash::InitializeFrames()
-{
-  auto frames{SliceSpritesheet("./assets/sprites/get-up.png",
-                               SpritesheetClipInfo(8, 8), 0.15)};
-
-  frames[0].SetDuration(0.6);
 
   return frames;
 }

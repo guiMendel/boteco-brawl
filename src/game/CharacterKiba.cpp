@@ -20,7 +20,7 @@ const CharacterKiba::transformerMap &CharacterKiba::GetSequenceIndexTransformer(
 
 float CharacterKiba::GetBaseDamage() const { return 1; }
 float CharacterKiba::GetDefaultArmor() const { return 1; }
-Rectangle CharacterKiba::GetHurtbox() const { return Rectangle({0, 0}, 0.8, 1); }
+Rectangle CharacterKiba::GetHurtbox() const { return Rectangle({0, 0}, 1.8, 2); }
 ColliderDensity CharacterKiba::GetDensity() const { return ColliderDensity::Character; }
 
 float CharacterKiba::GetAcceleration() const { return 35; }

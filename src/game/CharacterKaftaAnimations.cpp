@@ -24,7 +24,7 @@ vector<AnimationFrame> Dash::InitializeFrames()
   SplitLastFrame(frames, 2, 0.1);
 
   // First frame with duration 0.2
-  frames[0].SetDuration(0.1);
+  frames[0].SetDuration(0.2);
 
   return frames;
 }
