@@ -14,6 +14,8 @@
 #define TAKE_DAMAGE_PRIORITY 2
 #define JUMP_PRIORITY 1
 #define LAND_PRIORITY 2
+#define RIPOSTE_PRIORITY 2
+#define ATTACK_PRIORITY 1
 
 // Action timer names
 #define STUN_DURATION_TIMER "stun-duration"
@@ -173,7 +175,7 @@ namespace Actions
   {
     void Trigger(WorldObject &target, std::shared_ptr<CharacterState> actionState) override;
 
-    int GetPriority() const override { return ATTACK_PRIORITY; }
+    int GetPriority() const override { return RIPOSTE_PRIORITY; }
 
     std::shared_ptr<CharacterState> NextState(std::shared_ptr<Action> sharedAction) override
     {

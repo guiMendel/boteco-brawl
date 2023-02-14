@@ -1,13 +1,13 @@
-#ifndef __GUN_PARRY__
-#define __GUN_PARRY__
+#ifndef __KAFTA_PARRY__
+#define __KAFTA_PARRY__
 
 #include "Parry.h"
 
-class GunParry : public Parry
+class KaftaParry : public Parry
 {
 public:
-  GunParry(GameObject &associatedObject);
-  virtual ~GunParry() {}
+  KaftaParry(GameObject &associatedObject);
+  virtual ~KaftaParry() {}
 
   // Whether a given attack damage can be parried right now
   bool CanParry(Damage damage) override;

@@ -1,6 +1,6 @@
 #include "CharacterKafta.h"
 #include "CharacterKaftaAnimations.h"
-#include "GunParry.h"
+#include "KaftaParry.h"
 #include "Animator.h"
 #include "LandingAttackEffector.h"
 
@@ -11,7 +11,8 @@ CharacterKafta::CharacterKafta(GameObject &associatedObject)
     : Character(associatedObject) {}
 
 static const CharacterKafta::transformerMap sequenceIndexTransformer{
-    {"neutral", SequenceIndexTransformer::Repeat(3)}};
+    {"neutral", SequenceIndexTransformer::Repeat(3)},
+    {"specialHorizontal", SequenceIndexTransformer::Repeat(2)}};
 
 const CharacterKafta::transformerMap &CharacterKafta::GetSequenceIndexTransformer() const
 {
@@ -47,7 +48,8 @@ void CharacterKafta::AddAnimations(std::shared_ptr<Animator> animator) const
   animator->RegisterAnimation<AirUp>();
   animator->RegisterAnimation<AirDown>();
   animator->RegisterAnimation<SpecialNeutral>();
-  animator->RegisterAnimation<SpecialHorizontal>();
+  animator->RegisterAnimation<SpecialHorizontal1>();
+  animator->RegisterAnimation<SpecialHorizontal2>();
   animator->RegisterAnimation<Riposte>();
   animator->RegisterAnimation<Crash>();
   animator->RegisterAnimation<Spin>();
@@ -56,21 +58,7 @@ void CharacterKafta::AddAnimations(std::shared_ptr<Animator> animator) const
 void CharacterKafta::AddMechanics(std::shared_ptr<WorldObject> object) const
 {
   // Give it parry capacity
-  object->AddComponent<GunParry>();
-
-  // === LANDING ATTACKS
-
-  // Decides whether the landing effector should trigger on land
-  auto effectorCondition = [weakAnimator = weak_ptr(object->RequireComponent<Animator>())]()
-  {
-    LOCK(weakAnimator, animator);
-
-    // Yes if the current animation is the shovel drop
-    return animator->GetCurrentAnimation()->Name() == AIR_DOWN_SHOVEL_LOOP;
-  };
-
-  // Give it the landing attack effector
-  object->AddComponent<LandingAttackEffector>(effectorCondition);
+  object->AddComponent<KaftaParry>();
 }
 
 int CharacterKafta::GetDashRecoverFrame() const { return 1; }

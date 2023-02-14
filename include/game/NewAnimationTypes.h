@@ -62,10 +62,10 @@ public:
 
   virtual float GetHitCooldown() const;
 
-protected:
   // Sets hitbox for a given frame
   void FrameHitbox(AnimationFrame &frame, std::vector<Circle> hitboxAreas = {});
 
+protected:
   // Setup attack properties
   void InternalOnStart() override;
   void InternalOnStop() override;

@@ -257,16 +257,6 @@ namespace CharacterKaftaAnimations
     DELCARE_FRAMES
   };
 
-  class SpecialHorizontal : public StatefulAnimation
-  {
-  public:
-    CONSTRUCTOR_AND_DESTRUCTOR(SpecialHorizontal)
-
-    DEF_NAME("specialHorizontal")
-    DELCARE_FRAMES
-    ATTACK_CANCEL(3)
-  };
-
   class Riposte : public RiposteAnimation
   {
   public:
@@ -275,6 +265,34 @@ namespace CharacterKaftaAnimations
 
     DEF_NAME("riposte")
     DELCARE_FRAMES
+  };
+
+  class SpecialHorizontal1 : public AttackAnimation
+  {
+  public:
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(SpecialHorizontal1)
+
+    DEF_NAME("specialHorizontal1")
+    DELCARE_FRAMES
+
+    SET_DAMAGE(2 * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-2), 1), 0.2)
+
+    ATTACK_SEQUENCE(3)
+    ATTACK_CANCEL(5)
+  };
+
+  class SpecialHorizontal2 : public AttackAnimation
+  {
+  public:
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(SpecialHorizontal2)
+
+    DEF_NAME("specialHorizontal2")
+    DELCARE_FRAMES
+
+    SET_DAMAGE(2 * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-2), 1), 0.2)
+
+    ATTACK_SEQUENCE(3)
+    ATTACK_CANCEL(5)
   };
 
 }

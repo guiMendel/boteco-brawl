@@ -1,4 +1,5 @@
 #include "CharacterKaftaAnimations.h"
+#include "KaftaParry.h"
 #include "Resources.h"
 #include "CharacterVFX.h"
 #include "ShakeEffectManager.h"
@@ -204,112 +205,6 @@ vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
   return frames;
 }
 
-// === SPECIAL NEUTRAL
-
-vector<AnimationFrame> SpecialNeutral::InitializeFrames()
-{
-  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/special.png",
-                               SpritesheetClipInfo(16, 8, 1), 0.2, {4, 0})};
-
-  // Add a recovery frame
-  frames.push_back(frames[0]);
-
-  // Ready parry
-  auto startParry = [](WorldObject &object)
-  {
-    auto parry = object.RequireComponent<GunParry>();
-
-    parry->ready = true;
-  };
-
-  auto stopParry = [](WorldObject &object)
-  {
-    auto parry = object.RequireComponent<GunParry>();
-
-    parry->ready = false;
-  };
-
-  frames[0].AddCallback(startParry);
-  frames[1].AddCallback(stopParry);
-
-  return frames;
-}
-
-void SpecialNeutral::InternalOnStop()
-{
-  auto parry = animator.worldObject.RequireComponent<GunParry>();
-
-  parry->ready = false;
-}
-
-// === SPECIAL HORIZONTAL
-
-vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
-{
-  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/special-horizontal.png",
-                               SpritesheetClipInfo(16, 8), 0.3, {4, 0})};
-
-  // Add a recovery frame
-  SplitLastFrame(frames, 2, 0.15);
-  frames[1].SetDuration(0.2);
-
-  // Add shoot frame
-  auto shoot = [this](WorldObject &target)
-  {
-    float mirrorFactor = GetSign(target.GetScale().x);
-
-    // Get shoot position
-    Vector2 shotPosition = GlobalVirtualPixelPosition({10, 3});
-
-    // Add smoke
-    ParticleEmissionParameters smoke;
-    smoke.angle = {DegreesToRadians(-35), DegreesToRadians(35)};
-    smoke.color = {Color(90, 90, 90), Color(200, 200, 200)};
-    smoke.frequency = {0.0005, 0.001};
-    smoke.gravityModifier = {Vector2::Up(0.5), Vector2::Zero()};
-    smoke.lifetime = {0.1, 0.7};
-    smoke.speed = {0.5 * mirrorFactor, 5 * mirrorFactor};
-    smoke.behavior = ParticleBehavior::Accelerate({-mirrorFactor, 0}, {0, numeric_limits<float>::max()});
-
-    ParticleFX::EffectAt(shotPosition, 0.01, 0.01, smoke, 1);
-
-    // Add sparks
-    ParticleEmissionParameters sparks;
-    sparks.angle = {DegreesToRadians(-35), DegreesToRadians(35)};
-    sparks.color = {Color::Yellow(), Color::ClampValid(Color::Yellow() * 1.5)};
-    sparks.frequency = {0.0008, 0.003};
-    sparks.lifetime = {0.05, 0.3};
-    sparks.speed = {2 * mirrorFactor, 8 * mirrorFactor};
-
-    ParticleFX::EffectAt(shotPosition, 0.01, 0.01, sparks, 1);
-
-    auto projectile = animator.GetScene()->Instantiate(
-        "Projectile",
-        ObjectRecipes::Projectile({8 * mirrorFactor, 0}, animator.worldObject.GetShared(), {0, 0}),
-        shotPosition);
-
-    projectile->localScale = {mirrorFactor, 1};
-  };
-
-  frames[1].AddCallback(shoot);
-
-  return frames;
-}
-
-// === RIPOSTE
-
-vector<AnimationFrame> Riposte::InitializeFrames()
-{
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/special.png",
-                                          SpritesheetClipInfo(16, 8, 2, 1), 0.2, {4, 0})};
-
-  // Add hitboxes
-  FrameHitbox(frames[0], {Circle({8.5, 4.5}, 7), Circle({14.5, 4.5}, 7)});
-  FrameHitbox(frames[1]);
-
-  return frames;
-}
-
 // === UP
 
 void Up::InternalOnStart()
@@ -396,4 +291,102 @@ vector<AnimationFrame> AirDown::InitializeFrames()
   frames[1].SetDuration(0.12);
 
   return frames;
+}
+
+// === SPECIAL NEUTRAL
+
+vector<AnimationFrame> SpecialNeutral::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/special.png",
+                               SpritesheetClipInfo(48, 48), 0.1, {4, -8})};
+
+  frames[1].SetDuration(0.3);
+  frames[3].SetDuration(0.2);
+
+  // Ready parry
+  frames[1].AddCallback(EnableParryCallback<KaftaParry>());
+  frames[2].AddCallback(DisableParryCallback<KaftaParry>());
+
+  return frames;
+}
+
+void SpecialNeutral::InternalOnStop()
+{
+  DisableParryCallback<KaftaParry>()(animator.worldObject);
+}
+
+// === RIPOSTE
+
+vector<AnimationFrame> Riposte::InitializeFrames()
+{
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/riposte.png",
+                                          SpritesheetClipInfo(80, 48), 0.1, {0, -8})};
+
+  // Add hitboxes
+  FrameHitbox(frames[2], {Circle({19, 30}, 17.5), Circle({38.5, 28.5}, 19), Circle({55, 27}, 20.5)});
+  FrameHitbox(frames[3]);
+
+  return frames;
+}
+
+// === SPECIAL HORIZONTAL
+
+static const Vector2 thrustImpulse{14, -1};
+
+vector<AnimationFrame> SetupThrustLunge(std::string animationPath, AttackAnimation &animation)
+{
+  auto frames{animation.SliceSpritesheet(animationPath,
+                                         SpritesheetClipInfo(106, 48), 0.2, {0, -8})};
+
+  // Add a recovery frame
+  frames.push_back(animation.SliceSpritesheet("./assets/sprites/kafta/attacks/draw-sword.png",
+                                              SpritesheetClipInfo(48, 48, 1), 0.2, {0, -8})[0]);
+
+  // Add cancel frame
+  SplitLastFrame(frames, 2, 0.2);
+
+  // Short frame
+  frames[1].SetDuration(0.05);
+  frames[2].SetDuration(0.1);
+
+  // Add hitboxes
+  animation.FrameHitbox(frames[2], {Circle({95, 28}, 10.5),
+                                    Circle({81, 28}, 10.5),
+                                    Circle({67, 28}, 10.5),
+                                    Circle({53, 28}, 10.5),
+                                    Circle({39, 28}, 10.5)});
+  animation.FrameHitbox(frames[3]);
+
+  // Displace
+  frames[2].AddCallback(DisplaceCallback({1.4, 0}));
+
+  // Remove velocity
+  auto brake = [](WorldObject &target)
+  {
+    auto &velocity = target.RequireComponent<Rigidbody>()->velocity;
+
+    velocity.x = velocity.x * 0.5;
+  };
+  frames[0].AddCallback(brake);
+
+  // Add velocity
+  auto strikeImpulse = [](WorldObject &target)
+  {
+    float direction = target.localScale.x;
+
+    target.RequireComponent<Rigidbody>()->velocity += {direction * thrustImpulse.x, thrustImpulse.y};
+  };
+  frames[2].AddCallback(strikeImpulse);
+
+  return frames;
+}
+
+vector<AnimationFrame> SpecialHorizontal1::InitializeFrames()
+{
+  return SetupThrustLunge("./assets/sprites/kafta/attacks/special-horizontal1.png", *this);
+}
+
+vector<AnimationFrame> SpecialHorizontal2::InitializeFrames()
+{
+  return SetupThrustLunge("./assets/sprites/kafta/attacks/special-horizontal2.png", *this);
 }

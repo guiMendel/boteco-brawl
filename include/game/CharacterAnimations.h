@@ -90,6 +90,27 @@ namespace CharacterAnimationHelper
 
   // Returns a callback that resets the attacks's hit targets
   std::function<void(WorldObject &)> ResetHitTargetsCallback();
+
+  // Returns a callback that enables a parry
+  template <class T>
+  std::function<void(WorldObject &)> EnableParryCallback()
+  {
+    return [](WorldObject &target)
+    {
+      target.ComponentOwner::RequireComponent<T>()->SetParry(true);
+    };
+  }
+
+  // Returns a callback that disables a parry
+  template <class T>
+  std::function<void(WorldObject &)> DisableParryCallback()
+  {
+    return [](WorldObject &target)
+    {
+      target.ComponentOwner::RequireComponent<T>()->SetParry(false);
+    };
+  }
+
 }
 
 #endif

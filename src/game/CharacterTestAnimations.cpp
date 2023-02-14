@@ -131,32 +131,15 @@ vector<AnimationFrame> SpecialNeutral::InitializeFrames()
   // Add a recovery frame
   frames.push_back(frames[0]);
 
-  // Ready parry
-  auto startParry = [](WorldObject &object)
-  {
-    auto parry = object.RequireComponent<GunParry>();
-
-    parry->ready = true;
-  };
-
-  auto stopParry = [](WorldObject &object)
-  {
-    auto parry = object.RequireComponent<GunParry>();
-
-    parry->ready = false;
-  };
-
-  frames[0].AddCallback(startParry);
-  frames[1].AddCallback(stopParry);
+  frames[0].AddCallback(EnableParryCallback<GunParry>());
+  frames[1].AddCallback(DisableParryCallback<GunParry>());
 
   return frames;
 }
 
 void SpecialNeutral::InternalOnStop()
 {
-  auto parry = animator.worldObject.RequireComponent<GunParry>();
-
-  parry->ready = false;
+  DisableParryCallback<GunParry>()(animator.worldObject);
 }
 
 // === SPECIAL HORIZONTAL

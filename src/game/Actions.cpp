@@ -1,4 +1,5 @@
 #include "Actions.h"
+#include "SpriteRenderer.h"
 #include "Character.h"
 #include "CharacterVFX.h"
 #include "Movement.h"
@@ -142,6 +143,10 @@ void TakeDamage::Trigger(WorldObject &target, shared_ptr<CharacterState>)
 void Riposte::Trigger(WorldObject &target, shared_ptr<CharacterState> actionState)
 {
   LOCK(weakParry, parry);
+
+  // Go to render front
+  target.RequireComponent<SpriteRenderer>()->SetRenderOrder(Game::currentFrame + 1);
+  cout << "front seat yeah" << endl;
 
   // Store these info
   auto weakStateManager = weak_ptr(target.RequireComponent<CharacterStateManager>());

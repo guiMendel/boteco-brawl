@@ -7,8 +7,6 @@
 #include "CharacterState.h"
 #include "CharacterStateRecipes.h"
 
-#define ATTACK_PRIORITY 1
-
 class WorldObject;
 
 // Defines the data of a game action, such as a standing attack or a dash

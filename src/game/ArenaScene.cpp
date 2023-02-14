@@ -64,7 +64,7 @@ void ArenaScene::InitializeObjects()
 
     playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKafta>();
     playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKafta>();
-    playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKiba>();
+    // playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKiba>();
   }
 
   playerManager->worldObject.SetParent(mainParent);
