@@ -15,6 +15,8 @@ public:
 
   virtual ~Player() {}
 
+  void OnBeforeDestroy() override;
+
   // Whether this player is currently searching for an available controller to associate to
   bool SearchingForController() const;
 

@@ -1,4 +1,5 @@
 #include "PlayerManager.h"
+#include <queue>
 
 using namespace std;
 
@@ -7,6 +8,8 @@ const Color PlayerManager::playerColors[]{PLAYER_1_COLOR, PLAYER_2_COLOR, PLAYER
 
 PlayerManager::PlayerManager(GameObject &associatedObject)
     : WorldComponent(associatedObject) {}
+
+void PlayerManager::Awake() { UseCurrentControllers(); }
 
 void PlayerManager::SetMainPlayer(shared_ptr<Player> player) { mainPlayerId = player->PlayerId(); }
 
@@ -38,4 +41,25 @@ shared_ptr<Player> PlayerManager::RequirePlayer(int playerId) const
   Assert(player != nullptr, "Couldn't find required player with id " + to_string(playerId));
 
   return player;
+}
+
+void PlayerManager::UseCurrentControllers()
+{
+  // Get players looking for controllers
+  queue<shared_ptr<Player>> availablePlayers;
+
+  for (auto player : GetPlayers())
+    if (player->SearchingForController())
+      availablePlayers.push(player);
+
+  for (auto controller : inputManager.GetControllers())
+  {
+    controller->RegisterPlayerManager(RequirePointerCast<PlayerManager>(GetShared()));
+
+    if (controller->SearchingForPlayer() && availablePlayers.size() > 0)
+    {
+      controller->AssociateToPlayer(availablePlayers.front());
+      availablePlayers.pop();
+    }
+  }
 }

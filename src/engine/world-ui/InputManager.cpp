@@ -232,7 +232,7 @@ Vector2 InputManager::GetMouseWorldCoordinates() const
   return Camera::GetMain()->ScreenToWorld(GetMouseScreenCoordinates());
 }
 
-std::shared_ptr<ControllerDevice> InputManager::GetController(int id)
+shared_ptr<ControllerDevice> InputManager::GetController(int id)
 {
   if (controllers.count(id) == 0)
     return nullptr;
@@ -246,4 +246,14 @@ int InputManager::KeyStateLength(int key) const
     return updateCounter;
 
   return updateCounter - keyUpdate.at(key);
+}
+
+vector<shared_ptr<ControllerDevice>> InputManager::GetControllers()
+{
+  vector<shared_ptr<ControllerDevice>> controllerVector;
+
+  for (auto [controllerId, controller] : controllers)
+    controllerVector.push_back(controller);
+
+  return controllerVector;
 }

@@ -29,6 +29,8 @@ public:
 
   virtual ~PlayerManager() {}
 
+  void Awake();
+
   std::shared_ptr<Player> GetPlayer(int playerId) const;
   std::shared_ptr<Player> RequirePlayer(int playerId) const;
 
@@ -56,6 +58,9 @@ public:
   }
 
 private:
+  // Announce existence to current controllers
+  void UseCurrentControllers();
+
   // Component id of main player worldObject
   // -1 if no player
   int mainPlayerId{-1};

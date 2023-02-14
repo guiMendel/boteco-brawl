@@ -26,12 +26,10 @@ ControllerDevice::ControllerDevice(int controllerIndex)
   auto playerManager = Game::GetInstance().GetScene()->FindComponent<PlayerManager>();
 
   if (playerManager == nullptr)
-    MESSAGE << "WARNING: No PlayerManager instance was found, controller " << instanceId << " will never be used." << endl;
+    MESSAGE << "WARNING: Controller " << instanceId << " found no PlayerManager instance." << endl;
 
   else
-    playerManager->OnPlayerSearchForController.AddListener(
-        "add-controller", [this](shared_ptr<Player> player)
-        { MaybeAssociateToPlayer(player); });
+    RegisterPlayerManager(playerManager);
 }
 
 // TODO: dont destroy controller on scene transition!!!
@@ -67,8 +65,12 @@ std::shared_ptr<ControllerDevice> ControllerDevice::GetShared() const
 
 void ControllerDevice::LosePlayer()
 {
-  if (auto player = GetPlayer(); player != nullptr)
-    player->LoseController();
+  if (auto oldPlayer{GetPlayer()}; oldPlayer != nullptr)
+  {
+    weakAssociationPlayer.reset();
+
+    oldPlayer->LoseController();
+  }
 
   weakAssociationPlayer.reset();
 }
@@ -80,7 +82,7 @@ int ControllerDevice::GetId() const { return instanceId; }
 void ControllerDevice::MaybeAssociateToPlayer(std::shared_ptr<Player> player)
 {
   // Associate if has no associated player and this player has no associated controller
-  if (weakAssociationPlayer.expired() && player->SearchingForController())
+  if (SearchingForPlayer() && player->SearchingForController())
     AssociateToPlayer(player);
 }
 
@@ -100,3 +102,11 @@ void ControllerDevice::SearchPlayersForAssociation()
     MaybeAssociateToPlayer(player);
   }
 }
+
+void ControllerDevice::RegisterPlayerManager(std::shared_ptr<PlayerManager> playerManager)
+{
+  playerManager->OnPlayerSearchForController.AddListener("add-controller", [this](shared_ptr<Player> player)
+                                                         { MaybeAssociateToPlayer(player); });
+}
+
+bool ControllerDevice::SearchingForPlayer() const { return weakAssociationPlayer.expired(); }

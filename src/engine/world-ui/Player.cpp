@@ -13,10 +13,12 @@ bool Player::SearchingForController() const { return usingController && weakCont
 
 void Player::LoseController()
 {
-  if (auto currentController = GetController(); currentController != nullptr)
-    currentController->LosePlayer();
+  if (auto oldController{GetController()}; oldController != nullptr)
+  {
+    weakController.reset();
 
-  weakController.reset();
+    oldController->LosePlayer();
+  }
 
   // If using a controller, start searching for a new one
   if (usingController)
@@ -33,6 +35,9 @@ void Player::UseController()
 
 void Player::SearchForController()
 {
+  if (GetController() != nullptr)
+    return;
+
   MESSAGE << "Player " << PlayerId() << " searching for controller" << endl;
 
   usingController = true;
@@ -60,3 +65,9 @@ int Player::PlayerId() const { return worldObject.id; }
 Color Player::GetColor() const { return color; }
 
 std::shared_ptr<Player> Player::GetShared() const { return RequirePointerCast<Player>(worldObject.RequireComponent(id)); }
+
+void Player::OnBeforeDestroy()
+{
+  usingController = false;
+  LoseController();
+}

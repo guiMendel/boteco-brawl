@@ -63,6 +63,7 @@ public:
   Vector2 GetMouseScreenCoordinates() const;
 
   std::shared_ptr<ControllerDevice> GetController(int id);
+  std::vector<std::shared_ptr<ControllerDevice>> GetControllers();
 
   bool QuitRequested() const { return quitRequested; }
 

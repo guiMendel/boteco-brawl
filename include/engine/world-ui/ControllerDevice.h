@@ -49,6 +49,12 @@ public:
   // Associates this controller to a player
   void AssociateToPlayer(std::shared_ptr<Player> player);
 
+  // Subscribe to player manager's player actions
+  void RegisterPlayerManager(std::shared_ptr<PlayerManager> playerManager);
+
+  // Whether this controller is looking for a player
+  bool SearchingForPlayer() const;
+
 private:
   // Check if should associate to this player
   void MaybeAssociateToPlayer(std::shared_ptr<Player> player);
