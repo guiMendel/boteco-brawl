@@ -137,7 +137,7 @@ namespace CharacterKaftaAnimations
     DEF_NAME("neutral1")
     DELCARE_FRAMES
 
-    SET_DAMAGE(BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.2), 0.2)
+    SET_DAMAGE(BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.2), 0.4)
 
     ATTACK_SEQUENCE(2)
   };
@@ -150,9 +150,23 @@ namespace CharacterKaftaAnimations
     DEF_NAME("neutral2")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1.2f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.2), 0.3)
+    SET_DAMAGE(1.2f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.2), 0.4)
+    ATTACK_SEQUENCE(3)
+  };
 
-    ATTACK_CANCEL(5)
+  class Neutral3 : public InnerLoopAnimation
+  {
+  public:
+    LOOP_CONSTRUCTOR_AND_DESTRUCTOR(Neutral3)
+
+    DEF_FIRST_NAME("neutral3")
+
+    std::vector<AnimationFrame> InitializePreLoopFrames() override;
+    std::vector<AnimationFrame> InitializeInLoopFrames() override;
+    std::vector<AnimationFrame> InitializePostLoopFrames() override;
+
+    SET_DAMAGE(BASE_DAMAGE, AttackImpulse(animator.worldObject.GetShared(), 0.3), 0.2)
+    SET_HIT_COOLDOWN(0.2)
   };
 
   class Horizontal : public InnerLoopAnimation
@@ -162,15 +176,16 @@ namespace CharacterKaftaAnimations
 
     DEF_FIRST_NAME("horizontal")
 
+    std::vector<AnimationFrame> InitializePreLoopFrames() override;
     std::vector<AnimationFrame> InitializeInLoopFrames() override;
     std::vector<AnimationFrame> InitializePostLoopFrames() override;
     float MaxInnerLoopDuration() const override { return 2; }
     void InternalOnStart() override;
 
     SET_DAMAGE(
-        Helper::Lerp(1.2f, 6.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
+        Helper::Lerp(1.4f, 5.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
         AttackImpulse(Vector2::AngledDegrees(-20),
-                      Helper::Lerp(5.5f, 20.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
+                      Helper::Lerp(2.0f, 8.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
         0.6)
 
     int PostLoopCancelFrame() const override { return 3; }
@@ -182,13 +197,18 @@ namespace CharacterKaftaAnimations
     LOOP_CONSTRUCTOR_AND_DESTRUCTOR(Up)
 
     DEF_FIRST_NAME("up")
-
-    std::vector<AnimationFrame> InitializePreLoopFrames() override;
     std::vector<AnimationFrame> InitializeInLoopFrames() override;
     std::vector<AnimationFrame> InitializePostLoopFrames() override;
+    float MaxInnerLoopDuration() const override { return 2; }
+    void InternalOnStart() override;
 
-    SET_DAMAGE(2 * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-90), 1.5), 0.2)
-    SET_HIT_COOLDOWN(0.2)
+    SET_DAMAGE(
+        Helper::Lerp(1.5f, 8.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
+        AttackImpulse(Vector2::AngledDegrees(-89),
+                      Helper::Lerp(1.5f, 6.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
+        0.6)
+
+    int PostLoopCancelFrame() const override { return 2; }
   };
 
   class AirHorizontal : public AttackAnimation
@@ -212,25 +232,18 @@ namespace CharacterKaftaAnimations
     DEF_NAME("airUp")
     DELCARE_FRAMES
 
-    SET_DAMAGE(0.5f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-90), 9), 0.1)
-
-    ATTACK_CANCEL(3)
+    SET_DAMAGE(1.3f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-89), 3), 0.1)
   };
 
-  class AirDown : public InnerLoopAnimation
+  class AirDown : public AttackAnimation
   {
   public:
-    LOOP_CONSTRUCTOR_AND_DESTRUCTOR(AirDown)
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(AirDown)
 
-    DEF_FIRST_NAME("airDown")
-    std::string Phase2Name() override { return AIR_DOWN_SHOVEL_LOOP; }
+    DEF_NAME("airDown")
+    DELCARE_FRAMES
 
-    std::vector<AnimationFrame> InitializePreLoopFrames() override;
-    std::vector<AnimationFrame> InitializeInLoopFrames() override;
-
-    bool QuitLoopOnInputRelease() const override { return false; }
-
-    SET_DAMAGE(3.5f * BASE_DAMAGE, AttackImpulse(animator.worldObject.GetShared(), 6), 0.4)
+    SET_DAMAGE(2 * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(89), 3), 0.3)
   };
 
   class SpecialNeutral : public StatefulAnimation

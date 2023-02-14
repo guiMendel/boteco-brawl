@@ -80,10 +80,11 @@ vector<AnimationFrame> Crash::InitializeFrames()
 vector<AnimationFrame> Neutral1::InitializeFrames()
 {
   auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/neutral1.png",
-                                          SpritesheetClipInfo(144 / 3, 48), 0.1, {10, -8})};
+                                          SpritesheetClipInfo(144 / 3, 48), 0.13, {10, -8})};
 
   // Add hitboxes
   FrameHitbox(frames[1], {Circle({37, 30}, 8.5)});
+  frames[1].SetDuration(0.1);
   FrameHitbox(frames[2]);
 
   return frames;
@@ -93,60 +94,112 @@ vector<AnimationFrame> Neutral1::InitializeFrames()
 
 vector<AnimationFrame> Neutral2::InitializeFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/kick.png",
-                                          SpritesheetClipInfo(16, 8), 0.1, {4, 0})};
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/neutral2.png",
+                                          SpritesheetClipInfo(48, 48), 0.2, {8, -8})};
+
+  frames[0].SetDuration(0.15);
+  frames[1].SetDuration(0.15);
+  frames[2].SetDuration(0.1);
+
+  SplitLastFrame(frames, 2, 0.15);
 
   // Add hitboxes
-  FrameHitbox(frames[1], {Circle({8, 4}, 2.5), Circle({12, 4}, 2.5)});
-  FrameHitbox(frames[2], {Circle({8, 4}, 2.5), Circle({12, 4}, 2.5)});
+  FrameHitbox(frames[2], {Circle({31, 32}, 15.5)});
   FrameHitbox(frames[3]);
 
   return frames;
+}
+
+// === NEUTRAL 3
+
+vector<AnimationFrame> Neutral3::InitializePreLoopFrames()
+{
+  return Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/draw-sword.png",
+                                     SpritesheetClipInfo(48, 48, 1), 0.2, {0, -8});
+}
+
+vector<AnimationFrame> Neutral3::InitializeInLoopFrames()
+{
+  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/neutral3.png",
+                                          SpritesheetClipInfo(64, 48), 0.2, {0, -8})};
+
+  // Add hitboxes
+  FrameHitbox(frames[0], {Circle({16, 32}, 16.5), Circle({47, 32}, 16.5)});
+
+  return frames;
+}
+
+vector<AnimationFrame> Neutral3::InitializePostLoopFrames()
+{
+  return Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/draw-sword.png",
+                                     SpritesheetClipInfo(48, 48, 1, 1), 0.4, {0, -8});
 }
 
 // === HORIZONTAL
 
 void Horizontal::InternalOnStart()
 {
-  if (sequencePhase == SequencePhase::InLoop)
-  {
-    animator.GetScene()->FindComponent<ShakeEffectManager>()->Shake(
-        animator.worldObject.GetShared(),
-        0,
-        {0, 0.15},
-        {0.15, 0.08},
-        MaxInnerLoopDuration(),
-        0);
-  }
+  // if (sequencePhase == SequencePhase::InLoop)
+  // {
+  //   animator.GetScene()->FindComponent<ShakeEffectManager>()->Shake(
+  //       animator.worldObject.GetShared(),
+  //       0,
+  //       {0, 0.15},
+  //       {0.15, 0.08},
+  //       MaxInnerLoopDuration(),
+  //       0);
+  // }
+
+  ShakeLoop(*this);
 
   InnerLoopAnimation::InternalOnStart();
+}
+
+vector<AnimationFrame> Horizontal::InitializePreLoopFrames()
+{
+  return Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/draw-sword.png",
+                                     SpritesheetClipInfo(48, 48, 1), 0.15, {0, -8});
 }
 
 vector<AnimationFrame> Horizontal::InitializeInLoopFrames()
 {
   return SliceSpritesheet("./assets/sprites/kafta/attacks/horizontal.png",
-                          SpritesheetClipInfo(24, 8, 1), 0.2);
+                          SpritesheetClipInfo(108, 48, 1), 0.3, {0, -8});
 }
 
 vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
 {
   auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/horizontal.png",
-                               SpritesheetClipInfo(24, 8, 3, 1), 0.2)};
+                               SpritesheetClipInfo(108, 48, 2, 1), 0.25, {0, -8})};
 
   // Stop shake
-  auto stopShake = [](WorldObject &target)
-  {
-    target.GetScene()->FindComponent<ShakeEffectManager>()->StopShake(
-        target.GetShared());
-  };
-  frames[0].AddCallback(stopShake);
+  frames[0].AddCallback(StopShakeCallback());
+  // auto stopShake = [](WorldObject &target)
+  // {
+  //   target.GetScene()->FindComponent<ShakeEffectManager>()->StopShake(
+  //       target.GetShared());
+  // };
+
+  // Add recovery
+  auto recoveryFrames{SliceSpritesheet("./assets/sprites/kafta/attacks/draw-sword.png",
+                                       SpritesheetClipInfo(48, 48, 1), 0.4, {0, -8})};
+
+  frames.push_back(recoveryFrames[0]);
+
+  SplitLastFrame(frames, 2, 0.4);
+  frames[3].SetDuration(0.2);
 
   // Add hitboxes
-  FrameHitbox(frames[0], {Circle({16, 3}, 3.5), Circle({21, 3}, 3.5)});
-  FrameHitbox(frames[1]);
+  FrameHitbox(frames[0], {Circle({53, 31}, 16.5), Circle({72, 30}, 17.5)});
+  FrameHitbox(frames[1], {Circle({52.5, 23.5}, 25), Circle({70.5, 28.5}, 20)});
+  FrameHitbox(frames[2]);
 
-  // Replicate last frame
-  SplitLastFrame(frames, 2, 0.1);
+  // Add displacement
+  frames[0].AddCallback(DisplaceCallback({1.2, 0}));
+  frames[1].AddCallback(DisplaceCallback({1.2, 0}));
+
+  // Enable second hit connection
+  frames[1].AddCallback(ResetHitTargetsCallback());
 
   return frames;
 }
@@ -259,28 +312,34 @@ vector<AnimationFrame> Riposte::InitializeFrames()
 
 // === UP
 
-vector<AnimationFrame> Up::InitializePreLoopFrames()
+void Up::InternalOnStart()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/up.png",
-                                     SpritesheetClipInfo(12, 16, 2, 0), 0.1, {1, -4});
+  ShakeLoop(*this);
+
+  InnerLoopAnimation::InternalOnStart();
 }
 
 vector<AnimationFrame> Up::InitializeInLoopFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/up.png",
-                                          SpritesheetClipInfo(12, 16, 2, 2), 0.1, {1, -4})};
-
-  // Add hitboxes
-  FrameHitbox(frames[0], {Circle({6, 4}, 3.5), Circle({6, 7}, 3.5)});
-  FrameHitbox(frames[1], {Circle({6, 3}, 3.5), Circle({6, 6}, 3.5)});
-
-  return frames;
+  return SliceSpritesheet("./assets/sprites/kafta/attacks/up.png",
+                          SpritesheetClipInfo(48, 64, 1), 0.15, {0, -16});
 }
 
 vector<AnimationFrame> Up::InitializePostLoopFrames()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/up.png",
-                                     SpritesheetClipInfo(12, 16, 1, 4), 0.1, {1, -4});
+  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/up.png",
+                               SpritesheetClipInfo(48, 64, 2, 1), 0.2, {0, -16})};
+
+  frames[0].AddCallback(StopShakeCallback());
+
+  // Replicate last frame
+  SplitLastFrame(frames, 2, 0.15);
+
+  // Add hitboxes
+  FrameHitbox(frames[0], {Circle({23.5, 7.5}, 8), Circle({23.5, 17.5}, 8), Circle({23.5, 27.5}, 8), Circle({23.5, 37.5}, 8)});
+  FrameHitbox(frames[1]);
+
+  return frames;
 }
 
 // === AIR HORIZONTAL
@@ -288,14 +347,16 @@ vector<AnimationFrame> Up::InitializePostLoopFrames()
 vector<AnimationFrame> AirHorizontal::InitializeFrames()
 {
   auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/air-horizontal.png",
-                               SpritesheetClipInfo(16, 8), 0.15, {4, 0})};
+                               SpritesheetClipInfo(96, 64), 0.2, {13, -10})};
 
   // Add hitboxes
-  FrameHitbox(frames[1], {Circle({7.5, 3.5}, 4)});
+  FrameHitbox(frames[1], {Circle({48.5, 37.5}, 23), Circle({67, 36}, 18.5)});
   FrameHitbox(frames[2]);
 
+  frames[1].SetDuration(0.12);
+
   // Replicate last frame
-  SplitLastFrame(frames, 2, 0.15 / 2);
+  SplitLastFrame(frames, 2, 0.15);
 
   return frames;
 }
@@ -305,33 +366,34 @@ vector<AnimationFrame> AirHorizontal::InitializeFrames()
 vector<AnimationFrame> AirUp::InitializeFrames()
 {
   auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/air-up.png",
-                               SpritesheetClipInfo(12, 14), 0.15, {2, -3})};
+                               SpritesheetClipInfo(64, 80), 0.2, {0, -19})};
 
   // Add hitboxes
-  FrameHitbox(frames[1], {Circle({5.5, 5.5}, 5)});
+  FrameHitbox(frames[1], {Circle({31, 30}, 28.5)});
   FrameHitbox(frames[2]);
 
-  // Replicate last frame
-  SplitLastFrame(frames, 2, 0.15 / 2);
+  frames[1].SetDuration(0.12);
 
   return frames;
 }
 
 // === AIR DOWN
 
-vector<AnimationFrame> AirDown::InitializePreLoopFrames()
+vector<AnimationFrame> AirDown::InitializeFrames()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/air-down.png",
-                                     SpritesheetClipInfo(8, 20, 1), 0.2, {0, 2});
-}
-
-vector<AnimationFrame> AirDown::InitializeInLoopFrames()
-{
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/kafta/attacks/air-down.png",
-                                          SpritesheetClipInfo(8, 20, 1, 1), 0.1, {0, 2})};
+  auto frames{SliceSpritesheet("./assets/sprites/kafta/attacks/air-down.png",
+                               SpritesheetClipInfo(48, 96), 0.2, {0, 35})};
 
   // Add hitboxes
-  FrameHitbox(frames[0], {Circle({4, 14}, 3.5)});
+  FrameHitbox(frames[1],
+              {Circle({25.5, 24.5}, 9),
+               Circle({25.5, 36.5}, 9),
+               Circle({25.5, 48.5}, 9),
+               Circle({25.5, 60.5}, 9),
+               Circle({25.5, 72.5}, 9)});
+  FrameHitbox(frames[2]);
+
+  frames[1].SetDuration(0.12);
 
   return frames;
 }

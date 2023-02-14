@@ -95,8 +95,33 @@ private:
 class InnerLoopAnimation : public AttackAnimation
 {
 public:
+  // Indicates for which phase of the complete pre-in-post sequence this animation is being instantiated for
+  enum class SequencePhase
+  {
+    PreLoop,
+    InLoop,
+    PostLoop
+  };
+
   InnerLoopAnimation(Animator &animator);
   virtual ~InnerLoopAnimation() {}
+
+  // Get current sequence phase of animation
+  SequencePhase GetSequencePhase() const;
+
+  // Max duration of inner loop
+  // Negative value means no limit
+  virtual float MaxInnerLoopDuration() const;
+
+  // Provides cancel frame for last phase
+  virtual int PostLoopCancelFrame() const;
+
+  // Provides sequence open frame for last phase
+  virtual int PostLoopOpenSequenceFrame() const;
+
+  // Whether to automatically quit loop once state raised OnActionInputRelease
+  // true by default
+  virtual bool QuitLoopOnInputRelease() const;
 
   // Raised when either the whole sequence ends or is interrupted
   Event OnSequenceStop;
@@ -118,20 +143,6 @@ protected:
   // Provides frames to be played after loop sequence
   // Default implementation provides no frames
   virtual std::vector<AnimationFrame> InitializePostLoopFrames();
-
-  // Max duration of inner loop
-  // Negative value means no limit
-  virtual float MaxInnerLoopDuration() const;
-
-  // Provides cancel frame for last phase
-  virtual int PostLoopCancelFrame() const;
-
-  // Provides sequence open frame for last phase
-  virtual int PostLoopOpenSequenceFrame() const;
-
-  // Whether to automatically quit loop once state raised OnActionInputRelease
-  // true by default
-  virtual bool QuitLoopOnInputRelease() const;
 
   // Takes full responsibility over this method
   std::vector<AnimationFrame> InitializeFrames() final override;
@@ -156,14 +167,6 @@ protected:
   void OnUpdate(float) override;
 
   float GetInnerLoopElapsedTime() const;
-
-  // Indicates for which phase of the complete pre-in-post sequence this animation is being instantiated for
-  enum class SequencePhase
-  {
-    PreLoop,
-    InLoop,
-    PostLoop
-  };
 
   // Store this animation's phase
   SequencePhase sequencePhase{SequencePhase::PreLoop};

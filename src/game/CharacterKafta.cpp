@@ -11,7 +11,7 @@ CharacterKafta::CharacterKafta(GameObject &associatedObject)
     : Character(associatedObject) {}
 
 static const CharacterKafta::transformerMap sequenceIndexTransformer{
-    {"neutral", SequenceIndexTransformer::Repeat(2)}};
+    {"neutral", SequenceIndexTransformer::Repeat(3)}};
 
 const CharacterKafta::transformerMap &CharacterKafta::GetSequenceIndexTransformer() const
 {
@@ -23,8 +23,8 @@ float CharacterKafta::GetDefaultArmor() const { return 1; }
 Rectangle CharacterKafta::GetHurtbox() const { return Rectangle({0, 0}, 0.8, 2); }
 ColliderDensity CharacterKafta::GetDensity() const { return ColliderDensity::Character; }
 
-float CharacterKafta::GetAcceleration() const { return 35; }
-float CharacterKafta::GetDefaultSpeed() const { return 5; }
+float CharacterKafta::GetAcceleration() const { return 45; }
+float CharacterKafta::GetDefaultSpeed() const { return 7; }
 
 void CharacterKafta::AddAnimations(std::shared_ptr<Animator> animator) const
 {
@@ -40,6 +40,7 @@ void CharacterKafta::AddAnimations(std::shared_ptr<Animator> animator) const
   animator->RegisterAnimation<Dash>();
   animator->RegisterAnimation<Neutral1>();
   animator->RegisterAnimation<Neutral2>();
+  animator->RegisterAnimation<Neutral3>();
   animator->RegisterAnimation<Horizontal>();
   animator->RegisterAnimation<Up>();
   animator->RegisterAnimation<AirHorizontal>();

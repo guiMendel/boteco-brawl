@@ -12,7 +12,7 @@ const float Heat::inverseMaxHeat{1.0f / maxHeat};
 const float Heat::blowLift{0.25f};
 
 Heat::Heat(GameObject &associatedObject, float armor)
-    : WorldComponent(associatedObject), heat(100) { SetArmor(armor); }
+    : WorldComponent(associatedObject), heat(0) { SetArmor(armor); }
 
 void Heat::Awake()
 {

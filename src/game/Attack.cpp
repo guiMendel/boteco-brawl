@@ -27,7 +27,7 @@ void Attack::Land(shared_ptr<CharacterController> targetController)
   struckTargetsTime[targetController->id] = SDL_GetTicks();
 }
 
-void Attack::OnTriggerCollisionEnter(TriggerCollisionData trigger)
+void Attack::OnTriggerCollision(TriggerCollisionData trigger)
 {
   LOCK(trigger.weakOther, other);
 
@@ -54,4 +54,9 @@ Damage Attack::GetDamage() const
 void Attack::Ignore(std::shared_ptr<WorldObject> target)
 {
   ignoredObjects.insert(target->id);
+}
+
+void Attack::ResetTargets()
+{
+  struckTargetsTime.clear();
 }

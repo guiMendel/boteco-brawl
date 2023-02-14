@@ -78,6 +78,18 @@ namespace CharacterAnimationHelper
 {
   // Takes the last frame of a sequence, replicates it n - 1 times, and sets all of it's instances duration
   void SplitLastFrame(std::vector<AnimationFrame> &frames, int numberOfInstances, float newDuration);
+
+  // Applies shaking effect to the loop cycle of an InnerLoop animation type
+  void ShakeLoop(const InnerLoopAnimation &animation);
+
+  // Returns a callback to stop a shake initiated by the ShakeLoop method
+  std::function<void(WorldObject &)> StopShakeCallback();
+
+  // Returns a callback that displaces the character the given amount in units
+  std::function<void(WorldObject &)> DisplaceCallback(Vector2 displacement);
+
+  // Returns a callback that resets the attacks's hit targets
+  std::function<void(WorldObject &)> ResetHitTargetsCallback();
 }
 
 #endif

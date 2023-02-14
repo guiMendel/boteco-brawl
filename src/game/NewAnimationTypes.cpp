@@ -369,3 +369,5 @@ void InnerLoopAnimation::OnUpdate(float deltaTime)
 float InnerLoopAnimation::GetInnerLoopElapsedTime() const { return innerLoopElapsedTime; }
 
 float InnerLoopAnimation::MaxInnerLoopDuration() const { return -1; }
+
+InnerLoopAnimation::SequencePhase InnerLoopAnimation::GetSequencePhase() const { return sequencePhase; }

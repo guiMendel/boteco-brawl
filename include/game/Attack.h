@@ -21,13 +21,16 @@ public:
   Attack(GameObject &associatedObject, DamageParameters damage, float hitSecondsCooldown = -1);
   virtual ~Attack() {}
 
-  void OnTriggerCollisionEnter(TriggerCollisionData) override;
+  void OnTriggerCollision(TriggerCollisionData) override;
 
   // Apply attack to a given character's controller
   void Land(std::shared_ptr<CharacterController> targetController);
 
   // Sets a given world object to be ignored by this attack always
   void Ignore(std::shared_ptr<WorldObject> target);
+
+  // Forgets all targets which were already hit, resetting the hitbox to be able to trigger again
+  void ResetTargets();
 
   // Damage params
   DamageParameters damage;
