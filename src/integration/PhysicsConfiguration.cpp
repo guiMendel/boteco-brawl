@@ -7,6 +7,8 @@
 
 using namespace std;
 
+// #define RENDER_COLLIDER_OUTLINE
+
 // Initial gravity
 const Vector2 PhysicsSystem::initialGravity{0, 16};
 
@@ -31,12 +33,15 @@ void PhysicsLayerHandler::InitializeCollisionMatrix()
 // Allows for debug rendering
 void BoxCollider::Render()
 {
+#ifdef RENDER_COLLIDER_OUTLINE
   Debug::DrawBox(*RequirePointerCast<Rectangle>(DeriveShape()));
+#endif
 }
 
 // Allows for debug rendering
 void CircleCollider::Render()
 {
+#ifdef RENDER_COLLIDER_OUTLINE
   if (worldObject.GetName() == "Hitbox")
   {
     auto circle = *RequirePointerCast<Circle>(DeriveShape());
@@ -70,4 +75,5 @@ void CircleCollider::Render()
   }
 
   Debug::DrawCircle(*RequirePointerCast<Circle>(DeriveShape()));
+#endif
 }

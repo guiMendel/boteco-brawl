@@ -34,6 +34,7 @@ ControllerDevice::ControllerDevice(int controllerIndex)
         { MaybeAssociateToPlayer(player); });
 }
 
+// TODO: dont destroy controller on scene transition!!!
 ControllerDevice::~ControllerDevice()
 {
   OnBeforeDestroy.Invoke();

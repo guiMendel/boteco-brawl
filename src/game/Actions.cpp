@@ -1,4 +1,5 @@
 #include "Actions.h"
+#include "BoxCollider.h"
 #include "SpriteRenderer.h"
 #include "Character.h"
 #include "CharacterVFX.h"
@@ -153,6 +154,23 @@ void Riposte::Trigger(WorldObject &target, shared_ptr<CharacterState> actionStat
   auto weakObject = weak_ptr(target.GetShared());
   auto weakActionState = weak_ptr(actionState);
   int stateId = actionState->id;
+
+  // Trigger hit effect
+  auto parriedDamageCopy{parriedDamage};
+  parriedDamageCopy.minHitStop = 0.4;
+  auto duration = target.RequireComponent<Heat>()->TriggerHitEffect(parriedDamageCopy);
+
+  // Show of particles
+  ParticleEmissionParameters parryParticles;
+  parryParticles.color = {Color(0, 61, 255), Color(116, 227, 255)};
+  parryParticles.frequency = {0.00005, 0.0001};
+  parryParticles.gravityModifier = {Vector2::Up(0.1), Vector2::Down(0.1)};
+  parryParticles.lifetime = {duration / 3, duration};
+  parryParticles.speed = {1, 8};
+
+  float radius = target.RequireComponent<BoxCollider>()->GetBox().GetMaxDimension() / 2;
+
+  ParticleFX::EffectAt(target.GetPosition(), radius, 0.01, parryParticles, duration);
 
   // Get animator
   auto animator = target.RequireComponent<Animator>();

@@ -9,9 +9,12 @@
 #include "ShakeEffectManager.h"
 #include "CharacterStateManager.h"
 #include "CharacterController.h"
+#include "Actions.h"
 
 struct Heat : public WorldComponent
 {
+  friend class Actions::Riposte;
+  
 public:
   // How much characters get lifted from the ground when taking a blow
   static const float blowLift;
