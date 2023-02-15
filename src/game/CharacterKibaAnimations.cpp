@@ -1,4 +1,5 @@
 #include "CharacterKibaAnimations.h"
+#include "KibaLemonAOE.h"
 #include "CharacterVFX.h"
 #include "ShakeEffectManager.h"
 #include "GunParry.h"
@@ -152,12 +153,18 @@ vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
 vector<AnimationFrame> SpecialNeutral::InitializeFrames()
 {
   auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/special.png",
-                               SpritesheetClipInfo(80, 48), 0.3, {4, 0})};
+                               SpritesheetClipInfo(80, 48), 0.35, {-11, -8})};
 
-  frames[1].SetDuration(0.15);
-  frames[2].SetDuration(0.15);
+  frames[1].SetDuration(0.25);
+  frames[2].SetDuration(0.25);
 
-  // TODO: IMPLEMENTAR MECANICA
+  // Start emitting damage
+  auto startAOE = [](WorldObject &kiba)
+  {
+    kiba.RequireComponentInChildren<KibaLemonAOE>()->Activate();
+  };
+
+  frames[3].AddCallback(startAOE);
 
   return frames;
 }
@@ -251,7 +258,7 @@ vector<AnimationFrame> Up::InitializePostLoopFrames()
 vector<AnimationFrame> AirHorizontal::InitializeFrames()
 {
   auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/air-horizontal.png",
-                               SpritesheetClipInfo(80, 40), 0.2, {0 , -4})};
+                               SpritesheetClipInfo(80, 40), 0.2, {0, -4})};
 
   // Add hitboxes
   FrameHitbox(frames[1], {Circle({132.5 - 80, 19.5}, 13)});

@@ -14,10 +14,10 @@ struct AttackImpulse
 {
   // For debugging
   friend class CircleCollider;
-  
+
   // Zero impulse
   AttackImpulse();
-  
+
   // Impulse with constant direction
   AttackImpulse(Vector2 direction, float magnitude);
 
@@ -85,10 +85,10 @@ struct DamageParameters
 
   // How much impulse to apply, along with direction
   // Right direction means aligned to facing direction
-  AttackImpulse impulse;
+  AttackImpulse impulse{};
 
   // How much time to leave target stunned, unable to move
-  float stunTime;
+  float stunTime{0};
 
   // Derive a damage struct
   Damage DeriveDamage(std::shared_ptr<WorldObject> author) const;

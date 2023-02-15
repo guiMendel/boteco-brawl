@@ -1,7 +1,8 @@
 #include "CharacterKiba.h"
+#include "KibaLemonAOE.h"
 #include "CharacterKibaAnimations.h"
-#include "GunParry.h"
 #include "Animator.h"
+#include "CircleCollider.h"
 #include "LandingAttackEffector.h"
 
 using namespace std;
@@ -55,8 +56,19 @@ void CharacterKiba::AddAnimations(std::shared_ptr<Animator> animator) const
 
 void CharacterKiba::AddMechanics(std::shared_ptr<WorldObject> object) const
 {
-  // Give it parry capacity
-  object->AddComponent<GunParry>();
+  // === LEMON AOE
+
+  // Create lemon child
+  auto lemonAoeObject = worldObject.CreateChild(LEMON_AOE_OBJECT);
+
+  // Make it into a hitbox
+  lemonAoeObject->SetPhysicsLayer(PhysicsLayer::Hitbox);
+
+  // Give it the collider
+  lemonAoeObject->AddComponent<CircleCollider>(Circle{3}, true);
+
+  // Give it the AOE script
+  lemonAoeObject->AddComponent<KibaLemonAOE>();
 
   // === LANDING ATTACKS
 

@@ -70,6 +70,9 @@ public:
   // How many seconds to emit for
   float duration;
 
+  // Whether to always pick direction outwards from center (sets emission direction as unused)
+  bool irradiateParticles{false};
+
   // Whether to loop when emission cycle ends
   bool loop;
 

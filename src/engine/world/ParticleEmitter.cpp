@@ -88,6 +88,11 @@ void ParticleEmitter::Emit()
   // Get position
   Vector2 position = worldObject.GetPosition() + origin->SamplePoint();
 
+  if (irradiateParticles)
+  {
+    angle = (position - worldObject.GetPosition()).Angle();
+  }
+
   // Create particle
   auto particle = GetSystem().CreateParticle(
       position, lifetime, Vector2::Angled(angle, speed), color, gravityModifier, currentParams.behavior);

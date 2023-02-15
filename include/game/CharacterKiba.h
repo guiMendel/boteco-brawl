@@ -3,6 +3,8 @@
 
 #include "Character.h"
 
+#define LEMON_AOE_OBJECT "LemonAOE"
+
 class CharacterKiba : public Character
 {
 public:
