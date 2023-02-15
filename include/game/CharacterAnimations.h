@@ -74,6 +74,10 @@
 
 #define BASE_DAMAGE animator.worldObject.RequireComponent<Character>()->GetBaseDamage()
 
+#define CHARGE_DAMAGE(min, max) Helper::Lerp(min, max, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE
+
+#define CHARGE_IMPULSE(angle, min, max) AttackImpulse(Vector2::AngledDegrees(angle), Helper::Lerp(min, max, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()))
+
 namespace CharacterAnimationHelper
 {
   // Takes the last frame of a sequence, replicates it n - 1 times, and sets all of it's instances duration

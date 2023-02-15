@@ -149,7 +149,7 @@ void FallDeath::PlayEffect() const
   LOCK(weakArena, arena);
 
   // Get radius
-  auto radius = worldObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension();
+  auto radius = worldObject.RequireComponent<Collider>()->DeriveShape()->GetMaxDimension() / 2;
 
   // Get effect position
   Vector2 effectPosition{
@@ -174,6 +174,7 @@ void FallDeath::PlayEffect() const
   ParticleEmissionParameters fireParams;
   fireParams.angle = {effectAngle - DegreesToRadians(3), effectAngle + DegreesToRadians(3)};
   fireParams.color = {Color::Red(), Color::Yellow()};
+  // fireParams.frequency = {0.000005, 0.0001};
   fireParams.frequency = {0.00001, 0.0005};
   fireParams.gravityModifier = {Vector2::One() / 8, -Vector2::One() / 8};
   fireParams.lifetime = {0.01, 0.3};

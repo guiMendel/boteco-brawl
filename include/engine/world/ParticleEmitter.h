@@ -81,7 +81,7 @@ public:
   std::function<void(ParticleEmissionParameters &, float)> emissionEvolution{nullptr};
 
   // Whether to simulate particle with reference to this emitter or the world
-  bool attachToEmitter{false};
+  // bool positionOnEmitter{false};
 
   // Whether to emit on start hook
   bool emitOnStart{true};

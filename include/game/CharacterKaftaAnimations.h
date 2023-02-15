@@ -5,8 +5,6 @@
 
 // === ANIMATION DEFINES
 
-#define AIR_DOWN_SHOVEL_LOOP "airDownShovelLoop"
-
 namespace CharacterKaftaAnimations
 {
   class Run : public StatefulAnimation
@@ -182,11 +180,7 @@ namespace CharacterKaftaAnimations
     float MaxInnerLoopDuration() const override { return 2; }
     void InternalOnStart() override;
 
-    SET_DAMAGE(
-        Helper::Lerp(1.4f, 5.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
-        AttackImpulse(Vector2::AngledDegrees(-20),
-                      Helper::Lerp(2.0f, 8.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
-        0.6)
+    SET_DAMAGE(CHARGE_DAMAGE(1.4f, 5.0f), CHARGE_IMPULSE(-20, 2.0f, 8.0f), 0.6)
 
     int PostLoopCancelFrame() const override { return 3; }
   };
@@ -202,11 +196,7 @@ namespace CharacterKaftaAnimations
     float MaxInnerLoopDuration() const override { return 2; }
     void InternalOnStart() override;
 
-    SET_DAMAGE(
-        Helper::Lerp(1.5f, 8.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
-        AttackImpulse(Vector2::AngledDegrees(-89),
-                      Helper::Lerp(1.5f, 6.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
-        0.6)
+    SET_DAMAGE(CHARGE_DAMAGE(1.5f, 8.0f), CHARGE_IMPULSE(-89, 1.5f, 6.0f), 0.6)
 
     int PostLoopCancelFrame() const override { return 2; }
   };

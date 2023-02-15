@@ -60,13 +60,17 @@ vector<AnimationFrame> Crash::InitializeFrames()
 
 vector<AnimationFrame> Neutral1::InitializeFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/punch.png",
-                                          SpritesheetClipInfo(16, 8), 0.1, {4, 0})};
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/neutral.png",
+                               SpritesheetClipInfo(720 / 9, 32, 3), 0.3, {17, 0})};
 
   // Add hitboxes
-  FrameHitbox(frames[1], {Circle({7.5, 3.5}, 2), Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
-  FrameHitbox(frames[2], {Circle({10.5, 3.5}, 2), Circle({13.5, 3.5}, 2)});
-  FrameHitbox(frames[3]);
+  FrameHitbox(frames[1], {Circle({122.5 - 80, 14.5}, 13)});
+  FrameHitbox(frames[2]);
+
+  frames[1].SetDuration(0.15);
+
+  SplitLastFrame(frames, 2, 0.2);
+  frames[2].SetDuration(0.1);
 
   return frames;
 }
@@ -75,13 +79,34 @@ vector<AnimationFrame> Neutral1::InitializeFrames()
 
 vector<AnimationFrame> Neutral2::InitializeFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/kick.png",
-                                          SpritesheetClipInfo(16, 8), 0.1, {4, 0})};
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/neutral.png",
+                               SpritesheetClipInfo(720 / 9, 32, 3, 3), 0.3, {17, 0})};
 
   // Add hitboxes
-  FrameHitbox(frames[1], {Circle({8, 4}, 2.5), Circle({12, 4}, 2.5)});
-  FrameHitbox(frames[2], {Circle({8, 4}, 2.5), Circle({12, 4}, 2.5)});
-  FrameHitbox(frames[3]);
+  FrameHitbox(frames[1], {Circle({368 - 4 * 80, 14}, 15.5)});
+  FrameHitbox(frames[2]);
+
+  frames[1].SetDuration(0.2);
+
+  SplitLastFrame(frames, 2, 0.2);
+  frames[2].SetDuration(0.1);
+
+  return frames;
+}
+
+// === NEUTRAL 3
+
+vector<AnimationFrame> Neutral3::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/neutral.png",
+                               SpritesheetClipInfo(720 / 9, 32, 3, 6), 0.3, {17, 0})};
+
+  // Add hitboxes
+  FrameHitbox(frames[1], {Circle({609 - 7 * 80, 15}, 15.5)});
+  FrameHitbox(frames[2]);
+
+  frames[1].SetDuration(0.2);
+  frames[2].SetDuration(0.4);
 
   return frames;
 }
@@ -90,45 +115,34 @@ vector<AnimationFrame> Neutral2::InitializeFrames()
 
 void Horizontal::InternalOnStart()
 {
-  if (sequencePhase == SequencePhase::InLoop)
-  {
-    animator.GetScene()->FindComponent<ShakeEffectManager>()->Shake(
-        animator.worldObject.GetShared(),
-        0,
-        {0, 0.15},
-        {0.15, 0.08},
-        MaxInnerLoopDuration(),
-        0);
-  }
+  ShakeLoop(*this);
 
   InnerLoopAnimation::InternalOnStart();
 }
 
 vector<AnimationFrame> Horizontal::InitializeInLoopFrames()
 {
-  return SliceSpritesheet("./assets/sprites/horizontal.png",
-                          SpritesheetClipInfo(24, 8, 1), 0.2);
+  return SliceSpritesheet("./assets/sprites/kiba/attacks/horizontal.png",
+                          SpritesheetClipInfo(240 / 3, 47, 1), 0.4, {18, -3});
 }
 
 vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/horizontal.png",
-                               SpritesheetClipInfo(24, 8, 3, 1), 0.2)};
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/horizontal.png",
+                               SpritesheetClipInfo(240 / 3, 47, 2, 1), 0.5, {18, -3})};
 
   // Stop shake
-  auto stopShake = [](WorldObject &target)
-  {
-    target.GetScene()->FindComponent<ShakeEffectManager>()->StopShake(
-        target.GetShared());
-  };
-  frames[0].AddCallback(stopShake);
+  frames[0].AddCallback(StopShakeCallback());
 
   // Add hitboxes
-  FrameHitbox(frames[0], {Circle({16, 3}, 3.5), Circle({21, 3}, 3.5)});
+  FrameHitbox(frames[0], {Circle({152.5 - 80, 23.5}, 20), Circle({132 - 80, 24}, 17.5)});
   FrameHitbox(frames[1]);
 
+  // Step forward
+  frames[0].AddCallback(DisplaceCallback({1.3, 0}));
+
   // Replicate last frame
-  SplitLastFrame(frames, 2, 0.1);
+  SplitLastFrame(frames, 1, 0.25);
 
   return frames;
 }
@@ -137,26 +151,22 @@ vector<AnimationFrame> Horizontal::InitializePostLoopFrames()
 
 vector<AnimationFrame> SpecialNeutral::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/special.png",
-                               SpritesheetClipInfo(16, 8, 1), 0.2, {4, 0})};
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/special.png",
+                               SpritesheetClipInfo(80, 48), 0.3, {4, 0})};
 
-  // Add a recovery frame
-  frames.push_back(frames[0]);
+  frames[1].SetDuration(0.15);
+  frames[2].SetDuration(0.15);
 
-  // Ready parry
+  // TODO: IMPLEMENTAR MECANICA
 
   return frames;
-}
-
-void SpecialNeutral::InternalOnStop()
-{
 }
 
 // === SPECIAL HORIZONTAL
 
 vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/special-horizontal.png",
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/special-horizontal.png",
                                SpritesheetClipInfo(16, 8), 0.3, {4, 0})};
 
   // Add a recovery frame
@@ -206,59 +216,48 @@ vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
   return frames;
 }
 
-// === RIPOSTE
-
-vector<AnimationFrame> Riposte::InitializeFrames()
-{
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/special.png",
-                                          SpritesheetClipInfo(16, 8, 2, 1), 0.2, {4, 0})};
-
-  // Add hitboxes
-  FrameHitbox(frames[0], {Circle({8.5, 4.5}, 7), Circle({14.5, 4.5}, 7)});
-  FrameHitbox(frames[1]);
-
-  return frames;
-}
-
 // === UP
 
-vector<AnimationFrame> Up::InitializePreLoopFrames()
+void Up::InternalOnStart()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/up.png",
-                                     SpritesheetClipInfo(12, 16, 2, 0), 0.1, {1, -4});
+  ShakeLoop(*this);
+
+  InnerLoopAnimation::InternalOnStart();
 }
 
 vector<AnimationFrame> Up::InitializeInLoopFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/up.png",
-                                          SpritesheetClipInfo(12, 16, 2, 2), 0.1, {1, -4})};
-
-  // Add hitboxes
-  FrameHitbox(frames[0], {Circle({6, 4}, 3.5), Circle({6, 7}, 3.5)});
-  FrameHitbox(frames[1], {Circle({6, 3}, 3.5), Circle({6, 6}, 3.5)});
-
-  return frames;
+  return SliceSpritesheet("./assets/sprites/kiba/attacks/up.png",
+                          SpritesheetClipInfo(192 / 3, 64, 1), 0.2, {2, -16});
 }
 
 vector<AnimationFrame> Up::InitializePostLoopFrames()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/up.png",
-                                     SpritesheetClipInfo(12, 16, 1, 4), 0.1, {1, -4});
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/up.png",
+                               SpritesheetClipInfo(192 / 3, 64, 2, 1), 0.2, {2, -16})};
+
+  // Stop shake
+  frames[0].AddCallback(StopShakeCallback());
+
+  // Add hitboxes
+  FrameHitbox(frames[0], {Circle({95.5 - 192 / 3, 9.5}, 20)});
+  FrameHitbox(frames[1]);
+
+  return frames;
 }
 
 // === AIR HORIZONTAL
 
 vector<AnimationFrame> AirHorizontal::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/air-horizontal.png",
-                               SpritesheetClipInfo(16, 8), 0.15, {4, 0})};
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/air-horizontal.png",
+                               SpritesheetClipInfo(80, 40), 0.2, {0 , -4})};
 
   // Add hitboxes
-  FrameHitbox(frames[1], {Circle({7.5, 3.5}, 4)});
+  FrameHitbox(frames[1], {Circle({132.5 - 80, 19.5}, 13)});
   FrameHitbox(frames[2]);
 
-  // Replicate last frame
-  SplitLastFrame(frames, 2, 0.15 / 2);
+  frames[1].SetDuration(0.15);
 
   return frames;
 }
@@ -267,15 +266,14 @@ vector<AnimationFrame> AirHorizontal::InitializeFrames()
 
 vector<AnimationFrame> AirUp::InitializeFrames()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/air-up.png",
-                               SpritesheetClipInfo(12, 14), 0.15, {2, -3})};
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/air-up.png",
+                               SpritesheetClipInfo(80, 64), 0.25, {0, -16})};
 
   // Add hitboxes
-  FrameHitbox(frames[1], {Circle({5.5, 5.5}, 5)});
+  FrameHitbox(frames[1], {Circle({120 - 80, 20}, 17.5)});
   FrameHitbox(frames[2]);
 
-  // Replicate last frame
-  SplitLastFrame(frames, 2, 0.15 / 2);
+  frames[1].SetDuration(0.2);
 
   return frames;
 }
@@ -284,14 +282,14 @@ vector<AnimationFrame> AirUp::InitializeFrames()
 
 vector<AnimationFrame> AirDown::InitializePreLoopFrames()
 {
-  return Animation::SliceSpritesheet("./assets/sprites/air-down.png",
-                                     SpritesheetClipInfo(8, 20, 1), 0.2, {0, 2});
+  return SliceSpritesheet("./assets/sprites/kiba/attacks/air-down.png",
+                          SpritesheetClipInfo(8, 20, 1), 0.2, {0, 2});
 }
 
 vector<AnimationFrame> AirDown::InitializeInLoopFrames()
 {
-  auto frames{Animation::SliceSpritesheet("./assets/sprites/air-down.png",
-                                          SpritesheetClipInfo(8, 20, 1, 1), 0.1, {0, 2})};
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/air-down.png",
+                               SpritesheetClipInfo(8, 20, 1, 1), 0.1, {0, 2})};
 
   // Add hitboxes
   FrameHitbox(frames[0], {Circle({4, 14}, 3.5)});
@@ -301,8 +299,8 @@ vector<AnimationFrame> AirDown::InitializeInLoopFrames()
 
 vector<AnimationFrame> LandingAttack::InitializeFrames()
 {
-  auto frames = Animation::SliceSpritesheet("./assets/sprites/air-down.png",
-                                            SpritesheetClipInfo(8, 20, 3, 2), 0.2, {0, 2});
+  auto frames = SliceSpritesheet("./assets/sprites/kiba/attacks/air-down.png",
+                                 SpritesheetClipInfo(8, 20, 3, 2), 0.2, {0, 2});
 
   // Halt character
   auto stopVelocity = [](WorldObject &target)
@@ -313,50 +311,6 @@ vector<AnimationFrame> LandingAttack::InitializeFrames()
   };
 
   frames[0].AddCallback(stopVelocity);
-
-  return frames;
-}
-
-// === PROJECTILE
-
-void Projectile::OnConnectAttack(std::shared_ptr<CharacterController>)
-{
-  // Play effect
-  ParticleEmissionParameters hit;
-  hit.color = {Color::Black(), Color::Gray()};
-  hit.frequency = {0.001, 0.005};
-  hit.lifetime = {0.05, 0.2};
-  hit.speed = {1, 3};
-
-  ParticleFX::EffectAt(
-      animator.worldObject.GetPosition(),
-      0.1,
-      0.001,
-      hit,
-      4);
-
-  // Go away
-  animator.worldObject.RequestDestroy();
-}
-
-void Projectile::InternalOnStart()
-{
-  AttackAnimation::InternalOnStart();
-
-  // Don't attack parent
-  IF_LOCK(weakParent, parent)
-  {
-    GetAttack()->Ignore(parent);
-  }
-}
-
-vector<AnimationFrame> Projectile::InitializeFrames()
-{
-  auto frames{SliceSpritesheet("./assets/sprites/bullet.png",
-                               SpritesheetClipInfo(3, 2), 0.15)};
-
-  // Add hitboxes
-  FrameHitbox(frames[0], {Circle({1.0, 0.5}, 1.5)});
 
   return frames;
 }

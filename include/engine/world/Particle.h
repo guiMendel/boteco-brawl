@@ -42,7 +42,7 @@ private:
   ParticleSystem &particleSystem;
 
   // Reference to simulated position attachment to
-  std::weak_ptr<WorldObject> referenceObject;
+  std::weak_ptr<WorldObject> weakReferenceObject;
 
   // Whether this particle should be deleted asap
   bool deleteRequested{false};

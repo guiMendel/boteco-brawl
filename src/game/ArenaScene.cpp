@@ -62,8 +62,8 @@ void ArenaScene::InitializeObjects()
     // Add player manager
     playerManager = Instantiate("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true))->RequireComponent<PlayerManager>();
 
-    playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKafta>();
-    playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKafta>();
+    playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKiba>();
+    playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKiba>();
     // playerManager->AddNewPlayer<BrawlPlayer>()->SetCharacter<CharacterKiba>();
   }
 

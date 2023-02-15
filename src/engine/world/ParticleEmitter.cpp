@@ -93,8 +93,7 @@ void ParticleEmitter::Emit()
       position, lifetime, Vector2::Angled(angle, speed), color, gravityModifier, currentParams.behavior);
 
   // Attachment
-  if (attachToEmitter)
-    particle->AttachTo(worldObject.GetShared());
+  particle->AttachTo(worldObject.GetShared());
 
   // Register it
   weakEmittedParticles.emplace_back(particle);

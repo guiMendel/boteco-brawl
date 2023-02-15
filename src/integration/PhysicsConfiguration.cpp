@@ -7,7 +7,7 @@
 
 using namespace std;
 
-// #define RENDER_COLLIDER_OUTLINE
+#define RENDER_COLLIDER_OUTLINE
 
 // Initial gravity
 const Vector2 PhysicsSystem::initialGravity{0, 16};

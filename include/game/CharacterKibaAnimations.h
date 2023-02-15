@@ -5,7 +5,7 @@
 
 // === ANIMATION DEFINES
 
-#define AIR_DOWN_SHOVEL_LOOP "airDownShovelLoop"
+#define AIR_BODY_DROP_LOOP "airDownShovelLoop"
 
 namespace CharacterKibaAnimations
 {
@@ -15,7 +15,7 @@ namespace CharacterKibaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Run)
 
     DEF_NAME("run")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kiba/general/run.png", SpritesheetClipInfo(64, 48), 0.1, {0, -8}))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kiba/general/run.png", SpritesheetClipInfo(324 / 6, 36), 0.1, {0, -2}))
 
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
@@ -137,10 +137,9 @@ namespace CharacterKibaAnimations
     DEF_NAME("neutral1")
     DELCARE_FRAMES
 
-    SET_DAMAGE(BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.5), 0.2)
+    SET_DAMAGE(BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.5), 0.4)
 
     ATTACK_SEQUENCE(3)
-    ATTACK_CANCEL(4)
   };
 
   class Neutral2 : public AttackAnimation
@@ -151,9 +150,20 @@ namespace CharacterKibaAnimations
     DEF_NAME("neutral2")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1.2f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 4), 0.3)
+    SET_DAMAGE(1.6f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 0.5), 0.5)
 
-    ATTACK_CANCEL(5)
+    ATTACK_CANCEL(3)
+  };
+
+  class Neutral3 : public AttackAnimation
+  {
+  public:
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(Neutral3)
+
+    DEF_NAME("neutral3")
+    DELCARE_FRAMES
+
+    SET_DAMAGE(2.3f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 5.5), 0.6)
   };
 
   class Horizontal : public InnerLoopAnimation
@@ -168,13 +178,7 @@ namespace CharacterKibaAnimations
     float MaxInnerLoopDuration() const override { return 2; }
     void InternalOnStart() override;
 
-    SET_DAMAGE(
-        Helper::Lerp(1.2f, 6.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration()) * BASE_DAMAGE,
-        AttackImpulse(Vector2::AngledDegrees(-20),
-                      Helper::Lerp(5.5f, 20.0f, GetInnerLoopElapsedTime() / MaxInnerLoopDuration())),
-        0.6)
-
-    int PostLoopCancelFrame() const override { return 3; }
+    SET_DAMAGE(CHARGE_DAMAGE(2.0f, 9.0f), CHARGE_IMPULSE(-10, 6.0f, 25.0f), 0.7)
   };
 
   class Up : public InnerLoopAnimation
@@ -184,12 +188,12 @@ namespace CharacterKibaAnimations
 
     DEF_FIRST_NAME("up")
 
-    std::vector<AnimationFrame> InitializePreLoopFrames() override;
     std::vector<AnimationFrame> InitializeInLoopFrames() override;
     std::vector<AnimationFrame> InitializePostLoopFrames() override;
+    float MaxInnerLoopDuration() const override { return 2; }
+    void InternalOnStart() override;
 
-    SET_DAMAGE(2 * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-90), 1.5), 0.2)
-    SET_HIT_COOLDOWN(0.2)
+    SET_DAMAGE(CHARGE_DAMAGE(1.2f, 4.0f), CHARGE_IMPULSE(-89, 3.0f, 12.0f), 0.3)
   };
 
   class AirHorizontal : public AttackAnimation
@@ -200,9 +204,7 @@ namespace CharacterKibaAnimations
     DEF_NAME("airHorizontal")
     DELCARE_FRAMES
 
-    SET_DAMAGE(1.5f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-5), 3), 0.3)
-
-    ATTACK_CANCEL(3)
+    SET_DAMAGE(0.9f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-35), 1), 0.15)
   };
 
   class AirUp : public AttackAnimation
@@ -213,9 +215,7 @@ namespace CharacterKibaAnimations
     DEF_NAME("airUp")
     DELCARE_FRAMES
 
-    SET_DAMAGE(0.5f * BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-90), 9), 0.1)
-
-    ATTACK_CANCEL(3)
+    SET_DAMAGE(BASE_DAMAGE, AttackImpulse(Vector2::AngledDegrees(-89), 2.5), 0.2)
   };
 
   class AirDown : public InnerLoopAnimation
@@ -224,7 +224,7 @@ namespace CharacterKibaAnimations
     LOOP_CONSTRUCTOR_AND_DESTRUCTOR(AirDown)
 
     DEF_FIRST_NAME("airDown")
-    std::string Phase2Name() override { return AIR_DOWN_SHOVEL_LOOP; }
+    std::string Phase2Name() override { return AIR_BODY_DROP_LOOP; }
 
     std::vector<AnimationFrame> InitializePreLoopFrames() override;
     std::vector<AnimationFrame> InitializeInLoopFrames() override;
@@ -238,8 +238,6 @@ namespace CharacterKibaAnimations
   {
   public:
     CONSTRUCTOR_AND_DESTRUCTOR(SpecialNeutral)
-
-    void InternalOnStop() override;
 
     DEF_NAME("specialNeutral")
     DELCARE_FRAMES
@@ -255,16 +253,6 @@ namespace CharacterKibaAnimations
     ATTACK_CANCEL(3)
   };
 
-  class Riposte : public RiposteAnimation
-  {
-  public:
-    Riposte(Animator &animator) : RiposteAnimation(animator) {}
-    virtual ~Riposte() {}
-
-    DEF_NAME("riposte")
-    DELCARE_FRAMES
-  };
-
   class LandingAttack : public StatefulAnimation
   {
   public:
@@ -275,24 +263,6 @@ namespace CharacterKibaAnimations
 
     // Speed at which ground was intercepted
     float landingSpeed;
-  };
-
-  class Projectile : public AttackAnimation
-  {
-  public:
-    std::weak_ptr<WorldObject> weakParent;
-
-    Projectile(Animator &animator, std::weak_ptr<WorldObject> weakParent)
-        : AttackAnimation(animator), weakParent(weakParent) {}
-    virtual ~Projectile() {}
-
-    DEF_NAME("projectile")
-    DELCARE_FRAMES
-    void OnConnectAttack(std::shared_ptr<CharacterController>) override;
-    void InternalOnStart() override;
-
-    SET_DAMAGE(1.8, AttackImpulse(animator.worldObject.GetShared(), 2), 0.2)
-    FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
 
 }

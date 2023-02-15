@@ -11,7 +11,7 @@ CharacterKiba::CharacterKiba(GameObject &associatedObject)
     : Character(associatedObject) {}
 
 static const CharacterKiba::transformerMap sequenceIndexTransformer{
-    {"neutral", SequenceIndexTransformer::Repeat(2)}};
+    {"neutral", SequenceIndexTransformer::Repeat(3)}};
 
 const CharacterKiba::transformerMap &CharacterKiba::GetSequenceIndexTransformer() const
 {
@@ -40,6 +40,7 @@ void CharacterKiba::AddAnimations(std::shared_ptr<Animator> animator) const
   animator->RegisterAnimation<Dash>();
   animator->RegisterAnimation<Neutral1>();
   animator->RegisterAnimation<Neutral2>();
+  animator->RegisterAnimation<Neutral3>();
   animator->RegisterAnimation<Horizontal>();
   animator->RegisterAnimation<Up>();
   animator->RegisterAnimation<AirHorizontal>();
@@ -47,7 +48,6 @@ void CharacterKiba::AddAnimations(std::shared_ptr<Animator> animator) const
   animator->RegisterAnimation<AirDown>();
   animator->RegisterAnimation<SpecialNeutral>();
   animator->RegisterAnimation<SpecialHorizontal>();
-  animator->RegisterAnimation<Riposte>();
   animator->RegisterAnimation<LandingAttack>();
   animator->RegisterAnimation<Crash>();
   animator->RegisterAnimation<Spin>();
@@ -66,7 +66,7 @@ void CharacterKiba::AddMechanics(std::shared_ptr<WorldObject> object) const
     LOCK(weakAnimator, animator);
 
     // Yes if the current animation is the shovel drop
-    return animator->GetCurrentAnimation()->Name() == AIR_DOWN_SHOVEL_LOOP;
+    return animator->GetCurrentAnimation()->Name() == AIR_BODY_DROP_LOOP;
   };
 
   // Give it the landing attack effector

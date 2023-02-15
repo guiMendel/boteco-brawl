@@ -15,6 +15,12 @@ void Particle::PhysicsUpdate(float deltaTime)
 {
   const static auto &physicsSystem = particleSystem.gameScene.physicsSystem;
 
+  // Use time scale from reference
+  IF_LOCK(weakReferenceObject, referenceObject)
+  {
+    deltaTime = deltaTime * referenceObject->GetTimeScale();
+  }
+
   // Apply behavior
   if (behavior)
     behavior(*this, deltaTime);
@@ -33,7 +39,7 @@ void Particle::PhysicsUpdate(float deltaTime)
 // Attach position to a worldObject
 void Particle::AttachTo(std::shared_ptr<WorldObject> worldObject)
 {
-  referenceObject = worldObject;
+  weakReferenceObject = worldObject;
 }
 
 void Particle::Render()
