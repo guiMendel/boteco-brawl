@@ -28,6 +28,11 @@ static const float alignTolerance{DegreesToRadians(35)};
 // Aspect ratio of game screen
 static const float screenRatio = float(Game::screenWidth) / float(Game::screenHeight);
 
+bool ShouldIgnore(std::shared_ptr<FallDeath> target)
+{
+  return target->IsFallen() && target->GetLastFallAge() > fallStickTime;
+}
+
 CameraBehavior::CameraBehavior(GameObject &associatedObject, shared_ptr<WorldObject> charactersParent)
     : WorldComponent(associatedObject), weakCharactersParent(charactersParent) {}
 
@@ -96,10 +101,13 @@ void CameraBehavior::UpdateTargets()
     // Filter out those that have fallen a while ago
     auto fallDeath = character->RequireComponent<FallDeath>();
 
-    if (fallDeath->IsFallen() && fallDeath->GetLastFallAge() > fallStickTime)
+    if (ShouldIgnore(fallDeath))
       continue;
 
     liveCharacters++;
+
+    // cout << "Adding " << fallDeath->worldObject << endl;
+
     targetPosition += character->GetPosition();
   }
 
@@ -120,6 +128,9 @@ void CameraBehavior::UpdateTargets()
 
   for (auto character : charactersParent->GetChildren())
   {
+    if (ShouldIgnore(character->RequireComponent<FallDeath>()))
+      continue;
+
     // Get it's box
     auto characterBox = character->RequireComponent<BoxCollider>()->GetBox();
 

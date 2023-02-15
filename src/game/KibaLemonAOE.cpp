@@ -39,8 +39,6 @@ void KibaLemonAOE::Awake()
     emission.frequency = {
         Lerp(EMISSION_STARTING_FREQUENCY.first, EMISSION_STARTING_FREQUENCY.first * 15, elapsedTime / maxDuration),
         Lerp(EMISSION_STARTING_FREQUENCY.second, EMISSION_STARTING_FREQUENCY.second * 15, elapsedTime / maxDuration)};
-
-    cout << "new frequency: " << emission.frequency.first << ", " << emission.frequency.second << endl;
   };
 
   particles->emission.color = {Color(173, 250, 0, 160), Color(231, 255, 218, 160)};
