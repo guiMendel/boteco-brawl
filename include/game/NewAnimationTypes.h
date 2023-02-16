@@ -76,6 +76,8 @@ protected:
   // Get attack object
   std::shared_ptr<Attack> GetAttack() const;
 
+  virtual void PlaySound();
+
 private:
   // Create attack child
   void SetupAttack();
@@ -132,6 +134,10 @@ protected:
   virtual std::string Phase1Name() = 0;
   virtual std::string Phase2Name();
   virtual std::string Phase3Name();
+
+  virtual SequencePhase SoundPhase();
+
+  void PlaySound() override;
 
   // Provides frames to be played before loop sequence
   // Default implementation provides no frames

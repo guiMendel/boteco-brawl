@@ -10,6 +10,7 @@
 #include "CharacterStateManager.h"
 #include "CharacterController.h"
 #include "Actions.h"
+#include "Sound.h"
 
 struct Heat : public WorldComponent
 {
@@ -70,6 +71,7 @@ private:
   std::weak_ptr<Movement> weakMovement;
   std::weak_ptr<TimeScaleManager> weakTimeScaleManager;
   std::weak_ptr<ShakeEffectManager> weakShakeManager;
+  std::weak_ptr<Sound> weakSound;
 };
 
 #endif

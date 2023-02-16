@@ -1,4 +1,5 @@
 #include "CharacterAnimations.h"
+#include "Sound.h"
 #include "ShakeEffectManager.h"
 
 using namespace std;
@@ -65,5 +66,13 @@ function<void(WorldObject &)> CharacterAnimationHelper::ParticleFXCallback(
     auto positionUnits = target.RequireComponent<SpriteRenderer>()->GetVirtualPixelOffset(position, Lock(weakSprite));
 
     ParticleFX::EffectAt(positionUnits + target.GetPosition(), radius, duration, params, destroyAfter, irradiate);
+  };
+}
+
+std::function<void(WorldObject &)> CharacterAnimationHelper::SFXCallback(std::string sound)
+{
+  return [sound](WorldObject &target)
+  {
+    target.RequireComponent<Sound>()->Play(sound);
   };
 }

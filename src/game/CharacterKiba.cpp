@@ -1,4 +1,5 @@
 #include "CharacterKiba.h"
+#include "Sound.h"
 #include "KibaLemonAOE.h"
 #include "CharacterKibaAnimations.h"
 #include "Animator.h"
@@ -83,6 +84,32 @@ void CharacterKiba::AddMechanics(std::shared_ptr<WorldObject> object) const
 
   // Give it the landing attack effector
   object->AddComponent<LandingAttackEffector>(effectorCondition);
+
+  // === SOUNDS
+
+  auto sound = object->RequireComponent<Sound>();
+
+  sound->AddAudio(SOUND_GRUNT_1, "./assets/sounds/battle/grunts/kiba/damage_1_meghan.mp3");
+  sound->AddAudio(SOUND_GRUNT_2, "./assets/sounds/battle/grunts/kiba/damage_2_meghan.mp3");
+  sound->AddAudio(SOUND_GRUNT_3, "./assets/sounds/battle/grunts/kiba/damage_3_meghan.mp3");
+  sound->AddAudio(SOUND_GRUNT_4, "./assets/sounds/battle/grunts/kiba/damage_4_meghan.mp3");
+  sound->AddAudio(SOUND_GRUNT_5, "./assets/sounds/battle/grunts/kiba/damage_5_meghan.mp3");
+  sound->AddAudio(SOUND_GRUNT_6, "./assets/sounds/battle/grunts/kiba/damage_6_meghan.mp3");
+  sound->AddAudio(SOUND_GRUNT_7, "./assets/sounds/battle/grunts/kiba/damage_7_meghan.mp3");
+  sound->AddAudio(SOUND_GRUNT_8, "./assets/sounds/battle/grunts/kiba/damage_8_meghan.mp3");
+  sound->AddAudio(SOUND_GRUNT_9, "./assets/sounds/battle/grunts/kiba/damage_9_meghan.mp3");
+  sound->AddAudio(SOUND_GRUNT_10, "./assets/sounds/battle/grunts/kiba/damage_10_meghan.mp3");
+
+  sound->AddAudio(SOUND_DEATH_1, "./assets/sounds/battle/death/kiba/death_1_meghan.mp3");
+  sound->AddAudio(SOUND_DEATH_2, "./assets/sounds/battle/death/kiba/death_2_meghan.mp3");
+  sound->AddAudio(SOUND_DEATH_3, "./assets/sounds/battle/death/kiba/death_3_meghan.mp3");
+  sound->AddAudio(SOUND_DEATH_4, "./assets/sounds/battle/death/kiba/death_4_meghan.mp3");
+  sound->AddAudio(SOUND_DEATH_5, "./assets/sounds/battle/death/kiba/death_5_meghan.mp3");
+  sound->AddAudio(SOUND_DEATH_6, "./assets/sounds/battle/death/kiba/death_6_meghan.mp3");
+  sound->AddAudio(SOUND_DEATH_7, "./assets/sounds/battle/death/kiba/death_7_meghan.mp3");
+  sound->AddAudio(SOUND_DEATH_8, "./assets/sounds/battle/death/kiba/death_8_meghan.mp3");
+  sound->AddAudio(SOUND_DEATH_9, "./assets/sounds/battle/death/kiba/death_9_meghan.mp3");
+  sound->AddAudio(SOUND_DEATH_10, "./assets/sounds/battle/death/kiba/death_10_meghan.mp3");
 }
 
 int CharacterKiba::GetDashRecoverFrame() const { return 1; }

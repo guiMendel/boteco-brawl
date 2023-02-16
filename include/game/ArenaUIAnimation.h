@@ -5,6 +5,7 @@
 #include "UIBackground.h"
 #include "UIContainer.h"
 #include "UIText.h"
+#include "Sound.h"
 
 // Maps input from some source (player or AI) to the the creation and dispatch of the corresponding actions
 class ArenaUIAnimation : public WorldComponent
@@ -37,9 +38,12 @@ private:
   // If end game was requested
   bool endGameRequested{false};
 
+  bool musicStarted{false};
+
   std::weak_ptr<UIBackground> weakCurtain;
   std::weak_ptr<UIContainer> weakCountdown;
   std::weak_ptr<UIText> weakVictory;
+  std::weak_ptr<Sound> weakSound;
 };
 
 #endif

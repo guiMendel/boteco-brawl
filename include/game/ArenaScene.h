@@ -22,12 +22,13 @@ public:
   void InitializeObjects() override;
   void OnUpdate(float) override;
 
+  Music music;
+  Music background;
+
 private:
   void SpawnCharacters();
 
   void SetupArena();
-
-  Music music;
 };
 
 #endif

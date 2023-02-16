@@ -179,6 +179,8 @@ namespace CharacterKibaAnimations
     float MaxInnerLoopDuration() const override { return 2; }
     void InternalOnStart() override;
 
+    virtual SequencePhase SoundPhase() { return SequencePhase::PostLoop; }
+
     SET_DAMAGE(CHARGE_DAMAGE(2.0f, 9.0f), CHARGE_IMPULSE(-10, 6.0f, 25.0f), 0.7)
   };
 
@@ -193,6 +195,8 @@ namespace CharacterKibaAnimations
     std::vector<AnimationFrame> InitializePostLoopFrames() override;
     float MaxInnerLoopDuration() const override { return 2; }
     void InternalOnStart() override;
+
+    virtual SequencePhase SoundPhase() { return SequencePhase::PostLoop; }
 
     SET_DAMAGE(CHARGE_DAMAGE(1.2f, 4.0f), CHARGE_IMPULSE(-89, 3.0f, 12.0f), 0.3)
   };
@@ -258,7 +262,7 @@ namespace CharacterKibaAnimations
     void InternalOnStart() override;
 
     SET_DAMAGE(BASE_DAMAGE * 4, AttackImpulse(animator.worldObject.GetShared(), 10), 0.3)
-    SET_HIT_COOLDOWN(0.7f)
+    SET_HIT_COOLDOWN(1.5f)
   };
 
   class LandingAttack : public AttackAnimation

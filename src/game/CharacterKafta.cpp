@@ -1,4 +1,5 @@
 #include "CharacterKafta.h"
+#include "Sound.h"
 #include "CharacterKaftaAnimations.h"
 #include "KaftaParry.h"
 #include "Animator.h"
@@ -59,6 +60,32 @@ void CharacterKafta::AddMechanics(std::shared_ptr<WorldObject> object) const
 {
   // Give it parry capacity
   object->AddComponent<KaftaParry>();
+
+  // === SOUNDS
+
+  auto sound = object->RequireComponent<Sound>();
+
+  sound->AddAudio(SOUND_GRUNT_1, "./assets/sounds/battle/grunts/kafta/damage_1_sean.mp3");
+  sound->AddAudio(SOUND_GRUNT_2, "./assets/sounds/battle/grunts/kafta/damage_2_sean.mp3");
+  sound->AddAudio(SOUND_GRUNT_3, "./assets/sounds/battle/grunts/kafta/damage_3_sean.mp3");
+  sound->AddAudio(SOUND_GRUNT_4, "./assets/sounds/battle/grunts/kafta/damage_4_sean.mp3");
+  sound->AddAudio(SOUND_GRUNT_5, "./assets/sounds/battle/grunts/kafta/damage_5_sean.mp3");
+  sound->AddAudio(SOUND_GRUNT_6, "./assets/sounds/battle/grunts/kafta/damage_6_sean.mp3");
+  sound->AddAudio(SOUND_GRUNT_7, "./assets/sounds/battle/grunts/kafta/damage_7_sean.mp3");
+  sound->AddAudio(SOUND_GRUNT_8, "./assets/sounds/battle/grunts/kafta/damage_8_sean.mp3");
+  sound->AddAudio(SOUND_GRUNT_9, "./assets/sounds/battle/grunts/kafta/damage_9_sean.mp3");
+  sound->AddAudio(SOUND_GRUNT_10, "./assets/sounds/battle/grunts/kafta/damage_10_sean.mp3");
+
+  sound->AddAudio(SOUND_DEATH_1, "./assets/sounds/battle/death/kafta/death_1_sean.mp3");
+  sound->AddAudio(SOUND_DEATH_2, "./assets/sounds/battle/death/kafta/death_2_sean.mp3");
+  sound->AddAudio(SOUND_DEATH_3, "./assets/sounds/battle/death/kafta/death_3_sean.mp3");
+  sound->AddAudio(SOUND_DEATH_4, "./assets/sounds/battle/death/kafta/death_4_sean.mp3");
+  sound->AddAudio(SOUND_DEATH_5, "./assets/sounds/battle/death/kafta/death_5_sean.mp3");
+  sound->AddAudio(SOUND_DEATH_6, "./assets/sounds/battle/death/kafta/death_6_sean.mp3");
+  sound->AddAudio(SOUND_DEATH_7, "./assets/sounds/battle/death/kafta/death_7_sean.mp3");
+  sound->AddAudio(SOUND_DEATH_8, "./assets/sounds/battle/death/kafta/death_8_sean.mp3");
+  sound->AddAudio(SOUND_DEATH_9, "./assets/sounds/battle/death/kafta/death_9_sean.mp3");
+  sound->AddAudio(SOUND_DEATH_10, "./assets/sounds/battle/death/kafta/death_10_sean.mp3");
 }
 
 int CharacterKafta::GetDashRecoverFrame() const { return 1; }

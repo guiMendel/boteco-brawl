@@ -19,13 +19,19 @@ static const int cutDecaySpeed{200};
 #define RESET_HOVER_TIMER "reset-hover"
 #define SELECTOR_OFFSET -11
 
+#define SOUND_HOVER_CHAR "character-hover"
+#define SOUND_SELECT_CHAR "character-select"
+#define SOUND_CONNECT_PLAYER "player-connect"
+#define SOUND_START_BATTLE "start-battle"
+
 MainMenuInput::MainMenuInput(GameObject &associatedObject)
     : WorldComponent(associatedObject),
       defaultCursor(make_shared<MouseCursor>("./assets/images/knife-pointer.png", Vector2(0, 12))),
       hoverCursor(make_shared<MouseCursor>("./assets/images/knife-hover.png", Vector2(0, 12))),
       weakAnimationHandler(GetScene()->RequireUIObject<UIContainer>(MAIN_CONTAINER_OBJECT)->RequireComponent<SplashAnimation>()),
       weakBillContainer(GetScene()->RequireUIObject<UIContainer>(BILLS_OBJECT)),
-      weakPlayerManager(GetScene()->RequireFindComponent<PlayerManager>())
+      weakPlayerManager(GetScene()->RequireFindComponent<PlayerManager>()),
+      weakSound(GetScene()->RequireFindComponent<Camera>()->worldObject.RequireComponent<Sound>())
 {
   // Add player badges
   playerBadges.push({"./assets/images/character-selection/character-options/selector-1.png",
@@ -36,6 +42,14 @@ MainMenuInput::MainMenuInput(GameObject &associatedObject)
                      "./assets/images/character-selection/character-options/selected-3.png"});
   playerBadges.push({"./assets/images/character-selection/character-options/selector-4.png",
                      "./assets/images/character-selection/character-options/selected-4.png"});
+
+  // Add sounds
+  LOCK(weakSound, sound);
+
+  sound->AddAudio(SOUND_HOVER_CHAR, "./assets/sounds/character-hover.mp3");
+  sound->AddAudio(SOUND_SELECT_CHAR, "./assets/sounds/character-select.mp3");
+  sound->AddAudio(SOUND_CONNECT_PLAYER, "./assets/sounds/player-connect.mp3");
+  sound->AddAudio(SOUND_START_BATTLE, "./assets/sounds/battle-start.wav");
 }
 
 void MainMenuInput::Start()
@@ -385,6 +399,8 @@ void MainMenuInput::SetPlayerHover(shared_ptr<UIContainer> option, shared_ptr<Br
   // Make new association
   playerHovers[player->PlayerId()] = option;
 
+  Lock(weakSound)->Play(SOUND_HOVER_CHAR);
+
   // Place hover badge on option
   auto hoverBadge = option->AddChild<UIImage>(HOVER_IMAGE(player->PlayerId()), player->hoverBadgePath);
   hoverBadge->SetPositionAbsolute(true);
@@ -398,6 +414,8 @@ void MainMenuInput::SetPlayerSelect(shared_ptr<UIContainer> option, shared_ptr<B
 
   // Make new association
   playerSelections[player->PlayerId()] = option;
+
+  Lock(weakSound)->Play(SOUND_SELECT_CHAR);
 
   // Place selected badge on option
   auto selectedBadge = option->AddChild<UIImage>(SELECTION_IMAGE(player->PlayerId()), player->selectionBadgePath);
@@ -491,6 +509,8 @@ shared_ptr<BrawlPlayer> MainMenuInput::CreatePlayer()
   auto [hoverBadge, selectBadge] = playerBadges.front();
   playerBadges.pop();
 
+  Lock(weakSound)->Play(SOUND_CONNECT_PLAYER);
+
   // New player
   return Lock(weakPlayerManager)->AddNewPlayer<BrawlPlayer>(hoverBadge, selectBadge);
 }
@@ -537,6 +557,8 @@ void MainMenuInput::StartBattle()
 
   // Transition out of the menu
   Lock(weakAnimationHandler)->TransitionOutAndExecute(loadBattleScene);
+
+  Lock(weakSound)->Play(SOUND_START_BATTLE);
 }
 
 void MainMenuInput::OnBeforeDestroy()

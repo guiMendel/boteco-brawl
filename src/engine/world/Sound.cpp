@@ -4,33 +4,47 @@
 using namespace Helper;
 using namespace std;
 
-Sound::Sound(GameObject &associatedObject, const string fileName, bool playOnStart) : WorldComponent(associatedObject), chunkPath(fileName), playOnStart(playOnStart) {}
+Sound::Sound(GameObject &associatedObject, unordered_map<string, string> sounds)
+    : WorldComponent(associatedObject), sounds(sounds) {}
 
-void Sound::Play(const int times)
+void Sound::Play(string sound, int times)
 {
-  chunk = Resources::GetSound(chunkPath);
+  Assert(sounds.count(sound) > 0, "Sound " + sound + " was never registered");
+
+  // Get chunk
+  std::shared_ptr<Mix_Chunk> chunk;
+
+  // If it hasn't been loaded before
+  if (chunks.count(sound) == 0)
+    chunks[sound] = Resources::GetSound(sounds.at(sound));
+
+  chunk = chunks.at(sound);
 
   // Play and memorize channel
-  channel = Mix_PlayChannel(-1, chunk.get(), times - 1);
+  channels[sound] = Mix_PlayChannel(-1, chunk.get(), times - 1);
 }
 
 void Sound::Stop()
 {
-  // Catch no channel registered
-  if (channel < 0)
-    return;
-
-  // Stop the channel that was previously used
-  Mix_HaltChannel(channel);
-
-  chunk.reset();
-
-  // Resets channel
-  channel = -1;
+  // Stop all channels
+  for (auto [sound, channel] : channels)
+    Stop(sound);
 }
 
-void Sound::Start()
+void Sound::Stop(string sound)
 {
-  if (playOnStart)
-    Play();
+  // If no channel for this sound, ignore
+  if (channels.count(sound) == 0)
+    return;
+
+  // Stop it
+  Mix_HaltChannel(channels.at(sound));
+
+  // Reset it
+  channels.erase(sound);
+}
+
+void Sound::AddAudio(std::string sound, std::string path)
+{
+  sounds[sound] = path;
 }

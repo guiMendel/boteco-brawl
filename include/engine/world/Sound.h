@@ -12,31 +12,27 @@ class Sound : public WorldComponent
 {
 public:
   // Constructor with sound file name
-  Sound(GameObject &associatedObject, const std::string fileName, bool playOnStart = true);
+  Sound(GameObject &associatedObject, std::unordered_map<std::string, std::string> sounds = {});
 
   // Ensure sound stops if destroyed
   virtual ~Sound() { Stop(); }
 
-  // Plays audio
-  void Play(const int times = 1);
+  // Adds an audio
+  void AddAudio(std::string sound, std::string path);
 
-  // Stops playing
+  // Plays audio
+  void Play(std::string sound, int times = 1);
+
+  // Stops a single sound
+  void Stop(std::string sound);
+
+  // Stops playing all sounds
   void Stop();
 
-  void Start() override;
-
 private:
-  // The chunk path
-  std::string chunkPath;
-
-  // Chunk resource
-  std::shared_ptr<Mix_Chunk> chunk;
-
-  // Whther to play on Start callback
-  bool playOnStart;
-
-  // The channel where to play
-  int channel{-1};
+  std::unordered_map<std::string, std::string> sounds;
+  std::unordered_map<std::string, std::shared_ptr<Mix_Chunk>> chunks;
+  std::unordered_map<std::string, int> channels;
 };
 
 #endif

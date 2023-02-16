@@ -100,6 +100,9 @@ namespace CharacterAnimationHelper
   // Accepts position in virtual pixels relative to object position
   std::function<void(WorldObject &)> ParticleFXCallback(std::shared_ptr<Sprite> sprite, Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter = 0, bool irradiate = false);
 
+  // Returns a callback that plays an SFX
+  std::function<void(WorldObject &)> SFXCallback(std::string sound);
+
   // Returns a callback that enables a parry
   template <class T>
   std::function<void(WorldObject &)> EnableParryCallback()

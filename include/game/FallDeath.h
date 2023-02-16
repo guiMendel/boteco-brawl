@@ -5,6 +5,7 @@
 #include "WorldComponent.h"
 #include "Arena.h"
 #include "Invulnerability.h"
+#include "Sound.h"
 
 class FallDeath : public WorldComponent
 {
@@ -70,6 +71,7 @@ private:
   bool fallen{false};
 
   Invulnerability &invulnerability;
+  Sound &sound;
 };
 
 #endif

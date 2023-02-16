@@ -1,4 +1,5 @@
 #include "FallDeath.h"
+#include "Character.h"
 #include "CharacterUIManager.h"
 #include "CharacterRepelCollision.h"
 #include "Animator.h"
@@ -22,12 +23,17 @@ static const float initialInvulnerabilityTime{3};
 // Respawn invulnerability time
 static const float respawnInvulnerabilityTime{5};
 
+#define SOUND_FALL "fall-fire"
+
 FallDeath::FallDeath(GameObject &associatedObject)
     : WorldComponent(associatedObject),
       weakArena(GetScene()->FindComponent<Arena>()),
-      invulnerability(*worldObject.RequireComponent<Invulnerability>())
+      invulnerability(*worldObject.RequireComponent<Invulnerability>()),
+      sound(*worldObject.RequireComponent<Sound>())
 {
   Assert(weakArena.expired() == false, "Failed to find an Arena component");
+
+  sound.AddAudio(SOUND_FALL, "./assets/sounds/battle/fall-burn.mp3");
 }
 
 void FallDeath::Start()
@@ -66,6 +72,21 @@ void FallDeath::Update(float)
 
 void FallDeath::Fall()
 {
+  sound.Play(SOUND_FALL);
+
+  sound.Play(Sample(
+      vector{
+          SOUND_DEATH_1,
+          SOUND_DEATH_2,
+          SOUND_DEATH_3,
+          SOUND_DEATH_4,
+          SOUND_DEATH_5,
+          SOUND_DEATH_6,
+          SOUND_DEATH_7,
+          SOUND_DEATH_8,
+          SOUND_DEATH_9,
+          SOUND_DEATH_10}));
+
   // Record time
   lastFallTime = SDL_GetTicks();
 

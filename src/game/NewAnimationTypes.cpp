@@ -1,4 +1,5 @@
 #include "NewAnimationTypes.h"
+#include "Sound.h"
 #include "WorldObject.h"
 #include "CharacterStateManager.h"
 #include "Attack.h"
@@ -6,6 +7,16 @@
 
 using namespace std;
 using namespace Helper;
+
+#define SOUND_SWING_1 "swing-1"
+#define SOUND_SWING_2 "swing-2"
+#define SOUND_SWING_3 "swing-3"
+#define SOUND_SWING_4 "swing-4"
+#define SOUND_SWING_5 "swing-5"
+#define SOUND_SWING_6 "swing-6"
+#define SOUND_SWING_7 "swing-7"
+#define SOUND_SWING_8 "swing-8"
+#define SOUND_SWING_9 "swing-9"
 
 // === STATEFUL ANIMATIONS
 
@@ -143,6 +154,8 @@ void AttackAnimation::InternalOnStart()
   animator.worldObject.RequireComponent<SpriteRenderer>()->SetRenderOrder(Game::currentFrame);
 
   SetupAttack();
+
+  PlaySound();
 }
 void AttackAnimation::InternalOnStop()
 {
@@ -223,6 +236,25 @@ shared_ptr<Attack> AttackAnimation::GetAttack() const
   Assert(attackObjectId >= 0, "Attack object id was never stored");
 
   return animator.worldObject.RequireChild(attackObjectId)->RequireComponent<Attack>();
+}
+
+void AttackAnimation::PlaySound()
+{
+  auto sample = Sample(vector{SOUND_SWING_1,
+                              SOUND_SWING_2,
+                              SOUND_SWING_3,
+                              SOUND_SWING_4,
+                              SOUND_SWING_5,
+                              SOUND_SWING_6,
+                              SOUND_SWING_7,
+                              SOUND_SWING_8,
+                              SOUND_SWING_9});
+
+  auto sound = animator.worldObject.RequireComponent<Sound>();
+
+  sound->AddAudio(sample, "./assets/sounds/battle/swings/" + string(sample) + ".wav");
+
+  sound->Play(sample);
 }
 
 // === INNER LOOP ANIMATIONS
@@ -383,3 +415,16 @@ float InnerLoopAnimation::GetInnerLoopElapsedTime() const { return innerLoopElap
 float InnerLoopAnimation::MaxInnerLoopDuration() const { return -1; }
 
 InnerLoopAnimation::SequencePhase InnerLoopAnimation::GetSequencePhase() const { return sequencePhase; }
+
+void InnerLoopAnimation::PlaySound()
+{
+  if (sequencePhase != SoundPhase())
+    return;
+
+  AttackAnimation::PlaySound();
+}
+
+InnerLoopAnimation::SequencePhase InnerLoopAnimation::SoundPhase()
+{
+  return SequencePhase::InLoop;
+}

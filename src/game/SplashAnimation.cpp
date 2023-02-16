@@ -5,6 +5,10 @@
 using namespace std;
 using namespace Helper;
 
+#define SOUND_CUT "knife-slice"
+#define SOUND_SLAM "splash-slam"
+#define SOUND_START "menu-start"
+
 // Speed with which to raise bills, in percent per second
 static const float raiseBillSpeed{120};
 
@@ -40,7 +44,16 @@ SplashAnimation::SplashAnimation(GameObject &associatedObject)
       weakPrompt(GetScene()->RequireUIObject<UIImage>(START_PROMPT_OBJECT)),
       weakStartPrompt(GetScene()->RequireUIObject<UIImage>(START_ARENA_IMAGE)),
       weakCurtain(GetScene()->RequireUIObject<UIContainer>(CURTAIN_OBJECT)->RequireComponent<UIBackground>()),
-      weakStompParticles(GetScene()->RequireWorldObject(PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>()) {}
+      weakStompParticles(GetScene()->RequireWorldObject(PARTICLES_OBJECT)->RequireComponent<ParticleEmitter>()),
+      weakSound(GetScene()->RequireFindComponent<Camera>()->worldObject.RequireComponent<Sound>())
+{
+  // Register sounds
+  LOCK(weakSound, sound);
+
+  sound->AddAudio(SOUND_CUT, "./assets/sounds/title-cut.mp3");
+  sound->AddAudio(SOUND_SLAM, "./assets/sounds/splash-slam.wav");
+  sound->AddAudio(SOUND_START, "./assets/sounds/menu-start.wav");
+}
 
 void SplashAnimation::Start()
 {
@@ -99,17 +112,31 @@ void SplashAnimation::Start()
     stompParticles->worldObject.SetPosition(splash->canvas.CanvasToWorld(splash->GetPosition()) +
                                             Vector2{box->width, box->height} / 2);
 
+    Lock(weakSound)->Play(SOUND_SLAM);
+
     stompParticles->StartEmission();
   };
 
   auto delayDuration = make_shared<float>(2);
 
-  auto delay = [this, delayDuration](float deltaTime, Animation &animation)
+  auto soundPlayed = make_shared<bool>(false);
+
+  auto delay = [this, delayDuration, soundPlayed](float deltaTime, Animation &animation)
   {
     *delayDuration -= deltaTime;
 
     if (*delayDuration <= 0.5)
+    {
+      // Play slice sound
+      if (*soundPlayed == false)
+      {
+        *soundPlayed = true;
+
+        Lock(weakSound)->Play(SOUND_CUT);
+      }
+
       Lock(weakCurtain)->color = Color::White();
+    }
 
     if (*delayDuration <= 0)
       animation.done = true;
@@ -210,6 +237,9 @@ void SplashAnimation::Update(float deltaTime)
 
 void SplashAnimation::PanContent(int index)
 {
+  if (index == 1)
+    Lock(weakSound)->Play(SOUND_START);
+
   targetIndex = index;
 }
 

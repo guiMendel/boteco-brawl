@@ -139,10 +139,10 @@ namespace Helper
 
   // Gets a random member from the array
   template <typename T>
-  int Sample(T array[]) { return array[SampleIndex(array)]; }
+  T Sample(T array[]) { return array[SampleIndex(array)]; }
   // Gets a random member from the vector
   template <typename T>
-  int Sample(std::vector<T> array) { return array[SampleIndex(array)]; }
+  T Sample(std::vector<T> array) { return array[SampleIndex(array)]; }
 
   // Iterates through each weak pointer, removing those that are expired, and collecting the rest in a shared ptr collection
   template <typename T>

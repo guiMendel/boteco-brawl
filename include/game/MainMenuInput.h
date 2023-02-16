@@ -97,6 +97,7 @@ private:
   std::weak_ptr<SplashAnimation> weakAnimationHandler;
   std::weak_ptr<UIContainer> weakBillContainer;
   std::weak_ptr<PlayerManager> weakPlayerManager;
+  std::weak_ptr<Sound> weakSound;
 
   // Selection badges for each player to take as they connect
   std::queue<std::pair<std::string, std::string>> playerBadges;

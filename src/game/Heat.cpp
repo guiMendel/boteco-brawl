@@ -7,6 +7,15 @@
 using namespace std;
 using namespace Helper;
 
+#define SOUND_PUNCH_2 "punch-2"
+#define SOUND_PUNCH_3 "punch-3"
+#define SOUND_PUNCH_4 "punch-4"
+#define SOUND_PUNCH_5 "punch-5"
+#define SOUND_PUNCH_6 "punch-6"
+#define SOUND_PUNCH_7 "punch-7"
+#define SOUND_PUNCH_8 "punch-8"
+#define SOUND_PUNCH_9 "punch-9"
+
 const float Heat::maxHeat{200};
 const float Heat::inverseMaxHeat{1.0f / maxHeat};
 const float Heat::blowLift{0.25f};
@@ -22,13 +31,24 @@ void Heat::Awake()
   weakCharacterController = worldObject.RequireComponent<CharacterController>();
   weakTimeScaleManager = GetScene()->RequireFindComponent<TimeScaleManager>();
   weakShakeManager = GetScene()->RequireFindComponent<ShakeEffectManager>();
+  auto sound = worldObject.RequireComponent<Sound>();
+  weakSound = sound;
+
+  sound->AddAudio(SOUND_PUNCH_2, "./assets/sounds/battle/punches/02.mp3");
+  sound->AddAudio(SOUND_PUNCH_3, "./assets/sounds/battle/punches/03.mp3");
+  sound->AddAudio(SOUND_PUNCH_4, "./assets/sounds/battle/punches/04.mp3");
+  sound->AddAudio(SOUND_PUNCH_5, "./assets/sounds/battle/punches/05.mp3");
+  sound->AddAudio(SOUND_PUNCH_6, "./assets/sounds/battle/punches/06.mp3");
+  sound->AddAudio(SOUND_PUNCH_7, "./assets/sounds/battle/punches/07.mp3");
+  sound->AddAudio(SOUND_PUNCH_8, "./assets/sounds/battle/punches/08.mp3");
+  sound->AddAudio(SOUND_PUNCH_9, "./assets/sounds/battle/punches/09.mp3");
 }
 
 void Heat::Start()
 {
   // On death, reset heat
   worldObject.RequireComponent<FallDeath>()->OnFall.AddListener("reset-heat", [this]()
-                                                                   { heat = 0; });
+                                                                { heat = 0; });
 }
 
 // Gets current level of heat
@@ -54,6 +74,35 @@ void Heat::TakeDamage(Damage damage)
   // When damage has impulse
   if (damage.impulse.magnitude != 0)
   {
+    // Play sound
+    Lock(weakSound)->Play(Sample(
+        vector{SOUND_PUNCH_2,
+               SOUND_PUNCH_3,
+               SOUND_PUNCH_4,
+               SOUND_PUNCH_5,
+               SOUND_PUNCH_6,
+               SOUND_PUNCH_7,
+               SOUND_PUNCH_8,
+               SOUND_PUNCH_9}));
+
+    auto playGrunt = [this]()
+    {
+      Lock(weakSound)->Play(Sample(
+          vector{
+              SOUND_GRUNT_1,
+              SOUND_GRUNT_2,
+              SOUND_GRUNT_3,
+              SOUND_GRUNT_4,
+              SOUND_GRUNT_5,
+              SOUND_GRUNT_6,
+              SOUND_GRUNT_7,
+              SOUND_GRUNT_8,
+              SOUND_GRUNT_9,
+              SOUND_GRUNT_10}));
+    };
+
+    worldObject.DelayFunction(playGrunt, 0.2f);
+
     // Cancel any previous speed
     body->velocity = Vector2::Zero();
 

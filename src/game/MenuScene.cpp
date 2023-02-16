@@ -1,4 +1,5 @@
 #include "MenuScene.h"
+#include "Sound.h"
 #include "CharacterKafta.h"
 #include "CharacterKiba.h"
 #include "CharacterKaftaAnimations.h"
@@ -25,6 +26,9 @@ void MenuScene::InitializeObjects()
   // Create the main camera
   auto camera = Instantiate("MainCamera", ObjectRecipes::Camera())->RequireComponent<Camera>();
   camera->background = Color(226, 160, 106);
+
+  // Add sound player
+  camera->worldObject.AddComponent<Sound>();
 
   // Add player manager
   Instantiate("PlayerManager", ObjectRecipes::SingleComponent<PlayerManager>(true));

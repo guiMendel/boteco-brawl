@@ -7,6 +7,7 @@
 #include "UIContainer.h"
 #include "UIBackground.h"
 #include "ParticleEmitter.h"
+#include "Sound.h"
 
 class MainMenuInput;
 
@@ -63,6 +64,7 @@ private:
   std::weak_ptr<UIImage> weakStartPrompt;
   std::weak_ptr<UIBackground> weakCurtain;
   std::weak_ptr<ParticleEmitter> weakStompParticles;
+  std::weak_ptr<Sound> weakSound;
 
   // Bills to animate removal of offset from
   std::vector<std::weak_ptr<UIObject>> raisingBills;

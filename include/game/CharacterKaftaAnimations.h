@@ -182,6 +182,8 @@ namespace CharacterKaftaAnimations
 
     SET_DAMAGE(CHARGE_DAMAGE(1.4f, 5.0f), CHARGE_IMPULSE(-20, 2.0f, 8.0f), 0.6)
 
+    virtual SequencePhase SoundPhase() { return SequencePhase::PostLoop; }
+
     int PostLoopCancelFrame() const override { return 3; }
   };
 
@@ -197,6 +199,8 @@ namespace CharacterKaftaAnimations
     void InternalOnStart() override;
 
     SET_DAMAGE(CHARGE_DAMAGE(1.5f, 8.0f), CHARGE_IMPULSE(-89, 1.5f, 6.0f), 0.6)
+
+    virtual SequencePhase SoundPhase() { return SequencePhase::PostLoop; }
 
     int PostLoopCancelFrame() const override { return 2; }
   };

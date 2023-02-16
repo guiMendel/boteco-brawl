@@ -4,6 +4,28 @@
 #include "WorldComponent.h"
 #include "Animator.h"
 
+#define SOUND_GRUNT_1 "grunt-1"
+#define SOUND_GRUNT_2 "grunt-2"
+#define SOUND_GRUNT_3 "grunt-3"
+#define SOUND_GRUNT_4 "grunt-4"
+#define SOUND_GRUNT_5 "grunt-5"
+#define SOUND_GRUNT_6 "grunt-6"
+#define SOUND_GRUNT_7 "grunt-7"
+#define SOUND_GRUNT_8 "grunt-8"
+#define SOUND_GRUNT_9 "grunt-9"
+#define SOUND_GRUNT_10 "grunt-10"
+
+#define SOUND_DEATH_1 "death-1"
+#define SOUND_DEATH_2 "death-2"
+#define SOUND_DEATH_3 "death-3"
+#define SOUND_DEATH_4 "death-4"
+#define SOUND_DEATH_5 "death-5"
+#define SOUND_DEATH_6 "death-6"
+#define SOUND_DEATH_7 "death-7"
+#define SOUND_DEATH_8 "death-8"
+#define SOUND_DEATH_9 "death-9"
+#define SOUND_DEATH_10 "death-10"
+
 // Base class for defining specific characteristics for each of the game's characters
 class Character : public WorldComponent
 {

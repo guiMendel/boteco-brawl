@@ -1,4 +1,5 @@
 #include "ArenaScene.h"
+#include "Sound.h"
 #include "ArenaPiaui.h"
 #include "UIBackground.h"
 #include "UIImage.h"
@@ -17,6 +18,8 @@
 #include "BrawlPlayer.h"
 
 using namespace std;
+
+#define SOUND_BACKGROUND "background-chatter"
 
 // Initial space between characters
 static const float initialCharactersDistance{3};
@@ -41,6 +44,8 @@ void ArenaScene::InitializeObjects()
   // Create the main camera
   auto mainCamera = Instantiate("MainCamera", ObjectRecipes::Camera())->GetComponent<Camera>();
   mainCamera->worldObject.SetParent(mainParent);
+  auto sound = mainCamera->worldObject.AddComponent<Sound>();
+  sound->AddAudio(SOUND_BACKGROUND, "./assets/sounds/battle/boteco-background.mp3");
 
   // Give it behavior
   mainCamera->gameObject.AddComponent<CameraBehavior>(charactersParent);
@@ -119,6 +124,9 @@ void ArenaScene::InitializeObjects()
 
   // Add animation
   canvas->worldObject.AddComponent<ArenaUIAnimation>();
+
+  // Play background noise
+  sound->Play(SOUND_BACKGROUND, 0);
 }
 
 void ArenaScene::SpawnCharacters()

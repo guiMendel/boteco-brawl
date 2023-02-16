@@ -130,6 +130,10 @@ void ObjectRecipes::InitializeCharacter(shared_ptr<::Character> character, share
   // Set it's physics layer
   characterObject.SetPhysicsLayer(PhysicsLayer::Character);
 
+  // === SOUNDS
+
+  character->worldObject.AddComponent<Sound>();
+
   // === RENDERING
 
   // Get sprite

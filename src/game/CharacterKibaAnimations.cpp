@@ -1,4 +1,5 @@
 #include "CharacterKibaAnimations.h"
+#include "Sound.h"
 #include "KibaLemonAOE.h"
 #include "CharacterVFX.h"
 #include "ShakeEffectManager.h"
@@ -14,6 +15,11 @@ using namespace std;
 using namespace CharacterKibaAnimations;
 using namespace CharacterAnimationHelper;
 
+#define SOUND_STEP_1 "step1"
+#define SOUND_STEP_2 "step2"
+#define SOUND_STEP_3 "step3"
+#define SOUND_STEP_4 "step4"
+
 // === RUN
 
 vector<AnimationFrame> Run::InitializeFrames()
@@ -28,8 +34,17 @@ vector<AnimationFrame> Run::InitializeFrames()
   stepParticles.lifetime = {0.1, 0.5};
   stepParticles.speed = {0.7, 1};
 
+  auto sound1 = Sample(vector{SOUND_STEP_1, SOUND_STEP_2, SOUND_STEP_3, SOUND_STEP_4});
+  auto sound2 = Sample(vector{SOUND_STEP_1, SOUND_STEP_2, SOUND_STEP_3, SOUND_STEP_4});
+
+  auto sound = animator.worldObject.RequireComponent<Sound>();
+  sound->AddAudio(sound1, "./assets/sounds/battle/steps/" + string(sound1) + ".mp3");
+  sound->AddAudio(sound2, "./assets/sounds/battle/steps/" + string(sound2) + ".mp3");
+
   frames[0].AddCallback(ParticleFXCallback(frames[0].GetSprite(), {31, 35}, 0.01, 0.01, stepParticles, 1));
+  frames[0].AddCallback(SFXCallback(sound1));
   frames[3].AddCallback(ParticleFXCallback(frames[3].GetSprite(), {195 - 324 / 2, 35}, 0.01, 0.01, stepParticles, 1));
+  frames[3].AddCallback(SFXCallback(sound2));
 
   return frames;
 }
