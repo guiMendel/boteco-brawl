@@ -6,17 +6,17 @@ using namespace std;
 ParticleFX::ParticleFX(GameObject &associatedObject)
     : WorldComponent(associatedObject) {}
 
-void ParticleFX::EffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter)
+void ParticleFX::EffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter, bool irradiate)
 {
   // Find the instance
   auto instance = Game::GetInstance().GetScene()->FindComponent<ParticleFX>();
 
   Assert(instance != nullptr, "Could not find ParticleFX instance");
 
-  instance->PlayEffectAt(position, radius, duration, params, destroyAfter);
+  instance->PlayEffectAt(position, radius, duration, params, destroyAfter, irradiate);
 }
 
-void ParticleFX::PlayEffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter)
+void ParticleFX::PlayEffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter, bool irradiate)
 {
   // Create a temporary child to hold the emitter
   auto emitter = worldObject.CreateChild("FXEmitter", position)
@@ -25,6 +25,7 @@ void ParticleFX::PlayEffectAt(Vector2 position, float radius, float duration, Pa
                      false,
                      duration);
   emitter->emission = params;
+  emitter->irradiateParticles = irradiate;
 
   // Play
   emitter->StartEmission();

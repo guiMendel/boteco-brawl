@@ -15,7 +15,9 @@ namespace CharacterKibaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Run)
 
     DEF_NAME("run")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kiba/general/run.png", SpritesheetClipInfo(324 / 6, 36), 0.15, {0, -2}))
+    // DEF_FRAMES(SliceSpritesheet("./assets/sprites/kiba/general/run.png", SpritesheetClipInfo(324 / 6, 36), 0.15, {0, -2}))
+    DELCARE_FRAMES
+    
 
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
@@ -230,8 +232,9 @@ namespace CharacterKibaAnimations
     std::vector<AnimationFrame> InitializeInLoopFrames() override;
 
     bool QuitLoopOnInputRelease() const override { return false; }
+    void InternalOnStop() override;
 
-    SET_DAMAGE(3.5f * BASE_DAMAGE, AttackImpulse(animator.worldObject.GetShared(), 6), 0.4)
+    SET_DAMAGE(BASE_DAMAGE * 2, AttackImpulse(animator.worldObject.GetShared(), 3), 0.3)
   };
 
   class SpecialNeutral : public StatefulAnimation
@@ -253,13 +256,15 @@ namespace CharacterKibaAnimations
     ATTACK_CANCEL(3)
   };
 
-  class LandingAttack : public StatefulAnimation
+  class LandingAttack : public AttackAnimation
   {
   public:
-    CONSTRUCTOR_AND_DESTRUCTOR(LandingAttack)
+    ATTACK_CONSTRUCTOR_AND_DESTRUCTOR(LandingAttack)
 
     DEF_NAME("landingAttack")
     DELCARE_FRAMES
+
+    SET_DAMAGE(BASE_DAMAGE * 3.5f, AttackImpulse(animator.worldObject.GetShared(), 7), 0.4)
 
     // Speed at which ground was intercepted
     float landingSpeed;

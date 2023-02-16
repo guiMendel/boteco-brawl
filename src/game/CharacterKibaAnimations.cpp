@@ -14,6 +14,26 @@ using namespace std;
 using namespace CharacterKibaAnimations;
 using namespace CharacterAnimationHelper;
 
+// === RUN
+
+vector<AnimationFrame> Run::InitializeFrames()
+{
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/general/run.png", SpritesheetClipInfo(324 / 6, 36), 0.15, {0, -2})};
+
+  ParticleEmissionParameters stepParticles;
+  stepParticles.angle = {DegreesToRadians(-50), DegreesToRadians(-180 + 50)};
+  stepParticles.color = {Color::Gray(), Color::Brown()};
+  stepParticles.frequency = {0.001, 0.0005};
+  stepParticles.gravityModifier = {Vector2::Down(0.1), Vector2::Down(0.2)};
+  stepParticles.lifetime = {0.1, 0.5};
+  stepParticles.speed = {0.7, 1};
+
+  frames[0].AddCallback(ParticleFXCallback(frames[0].GetSprite(), {31, 35}, 0.01, 0.01, stepParticles, 1));
+  frames[3].AddCallback(ParticleFXCallback(frames[3].GetSprite(), {195 - 324 / 2, 35}, 0.01, 0.01, stepParticles, 1));
+
+  return frames;
+}
+
 // === JUMP
 
 vector<AnimationFrame> Jump::InitializeFrames()
@@ -37,7 +57,7 @@ vector<AnimationFrame> Jump::InitializeFrames()
 
     object.RequireComponent<CharacterVFX>()->PlayDust(
         Vector2(-colliderBox.width / 4, colliderBox.height / 2),
-        {DegreesToRadians(-135), DegreesToRadians(-100)});
+        {DegreesToRadians(-120), DegreesToRadians(-70)});
   };
 
   frames[1].AddCallback(callback);
@@ -287,27 +307,58 @@ vector<AnimationFrame> AirUp::InitializeFrames()
 
 // === AIR DOWN
 
+void AirDown::InternalOnStop()
+{
+  // Reset gravity back to normal
+  animator.worldObject.RequireComponent<Rigidbody>()->gravityScale = Vector2::One();
+
+  InnerLoopAnimation::InternalOnStop();
+}
+
 vector<AnimationFrame> AirDown::InitializePreLoopFrames()
 {
-  return SliceSpritesheet("./assets/sprites/kiba/attacks/air-down.png",
-                          SpritesheetClipInfo(8, 20, 1), 0.2, {0, 2});
+  auto animation = SliceSpritesheet("./assets/sprites/kiba/attacks/air-down.png",
+                                    SpritesheetClipInfo(320 / 4, 64, 2), 0.2);
+
+  // Intensify gravity & jump up
+  auto ringJump = [](WorldObject &kiba)
+  {
+    auto kibaBody = kiba.RequireComponent<Rigidbody>();
+
+    kibaBody->gravityScale = Vector2{1, 8};
+
+    // Jump
+    kibaBody->velocity.y = -30;
+  };
+
+  animation[1].AddCallback(ringJump);
+
+  return animation;
 }
 
 vector<AnimationFrame> AirDown::InitializeInLoopFrames()
 {
   auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/air-down.png",
-                               SpritesheetClipInfo(8, 20, 1, 1), 0.1, {0, 2})};
+                               SpritesheetClipInfo(320 / 4, 64, 1, 2), 0.2)};
 
   // Add hitboxes
-  FrameHitbox(frames[0], {Circle({4, 14}, 3.5)});
+  FrameHitbox(frames[0], {Circle({197.5 - 320 / 2, 30}, 22)});
+
+  // Intensify gravity & jump up
+  auto ringJump = [](WorldObject &kiba)
+  {
+    kiba.RequireComponent<Rigidbody>()->gravityScale = Vector2{1, 8};
+  };
+
+  frames[0].AddCallback(ringJump);
 
   return frames;
 }
 
 vector<AnimationFrame> LandingAttack::InitializeFrames()
 {
-  auto frames = SliceSpritesheet("./assets/sprites/kiba/attacks/air-down.png",
-                                 SpritesheetClipInfo(8, 20, 3, 2), 0.2, {0, 2});
+  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/air-down.png",
+                               SpritesheetClipInfo(320 / 4, 64, 1, 3), 0.5)};
 
   // Halt character
   auto stopVelocity = [](WorldObject &target)
@@ -315,9 +366,24 @@ vector<AnimationFrame> LandingAttack::InitializeFrames()
     auto body = target.RequireComponent<Rigidbody>();
 
     body->velocity.x = 0;
+
+    // Plat fx
+    auto box = target.RequireComponent<BoxCollider>()->GetBox();
+
+    ParticleEmissionParameters effect;
+    effect.color = {Color::Gray(), Color::Brown()};
+    effect.frequency = {0.0005, 0.0001};
+    effect.gravityModifier = {Vector2::Down(0.3), Vector2::Down(0.2)};
+    effect.lifetime = {0.3, 1};
+    effect.speed = {0.5, 4};
+
+    ParticleFX::EffectAt(target.GetPosition() + Vector2::Down(box.height / 2), 1, 0.01, effect, 4, true);
   };
 
   frames[0].AddCallback(stopVelocity);
+
+  // Add hitboxes
+  FrameHitbox(frames[0], {Circle({278.5 - 320 / 4 * 3, 31}, 32)});
 
   return frames;
 }

@@ -38,10 +38,6 @@ void PlatformDrop::OnTriggerCollisionEnter(TriggerCollisionData triggerData)
   // Register this platform as in range
   auto platform = other->worldObject.RequireComponent<PlatformEffector>();
   platformsInRange[platform->id] = platform;
-
-  cout << "Platforms in range of " << worldObject << " :" << endl;
-  for (auto platform : WeakMapToVector(platformsInRange))
-    cout << platform->worldObject << endl;
 }
 
 void PlatformDrop::OnTriggerCollisionExit(TriggerCollisionData triggerData)

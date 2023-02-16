@@ -84,7 +84,7 @@ void CharacterVFX::PlayDust(Vector2 offset, range<float> angle, range<float> spe
   ParticleEmissionParameters emission;
   emission.angle = angle;
   emission.speed = speed;
-  emission.color = {Color::Black(), Color::Gray()};
+  emission.color = {Color::Brown(), Color::Gray()};
   emission.frequency = {0.0005, 0.02};
   emission.lifetime = {0.2, 1.0};
   emission.gravityModifier = {Vector2::One(), Vector2::One()};

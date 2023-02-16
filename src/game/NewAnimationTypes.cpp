@@ -100,6 +100,8 @@ Vector2 StatefulAnimation::VirtualPixelPosition(Vector2 virtualPixel, const Anim
   auto sprite = frame.GetSprite();
   Assert(sprite != nullptr, "Provided frame must contain a sprite");
 
+  // cout << "Sprite Dimensions: " << sprite->GetWidth() << ", " << sprite->GetHeight() << endl;
+
   // Get relative position
   return spriteRenderer->GetVirtualPixelOffset(virtualPixel, sprite);
 
@@ -171,6 +173,7 @@ void AttackAnimation::SetupAttack()
 
 void AttackAnimation::FrameHitbox(AnimationFrame &frame, vector<Circle> hitboxAreas)
 {
+
   auto callback = [this, frame, hitboxAreas](WorldObject &)
   {
     if (hitboxAreas.empty())
@@ -207,7 +210,6 @@ void AttackAnimation::SetHitbox(const AnimationFrame &frame, vector<Circle> hitb
 
 void AttackAnimation::RemoveHitbox()
 {
-
   auto attackObject = animator.worldObject.GetChild(attackObjectId);
 
   auto colliders = attackObject->GetComponents<Collider>();

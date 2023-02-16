@@ -13,10 +13,10 @@ public:
   virtual ~ParticleFX() {}
 
   // Spawns a particle emitter to play the given effect, discards the emitter object after duration + destroyAfter seconds
-  void PlayEffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter = 0);
+  void PlayEffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter = 0, bool irradiate = false);
 
   // Finds the particle FX instance and plays on it
-  static void EffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter = 0);
+  static void EffectAt(Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter = 0, bool irradiate = false);
 
   void Update(float) override;
 

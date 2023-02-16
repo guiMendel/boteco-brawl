@@ -221,7 +221,7 @@ Vector2 SpriteRenderer::GetVirtualPixelOffset(Vector2 virtualPixel, std::shared_
   auto mirrorFactor = Vector2(GetSign(worldObject.GetScale().x), 1);
 
   if (mirrorFactor.x < 0)
-    spriteOrigin.x = spriteOrigin.x + sprite->GetWidth();
+    spriteOrigin.x = spriteOrigin.x + referenceSprite->GetWidth();
 
   return spriteOrigin + mirrorFactor * (virtualPixel + Vector2{0.5, 0.5}) / float(Game::defaultVirtualPixelsPerUnit);
 }

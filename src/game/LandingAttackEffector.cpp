@@ -8,8 +8,12 @@ LandingAttackEffector::LandingAttackEffector(GameObject &associatedObject, funct
 
 shared_ptr<Action> LandingAttackEffector::GetLandAction()
 {
-  if (effectorCondition()) {
+  if (effectorCondition())
+  {
     auto body = worldObject.RequireComponent<Rigidbody>();
+
+    cout << "Landing speed: " << body->velocity.Magnitude() << endl;
+
     return make_shared<Actions::LandingAttack>(body->velocity.Magnitude());
   }
 

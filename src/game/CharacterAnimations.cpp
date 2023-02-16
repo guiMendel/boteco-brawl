@@ -47,11 +47,23 @@ function<void(WorldObject &)> CharacterAnimationHelper::ResetHitTargetsCallback(
   };
 }
 
-std::function<void(WorldObject &)> CharacterAnimationHelper::DisplaceCallback(Vector2 displacement)
+function<void(WorldObject &)> CharacterAnimationHelper::DisplaceCallback(Vector2 displacement)
 {
   return [displacement](WorldObject &target)
   {
     // Adjust displacement to facing direction
     target.Translate(target.localScale.x < 0 ? -displacement : displacement);
+  };
+}
+
+function<void(WorldObject &)> CharacterAnimationHelper::ParticleFXCallback(
+    shared_ptr<Sprite> sprite, Vector2 position, float radius, float duration, ParticleEmissionParameters params, float destroyAfter, bool irradiate)
+{
+  return [position, radius, duration, params, destroyAfter, irradiate, weakSprite = weak_ptr(sprite)](WorldObject &target)
+  {
+    // Convert virtual pixel position
+    auto positionUnits = target.RequireComponent<SpriteRenderer>()->GetVirtualPixelOffset(position, Lock(weakSprite));
+
+    ParticleFX::EffectAt(positionUnits + target.GetPosition(), radius, duration, params, destroyAfter, irradiate);
   };
 }
