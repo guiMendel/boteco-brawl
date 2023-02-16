@@ -1,4 +1,7 @@
 #include "ArenaPiaui.h"
+#include "BoxCollider.h"
+#include "Attack.h"
+#include "ParticleEmitter.h"
 #include "PlatformEffector.h"
 #include "CameraBehavior.h"
 #include "ObjectRecipes.h"
@@ -35,7 +38,7 @@ void ArenaPiaui::InitializeArena()
 
   // Ground platforms
   vector groundPlatforms{
-      Rectangle(Rectangle::TopLeftInitialize, {162.5, 209}, 310, 18),
+      Rectangle(Rectangle::TopLeftInitialize, {162.5, 209.5}, 310, 18),
       Rectangle(Rectangle::TopLeftInitialize, {-75, 246}, 201, 6),
       Rectangle(Rectangle::TopLeftInitialize, {310, 192}, 39, 18),
   };
@@ -73,4 +76,28 @@ void ArenaPiaui::InitializeArena()
 
     GetScene()->Instantiate("PassablePlatform", ObjectRecipes::Platform(dimensions, true), position)->SetParent(worldObject.GetShared());
   }
+
+  // Add barbecue particles
+  Rectangle barbecueBox{Rectangle::TopLeftInitialize,
+                        platformsRenderer->GetVirtualPixelOffset({0, 246}),
+                        84 / float(Game::defaultVirtualPixelsPerUnit),
+                        1 / float(Game::defaultVirtualPixelsPerUnit)};
+
+  auto barbecueParticles = worldObject.AddComponent<ParticleEmitter>(RenderLayer::VFX, make_unique<Rectangle>(barbecueBox), true);
+  barbecueParticles->emission.color = {Color{238, 198, 43}, Color{247, 70, 0}};
+  barbecueParticles->emission.angle = {DegreesToRadians(-45), DegreesToRadians(-180 + 45)};
+  barbecueParticles->emission.frequency = {0.1, 0.05};
+  barbecueParticles->emission.lifetime = {0.4, 2};
+  barbecueParticles->emission.speed = {3, 8};
+  barbecueParticles->emission.gravityModifier = {Vector2::Down(0.1), Vector2::Down(0.2)};
+
+  // Add hitbox
+  Rectangle barbecueHitbox{Rectangle::TopLeftInitialize,
+                           platformsRenderer->GetVirtualPixelOffset({-75, 246}),
+                           (84 + 75) / float(Game::defaultVirtualPixelsPerUnit),
+                           1 / float(Game::defaultVirtualPixelsPerUnit)};
+
+  auto hitboxObject = worldObject.CreateChild("BarbecueHitbox");
+  hitboxObject->AddComponent<BoxCollider>(barbecueHitbox, true);
+  hitboxObject->AddComponent<Attack>(DamageParameters{5, AttackImpulse{Vector2::Up(), 10}, 0.1}, 0.05);
 }

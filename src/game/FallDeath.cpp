@@ -14,7 +14,7 @@ using namespace std;
 
 const float FallDeath::deathMargin{3};
 const float FallDeath::respawnDelay{2};
-const int FallDeath::startingLives{1};
+const int FallDeath::startingLives{3};
 
 // Initial invulnerability time
 static const float initialInvulnerabilityTime{3};

@@ -126,11 +126,14 @@ void ArenaScene::SpawnCharacters()
   auto playerManager = RequireFindComponent<PlayerManager>();
   auto charactersParent = RequireWorldObject(CHARACTERS_PARENT);
 
+  // Spawn offset
+  Vector2 baseOffset{4, 0};
+
   // Get how many characters there will be
   int characterCount = playerManager->GetPlayers().size();
 
   // Initialize character offset
-  float offset = initialCharactersDistance * (characterCount - 1) / 2;
+  float offset = -initialCharactersDistance * (characterCount - 1) / 2;
 
   // For each player
   for (auto player : playerManager->GetPlayers())
@@ -138,7 +141,7 @@ void ArenaScene::SpawnCharacters()
     auto character = Instantiate(
         "Character" + to_string(player->PlayerId()),
         RequirePointerCast<BrawlPlayer>(player)->characterRecipe,
-        Vector2{offset, -10},
+        baseOffset + Vector2{offset, -10},
         0,
         charactersParent);
 
@@ -146,7 +149,7 @@ void ArenaScene::SpawnCharacters()
     if (offset > 0)
       character->localScale.x = -1;
 
-    offset -= initialCharactersDistance;
+    offset += initialCharactersDistance;
   }
 }
 
