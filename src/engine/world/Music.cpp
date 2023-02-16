@@ -22,5 +22,5 @@ void Music::Play(const int times)
 Music::~Music()
 {
   // Stops any music being played
-  FadeOut();
+  FadeOut(0);
 }

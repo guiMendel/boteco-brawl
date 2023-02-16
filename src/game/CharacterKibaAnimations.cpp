@@ -191,56 +191,42 @@ vector<AnimationFrame> SpecialNeutral::InitializeFrames()
 
 // === SPECIAL HORIZONTAL
 
-vector<AnimationFrame> SpecialHorizontal::InitializeFrames()
+void SpecialHorizontal::InternalOnStart()
 {
-  auto frames{SliceSpritesheet("./assets/sprites/kiba/attacks/special-horizontal.png",
-                               SpritesheetClipInfo(16, 8), 0.3, {4, 0})};
-
-  // Add a recovery frame
-  SplitLastFrame(frames, 2, 0.15);
-  frames[1].SetDuration(0.2);
-
-  // Add shoot frame
-  auto shoot = [this](WorldObject &target)
+  if (sequencePhase == SequencePhase::InLoop)
   {
-    float mirrorFactor = GetSign(target.GetScale().x);
+    float direction = GetSign(animator.worldObject.localScale.x);
 
-    // Get shoot position
-    Vector2 shotPosition = GlobalVirtualPixelPosition({10, 3});
+    animator.worldObject.RequireComponent<Movement>()->SetDirection(direction * 2);
+  }
+  else if (sequencePhase == SequencePhase::PostLoop)
+  {
+    animator.worldObject.RequireComponent<Movement>()->SetDirection(0);
+  }
 
-    // Add smoke
-    ParticleEmissionParameters smoke;
-    smoke.angle = {DegreesToRadians(-35), DegreesToRadians(35)};
-    smoke.color = {Color(90, 90, 90), Color(200, 200, 200)};
-    smoke.frequency = {0.0005, 0.001};
-    smoke.gravityModifier = {Vector2::Up(0.5), Vector2::Zero()};
-    smoke.lifetime = {0.1, 0.7};
-    smoke.speed = {0.5 * mirrorFactor, 5 * mirrorFactor};
-    smoke.behavior = ParticleBehavior::Accelerate({-mirrorFactor, 0}, {0, numeric_limits<float>::max()});
+  InnerLoopAnimation::InternalOnStart();
+}
 
-    ParticleFX::EffectAt(shotPosition, 0.01, 0.01, smoke, 1);
+vector<AnimationFrame> SpecialHorizontal::InitializePreLoopFrames()
+{
+  return SliceSpritesheet("./assets/sprites/kiba/attacks/special-horizontal-extra.png",
+                          SpritesheetClipInfo(128 / 2, 36, 1), 0.3, {3, -2});
+}
 
-    // Add sparks
-    ParticleEmissionParameters sparks;
-    sparks.angle = {DegreesToRadians(-35), DegreesToRadians(35)};
-    sparks.color = {Color::Yellow(), Color::ClampValid(Color::Yellow() * 1.5)};
-    sparks.frequency = {0.0008, 0.003};
-    sparks.lifetime = {0.05, 0.3};
-    sparks.speed = {2 * mirrorFactor, 8 * mirrorFactor};
+vector<AnimationFrame> SpecialHorizontal::InitializeInLoopFrames()
+{
+  auto frames = SliceSpritesheet("./assets/sprites/kiba/attacks/special-horizontal.png",
+                                 SpritesheetClipInfo(320 / 5, 36), 0.1, {-5, -2});
 
-    ParticleFX::EffectAt(shotPosition, 0.01, 0.01, sparks, 1);
-
-    auto projectile = animator.GetScene()->Instantiate(
-        "Projectile",
-        ObjectRecipes::Projectile({8 * mirrorFactor, 0}, animator.worldObject.GetShared(), {0, 0}),
-        shotPosition);
-
-    projectile->localScale = {mirrorFactor, 1};
-  };
-
-  frames[1].AddCallback(shoot);
+  FrameHitbox(frames[0], {Circle({39, 18}, 18)});
 
   return frames;
+}
+
+vector<AnimationFrame> SpecialHorizontal::InitializePostLoopFrames()
+{
+  return SliceSpritesheet("./assets/sprites/kiba/attacks/special-horizontal-extra.png",
+                          SpritesheetClipInfo(128 / 2, 36, 1, 1), 0.6, {3, -2});
 }
 
 // === UP

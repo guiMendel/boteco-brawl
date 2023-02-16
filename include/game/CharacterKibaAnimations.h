@@ -17,7 +17,6 @@ namespace CharacterKibaAnimations
     DEF_NAME("run")
     // DEF_FRAMES(SliceSpritesheet("./assets/sprites/kiba/general/run.png", SpritesheetClipInfo(324 / 6, 36), 0.15, {0, -2}))
     DELCARE_FRAMES
-    
 
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };
@@ -246,14 +245,20 @@ namespace CharacterKibaAnimations
     DELCARE_FRAMES
   };
 
-  class SpecialHorizontal : public StatefulAnimation
+  class SpecialHorizontal : public InnerLoopAnimation
   {
   public:
-    CONSTRUCTOR_AND_DESTRUCTOR(SpecialHorizontal)
+    LOOP_CONSTRUCTOR_AND_DESTRUCTOR(SpecialHorizontal)
 
-    DEF_NAME("specialHorizontal")
-    DELCARE_FRAMES
-    ATTACK_CANCEL(3)
+    DEF_FIRST_NAME("specialHorizontal")
+
+    std::vector<AnimationFrame> InitializePreLoopFrames() override;
+    std::vector<AnimationFrame> InitializeInLoopFrames() override;
+    std::vector<AnimationFrame> InitializePostLoopFrames() override;
+    void InternalOnStart() override;
+
+    SET_DAMAGE(BASE_DAMAGE * 4, AttackImpulse(animator.worldObject.GetShared(), 10), 0.3)
+    SET_HIT_COOLDOWN(0.7f)
   };
 
   class LandingAttack : public AttackAnimation

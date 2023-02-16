@@ -71,6 +71,14 @@ void MenuScene::InitializeObjects()
 
   // Add main player
   inputHandler->CreatePlayer();
+
+  // Play music
+  auto playMusic = [this]()
+  {
+    music.Play("./assets/music/intro-CHEIO DE MANIAS - RAÇA NEGRA - KARAOKE.mp3");
+  };
+
+  mainContainer->DelayFunction(playMusic, 1.5);
 }
 
 void MenuScene::CreateSplash(shared_ptr<UIContainer> mainContainer)

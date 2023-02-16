@@ -31,6 +31,8 @@ private:
 
   // Create the selection menu
   void CreateSelection(std::shared_ptr<UIContainer> mainContainer);
+
+  Music music;
 };
 
 #endif
