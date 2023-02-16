@@ -2,7 +2,10 @@
 
 using namespace std;
 
-const pair<float, float> PlatformEffector::defaultPassThroughArc{-0.1f, -M_PI + 0.1f};
+#define HORIZONTAL_TOLERANCE 5
+
+const pair<float, float> PlatformEffector::defaultPassThroughArc{DegreesToRadians(-HORIZONTAL_TOLERANCE),
+                                                                 DegreesToRadians(-180 + HORIZONTAL_TOLERANCE)};
 
 PlatformEffector::PlatformEffector(GameObject &associatedObject, pair<float, float> passThroughArc)
     : WorldComponent(associatedObject), passThroughArc(passThroughArc) {}

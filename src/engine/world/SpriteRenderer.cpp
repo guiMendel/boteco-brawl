@@ -203,3 +203,25 @@ Vector2 SpriteRenderer::ApplyParallax(Vector2 position) const
 }
 
 void SpriteRenderer::SetRenderOrder(int newOrder) { renderOrder = newOrder; }
+
+Vector2 SpriteRenderer::GetVirtualPixelOffset(Vector2 virtualPixel, std::shared_ptr<Sprite> referenceSprite) const
+{
+  // Coalesce sprite
+  referenceSprite = referenceSprite == nullptr ? GetSprite() : referenceSprite;
+
+  Assert(referenceSprite != nullptr, "Sprite Renderer had no sprite set");
+
+  // Global position of sprite's top-left pixel, in units
+  Vector2 topLeftPosition = RenderPositionFor(worldObject.GetPosition(), referenceSprite);
+
+  // Displacement to apply to object's position to get to top-left pixel's position
+  Vector2 spriteOrigin = topLeftPosition - worldObject.GetPosition();
+
+  // When mirrored, we want to displace with reference to top-right pixel, so sum the sprite's width
+  auto mirrorFactor = Vector2(GetSign(worldObject.GetScale().x), 1);
+
+  if (mirrorFactor.x < 0)
+    spriteOrigin.x = spriteOrigin.x + sprite->GetWidth();
+
+  return spriteOrigin + mirrorFactor * (virtualPixel + Vector2{0.5, 0.5}) / float(Game::defaultVirtualPixelsPerUnit);
+}

@@ -106,8 +106,6 @@ void CameraBehavior::UpdateTargets()
 
     liveCharacters++;
 
-    // cout << "Adding " << fallDeath->worldObject << endl;
-
     targetPosition += character->GetPosition();
   }
 

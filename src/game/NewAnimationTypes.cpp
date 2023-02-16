@@ -100,19 +100,29 @@ Vector2 StatefulAnimation::VirtualPixelPosition(Vector2 virtualPixel, const Anim
   auto sprite = frame.GetSprite();
   Assert(sprite != nullptr, "Provided frame must contain a sprite");
 
-  // Global position of sprite's top-left pixel, in units
-  Vector2 topLeftPosition = spriteRenderer->RenderPositionFor(animator.worldObject.GetPosition(), sprite);
+  // Get relative position
+  return spriteRenderer->GetVirtualPixelOffset(virtualPixel, sprite);
 
-  // Displacement to apply to object's position to get to top-left pixel's position
-  Vector2 spriteOrigin = topLeftPosition - animator.worldObject.GetPosition();
+  // // Get sprite renderer
+  // auto spriteRenderer = animator.worldObject.RequireComponent<SpriteRenderer>();
 
-  // When mirrored, we want to displace with reference to top-right pixel, so sum the sprite's width
-  auto mirrorFactor = Vector2(GetSign(animator.worldObject.GetScale().x), 1);
+  // // Get the frame's sprite
+  // auto sprite = frame.GetSprite();
+  // Assert(sprite != nullptr, "Provided frame must contain a sprite");
 
-  if (mirrorFactor.x < 0)
-    spriteOrigin.x = spriteOrigin.x + sprite->GetWidth();
+  // // Global position of sprite's top-left pixel, in units
+  // Vector2 topLeftPosition = spriteRenderer->RenderPositionFor(animator.worldObject.GetPosition(), sprite);
 
-  return spriteOrigin + mirrorFactor * (virtualPixel + Vector2{0.5, 0.5}) / float(Game::defaultVirtualPixelsPerUnit);
+  // // Displacement to apply to object's position to get to top-left pixel's position
+  // Vector2 spriteOrigin = topLeftPosition - animator.worldObject.GetPosition();
+
+  // // When mirrored, we want to displace with reference to top-right pixel, so sum the sprite's width
+  // auto mirrorFactor = Vector2(GetSign(animator.worldObject.GetScale().x), 1);
+
+  // if (mirrorFactor.x < 0)
+  //   spriteOrigin.x = spriteOrigin.x + sprite->GetWidth();
+
+  // return spriteOrigin + mirrorFactor * (virtualPixel + Vector2{0.5, 0.5}) / float(Game::defaultVirtualPixelsPerUnit);
 }
 
 // === ATTACK ANIMATIONS

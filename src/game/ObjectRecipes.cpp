@@ -192,7 +192,6 @@ void ObjectRecipes::InitializeCharacter(shared_ptr<::Character> character, share
 
   // === PLATFORM DETECTOR FOR DROPPING
 
-  // Give it a repel box trigger collider, to allow for making 2 characterObjects slide away from each other when overlapping
   auto platformDropDetector = characterObject.CreateChild(CHARACTER_PLATFORM_DROP_OBJECT);
   platformDropDetector->AddComponent<PlatformDrop>(body);
 

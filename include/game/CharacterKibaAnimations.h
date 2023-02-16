@@ -15,7 +15,7 @@ namespace CharacterKibaAnimations
     CONSTRUCTOR_AND_DESTRUCTOR(Run)
 
     DEF_NAME("run")
-    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kiba/general/run.png", SpritesheetClipInfo(324 / 6, 36), 0.1, {0, -2}))
+    DEF_FRAMES(SliceSpritesheet("./assets/sprites/kiba/general/run.png", SpritesheetClipInfo(324 / 6, 36), 0.15, {0, -2}))
 
     FIELD(CycleEndBehavior, EndBehavior, CycleEndBehavior::Loop)
   };

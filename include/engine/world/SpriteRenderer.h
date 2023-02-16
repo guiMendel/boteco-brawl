@@ -62,6 +62,9 @@ public:
   // Sets a new width to render with, in real pixels
   void OverrideWidthPixels(int newWidth);
 
+  // Get world units position (relative to this object) of the given virtual pixel of the provided sprite
+  Vector2 GetVirtualPixelOffset(Vector2 virtualPixel, std::shared_ptr<Sprite> referenceSprite = nullptr) const;
+
   // Get dimensions of current sprite (in units) with parallax applied
   std::pair<float, float> GetSpriteDimensionsParallax(std::shared_ptr<Sprite> referenceSprite = nullptr) const;
 
